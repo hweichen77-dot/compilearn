@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Lightbulb, Eye, EyeOff, Zap, Trophy, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CodeEditor from "../components/editor/CodeEditor";
+import AIChatbot from "../components/chat/AIChatbot";
 
 const difficultyColors = {
   easy: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -250,6 +251,12 @@ RESULT: [PASSED or FAILED]`,
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        context={challenge?.description || ""}
+        lessonTitle={challenge?.title || "Challenge"}
+      />
     </div>
   );
 }
