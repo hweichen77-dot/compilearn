@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import CodeEditor from "../components/editor/CodeEditor";
+import AIChatbot from "../components/chat/AIChatbot";
 
 const difficultyColors = {
   beginner: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -401,6 +402,12 @@ Expected output format: Just the raw console output, one line per console.log st
           </AnimatePresence>
         </div>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        context={activeLesson?.explanation || ""}
+        lessonTitle={activeLesson?.title || project.title}
+      />
     </div>
   );
 }
