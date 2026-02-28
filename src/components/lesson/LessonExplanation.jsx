@@ -1,127 +1,159 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { BookOpen, Lightbulb, Code2 } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 
-const sectionColors = [
-  { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-500", header: "text-violet-700" },
-  { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-500", header: "text-blue-700" },
-  { bg: "bg-emerald-50", border: "border-emerald-200", icon: "text-emerald-500", header: "text-emerald-700" },
-  { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", header: "text-amber-700" },
-];
+function CodeBlock({ children, className }) {
+  const [copied, setCopied] = useState(false);
+  const lang = className?.replace("language-", "").toUpperCase() || "JS";
+  const code = String(children).replace(/\n$/, "");
 
-function parseExplanation(text) {
-  if (!text) return [];
-  // Split by ## headings
-  const parts = text.split(/(?=^## )/m);
-  return parts
-    .map((part) => {
-      const lines = part.trim().split("\n");
-      const firstLine = lines[0];
-      if (firstLine.startsWith("## ")) {
-        return {
-          heading: firstLine.replace("## ", "").trim(),
-          body: lines.slice(1).join("\n").trim(),
-        };
-      }
-      return { heading: null, body: part.trim() };
-    })
-    .filter((s) => s.body || s.heading);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Add line numbers
+  const lines = code.split("\n");
+
+  return (
+    <div className="my-5 rounded-md overflow-hidden border border-[#3a3a4a] bg-[#1E1E2E]">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#252535] border-b border-[#3a3a4a]">
+        <div className="flex gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+          <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+          <span className="w-3 h-3 rounded-full bg-[#28C840]" />
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+          <span className="text-xs font-bold text-white bg-[#6C5CE7] px-2 py-0.5 rounded">{lang}</span>
+        </div>
+      </div>
+      <pre className="overflow-x-auto p-4">
+        <code className="font-mono text-sm leading-relaxed">
+          {lines.map((line, i) => (
+            <div key={i} className="flex">
+              <span className="select-none text-gray-600 w-7 flex-shrink-0 text-right mr-4 text-xs leading-6">
+                {i + 1}
+              </span>
+              <span className="text-[#CDD6F4] leading-6">{line || " "}</span>
+            </div>
+          ))}
+        </code>
+      </pre>
+    </div>
+  );
 }
 
 export default function LessonExplanation({ explanation, concept }) {
-  const sections = parseExplanation(explanation);
+  if (!explanation) return null;
 
   return (
-    <div className="space-y-5">
-      {/* Concept badge */}
+    <div className="lesson-content">
+      <style>{`
+        .lesson-content {
+          font-family: 'Inter', system-ui, sans-serif;
+          color: #1a1a2e;
+          line-height: 1.8;
+        }
+        .lesson-content h2 {
+          font-size: 1.6rem;
+          font-weight: 700;
+          color: #111;
+          margin-top: 2rem;
+          margin-bottom: 0.75rem;
+          border-bottom: none;
+        }
+        .lesson-content h3 {
+          font-size: 1.15rem;
+          font-weight: 600;
+          color: #222;
+          margin-top: 1.5rem;
+          margin-bottom: 0.5rem;
+        }
+        .lesson-content p {
+          font-size: 1rem;
+          color: #2d2d2d;
+          margin-bottom: 1rem;
+          line-height: 1.85;
+        }
+        .lesson-content ul, .lesson-content ol {
+          margin: 0.75rem 0 1rem 1.5rem;
+        }
+        .lesson-content li {
+          margin-bottom: 0.35rem;
+          color: #2d2d2d;
+          font-size: 1rem;
+        }
+        .lesson-content strong {
+          font-weight: 600;
+          color: #111;
+        }
+        .lesson-content .inline-code {
+          font-family: 'JetBrains Mono', 'Fira Code', monospace;
+          font-size: 0.82em;
+          background: #e8e6f0;
+          color: #4a4080;
+          padding: 0.1em 0.45em;
+          border-radius: 4px;
+          border: 1px solid #d0cce8;
+          white-space: nowrap;
+        }
+      `}</style>
+
       {concept && (
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#6C5CE7]/10 text-[#6C5CE7] text-xs font-semibold border border-[#6C5CE7]/20">
-            <BookOpen className="w-3.5 h-3.5" />
+        <div className="mb-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-[#6C5CE7] bg-[#6C5CE7]/10 px-3 py-1.5 rounded-full border border-[#6C5CE7]/20">
             {concept}
           </span>
         </div>
       )}
 
-      {/* Sections */}
-      {sections.map((section, i) => {
-        const color = sectionColors[i % sectionColors.length];
-        return (
-          <div
-            key={i}
-            className={`rounded-2xl border ${color.border} ${color.bg} overflow-hidden`}
-          >
-            {section.heading && (
-              <div className={`flex items-center gap-2.5 px-5 py-3.5 border-b ${color.border}`}>
-                <Lightbulb className={`w-4 h-4 ${color.icon} flex-shrink-0`} />
-                <h3 className={`font-semibold text-sm ${color.header}`}>
-                  {section.heading}
-                </h3>
-              </div>
-            )}
-            {section.body && (
-              <div className="px-5 py-4">
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => (
-                      <p className="text-gray-700 text-sm leading-relaxed mb-3 last:mb-0">
-                        {children}
-                      </p>
-                    ),
-                    code: ({ inline, children }) =>
-                      inline ? (
-                        <code className="bg-white/70 border border-white px-1.5 py-0.5 rounded text-xs font-mono text-[#6C5CE7]">
-                          {children}
-                        </code>
-                      ) : (
-                        <div className="mt-3 mb-3 rounded-xl overflow-hidden border border-gray-800/20">
-                          <div className="flex items-center gap-2 px-4 py-2 bg-[#1E1E2E]">
-                            <Code2 className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="text-xs text-gray-400 font-mono">code</span>
-                          </div>
-                          <pre className="bg-[#282A36] px-4 py-3 overflow-x-auto">
-                            <code className="text-[#CDD6F4] font-mono text-xs leading-relaxed">
-                              {children}
-                            </code>
-                          </pre>
-                        </div>
-                      ),
-                    ul: ({ children }) => (
-                      <ul className="space-y-1.5 my-2">{children}</ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className="space-y-1.5 my-2 list-decimal pl-5">{children}</ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className="text-sm text-gray-700 flex items-start gap-2">
-                        <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${color.icon.replace("text-", "bg-")}`} />
-                        <span className="leading-relaxed">{children}</span>
-                      </li>
-                    ),
-                    h3: ({ children }) => (
-                      <h4 className={`font-semibold text-sm ${color.header} mb-2 mt-3`}>
-                        {children}
-                      </h4>
-                    ),
-                    strong: ({ children }) => (
-                      <strong className="font-semibold text-gray-800">{children}</strong>
-                    ),
-                  }}
-                >
-                  {section.body}
-                </ReactMarkdown>
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Fallback: no sections parsed */}
-      {sections.length === 0 && explanation && (
-        <div className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4">
-          <p className="text-sm text-gray-700 leading-relaxed">{explanation}</p>
-        </div>
-      )}
+      <ReactMarkdown
+        components={{
+          h2: ({ children }) => (
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3 first:mt-0">{children}</h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-2">{children}</h3>
+          ),
+          p: ({ children }) => (
+            <p className="text-gray-800 text-base leading-[1.85] mb-4">{children}</p>
+          ),
+          code: ({ inline, className, children }) =>
+            inline ? (
+              <code className="inline-code">{children}</code>
+            ) : (
+              <CodeBlock className={className}>{children}</CodeBlock>
+            ),
+          pre: ({ children }) => <>{children}</>,
+          ul: ({ children }) => (
+            <ul className="list-disc ml-6 my-3 space-y-1.5">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal ml-6 my-3 space-y-1.5">{children}</ol>
+          ),
+          li: ({ children }) => (
+            <li className="text-gray-800 text-base leading-relaxed">{children}</li>
+          ),
+          strong: ({ children }) => (
+            <strong className="font-semibold text-gray-900">{children}</strong>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-[#6C5CE7] pl-4 my-4 italic text-gray-600">
+              {children}
+            </blockquote>
+          ),
+        }}
+      >
+        {explanation}
+      </ReactMarkdown>
     </div>
   );
 }
