@@ -128,7 +128,7 @@ export default function LessonExplanation({ explanation, concept }) {
           ),
           code: ({ inline, className, children }) =>
             inline ? (
-              <code className="inline-code">{children}</code>
+              <code className="inline-code font-semibold">{children}</code>
             ) : (
               <CodeBlock className={className}>{children}</CodeBlock>
             ),
