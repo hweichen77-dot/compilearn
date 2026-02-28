@@ -172,7 +172,7 @@ export default function LessonExplanation({ explanation, concept }) {
             <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-2">{children}</h3>
           ),
           p: ({ children }) => (
-            <p className="text-gray-800 text-base leading-[1.85] mb-4">{children}</p>
+            <p className="text-gray-800 text-base leading-[1.85] mb-4">{processChildren(children)}</p>
           ),
           code: ({ inline, className, children }) =>
             inline ? (
