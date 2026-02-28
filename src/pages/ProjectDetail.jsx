@@ -18,9 +18,9 @@ import {
   EyeOff,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
 import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
+import LessonExplanation from "../components/lesson/LessonExplanation";
 
 const difficultyColors = {
   beginner: "bg-emerald-50 text-emerald-700 border-emerald-200",
