@@ -1,0 +1,105 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "ID of the parent project"
+    },
+    "title": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number",
+      "description": "Lesson order within the project"
+    },
+    "concept": {
+      "type": "string",
+      "description": "The main concept taught (e.g. variables, loops)"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Markdown explanation of the concept"
+    },
+    "starter_code": {
+      "type": "string",
+      "description": "Code the student starts with"
+    },
+    "solution_code": {
+      "type": "string",
+      "description": "The correct solution"
+    },
+    "hints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_output": {
+      "type": "string",
+      "description": "Expected console output or result"
+    },
+    "quiz_questions": {
+      "type": "array",
+      "description": "Multiple choice quiz questions for this lesson",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correct_index": {
+            "type": "number"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "challenge_title": {
+      "type": "string",
+      "description": "Title of the coding challenge for this lesson"
+    },
+    "challenge_description": {
+      "type": "string",
+      "description": "Description of the coding challenge"
+    },
+    "challenge_starter_code": {
+      "type": "string",
+      "description": "Starter code for the challenge"
+    },
+    "challenge_solution_code": {
+      "type": "string",
+      "description": "Solution for the challenge"
+    },
+    "challenge_test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string"
+          },
+          "expected_output": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "project_id",
+    "title",
+    "order"
+  ]
+}

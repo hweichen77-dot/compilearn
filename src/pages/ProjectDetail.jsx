@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
 import LessonExplanation from "../components/lesson/LessonExplanation";
+import LessonQuiz from "../components/lesson/LessonQuiz";
+import LessonChallenge from "../components/lesson/LessonChallenge";
 
 const DIFFICULTY_NUM = { beginner: "00", intermediate: "01", advanced: "02" };
 
@@ -329,6 +331,14 @@ export default function ProjectDetail() {
                       concept={null}
                     />
                   </div>
+
+                  {/* Quiz section */}
+                  {activeLesson.quiz_questions?.length > 0 && (
+                    <LessonQuiz questions={activeLesson.quiz_questions} />
+                  )}
+
+                  {/* Coding challenge section */}
+                  <LessonChallenge lesson={activeLesson} />
 
                   {/* Code editor */}
                   <CodeEditor
