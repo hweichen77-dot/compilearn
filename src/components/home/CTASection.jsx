@@ -41,7 +41,7 @@ export default function CTASection() {
         <h2
           className="font-display font-black leading-none mb-8 mx-auto"
           style={{
-            fontSize: "clamp(3rem, 7vw, 6rem)",
+            fontSize: "clamp(2rem, 4vw, 3.5rem)",
             letterSpacing: "-0.04em",
             color: "#e8e8e8",
             maxWidth: "14ch",
