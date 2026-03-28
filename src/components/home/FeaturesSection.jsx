@@ -48,7 +48,7 @@ export default function FeaturesSection() {
           <div>
             <h2
               className="font-display font-black leading-none mb-4"
-              style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)", color: "#e8e8e8", letterSpacing: "-0.03em" }}
+              style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)", color: "#e8e8e8", letterSpacing: "-0.03em" }}
             >
               How it works
             </h2>
