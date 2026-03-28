@@ -1,0 +1,178 @@
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function LessonQuiz({ questions }) {
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  if (!questions || questions.length === 0) return null;
+
+  const score = submitted
+    ? questions.filter((q, i) => answers[i] === q.correct_index).length
+    : 0;
+
+  const handleSubmit = () => setSubmitted(true);
+  const handleReset = () => { setAnswers({}); setSubmitted(false); };
+
+  return (
+    <div style={{ border: "1px solid #1e1e1e" }}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-6 py-4"
+        style={{ borderBottom: "1px solid #1e1e1e", background: "#0d0d0d" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="font-mono text-xs tracking-widest uppercase px-2 py-1"
+            style={{ color: "#b8ff00", border: "1px solid #b8ff0033", background: "#b8ff0010" }}
+          >
+            QUIZ
+          </div>
+          <span className="font-mono text-xs" style={{ color: "#444" }}>
+            {questions.length} question{questions.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        {submitted && (
+          <div className="flex items-center gap-4">
+            <span
+              className="font-mono text-sm font-bold"
+              style={{ color: score === questions.length ? "#b8ff00" : score >= questions.length / 2 ? "#ffb300" : "#ff5555" }}
+            >
+              {score}/{questions.length}
+            </span>
+            <button
+              onClick={handleReset}
+              className="font-mono text-xs tracking-widest uppercase px-3 py-1.5 transition-colors"
+              style={{ color: "#444", border: "1px solid #1e1e1e" }}
+              onMouseEnter={e => e.currentTarget.style.color = "#888"}
+              onMouseLeave={e => e.currentTarget.style.color = "#444"}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Questions */}
+      <div className="divide-y" style={{ borderColor: "#1a1a1a" }}>
+        {questions.map((q, qi) => {
+          const selected = answers[qi];
+          const isCorrect = submitted && selected === q.correct_index;
+          const isWrong = submitted && selected !== undefined && selected !== q.correct_index;
+
+          return (
+            <div key={qi} className="px-6 py-6">
+              <div className="flex gap-3 mb-4">
+                <span className="font-mono text-xs flex-shrink-0 mt-0.5" style={{ color: "#333" }}>
+                  {String(qi + 1).padStart(2, "0")}
+                </span>
+                <p className="font-display text-sm leading-relaxed" style={{ color: "#cccccc", fontWeight: 500 }}>
+                  {q.question}
+                </p>
+              </div>
+
+              <div className="space-y-2 ml-8">
+                {q.options?.map((opt, oi) => {
+                  const isSelected = selected === oi;
+                  const isThisCorrect = submitted && oi === q.correct_index;
+                  const isThisWrong = submitted && isSelected && oi !== q.correct_index;
+
+                  let borderColor = "#1e1e1e";
+                  let bgColor = "transparent";
+                  let textColor = "#666";
+                  let dotColor = "#2a2a2a";
+
+                  if (isSelected && !submitted) { borderColor = "#555"; textColor = "#ccc"; dotColor = "#888"; }
+                  if (isThisCorrect && submitted) { borderColor = "#b8ff0055"; bgColor = "#b8ff0008"; textColor = "#b8ff00"; dotColor = "#b8ff00"; }
+                  if (isThisWrong) { borderColor = "#ff555533"; bgColor = "#ff55550a"; textColor = "#ff5555"; dotColor = "#ff5555"; }
+                  if (submitted && !isSelected && !isThisCorrect) { textColor = "#333"; }
+
+                  return (
+                    <button
+                      key={oi}
+                      onClick={() => !submitted && setAnswers({ ...answers, [qi]: oi })}
+                      disabled={submitted}
+                      className="w-full text-left flex items-center gap-3 px-4 py-3 transition-all duration-150"
+                      style={{ border: `1px solid ${borderColor}`, background: bgColor, cursor: submitted ? "default" : "pointer" }}
+                    >
+                      <span
+                        className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ border: `1.5px solid ${dotColor}`, background: isSelected ? dotColor : "transparent" }}
+                      >
+                        {isSelected && !submitted && (
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#0a0a0a" }} />
+                        )}
+                        {isThisCorrect && submitted && (
+                          <span className="font-mono text-xs leading-none" style={{ color: "#0a0a0a", fontSize: "8px" }}>✓</span>
+                        )}
+                        {isThisWrong && (
+                          <span className="font-mono text-xs leading-none" style={{ color: "#fff", fontSize: "8px" }}>✕</span>
+                        )}
+                      </span>
+                      <span className="font-display text-sm" style={{ color: textColor, fontWeight: 400 }}>
+                        {opt}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Explanation */}
+              <AnimatePresence>
+                {submitted && q.explanation && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden ml-8 mt-3"
+                  >
+                    <div
+                      className="px-4 py-3"
+                      style={{
+                        borderLeft: `2px solid ${isCorrect ? "#b8ff00" : "#ff5555"}`,
+                        background: isCorrect ? "#b8ff0008" : "#ff55550a",
+                      }}
+                    >
+                      <div
+                        className="font-mono text-xs tracking-widest uppercase mb-1"
+                        style={{ color: isCorrect ? "#b8ff00" : "#ff5555" }}
+                      >
+                        {isCorrect ? "Correct" : "Incorrect"}
+                      </div>
+                      <p className="font-display text-xs leading-relaxed" style={{ color: "#777", fontWeight: 400 }}>
+                        {q.explanation}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Submit */}
+      {!submitted && (
+        <div className="px-6 py-4" style={{ borderTop: "1px solid #1a1a1a", background: "#0d0d0d" }}>
+          <button
+            onClick={handleSubmit}
+            disabled={Object.keys(answers).length < questions.length}
+            className="font-mono text-xs tracking-widest uppercase px-6 py-3 transition-all duration-150"
+            style={{
+              background: Object.keys(answers).length === questions.length ? "#b8ff00" : "#1a1a1a",
+              color: Object.keys(answers).length === questions.length ? "#0a0a0a" : "#333",
+              border: "1px solid transparent",
+              fontWeight: 700,
+              cursor: Object.keys(answers).length < questions.length ? "not-allowed" : "pointer",
+            }}
+          >
+            Check Answers
+          </button>
+          <span className="font-mono text-xs ml-4" style={{ color: "#333" }}>
+            {Object.keys(answers).length}/{questions.length} answered
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
