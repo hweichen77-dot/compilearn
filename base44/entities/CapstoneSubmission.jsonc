@@ -1,0 +1,49 @@
+{
+  "name": "CapstoneSubmission",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "project_title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "Student's description of what they built"
+    },
+    "code_snapshot": {
+      "type": "string",
+      "description": "Final code the student submitted"
+    },
+    "demo_url": {
+      "type": "string",
+      "description": "Link to deployed project or demo"
+    },
+    "screenshot_url": {
+      "type": "string",
+      "description": "Screenshot of the finished project"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this appears on the public portfolio"
+    },
+    "ai_feedback": {
+      "type": "string",
+      "description": "AI-generated feedback on the submission"
+    },
+    "submitted_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_email",
+    "project_id",
+    "project_title"
+  ]
+}

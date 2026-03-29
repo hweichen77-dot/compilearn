@@ -1,0 +1,61 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Project title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of the project"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "html_css",
+        "javascript",
+        "react",
+        "python",
+        "general",
+        "ai_ml"
+      ],
+      "default": "javascript"
+    },
+    "estimated_time": {
+      "type": "number",
+      "description": "Estimated completion time in minutes"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "URL of the cover image"
+    },
+    "lessons_count": {
+      "type": "number",
+      "description": "Number of lessons in this project"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "order": {
+      "type": "number",
+      "description": "Display order"
+    }
+  },
+  "required": [
+    "title",
+    "description"
+  ]
+}

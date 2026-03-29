@@ -1,0 +1,56 @@
+{
+  "name": "UserProgress",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "lesson_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "user_code": {
+      "type": "string",
+      "description": "Last saved code"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "wrong_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of failed run attempts before completing"
+    },
+    "hints_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times hints were revealed"
+    },
+    "solution_viewed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student viewed the solution"
+    },
+    "time_spent_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Total active time spent on this lesson"
+    },
+    "quiz_score": {
+      "type": "number",
+      "description": "Score on the lesson quiz (0-100)"
+    }
+  },
+  "required": [
+    "user_email",
+    "lesson_id",
+    "project_id"
+  ]
+}
