@@ -3,7 +3,7 @@ import { appParams } from '@/lib/app-params';
 
 const { appId, token, functionsVersion, appBaseUrl } = appParams;
 
-//Create a client with authentication required
+// Auth + data client — initialized once, shared across the app
 export const api = createClient({
   appId,
   token,
