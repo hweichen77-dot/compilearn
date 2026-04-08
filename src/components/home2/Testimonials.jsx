@@ -25,7 +25,7 @@ export default function Testimonials() {
       <div style={{
         fontFamily: "monospace",
         fontSize: "11px",
-        color: "#525252",
+        color: "#888888",
         letterSpacing: "0.1em",
         textTransform: "uppercase",
         marginBottom: "48px",
@@ -63,7 +63,7 @@ export default function Testimonials() {
             </p>
             <div>
               <div style={{ color: "#f0f0f0", fontSize: "14px", fontWeight: 600 }}>{t.name}</div>
-              <div style={{ color: "#525252", fontSize: "12px", fontFamily: "monospace", marginTop: "3px" }}>{t.role}</div>
+              <div style={{ color: "#888888", fontSize: "12px", fontFamily: "monospace", marginTop: "3px" }}>{t.role}</div>
             </div>
           </div>
         ))}

@@ -30,7 +30,7 @@ export default function HowItWorks() {
         <div style={{
           fontFamily: "monospace",
           fontSize: "11px",
-          color: "#525252",
+          color: "#888888",
           letterSpacing: "0.1em",
           textTransform: "uppercase",
           marginBottom: "56px",
@@ -75,7 +75,7 @@ export default function HowItWorks() {
                 {step.title}
               </h3>
               <p style={{
-                color: "#a3a3a3",
+                color: "#c0c0c0",
                 fontSize: "14px",
                 lineHeight: 1.75,
                 margin: 0,

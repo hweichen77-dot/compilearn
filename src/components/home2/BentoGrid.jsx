@@ -19,7 +19,7 @@ function CodeMockup() {
       lineHeight: 1.8,
       marginTop: "20px",
     }}>
-      <div style={{ color: "#525252", marginBottom: "6px" }}>// lesson_03.js</div>
+      <div style={{ color: "#888888", marginBottom: "6px" }}>// lesson_03.js</div>
       <div><span style={{ color: "#c084fc" }}>async function</span> <span style={{ color: "#60a5fa" }}>analyzeText</span><span style={{ color: "#a3a3a3" }}>(input) {"{"}</span></div>
       <div style={{ paddingLeft: "18px" }}>
         <span style={{ color: "#a3a3a3" }}>const result = </span>
@@ -108,7 +108,7 @@ export default function BentoGrid() {
           <h3 style={{ color: "#f0f0f0", fontSize: "20px", fontWeight: 700, margin: "0 0 10px", letterSpacing: "-0.02em" }}>
             Real projects, real skills.
           </h3>
-          <p style={{ color: "#a3a3a3", fontSize: "14px", lineHeight: 1.65, margin: "0 0 28px" }}>
+          <p style={{ color: "#c0c0c0", fontSize: "14px", lineHeight: 1.65, margin: "0 0 28px" }}>
             Not toy examples. These are things you'd actually put on a portfolio.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -144,7 +144,7 @@ export default function BentoGrid() {
                     borderRadius: "2px",
                   }} />
                 </div>
-                <span style={{ color: "#525252", fontSize: "12px", fontFamily: "monospace", minWidth: "80px" }}>{lvl}</span>
+                <span style={{ color: "#888888", fontSize: "12px", fontFamily: "monospace", minWidth: "80px" }}>{lvl}</span>
               </div>
             ))}
           </div>
@@ -158,7 +158,7 @@ export default function BentoGrid() {
           <h3 style={{ color: "#f0f0f0", fontSize: "18px", fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
             AI-powered guidance.
           </h3>
-          <p style={{ color: "#a3a3a3", fontSize: "13px", lineHeight: 1.65, margin: "0 0 22px" }}>
+          <p style={{ color: "#c0c0c0", fontSize: "13px", lineHeight: 1.65, margin: "0 0 22px" }}>
             Stuck? Ask your AI tutor. It knows what lesson you're on and won't just give you the answer.
           </p>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -175,7 +175,7 @@ export default function BentoGrid() {
                 minWidth: "100px",
               }}>
                 <span style={{ fontSize: "16px" }}>{f.icon}</span>
-                <span style={{ color: "#a3a3a3", fontSize: "12px", fontWeight: 500 }}>{f.label}</span>
+                <span style={{ color: "#c0c0c0", fontSize: "12px", fontWeight: 500 }}>{f.label}</span>
               </div>
             ))}
           </div>
@@ -186,10 +186,10 @@ export default function BentoGrid() {
           <div style={{ color: "#f59e0b", fontSize: "42px", fontWeight: 800, lineHeight: 1, fontFamily: "Georgia, serif", letterSpacing: "-0.03em" }}>
             2,400+
           </div>
-          <div style={{ color: "#a3a3a3", fontSize: "14px", marginTop: "8px", fontWeight: 500 }}>
+          <div style={{ color: "#c0c0c0", fontSize: "14px", marginTop: "8px", fontWeight: 500 }}>
             learners building with AI
           </div>
-          <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#525252", marginTop: "4px" }}>
+          <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#888888", marginTop: "4px" }}>
             and growing every week
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function BentoGrid() {
             <div style={{ color: "#f0f0f0", fontSize: "16px", fontWeight: 700, marginBottom: "6px", letterSpacing: "-0.01em" }}>
               Beginner friendly.
             </div>
-            <div style={{ color: "#a3a3a3", fontSize: "13px", lineHeight: 1.6 }}>
+            <div style={{ color: "#c0c0c0", fontSize: "13px", lineHeight: 1.6 }}>
               No CS degree needed. If you can Google something, you can learn here.
             </div>
           </div>
