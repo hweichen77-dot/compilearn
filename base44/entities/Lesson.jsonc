@@ -63,6 +63,48 @@
         }
       }
     },
+    "participation_activities": {
+      "type": "array",
+      "description": "Zybooks-style participation activities (true/false or fill-in)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "activity_title": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "true_false",
+                    "fill_in"
+                  ]
+                },
+                "correct_answer": {
+                  "type": "string",
+                  "description": "For true_false: 'true' or 'false'. For fill_in: the correct text answer."
+                },
+                "explanation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "xp_reward": {
+      "type": "number",
+      "default": 10,
+      "description": "Points earned for completing this lesson"
+    },
     "challenge_title": {
       "type": "string",
       "description": "Title of the coding challenge for this lesson"

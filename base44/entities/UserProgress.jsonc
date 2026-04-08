@@ -46,6 +46,21 @@
     "quiz_score": {
       "type": "number",
       "description": "Score on the lesson quiz (0-100)"
+    },
+    "participation_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether all participation activities were completed"
+    },
+    "challenge_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the coding challenge was completed"
+    },
+    "points_earned": {
+      "type": "number",
+      "default": 0,
+      "description": "XP points earned for this lesson"
     }
   },
   "required": [
