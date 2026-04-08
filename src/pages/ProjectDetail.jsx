@@ -252,7 +252,7 @@ export default function ProjectDetail() {
               {/* Vertical label */}
               <div
                 className="font-mono text-xs tracking-widest uppercase mb-5"
-                style={{ color: "#2a2a2a" }}
+                style={{ color: "#666" }}
               >
                 LESSONS
               </div>
@@ -278,7 +278,7 @@ export default function ProjectDetail() {
                       <div className="flex items-start gap-3">
                         <span
                           className="font-mono text-xs flex-shrink-0 mt-0.5"
-                          style={{ color: completed ? "#b8ff00" : active ? "#555" : "#222" }}
+                          style={{ color: completed ? "#b8ff00" : active ? "#aaa" : "#555" }}
                         >
                           {completed ? "✓" : String(i + 1).padStart(2, "0")}
                         </span>
@@ -286,13 +286,13 @@ export default function ProjectDetail() {
                           <span
                             className="font-display text-xs leading-snug transition-colors duration-150 block"
                             style={{
-                              color: active ? "#e8e8e8" : completed ? "#666" : "#333",
+                              color: active ? "#e8e8e8" : completed ? "#888" : "#aaa",
                               fontWeight: active ? 600 : 400,
                             }}
                           >
                             {lesson.title}
                           </span>
-                          <span className="font-mono" style={{ fontSize: "9px", color: completed ? "#b8ff00" : "#2a2a2a" }}>
+                          <span className="font-mono" style={{ fontSize: "9px", color: completed ? "#b8ff00" : "#666" }}>
                             {lesson.xp_reward || 10} pts
                           </span>
                         </div>
