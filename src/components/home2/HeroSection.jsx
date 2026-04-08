@@ -39,7 +39,7 @@ export default function HeroSection() {
       {/* Subtext */}
       <p style={{
         fontSize: "18px",
-        color: "#a3a3a3",
+        color: "#c0c0c0",
         lineHeight: 1.7,
         maxWidth: "560px",
         margin: "0 auto 44px",
@@ -85,7 +85,7 @@ export default function HeroSection() {
         </button>
       </div>
 
-      <p style={{ fontSize: "13px", color: "#525252", fontWeight: 400 }}>
+      <p style={{ fontSize: "13px", color: "#777777", fontWeight: 400 }}>
         No credit card required
       </p>
     </section>
