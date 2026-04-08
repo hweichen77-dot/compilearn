@@ -165,6 +165,15 @@
   animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Homepage responsive */
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: 1fr !important; }
+  .how-steps { grid-template-columns: 1fr !important; }
+  .testimonial-grid { grid-template-columns: 1fr !important; }
+  .pricing-grid { grid-template-columns: 1fr !important; }
+  .nav-links { display: none !important; }
+}
+
 /* Step dot trail */
 @keyframes dot-pulse {
   0%, 100% { opacity: 0.3; }
