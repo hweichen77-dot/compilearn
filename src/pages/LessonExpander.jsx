@@ -41,6 +41,9 @@ function ItemList({ items, statuses, running, onRunOne, labelKey = "title", subK
               {status === "error" && (
                 <span className="font-mono text-xs" style={{ color: "#ef4444" }}>✗ error</span>
               )}
+              {status === "already_expanded" && (
+                <span className="font-mono text-xs" style={{ color: "#555" }}>✓ already expanded</span>
+              )}
               {!running && (
                 <button
                   onClick={() => onRunOne(item)}
@@ -50,7 +53,7 @@ function ItemList({ items, statuses, running, onRunOne, labelKey = "title", subK
                   onMouseEnter={e => { e.currentTarget.style.color = "#b8ff00"; e.currentTarget.style.borderColor = "#b8ff0033"; }}
                   onMouseLeave={e => { e.currentTarget.style.color = "#888"; e.currentTarget.style.borderColor = "#1e1e1e"; }}
                 >
-                  Expand
+                  {status === "already_expanded" ? "Re-expand" : "Expand"}
                 </button>
               )}
             </div>
@@ -87,6 +90,13 @@ export default function LessonExpander() {
         ]).then(([ls, ps]) => {
           setLessons(ls);
           setProjects(ps);
+          // Pre-mark already expanded items
+          const initLessonStatuses = {};
+          ls.forEach(l => { if (l.explanation) initLessonStatuses[l.id] = "already_expanded"; });
+          setLessonStatuses(initLessonStatuses);
+          const initProjectStatuses = {};
+          ps.forEach(p => { if (p.description && p.description.length > 100) initProjectStatuses[p.id] = "already_expanded"; });
+          setProjectStatuses(initProjectStatuses);
           setLoaded(true);
         });
       }
@@ -96,9 +106,9 @@ export default function LessonExpander() {
   // --- Lessons ---
   const runAllLessons = async () => {
     setLessonRunning(true);
-    setLessonStatuses({});
-    for (let i = 0; i < lessons.length; i++) {
-      const lesson = lessons[i];
+    const toRun = lessons.filter(l => lessonStatuses[l.id] !== "already_expanded" && lessonStatuses[l.id] !== "done");
+    for (let i = 0; i < toRun.length; i++) {
+      const lesson = toRun[i];
       setLessonIndex(i);
       setLessonStatuses(prev => ({ ...prev, [lesson.id]: "running" }));
       try {
@@ -125,9 +135,9 @@ export default function LessonExpander() {
   // --- Projects ---
   const runAllProjects = async () => {
     setProjectRunning(true);
-    setProjectStatuses({});
-    for (let i = 0; i < projects.length; i++) {
-      const project = projects[i];
+    const toRun = projects.filter(p => projectStatuses[p.id] !== "already_expanded" && projectStatuses[p.id] !== "done");
+    for (let i = 0; i < toRun.length; i++) {
+      const project = toRun[i];
       setProjectIndex(i);
       setProjectStatuses(prev => ({ ...prev, [project.id]: "running" }));
       try {
@@ -219,8 +229,8 @@ export default function LessonExpander() {
             }}
           >
             {running
-              ? `⏳ Processing ${currentIndex + 1}/${totalCount}...`
-              : `🤖 Expand All ${isLessonsTab ? "Lessons" : "Projects"}`}
+              ? `⏳ Processing ${currentIndex + 1}/${(isLessonsTab ? lessons : projects).filter(x => lessonStatuses[x.id] !== "already_expanded" && lessonStatuses[x.id] !== "done").length}...`
+              : `🤖 Expand All ${isLessonsTab ? "Lessons" : "Projects"} (${(isLessonsTab ? lessons : projects).filter(x => (isLessonsTab ? lessonStatuses : projectStatuses)[x.id] !== "already_expanded" && (isLessonsTab ? lessonStatuses : projectStatuses)[x.id] !== "done").length} remaining)`}
           </button>
 
           {isLessonsTab && Object.keys(lessonStatuses).length > 0 && (
