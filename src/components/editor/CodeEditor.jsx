@@ -102,7 +102,7 @@ If you notice ONE specific, actionable issue (logic error, infinite loop risk, w
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2a2a2a" }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2a2a2a" }} />
             </div>
-            <span className="font-mono text-xs" style={{ color: "#333" }}>
+            <span className="font-mono text-xs" style={{ color: "#666" }}>
               ~/codeflow/{filename}
             </span>
           </div>
