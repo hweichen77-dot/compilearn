@@ -6,7 +6,8 @@ import { createPageUrl } from "../utils";
 import { motion, AnimatePresence } from "framer-motion";
 import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
-import LessonExplanation from "../components/lesson/LessonExplanation";
+import RichLessonPanel from "../components/lesson/RichLessonPanel";
+import LessonEnhancements from "../components/lesson/LessonEnhancements";
 import ZybooksQuiz from "../components/lesson/ZybooksQuiz";
 import ParticipationActivity from "../components/lesson/ParticipationActivity";
 import LessonPointsSummary from "../components/lesson/LessonPointsSummary";
@@ -141,7 +142,21 @@ export default function ProjectDetail() {
   };
 
   const [expandingLesson, setExpandingLesson] = useState(false);
+  const [enrichingLesson, setEnrichingLesson] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+
+  const handleEnrichLesson = async () => {
+    if (!activeLesson) return;
+    setEnrichingLesson(true);
+    try {
+      await base44.functions.invoke("enrichLesson", { lessonId: activeLesson.id });
+      queryClient.invalidateQueries({ queryKey: ["lessons", projectId] });
+      showXPToast("Lesson enriched!", 0, "✨");
+    } catch (e) {
+      console.error(e);
+    }
+    setEnrichingLesson(false);
+  };
 
   const handleExpandLesson = async () => {
     if (!activeLesson) return;
@@ -378,7 +393,7 @@ export default function ProjectDetail() {
                     </div>
                   </div>
 
-                  {/* White textbook reading area */}
+                  {/* Rich lesson reading area */}
                   <div style={{ background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: "4px", padding: "32px 36px" }}>
                     {activeLesson.concept && (
                       <h3 style={{
@@ -389,10 +404,7 @@ export default function ProjectDetail() {
                       </h3>
                     )}
 
-                    <LessonExplanation
-                      explanation={activeLesson.explanation || ""}
-                      concept={null}
-                    />
+                    <RichLessonPanel lesson={activeLesson} />
 
                     {!readingDone && (
                       <div style={{ textAlign: "center", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #e8e8e8" }}>
@@ -429,6 +441,9 @@ export default function ProjectDetail() {
                       />
                     ))}
                   </div>
+
+                  {/* Dark-themed enhancements: callouts, video, key terms, diagram, inline quizzes */}
+                  <LessonEnhancements lesson={activeLesson} />
 
                   {/* Quiz — zybooks participation style */}
                   {activeLesson.quiz_questions?.length > 0 && (
@@ -486,17 +501,30 @@ export default function ProjectDetail() {
                   {/* Action row */}
                   <div className="flex flex-wrap items-center gap-3 pt-2">
                     {user?.role === "admin" && (
-                      <button
-                        onClick={handleExpandLesson}
-                        disabled={expandingLesson}
-                        className="font-mono text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
-                        style={{
-                          color: "#60a5fa", border: "1px solid #60a5fa33",
-                          background: "#60a5fa10", opacity: expandingLesson ? 0.5 : 1,
-                        }}
-                      >
-                        {expandingLesson ? "⏳ Expanding..." : "🤖 Expand with AI"}
-                      </button>
+                      <>
+                        <button
+                          onClick={handleExpandLesson}
+                          disabled={expandingLesson}
+                          className="font-mono text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                          style={{
+                            color: "#60a5fa", border: "1px solid #60a5fa33",
+                            background: "#60a5fa10", opacity: expandingLesson ? 0.5 : 1,
+                          }}
+                        >
+                          {expandingLesson ? "⏳ Expanding..." : "🤖 Expand with AI"}
+                        </button>
+                        <button
+                          onClick={handleEnrichLesson}
+                          disabled={enrichingLesson}
+                          className="font-mono text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                          style={{
+                            color: "#cc66ff", border: "1px solid #cc66ff33",
+                            background: "#cc66ff10", opacity: enrichingLesson ? 0.5 : 1,
+                          }}
+                        >
+                          {enrichingLesson ? "⏳ Enriching..." : "✨ Enrich with AI"}
+                        </button>
+                      </>
                     )}
                     {activeLesson.hints && activeLesson.hints.length > 0 && (
                       <button

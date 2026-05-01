@@ -88,8 +88,7 @@
                   ]
                 },
                 "correct_answer": {
-                  "type": "string",
-                  "description": "For true_false: 'true' or 'false'. For fill_in: the correct text answer."
+                  "type": "string"
                 },
                 "explanation": {
                   "type": "string"
@@ -100,26 +99,121 @@
         }
       }
     },
+    "key_terms": {
+      "type": "array",
+      "description": "Key vocabulary terms with definitions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "callouts": {
+      "type": "array",
+      "description": "Highlighted callout boxes (tip, warning, analogy, insight)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "concept_diagram": {
+      "type": "object",
+      "description": "Flow diagram steps for visual learners",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "desc": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inline_quizzes": {
+      "type": "array",
+      "description": "Quick mid-lesson check questions embedded in the reading",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correct_index": {
+            "type": "number"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "video_id": {
+      "type": "string",
+      "description": "YouTube video ID to embed in the lesson"
+    },
+    "video_title": {
+      "type": "string",
+      "description": "Title for the video embed"
+    },
+    "video_caption": {
+      "type": "string",
+      "description": "Caption shown below the video"
+    },
+    "video_search_query": {
+      "type": "string",
+      "description": "YouTube search query used to find a relevant video"
+    },
     "xp_reward": {
       "type": "number",
       "default": 10,
       "description": "Points earned for completing this lesson"
     },
     "challenge_title": {
-      "type": "string",
-      "description": "Title of the coding challenge for this lesson"
+      "type": "string"
     },
     "challenge_description": {
-      "type": "string",
-      "description": "Description of the coding challenge"
+      "type": "string"
     },
     "challenge_starter_code": {
-      "type": "string",
-      "description": "Starter code for the challenge"
+      "type": "string"
     },
     "challenge_solution_code": {
-      "type": "string",
-      "description": "Solution for the challenge"
+      "type": "string"
     },
     "challenge_test_cases": {
       "type": "array",

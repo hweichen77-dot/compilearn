@@ -68,6 +68,10 @@ export default function LessonExpander() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("lessons");
 
+  const [enrichStatuses, setEnrichStatuses] = useState({});
+  const [enrichRunning, setEnrichRunning] = useState(false);
+  const [enrichIndex, setEnrichIndex] = useState(-1);
+
   const [lessons, setLessons] = useState([]);
   const [lessonStatuses, setLessonStatuses] = useState({});
   const [lessonRunning, setLessonRunning] = useState(false);
@@ -161,6 +165,33 @@ export default function LessonExpander() {
     }
   };
 
+  const runAllEnrich = async () => {
+    setEnrichRunning(true);
+    for (let i = 0; i < lessons.length; i++) {
+      const lesson = lessons[i];
+      setEnrichIndex(i);
+      setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "running" }));
+      try {
+        await base44.functions.invoke("enrichLesson", { lessonId: lesson.id });
+        setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "done" }));
+      } catch (e) {
+        setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "error" }));
+      }
+    }
+    setEnrichIndex(-1);
+    setEnrichRunning(false);
+  };
+
+  const runOneEnrich = async (lesson) => {
+    setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "running" }));
+    try {
+      await base44.functions.invoke("enrichLesson", { lessonId: lesson.id });
+      setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "done" }));
+    } catch (e) {
+      setEnrichStatuses(prev => ({ ...prev, [lesson.id]: "error" }));
+    }
+  };
+
   const lessonDone = Object.values(lessonStatuses).filter(s => s === "done").length;
   const lessonErrors = Object.values(lessonStatuses).filter(s => s === "error").length;
   const projectDone = Object.values(projectStatuses).filter(s => s === "done").length;
@@ -197,7 +228,7 @@ export default function LessonExpander() {
 
         {/* Tabs */}
         <div className="flex gap-0 mb-6" style={{ borderBottom: "1px solid #1e1e1e" }}>
-          {["lessons", "projects"].map(t => (
+          {["lessons", "projects", "enrich"].map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -214,7 +245,40 @@ export default function LessonExpander() {
           ))}
         </div>
 
+        {/* Enrich tab */}
+        {tab === "enrich" && loaded && (
+          <div>
+            <div className="flex items-center gap-4 mb-6 p-5" style={{ border: "1px solid #1e1e1e", background: "#0d0d0d" }}>
+              <button
+                onClick={runAllEnrich}
+                disabled={enrichRunning}
+                className="font-mono text-xs tracking-widest uppercase px-6 py-3 transition-all"
+                style={{
+                  background: enrichRunning ? "#1a1a1a" : "#cc66ff",
+                  color: enrichRunning ? "#555" : "#0a0a0a",
+                  border: "1px solid transparent", fontWeight: 700,
+                  cursor: enrichRunning ? "not-allowed" : "pointer",
+                }}
+              >
+                {enrichRunning ? `⏳ Enriching ${enrichIndex + 1}/${lessons.length}...` : `✨ Enrich All Lessons (${lessons.length})`}
+              </button>
+              <div className="font-mono text-xs" style={{ color: "#888" }}>
+                Adds key terms, callouts, diagrams, inline quizzes, quizzes & participation activities
+              </div>
+            </div>
+            <ItemList
+              items={lessons}
+              statuses={enrichStatuses}
+              running={enrichRunning}
+              onRunOne={runOneEnrich}
+              labelKey="title"
+              subKey="concept"
+            />
+          </div>
+        )}
+
         {/* Controls */}
+        {tab !== "enrich" && (
         <div className="flex items-center gap-4 mb-6 p-5" style={{ border: "1px solid #1e1e1e", background: "#0d0d0d" }}>
           <button
             onClick={isLessonsTab ? runAllLessons : runAllProjects}
@@ -249,8 +313,10 @@ export default function LessonExpander() {
           )}
         </div>
 
+        )}
+
         {/* List */}
-        {loaded && isLessonsTab && (
+        {tab !== "enrich" && loaded && isLessonsTab && (
           <ItemList
             items={lessons}
             statuses={lessonStatuses}
@@ -260,7 +326,7 @@ export default function LessonExpander() {
             subKey="concept"
           />
         )}
-        {loaded && !isLessonsTab && (
+        {tab !== "enrich" && loaded && !isLessonsTab && (
           <ItemList
             items={projects}
             statuses={projectStatuses}
