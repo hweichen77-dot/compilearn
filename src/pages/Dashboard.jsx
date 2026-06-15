@@ -4,13 +4,40 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { getLevel } from "../components/gamification/XPLevelBar";
+import { useAuth } from "../hooks/useAuth";
+import { UserChallenges } from "../api/supabaseClient";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const { user: supabaseUser } = useAuth();
+  const [challengeStats, setChallengeStats] = useState({ completed: 0, inProgress: 0, streak: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => { base44.auth.redirectToLogin(); });
   }, []);
+
+  useEffect(() => {
+    if (!supabaseUser) { setStatsLoading(false); return; }
+    UserChallenges.list(supabaseUser.id).then(items => {
+      const completed = items.filter(i => i.status === 'completed').length;
+      const inProgress = items.filter(i => i.status === 'in_progress').length;
+      const completedDates = items
+        .filter(i => i.completed_at)
+        .map(i => new Date(i.completed_at).toDateString());
+      const uniqueDates = [...new Set(completedDates)].sort().reverse();
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < uniqueDates.length; i++) {
+        const expected = new Date(today);
+        expected.setDate(today.getDate() - i);
+        if (uniqueDates[i] === expected.toDateString()) streak++;
+        else break;
+      }
+      setChallengeStats({ completed, inProgress, streak });
+      setStatsLoading(false);
+    }).catch(() => setStatsLoading(false));
+  }, [supabaseUser]);
 
   const { data: progress = [] } = useQuery({
     queryKey: ["all-progress", user?.email],
@@ -158,10 +185,10 @@ export default function Dashboard() {
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-0" style={{ border: "1px solid #1a1a1a" }}>
           {[
-            { val: completedLessons, label: "Lessons Done", accent: null },
-            { val: completedProjects.length, label: "Projects Done", accent: null },
+            { val: statsLoading ? "—" : challengeStats.completed, label: "Challenges Done", accent: "#b8ff00" },
+            { val: statsLoading ? "—" : challengeStats.inProgress, label: "In Progress", accent: null },
             { val: `${totalXP}`, label: "Total XP", accent: "#b8ff00" },
-            { val: `${streak}🔥`, label: "Day Streak", accent: streak >= 3 ? "#ff6b35" : null },
+            { val: statsLoading ? "—🔥" : `${challengeStats.streak}🔥`, label: "Challenge Streak", accent: challengeStats.streak >= 3 ? "#ff6b35" : null },
             { val: `LVL ${lvl.level}`, label: lvl.name, accent: lvl.color },
             { val: `${overallPct}%`, label: "Overall Progress", accent: null },
           ].map((stat, i, arr) => (

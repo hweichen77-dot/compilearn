@@ -8,6 +8,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LessonExpander from './pages/LessonExpander';
+import { useAuth as useSupabaseAuth } from './hooks/useAuth';
+import Login from './pages/Login';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -67,6 +69,14 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  const { user, loading } = useSupabaseAuth()
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="text-gray-400">Loading...</div>
+    </div>
+  )
+  if (!user) return <Login />
 
   return (
     <AuthProvider>

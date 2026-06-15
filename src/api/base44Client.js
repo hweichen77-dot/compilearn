@@ -3,7 +3,7 @@ import { appParams } from '@/lib/app-params';
 
 const { appId, token, functionsVersion, appBaseUrl } = appParams;
 
-// Auth + data client — initialized once, shared across the app
+// Legacy base44 client — preserved for existing consumers (auth, entities, integrations)
 export const base44 = createClient({
   appId,
   token,
@@ -12,3 +12,6 @@ export const base44 = createClient({
   requiresAuth: false,
   appBaseUrl
 });
+
+// Migration shim: Supabase entity clients re-exported for new consumers
+export { Challenges, UserChallenges, Projects, Tracks, UserTracks, supabase } from './supabaseClient.js'
