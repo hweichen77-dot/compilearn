@@ -3,7 +3,32 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Supabase is dormant in the static build. createClient() throws "supabaseUrl is required"
+// when env vars are absent — and that throw happens at module load, crashing the whole app.
+// Without credentials, export a no-op stub so importers degrade gracefully instead.
+const makeStub = () => ({
+  auth: {
+    getSession: async () => ({ data: { session: null } }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+    signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+    signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+    signOut: async () => ({ error: null }),
+  },
+  from: () => {
+    const result = Promise.resolve({ data: [], error: null })
+    const chain = {
+      select: () => chain, insert: () => chain, update: () => chain, delete: () => chain,
+      upsert: () => chain, eq: () => chain, order: () => chain,
+      single: async () => ({ data: null, error: null }),
+      then: (resolve, reject) => result.then(resolve, reject),
+    }
+    return chain
+  },
+})
+
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : makeStub()
 
 // ── Auth helpers ──────────────────────────────────────────────────────────────
 export const auth = {
