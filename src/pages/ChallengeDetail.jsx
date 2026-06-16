@@ -107,7 +107,7 @@ export default function ChallengeDetail() {
           <div className="flex items-start gap-5">
             <span
               className="font-mono font-bold flex-shrink-0"
-              style={{ fontSize: "3.5rem", lineHeight: 1, color: "#141414", letterSpacing: "-0.05em" }}
+              style={{ fontSize: "3.5rem", lineHeight: 1, color: "#e8e8e8", letterSpacing: "-0.05em" }}
             >
               {DIFF_NUM[challenge.difficulty] || "01"}
             </span>
