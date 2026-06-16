@@ -292,7 +292,7 @@ export default function ProjectDetail() {
               <div className="flex items-center gap-4 mb-3">
                 <span
                   className="font-mono font-bold"
-                  style={{ fontSize: "4rem", lineHeight: 1, color: "#1a1a1a", letterSpacing: "-0.05em" }}
+                  style={{ fontSize: "4rem", lineHeight: 1, color: "#e8e8e8", letterSpacing: "-0.05em" }}
                 >
                   {DIFFICULTY_NUM[project.difficulty] || "00"}
                 </span>

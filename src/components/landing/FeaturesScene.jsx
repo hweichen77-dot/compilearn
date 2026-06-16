@@ -75,7 +75,7 @@ function FeatureCard({ feature, index, scrollYProgress }) {
           <div>
             <div
               className="font-mono font-bold mb-4"
-              style={{ fontSize: "3.5rem", color: "#161616", letterSpacing: "-0.05em", lineHeight: 1 }}
+              style={{ fontSize: "3.5rem", color: "#e8e8e8", letterSpacing: "-0.05em", lineHeight: 1 }}
             >
               {feature.num}
             </div>
