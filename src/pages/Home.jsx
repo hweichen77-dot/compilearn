@@ -3,7 +3,6 @@ import HeroSection from "@/components/home2/HeroSection";
 import BentoGrid from "@/components/home2/BentoGrid";
 import HowItWorks from "@/components/home2/HowItWorks";
 import Testimonials from "@/components/home2/Testimonials";
-import Pricing from "@/components/home2/Pricing";
 import FinalCTA from "@/components/home2/FinalCTA";
 import Footer from "@/components/home2/Footer";
 
@@ -28,7 +27,6 @@ export default function Home() {
       <BentoGrid />
       <HowItWorks />
       <Testimonials />
-      <Pricing />
       <FinalCTA />
       <Footer />
     </div>
