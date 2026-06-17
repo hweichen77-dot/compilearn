@@ -13,6 +13,7 @@ const makeStub = () => ({
     signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
     signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
     signOut: async () => ({ error: null }),
+    resetPasswordForEmail: async () => ({ data: null, error: new Error('Supabase not configured') }),
   },
   from: () => {
     const result = Promise.resolve({ data: [], error: null })
@@ -33,10 +34,16 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 // ── Auth helpers ──────────────────────────────────────────────────────────────
 export const auth = {
   signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
-  signUp: (email, password) => supabase.auth.signUp({ email, password }),
+  signUp: (email, password, name) =>
+    supabase.auth.signUp({ email, password, options: { data: { name: name || '' } } }),
   signOut: () => supabase.auth.signOut(),
   getSession: () => supabase.auth.getSession(),
   onAuthStateChange: (cb) => supabase.auth.onAuthStateChange(cb),
+  resetPassword: (email) =>
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}${import.meta.env.BASE_URL || '/'}` : undefined,
+    }),
+  isConfigured: Boolean(supabaseUrl && supabaseAnonKey),
 }
 
 // ── Challenges ────────────────────────────────────────────────────────────────

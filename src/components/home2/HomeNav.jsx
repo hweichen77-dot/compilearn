@@ -21,7 +21,7 @@ export default function HomeNav() {
         {/* Nav links */}
         <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
           <div style={{ display: "flex", gap: "28px" }} className="cf-nav-links">
-            {["Learn", "Projects", "Pricing"].map(link => (
+            {["Learn", "Projects"].map(link => (
               <a
                 key={link}
                 href={`#${link.toLowerCase()}`}

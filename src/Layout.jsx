@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -43,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
           className="max-w-7xl mx-auto flex items-center justify-between h-full px-8 lg:px-16"
         >
           {/* Logo */}
-          <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group">
             <div
               className="font-mono font-bold text-sm tracking-widest uppercase transition-all duration-200"
               style={{ color: "#b8ff00" }}
@@ -104,10 +101,10 @@ export default function Layout({ children, currentPageName }) {
                   Portfolio
                 </Link>
                 <span className="font-mono text-xs" style={{ color: "#d4d4d4" }}>
-                  {user.full_name?.split(" ")[0] || user.email?.split("@")[0]}
+                  {user.name?.split(" ")[0] || user.email?.split("@")[0]}
                 </span>
                 <button
-                  onClick={() => base44.auth.logout()}
+                  onClick={logout}
                   className="font-mono text-xs tracking-widest uppercase px-4 py-2 transition-all duration-150"
                   style={{ color: "#d4d4d4", border: "1px solid #2a2a2a" }}
                   onMouseEnter={e => { e.currentTarget.style.color = "#d4d4d4"; e.currentTarget.style.borderColor = "#2a2a2a"; }}
@@ -118,7 +115,7 @@ export default function Layout({ children, currentPageName }) {
               </>
             ) : (
               <button
-                onClick={() => base44.auth.redirectToLogin()}
+                onClick={() => navigate("/login")}
                 className="font-mono text-xs tracking-widest uppercase px-5 py-2 transition-all duration-150"
                 style={{ color: "#b8ff00", border: "1px solid #b8ff0033", background: "#b8ff0010" }}
                 onMouseEnter={e => {
@@ -174,7 +171,7 @@ export default function Layout({ children, currentPageName }) {
                   Portfolio
                 </Link>
                 <button
-                  onClick={() => base44.auth.logout()}
+                  onClick={() => { setMobileOpen(false); logout(); }}
                   className="font-mono text-xs tracking-widest uppercase w-full text-left px-4 py-3"
                   style={{ color: "#d4d4d4" }}
                 >
@@ -183,7 +180,7 @@ export default function Layout({ children, currentPageName }) {
                 </>
               ) : (
                 <button
-                  onClick={() => base44.auth.redirectToLogin()}
+                  onClick={() => { setMobileOpen(false); navigate("/login"); }}
                   className="font-mono text-xs tracking-widest uppercase px-4 py-3"
                   style={{ color: "#b8ff00" }}
                 >
