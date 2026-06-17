@@ -3,36 +3,49 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import LessonExpander from './pages/LessonExpander';
-import ProfileGate from '@/components/ProfileGate';
+import AuthGate from '@/components/AuthGate';
+import AuthHome from './pages/AuthHome';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+
+// App pages that require a signed-in (or guest) profile. Public: marketing Home + LessonDemo.
+const PROTECTED = new Set([
+  'ChallengeDetail', 'Challenges', 'Dashboard', 'ProjectDetail', 'Projects', 'Portfolio', 'AITrack',
+]);
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <Routes>
+      {/* Home: marketing for visitors, personalized progress home once signed in. */}
       <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
+        <LayoutWrapper currentPageName={isAuthenticated ? 'Home' : mainPageKey}>
+          {isAuthenticated ? <AuthHome /> : <MainPage />}
         </LayoutWrapper>
       } />
+
+      {/* Auth gate (full screen, no app chrome). */}
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <AuthGate />} />
+
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
           path={`/${path}`}
           element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
+            PROTECTED.has(path) && !isAuthenticated
+              ? <Navigate to="/login" replace />
+              : <LayoutWrapper currentPageName={path}><Page /></LayoutWrapper>
           }
         />
       ))}
@@ -43,7 +56,7 @@ const AuthenticatedApp = () => {
 };
 
 const Gate = () => {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isLoadingAuth } = useAuth();
 
   if (isLoadingAuth) {
     return (
@@ -51,10 +64,6 @@ const Gate = () => {
         <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: "#1a1a1a", borderTopColor: "#b8ff00" }}></div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <ProfileGate />;
   }
 
   return (

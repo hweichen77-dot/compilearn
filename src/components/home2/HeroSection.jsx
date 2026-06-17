@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
+  const navigate = useNavigate();
   return (
     <section style={{
       maxWidth: "900px",
@@ -62,6 +64,7 @@ export default function HeroSection() {
           cursor: "pointer",
           fontFamily: "inherit",
         }}
+          onClick={() => navigate("/login")}
           onMouseEnter={e => e.currentTarget.style.background = "#caff35"}
           onMouseLeave={e => e.currentTarget.style.background = "#b8ff00"}
         >
