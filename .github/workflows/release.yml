@@ -62,6 +62,15 @@ jobs:
       - name: Install frontend deps
         run: npm ci
 
+      # Older tags use `VITE_BASE=/ vite build`, whose inline env var is Unix-only
+      # and fails on the Windows runner. Normalise the desktop build to cross-env
+      # so any historical tag builds on every platform without rewriting the tag.
+      - name: Make desktop build cross-platform
+        shell: bash
+        run: |
+          npm install -D cross-env
+          npm pkg set "scripts.build:desktop=cross-env VITE_BASE=/ vite build"
+
       - name: Build app + publish installers
         uses: tauri-apps/tauri-action@v0
         env:
