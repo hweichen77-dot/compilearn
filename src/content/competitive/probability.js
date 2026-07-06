@@ -11,11 +11,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["dynamic-programming", "hmm", "viterbi", "decoding"],
     story:
-      "A part-of-speech tagger hides the real grammatical state behind the words you actually see. Given how likely each hidden state emits each observed token, and how likely states follow one another, you want the single **most likely sequence of hidden states**. Searching all S^T paths is hopeless — the **Viterbi algorithm** finds the best one in O(T·S²) with dynamic programming.\n\nTo keep everything exact, this problem uses **integer scores** (think log-probabilities) instead of floating-point probabilities, and you maximize the total score.",
+      "A part-of-speech tagger hides the real grammatical state behind the words you actually see. Given how likely each hidden state emits each observed token, and how likely states follow one another, you want the single **most likely sequence of hidden states**. Searching all S^T paths is hopeless, the **Viterbi algorithm** finds the best one in O(T·S²) with dynamic programming.\n\nTo keep everything exact, this problem uses **integer scores** (think log-probabilities) instead of floating-point probabilities, and you maximize the total score.",
     statement:
-      "There are `S` hidden states (numbered `0..S-1`) and `T` observations. You are given:\n\n- `start[s]` — the score of beginning in state `s`.\n- `trans[p][s]` — the score of moving from state `p` to state `s`.\n- `emit[s][k]` — the score of state `s` emitting observation symbol `k`.\n- `obs[0..T-1]` — the observed symbols (each in `0..K-1`).\n\nThe score of a state path `p0, p1, …, p(T-1)` is:\n\n```\nstart[p0] + emit[p0][obs[0]]\n  + sum over t=1..T-1 of ( trans[p(t-1)][pt] + emit[pt][obs[t]] )\n```\n\nFind the **maximum total score** and one path achieving it. If several paths tie, output the one that is lexicographically smallest by state index.",
+      "There are `S` hidden states (numbered `0..S-1`) and `T` observations. You are given:\n\n- `start[s]`, the score of beginning in state `s`.\n- `trans[p][s]`, the score of moving from state `p` to state `s`.\n- `emit[s][k]`, the score of state `s` emitting observation symbol `k`.\n- `obs[0..T-1]`, the observed symbols (each in `0..K-1`).\n\nThe score of a state path `p0, p1, …, p(T-1)` is:\n\n```\nstart[p0] + emit[p0][obs[0]]\n  + sum over t=1..T-1 of ( trans[p(t-1)][pt] + emit[pt][obs[t]] )\n```\n\nFind the **maximum total score** and one path achieving it. If several paths tie, output the one that is lexicographically smallest by state index.",
     input_format:
-      "Line 1: two integers `S T`.\nLine 2: `S` integers — `start[0..S-1]`.\nNext `S` lines: row `p` has `S` integers — `trans[p][0..S-1]`.\nNext line: integer `K` (number of observation symbols).\nNext `S` lines: row `s` has `K` integers — `emit[s][0..K-1]`.\nLast line: `T` integers — `obs[0..T-1]`.",
+      "Line 1: two integers `S T`.\nLine 2: `S` integers, `start[0..S-1]`.\nNext `S` lines: row `p` has `S` integers, `trans[p][0..S-1]`.\nNext line: integer `K` (number of observation symbols).\nNext `S` lines: row `s` has `K` integers, `emit[s][0..K-1]`.\nLast line: `T` integers, `obs[0..T-1]`.",
     output_format:
       "Line 1: the maximum total score.\nLine 2: the `T` state indices of an optimal path, space-separated.",
     constraints: [
@@ -44,7 +44,7 @@ export default [
       { input: "2 2\n5 0\n0 0\n0 0\n2\n1 0\n0 1\n0 1", expected_output: "7\n0 1" },
     ],
     editorial:
-      "Viterbi is dynamic programming over a trellis: `dp[t][s]` is the best score of any path that ends in state `s` after t observations, and a parent pointer lets you walk the winner back. The complexity is O(T·S²) — quadratic in states, linear in time — versus the S^T cost of brute force. Switching the integer scores to log-probabilities and the additions to log-space sums turns this exact same code into the standard HMM decoder used in speech recognition and POS tagging. Maximizing in log-space avoids the floating-point underflow you'd get multiplying many small probabilities directly.",
+      "Viterbi is dynamic programming over a trellis: `dp[t][s]` is the best score of any path that ends in state `s` after t observations, and a parent pointer lets you walk the winner back. The complexity is O(T·S²), quadratic in states, linear in time, versus the S^T cost of brute force. Switching the integer scores to log-probabilities and the additions to log-space sums turns this exact same code into the standard HMM decoder used in speech recognition and POS tagging. Maximizing in log-space avoids the floating-point underflow you'd get multiplying many small probabilities directly.",
   },
   {
     id: "cp-prob-2",
@@ -57,11 +57,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["argmax", "n-gram", "language-model", "counting"],
     story:
-      "Before transformers, the simplest language models were **n-grams**: to predict the next word you just counted how often each word followed the current context in your training corpus, then picked the most frequent one. That single step — `argmax` over counts — is the maximum-likelihood estimate of the next token.\n\nYou are handed the slice of the count table for one fixed context: a list of candidate next tokens and how many times each was observed. Predict greedily by returning the token with the **highest count**.",
+      "Before transformers, the simplest language models were **n-grams**: to predict the next word you just counted how often each word followed the current context in your training corpus, then picked the most frequent one. That single step, `argmax` over counts, is the maximum-likelihood estimate of the next token.\n\nYou are handed the slice of the count table for one fixed context: a list of candidate next tokens and how many times each was observed. Predict greedily by returning the token with the **highest count**.",
     statement:
       "For a fixed context, you are given `N` candidate next tokens, each with an observed integer count. Output the token with the largest count.\n\nIf two or more tokens share the maximum count, output the one that is **lexicographically smallest** (standard ASCII string comparison).",
     input_format:
-      "Line 1: an integer `N` — the number of candidate tokens.\nNext `N` lines: each line has a token (a string of visible non-space characters) and an integer `count`, separated by a space.",
+      "Line 1: an integer `N`, the number of candidate tokens.\nNext `N` lines: each line has a token (a string of visible non-space characters) and an integer `count`, separated by a space.",
     output_format: "A single line: the predicted next token.",
     constraints: [
       "1 ≤ N ≤ 100000",
@@ -78,7 +78,7 @@ export default [
       },
     ],
     notes:
-      "One linear scan suffices. Track the best token seen so far; replace it when you see a strictly larger count, or an equal count with a lexicographically smaller token. Counts can reach 10^9 — comfortably inside a 32-bit int, but using `long long` avoids any worry.",
+      "One linear scan suffices. Track the best token seen so far; replace it when you see a strictly larger count, or an equal count with a lexicographically smaller token. Counts can reach 10^9, comfortably inside a 32-bit int, but using `long long` avoids any worry.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    // TODO: read n (token, count) pairs.\n    // Print the token with the largest count; break ties by smallest token.\n\n    return 0;\n}\n",
     solution_cpp:
@@ -89,7 +89,7 @@ export default [
       { input: "4\nzebra 2\napple 7\nmango 7\nbanana 1", expected_output: "apple" },
     ],
     editorial:
-      "An n-gram model estimates P(next | context) by relative frequency: count(context, next) / count(context). Since the denominator is the same for every candidate under a fixed context, the most probable next token is simply the one with the largest raw count — no division needed. That reduces prediction to a single `argmax` over the count column, computable in O(N) with a one-pass scan. The lexicographic tie-break makes the answer deterministic, exactly the kind of stable rule a real decoder needs when probabilities are equal. This greedy pick is also the foundation of greedy decoding in modern LLMs: at each step you take the argmax of the next-token distribution; n-grams just compute that distribution by counting instead of with a neural network.",
+      "An n-gram model estimates P(next | context) by relative frequency: count(context, next) / count(context). Since the denominator is the same for every candidate under a fixed context, the most probable next token is simply the one with the largest raw count, no division needed. That reduces prediction to a single `argmax` over the count column, computable in O(N) with a one-pass scan. The lexicographic tie-break makes the answer deterministic, exactly the kind of stable rule a real decoder needs when probabilities are equal. This greedy pick is also the foundation of greedy decoding in modern LLMs: at each step you take the argmax of the next-token distribution; n-grams just compute that distribution by counting instead of with a neural network.",
   },
   {
     id: "cp-prob-3",
@@ -104,9 +104,9 @@ export default [
     story:
       "A **Naive Bayes** classifier assigns a document to the class that maximizes the posterior P(class | features). Because multiplying many small probabilities underflows, real implementations work in **log-space**: the product of probabilities becomes a sum of log-probabilities, and the class score is `log P(class) + sum over features of count(feature) · log P(feature | class)`.\n\nTo keep everything exact, this problem gives you the log-probabilities already scaled to **integers**. You just sum the right integers per class and pick the largest.",
     statement:
-      "There are `C` classes (numbered `0..C-1`) and `F` features. For each class `c` you are given:\n\n- `prior[c]` — an integer log-score for choosing class `c`.\n- `feat[c][f]` — an integer log-score contributed by **one** occurrence of feature `f` in class `c`.\n\nA query is described by feature counts `cnt[0..F-1]`, where `cnt[f]` is how many times feature `f` was observed. The total score of class `c` is:\n\n```\nscore[c] = prior[c] + sum over f=0..F-1 of ( feat[c][f] · cnt[f] )\n```\n\nOutput the index of the class with the **maximum** total score. If several classes tie, output the **smallest** such index.",
+      "There are `C` classes (numbered `0..C-1`) and `F` features. For each class `c` you are given:\n\n- `prior[c]`, an integer log-score for choosing class `c`.\n- `feat[c][f]`, an integer log-score contributed by **one** occurrence of feature `f` in class `c`.\n\nA query is described by feature counts `cnt[0..F-1]`, where `cnt[f]` is how many times feature `f` was observed. The total score of class `c` is:\n\n```\nscore[c] = prior[c] + sum over f=0..F-1 of ( feat[c][f] · cnt[f] )\n```\n\nOutput the index of the class with the **maximum** total score. If several classes tie, output the **smallest** such index.",
     input_format:
-      "Line 1: two integers `C F`.\nNext `C` lines: line `c` has `1 + F` integers — `prior[c]` followed by `feat[c][0..F-1]`.\nLast line: `F` integers — the query feature counts `cnt[0..F-1]`.",
+      "Line 1: two integers `C F`.\nNext `C` lines: line `c` has `1 + F` integers, `prior[c]` followed by `feat[c][0..F-1]`.\nLast line: `F` integers, the query feature counts `cnt[0..F-1]`.",
     output_format: "A single line: the index of the best-scoring class.",
     constraints: [
       "1 ≤ C ≤ 1000",
@@ -124,7 +124,7 @@ export default [
       },
     ],
     notes:
-      "Read all `C` rows, then the query counts. For each class accumulate `prior[c] + sum(feat[c][f]·cnt[f])` using `long long` — products like 10^6 · 10^6 already exceed 32 bits. Replace the running best only on a **strict** improvement so equal scores keep the earliest (smallest) class index.",
+      "Read all `C` rows, then the query counts. For each class accumulate `prior[c] + sum(feat[c][f]·cnt[f])` using `long long`, products like 10^6 · 10^6 already exceed 32 bits. Replace the running best only on a **strict** improvement so equal scores keep the earliest (smallest) class index.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int C, F;\n    cin >> C >> F;\n    // TODO: read prior[c] and feat[c][f] for each class, then cnt[f].\n    // Print the class index with the maximum total log-score.\n\n    return 0;\n}\n",
     solution_cpp:
@@ -135,6 +135,6 @@ export default [
       { input: "2 1\n0 -1\n-1 -1\n5", expected_output: "0" },
     ],
     editorial:
-      "Naive Bayes picks argmax_c P(c) · prod_f P(f|c)^cnt[f]. Taking logs turns the product into a sum — `log P(c) + sum_f cnt[f]·log P(f|c)` — which both avoids floating-point underflow and makes the comparison a simple integer/real addition. The 'naive' part is the conditional-independence assumption between features given the class, which is what lets the joint likelihood factor into that product. Here the log-probabilities are pre-scaled to integers so the arithmetic is exact: each class score is one dot product between its feature log-weights and the query counts, plus the prior. Scoring all classes is O(C·F), and the strict-improvement tie-break guarantees a deterministic, reproducible label — the same MAP decision rule used in spam filters and text categorizers, just with the probabilities supplied as integers instead of estimated from data.",
+      "Naive Bayes picks argmax_c P(c) · prod_f P(f|c)^cnt[f]. Taking logs turns the product into a sum, `log P(c) + sum_f cnt[f]·log P(f|c)`, which both avoids floating-point underflow and makes the comparison a simple integer/real addition. The 'naive' part is the conditional-independence assumption between features given the class, which is what lets the joint likelihood factor into that product. Here the log-probabilities are pre-scaled to integers so the arithmetic is exact: each class score is one dot product between its feature log-weights and the query counts, plus the prior. Scoring all classes is O(C·F), and the strict-improvement tie-break guarantees a deterministic, reproducible label, the same MAP decision rule used in spam filters and text categorizers, just with the probabilities supplied as integers instead of estimated from data.",
   },
 ];

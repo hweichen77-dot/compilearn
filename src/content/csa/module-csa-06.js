@@ -7,7 +7,7 @@ export default {
     "category": "apcsa",
     "order": 206,
     "track": "apcsa",
-    "unit": "Unit 6 — Array",
+    "unit": "Unit 6, Array",
     "tags": [
       "arrays",
       "java",

@@ -19,7 +19,7 @@ export default {
       title: "Why Streaming Matters (Time To First Token)",
       concept: "Streaming",
       xp_reward: 10,
-      explanation: `A user waits eight seconds staring at a spinner, then a full paragraph appears at once. The same answer, streamed, shows its first word in 400 milliseconds and feels instant. The total time barely changed. The *perceived* time collapsed. That gap is the entire reason streaming exists.
+      explanation: `A user waits eight seconds staring at a spinner, then a full paragraph appears at once. The same answer, streamed, shows its first word in 400 milliseconds and feels instant. The total time barely changed, but the perceived time collapsed, and that gap is the reason streaming exists.
 
 ## What it is
 
@@ -43,8 +43,8 @@ for chunk in client.stream(prompt="Explain TTFT"):
 
 Two latency numbers now matter instead of one:
 
-1. **TTFT** — time until the first token. Dominated by the model "thinking" about your prompt before it can speak.
-2. **Inter-token latency** — the gap between each following token. This sets the *typing speed* the user sees.
+1. **TTFT**: time until the first token, set mostly by the model processing your prompt before it can speak.
+2. **Inter-token latency**: the gap between each following token, which sets the typing speed the user sees.
 
 Total time is roughly \`TTFT + (tokens - 1) * inter_token_latency\`. Streaming does not shrink the total; it surfaces output during it.
 
@@ -58,7 +58,7 @@ The trade-off: streaming is harder to handle. You must parse a live event stream
 
 ## The mental model to keep
 
-**Streaming doesn't make the answer faster. It makes the wait feel faster by showing the work as it happens — and TTFT is the number your users actually feel.**`,
+Streaming does not make the answer faster. It makes the wait feel faster by showing the work as it happens, and TTFT is the number your users actually feel.`,
       key_terms: [
         { term: "Streaming", definition: "Sending model output token by token as it is generated, rather than all at once at the end." },
         { term: "Time to first token (TTFT)", definition: "The delay between sending a request and receiving the first token of the response." },
@@ -224,9 +224,9 @@ total: 2.38`,
         "Use round(total, 2) so the printed number is clean."
       ],
       challenge_title: "The TTFT Router",
-      challenge_description: "Pick the model route that shows the user a word fastest — but only among routes that can still finish the whole reply inside the latency budget.",
+      challenge_description: "Pick the model route that shows the user a word fastest, but only among routes that can still finish the whole reply inside the latency budget.",
       challenge_difficulty: "intermediate",
-      challenge_story: "You run the gateway in front of a chat product. Every incoming question can be served by several **routes** — different models or deployments — and each has its own performance profile: a fixed **time to first token (TTFT)** before anything appears, a **per-token cost** in milliseconds while it streams, and the **number of tokens** the reply will take. Users judge a chat by how fast the *first* word shows up, so you want to minimize TTFT. But product set a hard rule: a route is only allowed if its **total** generation time fits inside the latency budget — nobody wants a snappy first word followed by a thirty-second crawl.",
+      challenge_story: "You run the gateway in front of a chat product. Every incoming question can be served by several **routes** (different models or deployments), and each has its own performance profile: a fixed **time to first token (TTFT)** before anything appears, a per-token cost in milliseconds while it streams, and the number of tokens the reply will take. Users judge a chat by how fast the first word shows up, so you want to minimize TTFT. But product set a hard rule: a route is only allowed if its total generation time fits inside the latency budget. Nobody wants a snappy first word followed by a thirty-second crawl.",
       challenge_statement: "You are given `n` candidate routes and a latency `budget` (milliseconds). For each route you know its `ttft`, its per-token streaming cost `per`, and the number of output tokens `out`. A route's **total time** is `ttft + per * out`.\n\nA route is **eligible** only if its total time is **≤ budget**. Among all eligible routes, print the name of the one with the **smallest TTFT**. Break ties by smallest total time; if still tied, prefer the route that appeared **earlier** in the input. If no route is eligible, print `NONE`.",
       challenge_input_format: "The first line has two integers `n budget`.\n\nEach of the next `n` lines describes a route: a name (no spaces) followed by three integers `ttft per out`.",
       challenge_output_format: "One line: the chosen route's name, or `NONE` if no route fits the budget.",
@@ -301,11 +301,11 @@ main()
       title: "Server-Sent Events",
       concept: "SSE",
       xp_reward: 10,
-      explanation: `Open the network tab while a chat app types out an answer and you will see one long-lived HTTP response, not a flood of separate requests. Each line of it starts with \`data:\`. That is **Server-Sent Events (SSE)** — the simple, text-based protocol almost every streaming LLM API uses to push tokens to you.
+      explanation: `Open the network tab while a chat app types out an answer and you will see one long-lived HTTP response, not a flood of separate requests. Each line of it starts with \`data:\`. That is **Server-Sent Events (SSE)**, the text-based protocol almost every streaming LLM API uses to push tokens to you.
 
 ## What it is
 
-**Server-Sent Events** is a one-way streaming channel: the server holds an HTTP connection open and keeps sending small text **events** down it until it is done. The client does not poll and does not send anything back over this channel — it just reads events as they arrive. It is plain HTTP, so it works through normal proxies and needs no special handshake like WebSockets do.
+**Server-Sent Events** is a one-way streaming channel: the server holds an HTTP connection open and keeps sending small text **events** down it until it is done. The client does not poll and does not send anything back over this channel, it just reads events as they arrive. It is plain HTTP, so it works through normal proxies and needs no special handshake like WebSockets do.
 
 For LLMs, each event carries one chunk of the response, usually a token or a few tokens packaged as JSON.
 
@@ -541,7 +541,7 @@ print(message)
       challenge_description: "Parse a raw Server-Sent Events stream the way a real client does: skip the noise, stop at the sentinel, count the token events, and glue the pieces back into the final answer.",
       challenge_difficulty: "intermediate",
       challenge_story: "Your front-end gets a model's reply as a live **Server-Sent Events** stream over one long HTTP response. The wire format is messy on purpose: there are blank lines between events, `:` comment lines the server sends as keep-alives, and a final `data: [DONE]` sentinel that marks the end. Anything after `[DONE]` is leftover garbage you must ignore. Each real token arrives as a `data:` line whose payload looks like `{\"token\": \"...\"}`. You're writing the client-side reassembler that turns this raw stream into two things product needs: **how many tokens streamed** and **the full reconstructed text**.",
-      challenge_statement: "Read the raw SSE stream line by line and process it:\n\n1. Ignore any line that does **not** start with `data:` (blank lines, `:` comments, etc.).\n2. For a `data:` line, strip the `data:` prefix and surrounding whitespace to get the payload.\n3. If the payload is exactly `[DONE]`, **stop immediately** — ignore every line after it.\n4. Otherwise the payload is `{\"token\": \"<text>\"}`. Extract the string between the quotes after `\"token\":` and append it to the running output.\n\nPrint the **number of token events** consumed, then on the next line print the **concatenated text** of all those tokens.",
+      challenge_statement: "Read the raw SSE stream line by line and process it:\n\n1. Ignore any line that does **not** start with `data:` (blank lines, `:` comments, etc.).\n2. For a `data:` line, strip the `data:` prefix and surrounding whitespace to get the payload.\n3. If the payload is exactly `[DONE]`, **stop immediately**: ignore every line after it.\n4. Otherwise the payload is `{\"token\": \"<text>\"}`. Extract the string between the quotes after `\"token\":` and append it to the running output.\n\nPrint the **number of token events** consumed, then on the next line print the **concatenated text** of all those tokens.",
       challenge_input_format: "The entire stdin is the raw SSE stream: a sequence of lines that may include `data:` lines, blank lines, `:` comment lines, a `data: [DONE]` sentinel, and possibly trailing lines after it.",
       challenge_output_format: "Two lines. Line 1: the integer count of token events. Line 2: the reassembled text (which may be empty).",
       challenge_constraints: [
@@ -556,7 +556,7 @@ print(message)
       challenge_notes: "Almost every streaming LLM API speaks this exact dialect of SSE: `data:` lines, blank-line separators, and a `[DONE]` terminator. Robust clients always stop at the sentinel and never trust bytes that arrive after it.",
       challenge_hints: [
         "Read all of stdin and split on newlines; loop over the lines.",
-        "Only lines that start with `data:` matter — strip that prefix and `.strip()` the rest.",
+        "Only lines that start with `data:` matter, strip that prefix and `.strip()` the rest.",
         "When the payload equals `[DONE]`, break out of the loop so trailing lines are ignored.",
         "To pull the token text, find `\"token\":` and read the substring between the next two double quotes.",
       ],
@@ -626,7 +626,7 @@ main()
       title: "Prompt Caching",
       concept: "Caching",
       xp_reward: 10,
-      explanation: `You send a 4,000-token system prompt and a long document to a model, then ask ten follow-up questions about it. Without caching, the model re-processes those 4,000 tokens ten times and you pay for them ten times. With **prompt caching**, it processes them once, stores the result, and the next nine calls reuse it — often 90 percent cheaper and noticeably faster. The trick is structuring the prompt so the cache can actually hit.
+      explanation: `You send a 4,000-token system prompt and a long document to a model, then ask ten follow-up questions about it. Without caching, the model re-processes those 4,000 tokens ten times and you pay for them ten times. With **prompt caching**, it processes them once, stores the result, and the next nine calls reuse it, often 90 percent cheaper and noticeably faster. The trick is structuring the prompt so the cache can actually hit.
 
 ## What it is
 
@@ -665,7 +665,7 @@ prompt = system_prompt + reference_doc + user_question
 
 ## The mental model to keep
 
-**Caching pays to read a fixed prefix once and then rents it out cheaply. Put everything stable first, everything variable last, and keep the cached part byte-for-byte identical — otherwise you pay full price every time.**`,
+**Caching pays to read a fixed prefix once and then rents it out cheaply. Put everything stable first, everything variable last, and keep the cached part byte-for-byte identical, otherwise you pay full price every time.**`,
       key_terms: [
         { term: "Prompt caching", definition: "Storing the model's processing of a fixed prompt prefix so repeated requests that share it skip the work and cost." },
         { term: "Prefix", definition: "The beginning portion of a prompt; caching reuses it only up to the first token that differs." },
@@ -839,7 +839,7 @@ cache hits: True`,
       challenge_title: "The Cacheable Prefix",
       challenge_description: "Find the longest prompt prefix every request in a batch shares, then compute the money prompt caching would save by prefilling it only once.",
       challenge_difficulty: "intermediate",
-      challenge_story: "Your RAG service answers questions about the same big knowledge base, so every request starts with an identical block: a long system prompt plus the retrieved document. Only the user's question at the very end changes. Right now you pay to prefill that whole shared block on **every** call. Prompt caching can store the processed **common prefix** once and let the rest of the batch reuse it — but first you have to find exactly how much of the prompt is truly shared across **all** requests, because a single differing character at position k means nothing past k can be cached.",
+      challenge_story: "Your RAG service answers questions about the same big knowledge base, so every request starts with an identical block: a long system prompt plus the retrieved document. Only the user's question at the very end changes. Right now you pay to prefill that whole shared block on **every** call. Prompt caching can store the processed **common prefix** once and let the rest of the batch reuse it, but first you have to find exactly how much of the prompt is truly shared across **all** requests, because a single differing character at position k means nothing past k can be cached.",
       challenge_statement: "You are given `n` prompts and a `cost` (the price in micro-dollars to prefill **one token**). Do two things:\n\n1. Find the **longest common prefix** of all `n` prompts, measured in characters. Let its length be `L`.\n2. Estimate its token count as `T = ceil(L / 4)` (the usual ~4-chars-per-token rule), with `T = 0` when `L = 0`.\n\nWithout caching, every one of the `n` calls prefills those `T` tokens. With caching, the prefix is prefilled **once** and the other `n - 1` calls reuse it. So the saving is `(n - 1) * T * cost`.\n\nPrint `L` on the first line and the saving on the second line.",
       challenge_input_format: "The first line has two integers `n cost`.\n\nEach of the next `n` lines is one prompt string (it may contain spaces; read the whole line).",
       challenge_output_format: "Two lines. Line 1: the integer length `L` of the common prefix in characters. Line 2: the integer saving `(n - 1) * ceil(L/4) * cost`.",
@@ -907,11 +907,11 @@ main()
       title: "Batching & Concurrency",
       concept: "Throughput",
       xp_reward: 10,
-      explanation: `You have 1,000 documents to classify. Sent one at a time, each waiting for the last to finish, the job takes an hour. Sent with 50 requests in flight at once, it finishes in a couple of minutes — same model, same total work, completely different wall-clock time. The difference is **throughput**, and the levers are **batching** and **concurrency**.
+      explanation: `You have 1,000 documents to classify. Sent one at a time, each waiting for the last to finish, the job takes an hour. Sent with 50 requests in flight at once, it finishes in a couple of minutes, same model, same total work, completely different wall-clock time. The difference is **throughput**, and the levers are **batching** and **concurrency**.
 
 ## What it is
 
-**Throughput** is how much work you finish per unit of time — requests per second, or tokens per second across a whole job. It is a different question from **latency**, which is how long a single request takes. A model can have high latency per call yet enormous throughput if it handles many calls in parallel.
+**Throughput** is how much work you finish per unit of time, requests per second, or tokens per second across a whole job. It is a different question from **latency**, which is how long a single request takes. A model can have high latency per call yet enormous throughput if it handles many calls in parallel.
 
 Two ways to raise throughput:
 
@@ -1128,8 +1128,8 @@ concurrent seconds: 20.0`,
       challenge_title: "The Concurrency Planner",
       challenge_description: "Estimate how long a bulk classification job takes when you cap how many requests run at once, then report the speedup concurrency buys you.",
       challenge_difficulty: "beginner",
-      challenge_story: "You have a nightly job that runs `n` documents through a classifier model. Each request takes the same `latency` to come back. Fired one at a time, the job crawls. Your provider lets you keep up to `c` requests in flight at once, so the work runs in **waves**: launch `c` requests, wait for them, launch the next `c`, and so on. The product owner wants a capacity plan: the sequential time, the concurrent wall-clock time at concurrency `c`, and the speedup factor — so they can decide whether to pay for more parallelism.",
-      challenge_statement: "You are given the number of requests `n`, the max concurrency `c`, and the per-request `latency` in milliseconds (every request takes exactly `latency`).\n\nCompute three numbers:\n\n1. **Sequential time** = `n * latency` (one after another).\n2. **Concurrent time** = `ceil(n / c) * latency` — the requests run in `ceil(n / c)` full waves, each wave taking `latency`.\n3. **Speedup** = sequential / concurrent, printed to **exactly 2 decimal places**.\n\nPrint the sequential time, the concurrent time, then the speedup.",
+      challenge_story: "You have a nightly job that runs `n` documents through a classifier model. Each request takes the same `latency` to come back. Fired one at a time, the job crawls. Your provider lets you keep up to `c` requests in flight at once, so the work runs in **waves**: launch `c` requests, wait for them, launch the next `c`, and so on. The product owner wants a capacity plan: the sequential time, the concurrent wall-clock time at concurrency `c`, and the speedup factor, so they can decide whether to pay for more parallelism.",
+      challenge_statement: "You are given the number of requests `n`, the max concurrency `c`, and the per-request `latency` in milliseconds (every request takes exactly `latency`).\n\nCompute three numbers:\n\n1. **Sequential time** = `n * latency` (one after another).\n2. **Concurrent time** = `ceil(n / c) * latency`, the requests run in `ceil(n / c)` full waves, each wave taking `latency`.\n3. **Speedup** = sequential / concurrent, printed to **exactly 2 decimal places**.\n\nPrint the sequential time, the concurrent time, then the speedup.",
       challenge_input_format: "A single line with three integers: `n c latency`.",
       challenge_output_format: "Three lines. Line 1: sequential time (integer). Line 2: concurrent time (integer). Line 3: speedup as a string with exactly 2 decimal places (e.g. `2.33`).",
       challenge_constraints: [
@@ -1143,7 +1143,7 @@ concurrent seconds: 20.0`,
       ],
       challenge_notes: "Concurrency improves **throughput** (total work per unit time) by overlapping the waits across requests; it does not make any single request faster. The last wave can be partly empty, which is why you round the wave count up.",
       challenge_hints: [
-        "Use math.ceil(n / c) for the number of waves — the final wave may not be full.",
+        "Use math.ceil(n / c) for the number of waves, the final wave may not be full.",
         "Sequential is just n * latency; concurrent is waves * latency.",
         "Format the speedup with an f-string like f\"{value:.2f}\" so it always shows 2 decimals.",
       ],
@@ -1184,15 +1184,15 @@ main()
       title: "Measuring Latency",
       concept: "Metrics",
       xp_reward: 10,
-      explanation: `An engineer reports "our average latency is 800 milliseconds, we are fine." Meanwhile one in twenty users waits four seconds and churns. The average hid them. To actually run a fast AI product, you measure the right numbers — and the average is rarely one of them.
+      explanation: `An engineer reports "our average latency is 800 milliseconds, we are fine." Meanwhile one in twenty users waits four seconds and churns. The average hid them. To actually run a fast AI product, you measure the right numbers, and the average is rarely one of them.
 
 ## What it is
 
 **Latency metrics** are the specific numbers you track to know how responsive your system is. For streaming LLMs, three matter most:
 
-- **TTFT** — time to first token, the responsiveness users feel first.
-- **Total latency** — time from request to the final token.
-- **Tokens per second** — the streaming throughput, total output tokens divided by total time.
+- **TTFT**: time to first token, the responsiveness users feel first.
+- **Total latency**: time from request to the final token.
+- **Tokens per second**: the streaming throughput, total output tokens divided by total time.
 
 And one statistical idea changes everything: you summarize these with **percentiles**, not averages.
 
@@ -1229,7 +1229,7 @@ To measure well:
 
 ## The mental model to keep
 
-**Track TTFT, total latency, and tokens per second, and judge them by percentiles like p95 and p99 — never the average. The tail is the user experience that decides whether they stay.**`,
+**Track TTFT, total latency, and tokens per second, and judge them by percentiles like p95 and p99, never the average. The tail is the user experience that decides whether they stay.**`,
       key_terms: [
         { term: "Percentile", definition: "The value below which a given percent of measurements fall, like p95 meaning 95 percent are at or under it." },
         { term: "p95 / p99", definition: "Tail latency percentiles that capture the slow requests most responsible for user frustration." },
@@ -1402,9 +1402,9 @@ p95: 5.0`,
         "Return the element at rank - 1 since lists are zero-indexed."
       ],
       challenge_title: "The Latency SLO Checker",
-      challenge_description: "Turn a batch of TTFT measurements into the metric that actually matters — the tail percentile — and decide whether your service meets its latency promise.",
+      challenge_description: "Turn a batch of TTFT measurements into the metric that actually matters, the tail percentile, and decide whether your service meets its latency promise.",
       challenge_difficulty: "intermediate",
-      challenge_story: "Your AI feature has a service-level objective (SLO): the **p95 time to first token** must stay under a promised threshold. An on-call engineer keeps quoting the *average*, but the average hides the slow tail — the unlucky users who wait forever and churn. You're building the dashboard check that does it right: given a window of raw TTFT samples, it reports the mean (for context), the requested **percentile** by nearest-rank, and whether the SLO passed.",
+      challenge_story: "Your AI feature has a service-level objective (SLO): the **p95 time to first token** must stay under a promised threshold. An on-call engineer keeps quoting the *average*, but the average hides the slow tail, the unlucky users who wait forever and churn. You're building the dashboard check that does it right: given a window of raw TTFT samples, it reports the mean (for context), the requested **percentile** by nearest-rank, and whether the SLO passed.",
       challenge_statement: "You are given `n` latency samples (milliseconds), a percentile `p`, and an SLO `threshold` in milliseconds. Compute:\n\n1. **Mean** = floor of the average, i.e. `sum(samples) // n` (integer division).\n2. **Percentile value** by the **nearest-rank** method: sort ascending, let `rank = ceil(p/100 * n)` (1-indexed, and at least 1), and take the sample at that rank.\n3. **Status**: print `PASS` if the percentile value is **≤ threshold**, otherwise `FAIL`.\n\nPrint the mean, the percentile value, then the status.",
       challenge_input_format: "The first line has three integers `n p threshold`.\n\nThe second line has `n` space-separated integer latency samples.",
       challenge_output_format: "Three lines. Line 1: the integer mean (floor). Line 2: the integer percentile value. Line 3: `PASS` or `FAIL`.",
@@ -1468,11 +1468,11 @@ main()
       title: "Token Throughput",
       concept: "Throughput",
       xp_reward: 10,
-      explanation: `A model with a snappy 200ms time to first token can still take twelve full seconds to answer — because the reply is 1,500 tokens long and the model only emits 130 of them per second. Once the first word lands, the whole rest of the wait is governed by a single number you rarely see on a dashboard: **token throughput**.
+      explanation: `A model with a snappy 200ms time to first token can still take twelve full seconds to answer, because the reply is 1,500 tokens long and the model only emits 130 of them per second. Once the first word lands, the whole rest of the wait is governed by a single number you rarely see on a dashboard: **token throughput**.
 
 ## What it is
 
-**Token throughput** is the rate at which a model emits output tokens, measured in **tokens per second (TPS)**. Lesson 4 looked at *job-level* throughput across many requests; this is the throughput *inside one response* — how fast a single answer types itself out after generation begins.
+**Token throughput** is the rate at which a model emits output tokens, measured in **tokens per second (TPS)**. Lesson 4 looked at *job-level* throughput across many requests; this is the throughput *inside one response*, how fast a single answer types itself out after generation begins.
 
 It is the inverse of the inter-token latency from lesson 1: if each token arrives every 8 milliseconds, that is \`1 / 0.008 = 125\` tokens per second. The longer the answer, the more this rate dominates the clock.
 
@@ -1493,7 +1493,7 @@ print(round(total, 2))             # 12.19
 
 The decisive insight is the **mix**. For a 10-token reply, TTFT (0.2s) swamps the 0.07s of streaming, so first-token speed is everything. For a 1,500-token reply, TTFT is a rounding error and throughput owns the wall clock. Two models can have identical TTFT yet wildly different total times purely from TPS.
 
-This is why **output length is the most controllable latency lever you have**. You cannot easily change the model's TPS, but you can ask for a shorter answer, cap \`max_tokens\`, or stop the stream early — each directly shrinks the throughput-dominated portion.
+This is why **output length is the most controllable latency lever you have**. You cannot easily change the model's TPS, but you can ask for a shorter answer, cap \`max_tokens\`, or stop the stream early, each directly shrinks the throughput-dominated portion.
 
 ## Why it matters
 
@@ -1503,7 +1503,7 @@ This is why **output length is the most controllable latency lever you have**. Y
 
 ## The mental model to keep
 
-**TTFT is the cost to start talking; throughput is the speed of talking. Short answers are bottlenecked by TTFT, long answers by tokens per second — so for anything verbose, fewer tokens is faster.**`,
+**TTFT is the cost to start talking; throughput is the speed of talking. Short answers are bottlenecked by TTFT, long answers by tokens per second, so for anything verbose, fewer tokens is faster.**`,
       key_terms: [
         { term: "Token throughput", definition: "The rate at which a model emits output tokens, measured in tokens per second (TPS)." },
         { term: "Tokens per second (TPS)", definition: "How many output tokens stream out each second; the inverse of inter-token latency." },
@@ -1752,11 +1752,11 @@ main()
       title: "Semantic Caching",
       concept: "SemanticCache",
       xp_reward: 10,
-      explanation: `Two users ask "How do I reset my password?" and "What's the process for changing my password?" Word for word they share almost nothing, so the exact-match prompt cache from lesson 3 misses both times and you pay for two full model calls. But the *meaning* is identical. A **semantic cache** catches that — it matches by what a query means, not by the letters it is made of.
+      explanation: `Two users ask "How do I reset my password?" and "What's the process for changing my password?" Word for word they share almost nothing, so the exact-match prompt cache from lesson 3 misses both times and you pay for two full model calls. But the *meaning* is identical. A **semantic cache** catches that, it matches by what a query means, not by the letters it is made of.
 
 ## What it is
 
-A **semantic cache** stores past queries and their answers keyed by an **embedding** — a vector of numbers that captures meaning. A new query is embedded too, and if its vector is **close enough** to a stored one, you return the cached answer instead of calling the model. Prompt caching (lesson 3) needs a byte-for-byte prefix match; semantic caching tolerates completely different wording as long as the intent lines up.
+A **semantic cache** stores past queries and their answers keyed by an **embedding**: a vector of numbers that captures meaning. A new query is embedded too, and if its vector is **close enough** to a stored one, you return the cached answer instead of calling the model. Prompt caching (lesson 3) needs a byte-for-byte prefix match; semantic caching tolerates completely different wording as long as the intent lines up.
 
 ## How it works
 
@@ -2063,7 +2063,7 @@ main()
       title: "Cost vs Latency Tradeoffs",
       concept: "Tradeoffs",
       xp_reward: 10,
-      explanation: `Every technique in this module pulls on the same two dials: how fast the answer feels and how much it costs. A giant model gives the best answers but is slow and expensive. A tiny model is fast and cheap but weaker. Streaming, caching, and model choice are the levers you combine to find the sweet spot — and there is no single right setting, only the right setting for *this* request.
+      explanation: `Every technique in this module pulls on the same two dials: how fast the answer feels and how much it costs. A giant model gives the best answers but is slow and expensive. A tiny model is fast and cheap but weaker. Streaming, caching, and model choice are the levers you combine to find the sweet spot, and there is no single right setting, only the right setting for *this* request.
 
 ## What it is
 
@@ -2087,7 +2087,7 @@ expected = hit_rate * hit_latency + (1 - hit_rate) * cold_latency
 print(round(expected, 1))   # 482.0 ms
 \`\`\`
 
-This is why the levers stack. A semantic cache raises the hit rate, which pulls the expected cost and latency down. A smaller model lowers the cold-path cost and latency for the misses. Streaming lowers the *perceived* latency on every miss. Combine them and a request that would cost a lot and feel slow becomes cheap and snappy on average — without any single magic setting.
+This is why the levers stack. A semantic cache raises the hit rate, which pulls the expected cost and latency down. A smaller model lowers the cold-path cost and latency for the misses. Streaming lowers the *perceived* latency on every miss. Combine them and a request that would cost a lot and feel slow becomes cheap and snappy on average, without any single magic setting.
 
 The discipline is matching the strategy to the request. A simple, common question should route to a small cheap model behind an aggressive cache. A rare, hard question should route to the big model, stream the answer, and skip the cache (it would miss anyway).
 
@@ -2099,7 +2099,7 @@ The discipline is matching the strategy to the request. A simple, common questio
 
 ## The mental model to keep
 
-**Speed, cost, and quality form a triangle; you cannot max all three at once. Pick the model tier for the job, stream to mask the wait, and cache to dodge repeated work — then route each request to the cheapest path that is still good and fast enough.**`,
+**Speed, cost, and quality form a triangle; you cannot max all three at once. Pick the model tier for the job, stream to mask the wait, and cache to dodge repeated work, then route each request to the cheapest path that is still good and fast enough.**`,
       key_terms: [
         { term: "Cost vs latency tradeoff", definition: "The balancing act between response speed, dollar cost, and answer quality, where improving one usually worsens another." },
         { term: "Model tier", definition: "The size or class of model chosen; larger tiers are smarter but slower and costlier per token." },

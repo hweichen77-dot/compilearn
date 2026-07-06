@@ -19,13 +19,13 @@ export default {
       title: "Chain of Thought",
       concept: "CoT",
       xp_reward: 10,
-      explanation: `Ask a model "What is 17 times 24?" and it often blurts a wrong number. Add four words — "Let's think step by step" — and the same model quietly works it out and lands on 408. Nothing changed inside the model. You changed what it wrote first, and that changed everything.
+      explanation: `Ask a model "What is 17 times 24?" and it often returns a wrong number. Add four words, "Let's think step by step", and the same model works it out and lands on 408. The model itself did not change. What changed is what it wrote first.
 
 ## What it is
 
 **Chain of thought (CoT)** is a prompting pattern where you ask the model to write out its intermediate reasoning before giving a final answer. Instead of jumping straight to a conclusion, the model produces a visible trail of steps, and the answer falls out at the end of that trail.
 
-The reason this works comes straight from how models generate text. A model can only "think" by writing tokens — there is no hidden scratchpad. When you force the answer on the first token, the model has done zero computation toward it. When you let it write steps first, each step becomes context the next token can build on. **The reasoning isn't decoration; it is the computation.**
+This works because of how models generate text. A model can only "think" by writing tokens; there is no hidden scratchpad. When you force the answer on the first token, the model has done no computation toward it. When you let it write steps first, each step becomes context the next token can build on. The reasoning is not decoration; it is the computation.
 
 ## How it works
 
@@ -52,7 +52,7 @@ The trigger doesn't make the model smarter. It changes the *shape* of the output
 CoT moves the needle most on multi-step problems: arithmetic, logic puzzles, word problems, and anything requiring a chain of deductions.
 
 - **It trades tokens for accuracy.** Reasoning text costs output tokens and latency. For a simple lookup it is wasted money; for a multi-step problem it is the difference between right and wrong.
-- **It makes errors inspectable.** When the answer is wrong, you can read the steps and see *where* it went off the rails — impossible with a one-word answer.
+- **It makes errors inspectable.** When the answer is wrong, you can read the steps and see where it went off the rails, which is impossible with a one-word answer.
 - **It can be hidden.** Many production systems ask for reasoning, then strip it out and show only the final answer to the user.
 
 The catch: more reasoning is not always better. On trivial tasks CoT can introduce errors by overthinking, and a confidently wrong chain of reasoning still produces a confidently wrong answer.
@@ -214,7 +214,7 @@ A shop has 3 boxes of 12 apples and sells 17. How many are left? Let's think ste
       reflections: [
         {
           prompt: "In your own words: why does forcing the model to answer on the very first token tend to produce worse results on hard problems?",
-          sampleAnswer: "A model can only compute by writing tokens, so when you demand the answer immediately it has done no work toward it yet — the answer is a pure guess. Letting it write intermediate steps first turns each step into context the next token can build on, spreading the hard computation across many tokens instead of cramming it into one."
+          sampleAnswer: "A model can only compute by writing tokens, so when you demand the answer immediately it has done no work toward it yet, and the answer is a pure guess. Letting it write intermediate steps first turns each step into context the next token can build on, spreading the hard computation across many tokens instead of cramming it into one."
         }
       ],
       hints: [
@@ -224,7 +224,7 @@ A shop has 3 boxes of 12 apples and sells 17. How many are left? Let's think ste
       ],
       challenge_title: "Audit the Scratchpad",
       challenge_description: "Verify a model's chain-of-thought arithmetic and flag the first step where its reasoning breaks.",
-      challenge_story: "Your eval harness logs the **scratchpad** a model writes when it reasons step by step. Each line is one reasoning step: it takes the running value from the line above, applies one operation, and claims a result. When the final answer is wrong, you don't just want to know *that* it failed — you want the **exact step** where the reasoning first went off the rails, because that's the line a human reviewer should read. Build the auditor that walks the chain and pinpoints the first broken link.",
+      challenge_story: "Your eval harness logs the scratchpad a model writes when it reasons step by step. Each line is one reasoning step: it takes the running value from the line above, applies one operation, and claims a result. When the final answer is wrong, you want to know more than that it failed. You want the exact step where the reasoning first went off the rails, because that is the line a human reviewer should read. Build the auditor that walks the chain and pinpoints the first broken link.",
       challenge_statement: "A chain of thought starts from a value and applies `n` steps in order. Each step takes the **accumulator** (the result of the previous step, or the start value for step 1), applies one operation against an operand, and *claims* a result.\n\nWalk the chain top to bottom. For each step, recompute the true result from the current accumulator and compare it to the claimed result. If they differ, the chain breaks at that step.\n\n- If every step checks out, print `VALID` followed by the final accumulator.\n- Otherwise print `WRONG` followed by the **1-based index** of the first step whose claimed result is incorrect, and stop.\n\nOperators are `+`, `-`, `*`, and `/`. Division is **integer floor division** (`//`).",
       challenge_input_format: "The first line has two integers `n start`. Each of the next `n` lines is a step in the form `op operand = claimed`, where `op` is one of `+ - * /`.",
       challenge_output_format: "Either `VALID v` where `v` is the final accumulator, or `WRONG i` where `i` is the 1-based index of the first incorrect step.",
@@ -234,10 +234,10 @@ A shop has 3 boxes of 12 apples and sells 17. How many are left? Let's think ste
         "A `/` step never divides by zero",
       ],
       challenge_examples: [
-        { input: "3 7\n* 6 = 42\n- 2 = 40\n+ 8 = 48", output: "VALID 48", explanation: "7*6=42 ✓, 42-2=40 ✓, 40+8=48 ✓. Every step holds, final value 48." },
-        { input: "2 100\n/ 4 = 25\n+ 5 = 31", output: "WRONG 2", explanation: "100//4=25 ✓, but 25+5=30, not the claimed 31, so the chain first breaks at step 2." },
+        { input: "3 7\n* 6 = 42\n- 2 = 40\n+ 8 = 48", output: "VALID 48", explanation: "7*6=42 holds, 42-2=40 holds, 40+8=48 holds. Every step checks out, final value 48." },
+        { input: "2 100\n/ 4 = 25\n+ 5 = 31", output: "WRONG 2", explanation: "100//4=25 holds, but 25+5=30, not the claimed 31, so the chain first breaks at step 2." },
       ],
-      challenge_notes: "This is exactly why chain of thought helps: each step is a small, checkable computation. A direct answer gives you nothing to audit; an exposed chain lets you localize the error. Use `//` for floor division so results stay exact integers — no floats.",
+      challenge_notes: "This is why chain of thought helps: each step is a small, checkable computation. A direct answer gives you nothing to audit; an exposed chain lets you localize the error. Use `//` for floor division so results stay exact integers, with no floats.",
       challenge_hints: [
         "Carry an `acc` variable; for step 1 it starts at `start`, then it becomes each verified claimed value.",
         "Recompute the true result for the step's operator and compare to the claimed value before trusting it.",
@@ -303,13 +303,13 @@ main()
       title: "Few-Shot Done Right",
       concept: "FewShot",
       xp_reward: 10,
-      explanation: `You ask a model to classify reviews as positive or negative and it keeps replying with paragraphs of analysis. You didn't want an essay — you wanted one word. The fix isn't a longer instruction. It's two examples. Show it the exact input-output shape twice and it locks onto the pattern instantly.
+      explanation: `You ask a model to classify reviews as positive or negative and it keeps replying with paragraphs of analysis. You wanted one word, not an essay. The fix is not a longer instruction; it is two examples. Show it the exact input-output shape twice and it picks up the pattern.
 
 ## What it is
 
-**Few-shot prompting** means putting a handful of worked examples — each an input paired with the exact output you want — directly into the prompt before your real input. The model reads the pattern and continues it. Zero-shot is "just tell it what to do." Few-shot is "show it what done looks like."
+**Few-shot prompting** means putting a handful of worked examples (each an input paired with the exact output you want) directly into the prompt before your real input. The model reads the pattern and continues it. Zero-shot is "just tell it what to do." Few-shot is "show it what done looks like."
 
-This is **in-context learning**: the model adapts to your task from examples in the prompt alone, without any training or weight changes. The examples teach format, tone, edge-case handling, and label vocabulary all at once — things that are awkward to describe in words but trivial to demonstrate.
+This is **in-context learning**: the model adapts to your task from examples in the prompt alone, without any training or weight changes. The examples teach format, tone, edge-case handling, and label vocabulary all at once, things that are awkward to describe in words but easy to demonstrate.
 
 ## How it works
 
@@ -339,7 +339,7 @@ What makes few-shot work *well*:
 
 ## Why it matters
 
-Few-shot is the cheapest reliability upgrade you have. No fine-tuning, no infrastructure — just better prompt content.
+Few-shot is the cheapest reliability upgrade you have: no fine-tuning and no infrastructure, just better prompt content.
 
 - **It pins down format** so you can parse the output reliably in code.
 - **It teaches by demonstration**, which beats verbose instructions for fuzzy tasks like tone or style.
@@ -349,7 +349,7 @@ The classic mistake is unbalanced or sloppy examples. Garbage examples teach the
 
 ## The mental model to keep
 
-**Don't describe the task — demonstrate it. A few clean examples are worth a paragraph of instructions.**`,
+**Don't describe the task, demonstrate it. A few clean examples are worth a paragraph of instructions.**`,
       key_terms: [
         { term: "Few-shot prompting", definition: "Including several input-output example pairs in the prompt before the real input." },
         { term: "In-context learning", definition: "The model adapting to a task from examples in the prompt, with no weight changes." },
@@ -531,7 +531,7 @@ Sentiment:`,
       ],
       challenge_title: "Few-Shot Classifier",
       challenge_description: "Label new inputs the way a few-shot prompt would: by matching each one to the closest labeled example you were shown.",
-      challenge_story: "You're prototyping a sentiment classifier before wiring up a real model. The cheap-and-fast stand-in mimics what a **few-shot prompt** actually does: it generalizes from the handful of labeled examples you put in front of it. Each example is a numeric *feature* (say, a sentiment score the pipeline already computed) paired with a label. A new input gets whatever label its **nearest example** carries — the model has no other signal to go on. Build the classifier so you can sanity-check the label set before spending tokens.",
+      challenge_story: "You're prototyping a sentiment classifier before wiring up a real model. The cheap-and-fast stand-in mimics what a **few-shot prompt** actually does: it generalizes from the handful of labeled examples you put in front of it. Each example is a numeric *feature* (say, a sentiment score the pipeline already computed) paired with a label. A new input gets whatever label its **nearest example** carries, since the model has no other signal to go on. Build the classifier so you can sanity-check the label set before spending tokens.",
       challenge_statement: "You're given `k` labeled examples, each a feature value (integer) and a label (string). Then you're given `q` query feature values.\n\nFor each query, assign the label of the example whose feature is **closest** in absolute value. If two examples are equally close, prefer the one with the **smaller feature value**.\n\nPrint one label per query, in order.",
       challenge_input_format: "The first line is integer `k`. Each of the next `k` lines has `feature label` (an integer and a one-word label). The next line is integer `q`. Each of the next `q` lines is one integer query feature.",
       challenge_output_format: "`q` lines, the assigned label for each query in input order.",
@@ -542,13 +542,13 @@ Sentiment:`,
         "Labels are non-empty strings with no spaces",
       ],
       challenge_examples: [
-        { input: "3\n10 positive\n50 neutral\n90 negative\n3\n12\n55\n70", output: "positive\nneutral\nneutral", explanation: "12 is closest to 10 (positive). 55 closest to 50 (neutral). 70 is distance 20 from both 50 and 90 — a tie, so the smaller feature 50 wins (neutral)." },
+        { input: "3\n10 positive\n50 neutral\n90 negative\n3\n12\n55\n70", output: "positive\nneutral\nneutral", explanation: "12 is closest to 10 (positive). 55 closest to 50 (neutral). 70 is distance 20 from both 50 and 90, a tie, so the smaller feature 50 wins (neutral)." },
         { input: "2\n0 cold\n100 hot\n1\n50", output: "cold", explanation: "50 is distance 50 from both; the tie breaks toward the smaller feature 0 (cold)." },
       ],
-      challenge_notes: "This is nearest-neighbor classification — and it mirrors the central rule of few-shot prompting: the model can only produce a label it has actually seen demonstrated. Forget to include a label among your examples and no query will ever receive it.",
+      challenge_notes: "This is nearest-neighbor classification, and it mirrors the central rule of few-shot prompting: the model can only produce a label it has actually seen demonstrated. Forget to include a label among your examples and no query will ever receive it.",
       challenge_hints: [
         "For each query, scan all examples and track the minimum of `(abs(query - feature), feature)`.",
-        "Comparing the tuple `(distance, feature)` handles the tie-break automatically — Python compares the second element only on ties.",
+        "Comparing the tuple `(distance, feature)` handles the tie-break automatically; Python compares the second element only on ties.",
         "Read all input at once and index through it; build the output as a list and join with newlines.",
       ],
       challenge_difficulty: "intermediate",
@@ -608,7 +608,7 @@ main()
       title: "Self-Consistency & Voting",
       concept: "Voting",
       xp_reward: 10,
-      explanation: `A model solves a tricky word problem and answers 42. Run the exact same prompt again and it answers 27. Run it five more times: 42, 42, 27, 42, 31. Which do you trust? Count them. Four of seven say 42 — and that majority answer is far more reliable than any single run. This is **self-consistency**, and it can lift accuracy several points for the cost of running the prompt a few more times.
+      explanation: `A model solves a tricky word problem and answers 42. Run the same prompt again and it answers 27. Run it five more times: 42, 42, 27, 42, 31. Which do you trust? Count them: four of seven say 42, and that majority answer is more reliable than any single run. This is **self-consistency**, and it can lift accuracy several points for the cost of running the prompt a few more times.
 
 ## What it is
 
@@ -631,7 +631,7 @@ from collections import Counter
 # final answers pulled from 5 separate CoT runs
 answers = [42, 27, 42, 42, 31]
 winner = Counter(answers).most_common(1)[0][0]
-print(winner)   # 42 -- the majority, more reliable than any single run
+print(winner)   # 42, the majority, more reliable than any single run
 \`\`\`
 
 The reasoning that led to each answer is thrown away after voting; only the final answers compete. You are using disagreement as a signal: when the runs agree, you can be more confident; when they split evenly, the problem is genuinely hard or ambiguous.
@@ -645,7 +645,7 @@ Self-consistency buys accuracy with money and latency rather than a smarter mode
 - **It needs diversity.** If temperature is too low the paths are near-identical and voting adds nothing; too high and the reasoning degrades. There is a sweet spot.
 - **The vote can still be wrong.** If a model has a systematic bias, the majority can be confidently incorrect. Voting reduces random error, not shared bias.
 
-A common upgrade is to weight or filter votes — for example, ignoring runs whose reasoning is obviously malformed before counting.
+A common upgrade is to weight or filter votes, for example ignoring runs whose reasoning is obviously malformed before counting.
 
 ## The mental model to keep
 
@@ -759,7 +759,7 @@ majority answer: 42`,
             "The majority answer is 8.",
             "Four independent reasoning paths converged on 8 while only one strayed to 5, so 8 is far better supported than any lone run."
           ],
-          output: "8 -- it is the majority, backed by four converging reasoning paths versus one outlier."
+          output: "8, the majority, backed by four converging reasoning paths versus one outlier."
         },
         {
           number: 2, difficulty: "hard",
@@ -826,9 +826,9 @@ majority answer: 42`,
       ],
       challenge_examples: [
         { input: "5\n42 3\n42 1\n7 5\n7 4\n42 2", output: "7 9", explanation: "Answer 42 totals 3+1+2=6; answer 7 totals 5+4=9. 7 carries more weight, so it wins with total 9." },
-        { input: "3\n1 10\n2 10\n3 5", output: "1 10", explanation: "Answers 1 and 2 both total 10 — a tie — so the smaller value 1 wins." },
+        { input: "3\n1 10\n2 10\n3 5", output: "1 10", explanation: "Answers 1 and 2 both total 10, a tie, so the smaller value 1 wins." },
       ],
-      challenge_notes: "This is self-consistency with a twist: instead of one-run-one-vote, each run votes with its confidence. It still only cancels *random* error — if every run shares the same systematic bias, they all pile weight onto the same wrong answer and the aggregate is confidently incorrect.",
+      challenge_notes: "This is self-consistency with a twist: instead of one-run-one-vote, each run votes with its confidence. It still only cancels *random* error: if every run shares the same systematic bias, they all pile weight onto the same wrong answer and the aggregate is confidently incorrect.",
       challenge_hints: [
         "Accumulate totals in a dict keyed by answer value.",
         "Iterate the answers in sorted order so the first one you accept on a tie is already the smallest.",
@@ -886,11 +886,11 @@ main()
       title: "ReAct & Tool Prompts",
       concept: "ReActPrompt",
       xp_reward: 10,
-      explanation: `Ask a model "What's the weather in Tokyo right now?" and it cannot know — its weights froze months ago. But give it a way to *act*, and it can write "I should check the weather tool," call that tool, read the result, and answer correctly. The pattern that makes this work is **ReAct**: interleaving reasoning with actions.
+      explanation: `Ask a model "What's the weather in Tokyo right now?" and it cannot know, its weights froze months ago. But give it a way to *act*, and it can write "I should check the weather tool," call that tool, read the result, and answer correctly. The pattern that makes this work is **ReAct**: interleaving reasoning with actions.
 
 ## What it is
 
-**ReAct** stands for **Reason + Act**. It is a prompting pattern where the model alternates between two kinds of output: a **Thought** (reasoning about what to do next) and an **Action** (calling a tool, like a search, a calculator, or an API). After each action the environment returns an **Observation**, which the model reads before thinking again. The loop is Thought, Action, Observation, repeat — until the model has enough to give a final answer.
+**ReAct** stands for **Reason + Act**. It is a prompting pattern where the model alternates between two kinds of output: a **Thought** (reasoning about what to do next) and an **Action** (calling a tool, like a search, a calculator, or an API). After each action the environment returns an **Observation**, which the model reads before thinking again. The loop is Thought, Action, Observation, repeat, until the model has enough to give a final answer.
 
 This breaks the model out of its frozen, sealed box. Pure reasoning can only work with what's in the prompt and the weights. ReAct lets the model pull in fresh facts, do exact computation, and ground its answer in real tool output instead of guessing.
 
@@ -917,9 +917,9 @@ The model never executes anything itself. It only *requests* actions as text; yo
 
 ## Why it matters
 
-ReAct is the backbone of modern AI **agents** — systems that take real actions, not just chat.
+ReAct is the backbone of modern AI **agents**: systems that take real actions, not just chat.
 
-- **It grounds answers in real data.** Live weather, current prices, a database row — anything the model couldn't know is fetched, not hallucinated.
+- **It grounds answers in real data.** Live weather, current prices, a database row, anything the model couldn't know is fetched, not hallucinated.
 - **It offloads exact work.** Math, code execution, and lookups go to tools that don't make arithmetic mistakes.
 - **It makes behavior traceable.** The Thought and Action log shows exactly why the system did what it did, which is invaluable for debugging.
 - **It adds failure modes.** Tools can error, return junk, or be called with bad arguments. A robust ReAct loop must handle a failed Observation, cap the number of steps, and avoid infinite loops.
@@ -934,7 +934,7 @@ ReAct is the backbone of modern AI **agents** — systems that take real actions
         { term: "Agent", definition: "An LLM system that takes real actions via tools in a Thought-Action-Observation loop." }
       ],
       callouts: [
-        { type: "analogy", title: "Brain and hands", content: "The model is a brain in a jar: it can decide but not touch anything. ReAct gives it hands — your code and tools — that carry out actions and report back what happened.", position: "before" },
+        { type: "analogy", title: "Brain and hands", content: "The model is a brain in a jar: it can decide but not touch anything. ReAct gives it hands, your code and tools, that carry out actions and report back what happened.", position: "before" },
         { type: "warning", title: "The model only asks, never does", content: "The model writes 'Action: search(...)' as text. It does not run the search. Your code parses that request, executes the tool, and feeds back the result. Forgetting this is the classic ReAct bug.", position: "after" }
       ],
       concept_diagram: {
@@ -1096,8 +1096,8 @@ Observation: About 14 million (2024).`,
       ],
       challenge_title: "Run the ReAct Trace",
       challenge_description: "Execute an agent's action trace step by step, dispatching each tool call against a running register.",
-      challenge_story: "Your ReAct agent emits a trace of **actions**, each a tool call like `add(\"4\")` or `set(\"3\")`. Between reasoning, your runtime has to actually *execute* these calls: parse the tool name, pull the argument out from between the quotes, dispatch to the right tool, and thread the result forward as state. To debug an agent you need to see the register **after every single action**, not just at the end — that's the trail that tells you where a run went wrong. Build the executor that runs the trace and logs the state at each step.",
-      challenge_statement: "An agent emits `n` actions in order. Each action is `tool(\"arg\")` where `arg` is an integer (possibly negative). A single integer **register** starts at `0`. Apply each tool to the register:\n\n- `set(\"x\")` — replace the register with `x`.\n- `add(\"x\")` — add `x` to the register.\n- `sub(\"x\")` — subtract `x` from the register.\n- `mul(\"x\")` — multiply the register by `x`.\n\nPrint the final register value, then on a second line print the register value **after each action**, space-separated, in order.",
+      challenge_story: "Your ReAct agent emits a trace of **actions**, each a tool call like `add(\"4\")` or `set(\"3\")`. Between reasoning, your runtime has to actually *execute* these calls: parse the tool name, pull the argument out from between the quotes, dispatch to the right tool, and thread the result forward as state. To debug an agent you need to see the register **after every single action**, not just at the end, that's the trail that tells you where a run went wrong. Build the executor that runs the trace and logs the state at each step.",
+      challenge_statement: "An agent emits `n` actions in order. Each action is `tool(\"arg\")` where `arg` is an integer (possibly negative). A single integer **register** starts at `0`. Apply each tool to the register:\n\n- `set(\"x\")`, replace the register with `x`.\n- `add(\"x\")`, add `x` to the register.\n- `sub(\"x\")`, subtract `x` from the register.\n- `mul(\"x\")`, multiply the register by `x`.\n\nPrint the final register value, then on a second line print the register value **after each action**, space-separated, in order.",
       challenge_input_format: "The first line is integer `n`. Each of the next `n` lines is an action of the form `tool(\"arg\")` with `tool` one of `set`, `add`, `sub`, `mul`.",
       challenge_output_format: "Line 1: the final register value. Line 2: the register value after each of the `n` actions, space-separated.",
       challenge_constraints: [
@@ -1168,7 +1168,7 @@ main()
       title: "Prompt Chaining & Decomposition",
       concept: "Chaining",
       xp_reward: 10,
-      explanation: `You ask a model to "read this 20-page report, extract the risks, rank them, and write an executive summary" in one shot. The result is mushy: some risks missed, ranking arbitrary, summary vague. Now split it into four prompts, each doing one job and feeding the next. Suddenly every stage is sharp. That's **prompt chaining** — and it's how serious LLM systems get built.
+      explanation: `You ask a model to "read this 20-page report, extract the risks, rank them, and write an executive summary" in one shot. The result is mushy: some risks missed, ranking arbitrary, summary vague. Now split it into four prompts, each doing one job and feeding the next. Suddenly every stage is sharp. That's **prompt chaining**: and it's how serious LLM systems get built.
 
 ## What it is
 
@@ -1198,7 +1198,7 @@ summary = call_model(summarize_prompt(ranked))
 
 Each call is small, inspectable, and independently fixable. If the summary is bad, you can look at \`ranked\` to see whether the problem was the ranking step or the summary step. With one mega-prompt, you'd have no idea which part failed.
 
-Chains can branch and merge too: run several extractions in parallel, then combine them. But the core move is always the same — **split the work, pass the output along.**
+Chains can branch and merge too: run several extractions in parallel, then combine them. But the core move is always the same, **split the work, pass the output along.**
 
 ## Why it matters
 
@@ -1207,7 +1207,7 @@ Decomposition is the difference between a demo and a dependable system.
 - **Each step is more accurate** because a focused prompt outperforms a sprawling one.
 - **The pipeline is debuggable.** You can inspect the intermediate output of every stage and pinpoint exactly where things went wrong.
 - **Steps are reusable and swappable.** Improve the ranking prompt without touching the others; reuse the extraction step in a different chain.
-- **It costs more calls.** Four prompts mean four round trips, more tokens, and more latency than one. You trade efficiency for reliability and control — usually worth it for anything important.
+- **It costs more calls.** Four prompts mean four round trips, more tokens, and more latency than one. You trade efficiency for reliability and control, usually worth it for anything important.
 
 The risk to watch: **errors compound.** A bad early step poisons everything downstream, so the earliest stages deserve the most care and validation.
 
@@ -1386,8 +1386,8 @@ summary: found 2 risks`,
       ],
       challenge_title: "The Risk Triage Pipeline",
       challenge_description: "Run a three-stage extract-rank-summarize chain over a document of scored findings, each stage feeding the next.",
-      challenge_story: "A compliance summarizer reads a long report and surfaces the top risks for a human reviewer. Doing it in one giant prompt produces mush, so you decomposed it into a **chain**: stage 1 *extracts* findings whose severity clears a threshold, stage 2 *ranks* what survived, and stage 3 *summarizes* the top few. Each stage consumes the previous stage's output and nothing else — which is exactly why you can inspect the result of every step. Build the pipeline that turns raw findings into a tight, ranked summary.",
-      challenge_statement: "You're given `n` findings, each with an integer id and an integer severity score, plus a threshold `T` and a count `K`.\n\nRun three chained stages:\n\n1. **Extract** — keep only findings with `score >= T`.\n2. **Rank** — sort the kept findings by score **descending**; break ties by **smaller id first**.\n3. **Summarize** — take the top `K` of the ranked list.\n\nPrint three lines: how many findings survived extraction, the ids of the top `K` (space-separated, or `-` if none), and the sum of those top `K` scores.",
+      challenge_story: "A compliance summarizer reads a long report and surfaces the top risks for a human reviewer. Doing it in one giant prompt produces mush, so you decomposed it into a **chain**: stage 1 *extracts* findings whose severity clears a threshold, stage 2 *ranks* what survived, and stage 3 *summarizes* the top few. Each stage consumes the previous stage's output and nothing else, which is exactly why you can inspect the result of every step. Build the pipeline that turns raw findings into a tight, ranked summary.",
+      challenge_statement: "You're given `n` findings, each with an integer id and an integer severity score, plus a threshold `T` and a count `K`.\n\nRun three chained stages:\n\n1. **Extract**: keep only findings with `score >= T`.\n2. **Rank**: sort the kept findings by score **descending**; break ties by **smaller id first**.\n3. **Summarize**: take the top `K` of the ranked list.\n\nPrint three lines: how many findings survived extraction, the ids of the top `K` (space-separated, or `-` if none), and the sum of those top `K` scores.",
       challenge_input_format: "The first line has three integers `n T K`. Each of the next `n` lines has two integers: `id score`.",
       challenge_output_format: "Line 1: the count of findings kept after extraction. Line 2: the top-`K` ids space-separated in ranked order, or `-` if the kept set is empty. Line 3: the sum of the top-`K` scores (`0` if none).",
       challenge_constraints: [
@@ -1398,10 +1398,10 @@ summary: found 2 risks`,
         "ids are distinct integers in [0, 1000000000]",
       ],
       challenge_examples: [
-        { input: "5 50 2\n1 80\n2 30\n3 90\n4 50\n5 90", output: "4\n3 5\n180", explanation: "Extract keeps scores ≥ 50: ids 1,3,4,5 (count 4). Rank by score desc: 3(90), 5(90) — tie broken by smaller id — then 1(80), 4(50). Top 2 are ids 3 and 5, scores 90+90=180." },
+        { input: "5 50 2\n1 80\n2 30\n3 90\n4 50\n5 90", output: "4\n3 5\n180", explanation: "Extract keeps scores ≥ 50: ids 1,3,4,5 (count 4). Rank by score desc: 3(90), 5(90), tie broken by smaller id, then 1(80), 4(50). Top 2 are ids 3 and 5, scores 90+90=180." },
         { input: "3 100 5\n1 10\n2 20\n3 30", output: "0\n-\n0", explanation: "No finding clears threshold 100, so extraction is empty: count 0, no ids (`-`), sum 0." },
       ],
-      challenge_notes: "Each stage is a pure function of the stage before it — extract → rank → summarize. That decomposition is what makes the pipeline debuggable: print any line and you can see exactly where a wrong final answer was born. `K` may exceed the kept set; in that case you simply take everything that survived.",
+      challenge_notes: "Each stage is a pure function of the stage before it, extract → rank → summarize. That decomposition is what makes the pipeline debuggable: print any line and you can see exactly where a wrong final answer was born. `K` may exceed the kept set; in that case you simply take everything that survived.",
       challenge_hints: [
         "Stage 1 is a list comprehension filtering `score >= T`.",
         "Stage 2 sorts with key `(-score, id)` so higher scores come first and ties favor the smaller id.",
@@ -1462,9 +1462,9 @@ main()
 
 ## What it is
 
-**Tree of thoughts** is a prompting pattern where the model explores **multiple reasoning paths at once**, arranged as a tree. Each node is a partial reasoning state. From any node the model proposes several next "thoughts" — the branches. An evaluator scores how promising each branch is, and only the strongest survive to be expanded further. Weak branches are **pruned** so the search doesn't waste effort on dead ends.
+**Tree of thoughts** is a prompting pattern where the model explores **multiple reasoning paths at once**, arranged as a tree. Each node is a partial reasoning state. From any node the model proposes several next "thoughts", the branches. An evaluator scores how promising each branch is, and only the strongest survive to be expanded further. Weak branches are **pruned** so the search doesn't waste effort on dead ends.
 
-Where chain of thought is depth-first and irreversible (one path, no backtracking), ToT is a deliberate search: it can abandon a bad branch and pour effort into a better one. The width of the search — how many branches you keep at each level — is the **beam width**.
+Where chain of thought is depth-first and irreversible (one path, no backtracking), ToT is a deliberate search: it can abandon a bad branch and pour effort into a better one. The width of the search, how many branches you keep at each level, is the **beam width**.
 
 ## How it works
 
@@ -1483,7 +1483,7 @@ def tree_of_thoughts(root, beam_width, depth):
     return best(frontier)
 \`\`\`
 
-Two knobs control the search. **Branching factor** is how many candidates each node proposes. **Beam width** is how many you keep after scoring. A beam width of 1 collapses ToT back into greedy chain of thought — you always follow the single best-looking branch and can never recover from a wrong turn. Widen the beam and the search can carry a slightly-weaker-now branch that pays off later.
+Two knobs control the search. **Branching factor** is how many candidates each node proposes. **Beam width** is how many you keep after scoring. A beam width of 1 collapses ToT back into greedy chain of thought, you always follow the single best-looking branch and can never recover from a wrong turn. Widen the beam and the search can carry a slightly-weaker-now branch that pays off later.
 
 ## Why it matters
 
@@ -1495,7 +1495,7 @@ ToT shines exactly where a single chain is fragile: puzzles, planning, math with
 
 ## The mental model to keep
 
-**Don't bet everything on the first idea. Sprout several, judge them, keep the best few, and search — reasoning as a pruned tree, not a single rope.**`,
+**Don't bet everything on the first idea. Sprout several, judge them, keep the best few, and search, reasoning as a pruned tree, not a single rope.**`,
       key_terms: [
         { term: "Tree of thoughts", definition: "A pattern that explores multiple reasoning branches as a tree, scoring and pruning to find the best path." },
         { term: "Branch", definition: "One candidate next thought proposed from a reasoning node." },
@@ -1609,7 +1609,7 @@ kept branch: add first score: 7`,
             "Compare the scores: 9 is the largest.",
             "The branch scored 9 survives; the others (4 and 2) are pruned."
           ],
-          output: "The branch scored 9 — beam width 1 keeps only the top one."
+          output: "The branch scored 9, beam width 1 keeps only the top one."
         },
         {
           number: 2, difficulty: "medium",
@@ -1665,7 +1665,7 @@ kept branch: add first score: 7`,
       ],
       challenge_title: "Prune the Reasoning Tree",
       challenge_description: "Do one level of tree-of-thoughts pruning: from a set of scored candidate branches, keep the top B by score and report them.",
-      challenge_story: "Your agent reasons with **tree of thoughts**: from the current node it branches into several candidate next thoughts, a scorer rates each one, and you keep only the most promising few — the **beam** — and prune the rest. This is the single move at the heart of the pattern, exactly what the lesson walks through: branch out, score every candidate, keep the top `B`. Build that one prune step so you can see which branches survive and which dead ends get cut.",
+      challenge_story: "Your agent reasons with **tree of thoughts**: from the current node it branches into several candidate next thoughts, a scorer rates each one, and you keep only the most promising few, the **beam**: and prune the rest. This is the single move at the heart of the pattern, exactly what the lesson walks through: branch out, score every candidate, keep the top `B`. Build that one prune step so you can see which branches survive and which dead ends get cut.",
       challenge_statement: "You're given `n` candidate branches proposed from the current reasoning node. Each branch has an integer id and an integer score from the evaluator.\n\nKeep the `B` highest-scoring branches and prune the rest. If two branches tie on score, prefer the one with the **smaller id**. If `B` is larger than `n`, simply keep all `n` branches.\n\nPrint two lines: the ids of the kept branches in **ascending id order**, space-separated, and the **sum of the kept branches' scores**.",
       challenge_input_format: "The first line has two integers `n B`. Each of the next `n` lines has a branch's id and its score, two space-separated integers.",
       challenge_output_format: "Line 1: the kept branch ids in ascending order, space-separated. Line 2: the sum of the kept branches' scores.",
@@ -1680,7 +1680,7 @@ kept branch: add first score: 7`,
         { input: "4 2\n1 3\n2 7\n3 1\n4 5", output: "2 4\n12", explanation: "Scores are 3, 7, 1, 5. The top 2 by score are branch 2 (7) and branch 4 (5). Kept ids in order: 2 4; their score sum is 7+5 = 12. Branches 1 and 3 are pruned." },
         { input: "3 2\n10 9\n20 9\n30 4", output: "10 20\n18", explanation: "Branches 10 and 20 tie at score 9, beating branch 30 (4). Both are kept (smaller ids win the tie over 30). Sum is 9+9 = 18." },
       ],
-      challenge_notes: "This is one level of the propose-score-prune loop the lesson shows: you do not traverse deeper or accumulate path strength — you simply rank this node's candidates and keep the beam. A beam width of 1 would keep only the single best branch, which is exactly greedy chain of thought. Sort the candidates by score descending (ties by smaller id), slice the first B, then print their ids in ascending order.",
+      challenge_notes: "This is one level of the propose-score-prune loop the lesson shows: you do not traverse deeper or accumulate path strength, you simply rank this node's candidates and keep the beam. A beam width of 1 would keep only the single best branch, which is exactly greedy chain of thought. Sort the candidates by score descending (ties by smaller id), slice the first B, then print their ids in ascending order.",
       challenge_hints: [
         "Read each branch as an (id, score) pair into a list.",
         "Sort with key `(-score, id)` so higher scores come first and ties favor the smaller id, then take the first B.",
@@ -1736,13 +1736,13 @@ main()
       title: "Reflection and Self-Critique",
       concept: "Reflection",
       xp_reward: 10,
-      explanation: `A model writes a function, you ask "are there any bugs in what you just wrote?", and it finds the off-by-one error it created seconds ago. Nothing about the model changed. You simply gave it a second pass — a chance to read its own work with fresh eyes and fix it. That second pass is **reflection**, and it is one of the cheapest quality upgrades you can bolt onto any prompt.
+      explanation: `A model writes a function, you ask "are there any bugs in what you just wrote?", and it finds the off-by-one error it created seconds ago. Nothing about the model changed. You simply gave it a second pass, a chance to read its own work with fresh eyes and fix it. That second pass is **reflection**, and it is one of the cheapest quality upgrades you can bolt onto any prompt.
 
 ## What it is
 
 **Reflection** (or **self-critique**) is a pattern where the model produces a first answer, then critiques that answer against some standard, and finally revises it. Generation and evaluation become separate steps instead of being crammed into one shot. The model wears two hats in sequence: first the **author**, then the **critic**, then the author again with the critique in hand.
 
-It works for the same reason chain of thought works. A single forward pass that must be correct on the first try is fragile. Splitting it into draft, critique, and revise gives the model explicit room to catch what the draft missed — much like a writer who always edits before publishing.
+It works for the same reason chain of thought works. A single forward pass that must be correct on the first try is fragile. Splitting it into draft, critique, and revise gives the model explicit room to catch what the draft missed, much like a writer who always edits before publishing.
 
 ## How it works
 
@@ -1754,22 +1754,22 @@ critique = model(f"Find every flaw in this:\\n{draft}")  # 2. critic reviews
 final = model(f"Rewrite to fix these issues:\\n{critique}\\n{draft}")  # 3. revise
 \`\`\`
 
-The critique step is doing the real work. A vague "make it better" yields little; a sharp critique grounded in concrete criteria — "check each constraint, list every violation" — produces fixable, specific feedback. You can run the loop once or iterate until the critic finds nothing left to fix or a step budget runs out.
+The critique step is doing the real work. A vague "make it better" yields little; a sharp critique grounded in concrete criteria, "check each constraint, list every violation", produces fixable, specific feedback. You can run the loop once or iterate until the critic finds nothing left to fix or a step budget runs out.
 
-A crucial detail: the critic should judge against an **external standard** where possible — a spec, a checklist, test results, a tool's output. Asking a model to grade itself with no anchor invites it to rubber-stamp its own work.
+A crucial detail: the critic should judge against an **external standard** where possible, a spec, a checklist, test results, a tool's output. Asking a model to grade itself with no anchor invites it to rubber-stamp its own work.
 
 ## Why it matters
 
 Reflection catches a whole class of errors that one-shot prompting ships straight to the user.
 
-- **It fixes self-made mistakes.** Constraint violations, skipped requirements, sloppy formatting — the critic pass surfaces them before they reach anyone.
+- **It fixes self-made mistakes.** Constraint violations, skipped requirements, sloppy formatting, the critic pass surfaces them before they reach anyone.
 - **It costs extra calls.** Draft plus critique plus revise is at least three passes, so reserve it for answers where correctness matters more than latency.
 - **It has a ceiling.** The model can only catch flaws it is capable of recognizing. If it didn't know a fact was wrong when it wrote it, it usually won't catch it on review. Reflection sharpens, it does not add knowledge.
 - **Anchored critique beats vanity critique.** Grounding the critic in tests, specs, or rules makes the difference between real fixes and the model congratulating itself.
 
 ## The mental model to keep
 
-**Never ship the first draft. Make the model put on the critic's hat, judge its own work against a real standard, then revise — author, critic, author again.**`,
+**Never ship the first draft. Make the model put on the critic's hat, judge its own work against a real standard, then revise, author, critic, author again.**`,
       key_terms: [
         { term: "Reflection", definition: "A pattern where the model drafts an answer, critiques it, and revises based on the critique." },
         { term: "Self-critique", definition: "The step where the model evaluates its own draft to find flaws to fix." },
@@ -1937,8 +1937,8 @@ fixes applied: 2`,
       ],
       challenge_title: "The Self-Critique Pass",
       challenge_description: "Run a model's draft answer through a two-rule critique-and-revise pass and report the fixes applied.",
-      challenge_story: "Your assistant drafts answers fast but sloppily, so you bolt on a **reflection** step before anything ships. The critic enforces two concrete rules against the draft, which is a list of words: first, **no banned words** are allowed; second, the answer must be at most `L` words long. The revise step applies the critique in order — strip every banned word, then if the result is still too long, trim words from the **end** until it fits. Each individual removal counts as one fix. Build the critique-and-revise pass so you can log how much cleanup each draft needed.",
-      challenge_statement: "You're given a max length `L`, a set of banned words, and a draft answer (a list of words). Apply the self-critique pass in two ordered stages:\n\n1. **Strip banned words** — remove every word that appears in the banned set. Each removed word counts as one fix.\n2. **Trim to length** — if more than `L` words remain, remove words from the **end** one at a time until exactly `L` remain. Each removal counts as one fix.\n\nPrint the total number of fixes applied on the first line, then the final revised answer (words space-separated) on the second line, or `-` if the answer is empty.",
+      challenge_story: "Your assistant drafts answers fast but sloppily, so you bolt on a **reflection** step before anything ships. The critic enforces two concrete rules against the draft, which is a list of words: first, **no banned words** are allowed; second, the answer must be at most `L` words long. The revise step applies the critique in order, strip every banned word, then if the result is still too long, trim words from the **end** until it fits. Each individual removal counts as one fix. Build the critique-and-revise pass so you can log how much cleanup each draft needed.",
+      challenge_statement: "You're given a max length `L`, a set of banned words, and a draft answer (a list of words). Apply the self-critique pass in two ordered stages:\n\n1. **Strip banned words**: remove every word that appears in the banned set. Each removed word counts as one fix.\n2. **Trim to length**: if more than `L` words remain, remove words from the **end** one at a time until exactly `L` remain. Each removal counts as one fix.\n\nPrint the total number of fixes applied on the first line, then the final revised answer (words space-separated) on the second line, or `-` if the answer is empty.",
       challenge_input_format: "Line 1: integer `L`. Line 2: integer `b`, the number of banned words. Line 3: the `b` banned words space-separated (this line is present but empty when `b` is 0). Line 4: the draft answer as space-separated words.",
       challenge_output_format: "Line 1: the total number of fixes applied. Line 2: the revised answer words space-separated, or `-` if empty.",
       challenge_constraints: [
@@ -1951,7 +1951,7 @@ fixes applied: 2`,
         { input: "3\n2\nbad ugh\nthe bad cat ugh sat happily", output: "3\nthe cat sat", explanation: "Strip banned 'bad' and 'ugh' (2 fixes) leaving [the, cat, sat, happily]. That's 4 words, over L=3, so trim 'happily' from the end (1 fix). Total 3 fixes, final 'the cat sat'." },
         { input: "5\n0\n\nhello there friend", output: "0\nhello there friend", explanation: "No banned words and only 3 words (within L=5), so no fixes are needed and the draft passes unchanged." },
       ],
-      challenge_notes: "The order matters: stripping banned words first can drop the length below `L` so no trimming is needed. This mirrors real reflection — the critique enumerates concrete violations and the revise step applies them in a defined order. Reflection only fixes flaws the critic can detect; here the rules are explicit, so every violation is caught.",
+      challenge_notes: "The order matters: stripping banned words first can drop the length below `L` so no trimming is needed. This mirrors real reflection, the critique enumerates concrete violations and the revise step applies them in a defined order. Reflection only fixes flaws the critic can detect; here the rules are explicit, so every violation is caught.",
       challenge_hints: [
         "Stage 1: build a new list keeping only words not in the banned set; the count dropped is original length minus kept length.",
         "Stage 2: while the kept list is longer than L, pop from the end and increment the fix count.",
@@ -2013,13 +2013,13 @@ main()
       title: "Meta-Prompting",
       concept: "MetaPrompt",
       xp_reward: 10,
-      explanation: `You've spent this module hand-crafting prompts: adding triggers, balancing examples, wiring chains. Now flip the script. What if you let a model write the prompt for you? Hand it your goal and a few examples, and ask it to produce the best prompt for the job. That is **meta-prompting** — using a model to write or optimize prompts for another task — and it turns prompt engineering itself into something you can automate.
+      explanation: `You've spent this module hand-crafting prompts: adding triggers, balancing examples, wiring chains. Now flip the script. What if you let a model write the prompt for you? Hand it your goal and a few examples, and ask it to produce the best prompt for the job. That is **meta-prompting**: using a model to write or optimize prompts for another task, and it turns prompt engineering itself into something you can automate.
 
 ## What it is
 
 **Meta-prompting** is using one model call to generate or improve the prompt that a second call will actually run. The first call's *output* is a prompt; the second call *consumes* that prompt to do the real work. You stop writing the instructions by hand and instead describe what you want, letting the model draft the instructions.
 
-The idea leans on a strength models have: they have read enormous numbers of prompts and know what well-structured instructions look like. Often a model can write a clearer, better-organized prompt than a human typing in a hurry — especially for formatting, edge-case handling, and explicit step-by-step structure.
+The idea leans on a strength models have: they have read enormous numbers of prompts and know what well-structured instructions look like. Often a model can write a clearer, better-organized prompt than a human typing in a hurry, especially for formatting, edge-case handling, and explicit step-by-step structure.
 
 ## How it works
 
@@ -2035,7 +2035,7 @@ generated_prompt = model(meta)     # the model writes the task prompt
 result = model(generated_prompt + "\\n" + real_email)  # then we run it
 \`\`\`
 
-This unlocks **automatic prompt optimization**: generate several candidate prompts, run each against a small set of labeled examples, score how well each performs, and keep the winner. Prompt engineering becomes a search — propose candidates, evaluate against examples, select the best. It is the same propose-evaluate-select loop you saw in tree of thoughts and self-consistency, now applied to the prompts themselves.
+This unlocks **automatic prompt optimization**: generate several candidate prompts, run each against a small set of labeled examples, score how well each performs, and keep the winner. Prompt engineering becomes a search, propose candidates, evaluate against examples, select the best. It is the same propose-evaluate-select loop you saw in tree of thoughts and self-consistency, now applied to the prompts themselves.
 
 ## Why it matters
 
@@ -2048,7 +2048,7 @@ Meta-prompting scales prompt quality past what hand-tuning can reach.
 
 ## The mental model to keep
 
-**Stop hand-writing every prompt. Describe the goal, let a model draft candidate prompts, measure them against real examples, and keep the winner — prompt engineering as a measurable search.**`,
+**Stop hand-writing every prompt. Describe the goal, let a model draft candidate prompts, measure them against real examples, and keep the winner, prompt engineering as a measurable search.**`,
       key_terms: [
         { term: "Meta-prompting", definition: "Using a model to generate or improve the prompt that another model call will run." },
         { term: "Generated prompt", definition: "The prompt produced as the output of a meta-prompt, then used for the real task." },
@@ -2162,7 +2162,7 @@ winner: promptB total: 19`,
             "Compare the scores: 19 is the largest.",
             "The prompt scoring 19 is kept and used for the real task; the others are discarded."
           ],
-          output: "The prompt scoring 19 — optimization keeps the highest-scoring candidate."
+          output: "The prompt scoring 19, optimization keeps the highest-scoring candidate."
         },
         {
           number: 2, difficulty: "medium",
@@ -2233,7 +2233,7 @@ winner: promptB total: 19`,
         { input: "3 3\npA 20 5 5 5\npB 10 9 9 1\npC 15 6 6 7", output: "pB 19", explanation: "Totals: pA=15, pB=19, pC=19. pB and pC tie at 19, so length breaks it: pB (10) is shorter than pC (15). pB wins with total 19." },
         { input: "2 1\nzeta 10 8\nalpha 10 8", output: "alpha 8", explanation: "Both total 8 and both length 10, so the lexicographically smaller id 'alpha' wins." },
       ],
-      challenge_notes: "This is automatic prompt optimization in miniature: propose candidates, evaluate each against the same examples, and select the best by an explicit objective. The tie-breakers matter because raw accuracy is rarely the only thing you care about — a shorter prompt costs less on every call, so it's the better pick when quality is equal.",
+      challenge_notes: "This is automatic prompt optimization in miniature: propose candidates, evaluate each against the same examples, and select the best by an explicit objective. The tie-breakers matter because raw accuracy is rarely the only thing you care about, a shorter prompt costs less on every call, so it's the better pick when quality is equal.",
       challenge_hints: [
         "For each candidate compute the total as the sum of its m scores.",
         "Build a comparison key of (-total, length, id) so the smallest key under normal tuple ordering is the winner.",

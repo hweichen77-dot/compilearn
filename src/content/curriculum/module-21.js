@@ -19,20 +19,20 @@ export default {
       title: "How Pricing Works",
       concept: "Pricing",
       xp_reward: 10,
-      explanation: `You send a model a one-line question and a dense three-page answer comes back. When the bill arrives, those three pages cost far more than your one line — and not just because they're longer. Once you see how LLM pricing actually works, you stop being surprised by your invoice.
+      explanation: `You send a model a one-line question and a dense three-page answer comes back. When the bill arrives, those three pages cost far more than your one line, and not only because they are longer. Once you see how LLM pricing works, the invoice stops surprising you.
 
 ## What it is
 
-An LLM API doesn't charge per request or per minute. It charges **per token** — the little chunks of text the model reads and writes. Every call has two token counts: the **input tokens** (your prompt, plus any history) and the **output tokens** (the model's reply). They are priced *separately*, and that split is the whole game.
+An LLM API doesn't charge per request or per minute. It charges per token, the small chunks of text the model reads and writes. Every call has two token counts: the input tokens (your prompt, plus any history) and the output tokens (the model's reply). They are priced separately, and that split drives the cost.
 
-Prices are quoted **per million tokens**. You'll see a model listed like "$3 / 1M input, $15 / 1M output." Don't let the "million" scare you — most single calls use a few hundred to a few thousand tokens, so a call costs a fraction of a cent. The per-million number is just a tidy way to write a very small per-token price.
+Prices are quoted per million tokens. You'll see a model listed like "$3 / 1M input, $15 / 1M output." The word "million" can look alarming, but most single calls use a few hundred to a few thousand tokens, so a call costs a fraction of a cent. The per-million number is a compact way to write a very small per-token price.
 
 ## How it works
 
 Two facts drive every bill:
 
-1. **Input and output are billed at different rates.** The same provider that charges \\$3 per million input tokens might charge \\$15 per million output tokens. Reading your prompt is cheap; generating new text is expensive.
-2. **Output is usually several times more expensive than input.** A 3x to 5x gap is common. The model works harder to *produce* tokens than to *read* them, and pricing reflects that.
+1. Input and output are billed at different rates. The same provider that charges \\$3 per million input tokens might charge \\$15 per million output tokens. Reading your prompt is cheap; generating new text is expensive.
+2. Output is usually several times more expensive than input. A 3x to 5x gap is common. The model works harder to produce tokens than to read them, and pricing reflects that.
 
 To find a call's cost, compute each side and add them:
 
@@ -50,11 +50,11 @@ print(f"total: \${total:.6f}")
 
 ## Why it matters
 
-Because output is the pricey side, a chatty model that writes long answers can cost more than a model with a longer, denser prompt. If you want to control spend, the first lever is almost always *the length of the answer*, not the length of the question.
+Because output is the pricey side, a model that writes long answers can cost more than one with a longer, denser prompt. If you want to control spend, the first lever is usually the length of the answer, not the length of the question.
 
 ## The mental model to keep
 
-**Two meters run on every call: one cheap (input), one expensive (output).** Watch the expensive meter first.`,
+Two meters run on every call: one cheap for input, one expensive for output. Watch the expensive meter first.`,
       key_terms: [
         { term: "Input tokens", definition: "The tokens in your prompt (and any history) that the model reads. Usually the cheaper side." },
         { term: "Output tokens", definition: "The tokens the model generates in its reply. Usually several times more expensive than input." },
@@ -226,10 +226,10 @@ total: $0.010500`,
       ],
       challenge_difficulty: "beginner",
       challenge_title: "The Billing Meter",
-      challenge_description: "Bill a batch of API calls per token, then flag the single most expensive call — the exact report your finance team needs before the first invoice lands.",
-      challenge_story: "Your AI feature went live last night and the logs are already filling up. Finance wants two numbers before the billing cycle closes: **what the whole batch cost**, and **which single call was the most expensive** so the team can investigate runaway prompts. Each log line records a call's id, its input tokens (the prompt you sent) and its output tokens (the model's reply). Input and output are billed at **different per-million rates**, and output is the pricey one. Build the meter that turns the raw log into those two numbers — exactly, to the cent and beyond.",
-      challenge_statement: "You are given the input and output **per-million** prices and a batch of logged API calls. For each call, its cost in dollars is:\n\n```\ncost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000\n```\n\nDo two things:\n\n1. Print the **total cost of the whole batch**, formatted to exactly **6 decimal places**, prefixed with `$`.\n2. Print the **id of the single most expensive call**. If two calls tie on cost, print the **smaller id**.\n\nUse exact arithmetic — the prices and token counts are integers, so the cost numerator is an integer; divide only at the end to avoid floating-point drift.",
-      challenge_input_format: "The first line has three integers: `n input_price output_price` — the number of calls and the two per-million prices (in whole dollars).\n\nEach of the next `n` lines has three integers: `id input_tokens output_tokens`.",
+      challenge_description: "Bill a batch of API calls per token, then flag the single most expensive call, the exact report your finance team needs before the first invoice lands.",
+      challenge_story: "Your AI feature went live last night and the logs are already filling up. Finance wants two numbers before the billing cycle closes: what the whole batch cost, and which single call was the most expensive, so the team can investigate runaway prompts. Each log line records a call's id, its input tokens (the prompt you sent) and its output tokens (the model's reply). Input and output are billed at different per-million rates, and output is the pricey one. Build the meter that turns the raw log into those two numbers, exact to the cent and beyond.",
+      challenge_statement: "You are given the input and output **per-million** prices and a batch of logged API calls. For each call, its cost in dollars is:\n\n```\ncost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000\n```\n\nDo two things:\n\n1. Print the **total cost of the whole batch**, formatted to exactly **6 decimal places**, prefixed with `$`.\n2. Print the **id of the single most expensive call**. If two calls tie on cost, print the **smaller id**.\n\nUse exact arithmetic: the prices and token counts are integers, so the cost numerator is an integer; divide only at the end to avoid floating-point drift.",
+      challenge_input_format: "The first line has three integers: `n input_price output_price`, the number of calls and the two per-million prices (in whole dollars).\n\nEach of the next `n` lines has three integers: `id input_tokens output_tokens`.",
       challenge_output_format: "Two lines. Line 1: `$` followed by the total batch cost to exactly 6 decimal places. Line 2: the id of the most expensive call (smaller id wins ties).",
       challenge_constraints: [
         "1 ≤ n ≤ 100000",
@@ -242,7 +242,7 @@ total: $0.010500`,
         { input: "3 3 15\n1 1500 800\n2 500 2000\n3 1000 100", output: "$0.052500\n2", explanation: "Costs (in numerator form): call 1 = 1500·3+800·15 = 16500, call 2 = 31500, call 3 = 4500. Total 52500 → $0.052500. Call 2 is dearest." },
         { input: "2 5 10\n1 100 100\n2 100 100", output: "$0.003000\n1", explanation: "Both calls cost the same (1500 each), so the tie breaks to the smaller id, 1." },
       ],
-      challenge_notes: "Output tokens cost more than input tokens — in real apps the reply, not the prompt, usually dominates the bill. Because every price and token count is an integer, the cost numerator `input_tokens*input_price + output_tokens*output_price` is an exact integer; sum those, then divide by 1,000,000 once at the end so rounding can't drift over 100k calls.",
+      challenge_notes: "Output tokens cost more than input tokens, so in real apps the reply, not the prompt, usually dominates the bill. Because every price and token count is an integer, the cost numerator `input_tokens*input_price + output_tokens*output_price` is an exact integer; sum those, then divide by 1,000,000 once at the end so rounding can't drift over 100k calls.",
       challenge_hints: [
         "Keep a running integer sum of each call's numerator (input·in_price + output·out_price); divide by 1,000,000 only when you print.",
         "Track the best (largest) numerator seen and its id; on a tie, keep the row with the smaller id.",
@@ -315,7 +315,7 @@ main()
 
 Cost estimation is a two-step trick. First, **estimate the token count** from the text you have. Second, **plug those tokens into the price** to get an expected dollar figure. Do this before launch and the invoice never surprises you.
 
-The token estimate uses the rough rule from the basics: **about 1 token per 4 characters** of English. It isn't exact — the real tokenizer is — but it's close enough to budget with. Count characters, divide by four, round up.
+The token estimate uses the rough rule from the basics: **about 1 token per 4 characters** of English. It isn't exact, the real tokenizer is, but it's close enough to budget with. Count characters, divide by four, round up.
 
 ## How it works
 
@@ -335,11 +335,11 @@ cost = (est_input_tokens / 1_000_000 * input_price
 print(f"estimated cost: \${cost:.6f}")
 \`\`\`
 
-For output you usually can't measure ahead of time, so you **assume a budget** — "I'll cap the answer at 200 tokens" — and price against that. That assumption is also a spending limit you can later enforce.
+For output you usually can't measure ahead of time, so you **assume a budget**: "I'll cap the answer at 200 tokens", and price against that. That assumption is also a spending limit you can later enforce.
 
 ## Why it matters
 
-The real power is multiplying by scale. One call at \\$0.0002 sounds free. The same call **100,000 times a day** is \\$20 a day, \\$600 a month. Estimating per-call cost and multiplying by expected volume turns a vague worry into a number you can plan around — and a number you can compare against alternatives before you commit.
+The real power is multiplying by scale. One call at \\$0.0002 sounds free. The same call **100,000 times a day** is \\$20 a day, \\$600 a month. Estimating per-call cost and multiplying by expected volume turns a vague worry into a number you can plan around, and a number you can compare against alternatives before you commit.
 
 ## The mental model to keep
 
@@ -445,7 +445,7 @@ estimated cost: $0.001242`,
         {
           title: "estimating a call you haven't made yet",
           steps: [
-            { label: "Count characters", detail: "Measure the text you already have — your prompt string.", code: 'len("Summarize this.")  # = 15 characters' },
+            { label: "Count characters", detail: "Measure the text you already have, your prompt string.", code: 'len("Summarize this.")  # = 15 characters' },
             { label: "Divide by four, round up", detail: "The rough rule: about 1 token per 4 characters. Round up so a partial token counts.", code: "math.ceil(15 / 4)  # = 4 input tokens" },
             { label: "Add an output budget", detail: "You can't measure the reply yet, so assume a cap and treat it as the output token count.", code: "est_output_tokens = 80  # your chosen cap" },
             { label: "Turn tokens into dollars", detail: "Apply the input and output rates per million and add. That's your expected cost.", code: "cost = 4/1M*3 + 80/1M*15  # ~= $0.001212" }
@@ -507,7 +507,7 @@ estimated cost: $0.001242`,
       reflections: [
         {
           prompt: "In your own words: why is multiplying a per-call estimate by expected volume the most important step in budgeting an AI feature?",
-          sampleAnswer: "A single call almost always looks negligible — a fraction of a cent — so judging cost per call hides the real risk. The danger lives in volume: the same tiny cost repeated tens of thousands of times a day becomes hundreds or thousands of dollars a month. Multiplying by expected volume converts a number that feels like nothing into a budget figure you can actually plan and defend."
+          sampleAnswer: "A single call almost always looks negligible, a fraction of a cent, so judging cost per call hides the real risk. The danger lives in volume: the same tiny cost repeated tens of thousands of times a day becomes hundreds or thousands of dollars a month. Multiplying by expected volume converts a number that feels like nothing into a budget figure you can actually plan and defend."
         }
       ],
       hints: [
@@ -517,10 +517,10 @@ estimated cost: $0.001242`,
       ],
       challenge_difficulty: "beginner",
       challenge_title: "The Pre-Flight Estimator",
-      challenge_description: "Estimate a batch of calls before you ship — turn each prompt's character count into tokens, price the run with plain float math, and count how many calls would blow a per-call budget.",
-      challenge_story: "Before your team ships a new AI endpoint, the rule is simple: **estimate the bill first**. You don't have the model's real tokenizer in your planning script, so you use the standard back-of-envelope rule — about **4 characters per token** — and round partial tokens **up**. An upstream step already measured each planned prompt, so every call arrives as two clean numbers: the prompt's **character count** and the **output token cap** you set. Product also handed you a **per-call budget**: any single call estimated to cost *more* than the budget is a red flag worth reviewing before launch. Build the estimator that prices the whole batch and counts the red flags.",
+      challenge_description: "Estimate a batch of calls before you ship, turn each prompt's character count into tokens, price the run with plain float math, and count how many calls would blow a per-call budget.",
+      challenge_story: "Before your team ships a new AI endpoint, the rule is simple: **estimate the bill first**. You don't have the model's real tokenizer in your planning script, so you use the standard back-of-envelope rule, about **4 characters per token**: and round partial tokens **up**. An upstream step already measured each planned prompt, so every call arrives as two clean numbers: the prompt's **character count** and the **output token cap** you set. Product also handed you a **per-call budget**: any single call estimated to cost *more* than the budget is a red flag worth reviewing before launch. Build the estimator that prices the whole batch and counts the red flags.",
       challenge_statement: "You are given the per-million prices, a per-call budget, and a list of planned calls. For each call you get two integers: `chars` (the prompt's character count) and `out_cap` (the reply token cap). For each call:\n\n1. Estimate its **input tokens** as `ceil(chars / 4)` (round partial tokens up).\n2. Its **output tokens** are exactly `out_cap`.\n3. Its estimated cost is `(input_tokens * input_price + out_cap * output_price) / 1_000_000` dollars.\n\nDo two things:\n\n1. Print the **total estimated cost** of the batch, rounded to **6 decimal places** with `round(total, 6)` and shown via an f-string like `f\"${total:.6f}\"`.\n2. Print how many calls have an estimated cost **strictly greater than** the budget.",
-      challenge_input_format: "The first line has three integers: `n input_price output_price`.\n\nThe second line is the per-call budget as a decimal dollar amount (e.g. `0.005000`).\n\nEach of the next `n` lines has two integers: `chars out_cap` — the prompt's character count and the output token cap.",
+      challenge_input_format: "The first line has three integers: `n input_price output_price`.\n\nThe second line is the per-call budget as a decimal dollar amount (e.g. `0.005000`).\n\nEach of the next `n` lines has two integers: `chars out_cap`, the prompt's character count and the output token cap.",
       challenge_output_format: "Two lines. Line 1: `$` followed by the total estimated cost to exactly 6 decimal places. Line 2: the count of calls strictly over budget.",
       challenge_constraints: [
         "1 ≤ n ≤ 100000",
@@ -533,10 +533,10 @@ estimated cost: $0.001242`,
         { input: "3 4 16\n0.002000\n40 100\n400 50\n8 200", output: "$0.006048\n1", explanation: "chars 40,400,8 → ceil/4 = 10,100,2 input tokens. Costs: (10·4+100·16)/1e6 = 0.001640, (100·4+50·16)/1e6 = 0.001200, (2·4+200·16)/1e6 = 0.003208. Total = 0.006048 → $0.006048. Only the third call (0.003208) exceeds the $0.002 budget, so the count is 1." },
         { input: "2 4 0\n0.000000\n4 0\n8 0", output: "$0.000012\n2", explanation: "1 and 2 input tokens, no output. Costs 4/1e6 = 0.000004 and 8/1e6 = 0.000008 → total 0.000012. Both exceed a $0 budget." },
       ],
-      challenge_notes: "The 4-chars-per-token rule is a planning heuristic, not the real tokenizer — but it's accurate enough to catch budget blowups before you spend a cent. Rounding partial tokens **up** with `math.ceil` is the safe direction for an estimate: you'd rather over-predict the bill than be surprised by it. Plain float math is fine here; round the final total to 6 decimals for a clean dollar figure.",
+      challenge_notes: "The 4-chars-per-token rule is a planning heuristic, not the real tokenizer, but it's accurate enough to catch budget blowups before you spend a cent. Rounding partial tokens **up** with `math.ceil` is the safe direction for an estimate: you'd rather over-predict the bill than be surprised by it. Plain float math is fine here; round the final total to 6 decimals for a clean dollar figure.",
       challenge_hints: [
         "Read the budget as a float so you can compare each call's cost against it.",
-        "Each line is already two integers — `chars, out_cap = map(int, line.split())` — no text to split off.",
+        "Each line is already two integers, `chars, out_cap = map(int, line.split())`, no text to split off.",
         "`math.ceil(chars / 4)` gives the estimated input tokens; compare each call's cost with `>` (strictly greater) against the budget, and print the total with `f\"${round(total, 6):.6f}\"`.",
       ],
       challenge_starter_code: `import sys
@@ -590,18 +590,18 @@ main()
       title: "Where the Money Goes",
       concept: "Cost Drivers",
       xp_reward: 10,
-      explanation: `A team launches a chatbot, watches the first few messages cost almost nothing, and relaxes. Three weeks later the bill is ten times what they modeled. Nothing broke. They just didn't see where the money actually goes in a real conversation — and it's almost never where beginners expect.
+      explanation: `A team launches a chatbot, watches the first few messages cost almost nothing, and relaxes. Three weeks later the bill is ten times what they modeled. Nothing broke. They just didn't see where the money actually goes in a real conversation, and it's almost never where beginners expect.
 
 ## What it is
 
 Two things dominate a real LLM bill, and neither is the obvious "the prompt is long."
 
 1. **Long outputs.** Output tokens cost several times more than input, so an answer that rambles is the single biggest controllable cost on any one call.
-2. **Chat history that compounds.** This is the sneaky one. A model is stateless — it remembers nothing between calls. To fake a conversation, the app **resends the entire transcript every single turn**. Turn 10 doesn't just send your latest message; it re-sends turns 1 through 9 as input, plus the new message.
+2. **Chat history that compounds.** This is the sneaky one. A model is stateless, it remembers nothing between calls. To fake a conversation, the app **resends the entire transcript every single turn**. Turn 10 doesn't just send your latest message; it re-sends turns 1 through 9 as input, plus the new message.
 
 ## How it works
 
-That resending makes input cost grow with every turn. If each turn adds about the same number of tokens, the running input total climbs like 1, then 1+2, then 1+2+3 — the transcript gets re-billed again and again:
+That resending makes input cost grow with every turn. If each turn adds about the same number of tokens, the running input total climbs like 1, then 1+2, then 1+2+3, the transcript gets re-billed again and again:
 
 \`\`\`python
 tokens_per_turn = 100  # rough size of each message
@@ -618,7 +618,7 @@ By turn 20 of a long chat, you might be paying to resend nineteen earlier messag
 
 ## Why it matters
 
-This explains the two classic bill shocks: a feature that lets the model write long answers, and a chat product where long sessions cost far more than short ones. Both are fixable — but only once you can name the culprit. Spotting *where* the money goes is the prerequisite for cutting it, which is the next lesson.
+This explains the two classic bill shocks: a feature that lets the model write long answers, and a chat product where long sessions cost far more than short ones. Both are fixable, but only once you can name the culprit. Spotting *where* the money goes is the prerequisite for cutting it, which is the next lesson.
 
 ## The mental model to keep
 
@@ -626,7 +626,7 @@ This explains the two classic bill shocks: a feature that lets the model write l
       key_terms: [
         { term: "Stateless model", definition: "The model keeps no memory between calls, so the app must resend prior context every turn." },
         { term: "Transcript resend", definition: "Sending the whole conversation history as input on every new turn, which compounds input cost." },
-        { term: "Cost driver", definition: "The part of a workload that dominates the bill — here, long outputs and growing history." }
+        { term: "Cost driver", definition: "The part of a workload that dominates the bill, here, long outputs and growing history." }
       ],
       callouts: [
         { type: "insight", title: "History is billed over and over", content: "Because the model is stateless, the app resends the full transcript every turn. Turn 10 pays to re-read turns 1-9. Long chats get expensive even if each message is short.", position: "before" },
@@ -747,9 +747,9 @@ cumulative input tokens: 1500`,
             "Turn N resends N messages, so input per turn is 100, 200, ..., 1000 tokens.",
             "Cumulative input = 100 x (1 + 2 + ... + 10).",
             "The sum 1+2+...+10 = 55.",
-            "So cumulative input = 100 x 55 = 5,500 tokens — versus only 1,000 tokens actually typed."
+            "So cumulative input = 100 x 55 = 5,500 tokens, versus only 1,000 tokens actually typed."
           ],
-          output: "5,500 cumulative input tokens (vs 1,000 typed) — history is re-billed ~5.5x."
+          output: "5,500 cumulative input tokens (vs 1,000 typed), history is re-billed ~5.5x."
         }
       ],
       comparison_tables: [
@@ -784,7 +784,7 @@ cumulative input tokens: 1500`,
       reflections: [
         {
           prompt: "In your own words: why can a chat product cost far more in long sessions than short ones, even when every individual message is small?",
-          sampleAnswer: "The model is stateless, so to maintain a conversation the app resends the entire transcript as input on every turn. Each new turn pays again for all the earlier messages, so even tiny messages get re-billed many times as the session grows. A long session quietly multiplies input cost through repetition, while each new answer also adds high-priced output on top — so length, not message size, is what blows up the bill."
+          sampleAnswer: "The model is stateless, so to maintain a conversation the app resends the entire transcript as input on every turn. Each new turn pays again for all the earlier messages, so even tiny messages get re-billed many times as the session grows. A long session quietly multiplies input cost through repetition, while each new answer also adds high-priced output on top, so length, not message size, is what blows up the bill."
         }
       ],
       hints: [
@@ -794,10 +794,10 @@ cumulative input tokens: 1500`,
       ],
       challenge_difficulty: "intermediate",
       challenge_title: "The Stateless Transcript",
-      challenge_description: "Replay a real chat session turn by turn, billing the whole transcript that gets resent every turn — then find the turn where the input bill peaked.",
-      challenge_story: "The model is **stateless**: it remembers nothing between turns, so your chat app resends the **entire transcript** as input on every single turn to keep the conversation coherent. That means early messages get re-billed again and again as the session grows — the quiet way long chats blow up a budget. You're profiling a real session for the team. Each turn has a user message of some size and a model reply of some size, and there's a fixed **system prompt** prepended to the input every turn. Walk the session, total the input tokens billed across all turns, and pinpoint the turn where a single request's input was largest.",
+      challenge_description: "Replay a real chat session turn by turn, billing the whole transcript that gets resent every turn, then find the turn where the input bill peaked.",
+      challenge_story: "The model is **stateless**: it remembers nothing between turns, so your chat app resends the **entire transcript** as input on every single turn to keep the conversation coherent. That means early messages get re-billed again and again as the session grows, the quiet way long chats blow up a budget. You're profiling a real session for the team. Each turn has a user message of some size and a model reply of some size, and there's a fixed **system prompt** prepended to the input every turn. Walk the session, total the input tokens billed across all turns, and pinpoint the turn where a single request's input was largest.",
       challenge_statement: "A session runs `t` turns. A fixed **system prompt** of `s` tokens is part of the input on every turn. On turn `k` (1-indexed), the input sent to the model is:\n\n```\nsystem prompt  +  all user messages from turns 1..k  +  all model replies from turns 1..k-1\n```\n\n(The current turn's user message is included; that turn's reply hasn't been generated yet, so it isn't.)\n\nDo two things:\n\n1. Print the **cumulative input tokens** billed across all `t` turns (the sum of each turn's input size).\n2. Print the **turn number** whose input was largest. If two turns tie, print the **earlier** turn.",
-      challenge_input_format: "The first line has two integers: `t s` — the number of turns and the system-prompt token count.\n\nEach of the next `t` lines has two integers: `user_tokens reply_tokens` for that turn, in order.",
+      challenge_input_format: "The first line has two integers: `t s`, the number of turns and the system-prompt token count.\n\nEach of the next `t` lines has two integers: `user_tokens reply_tokens` for that turn, in order.",
       challenge_output_format: "Two lines. Line 1: the cumulative input tokens billed over all turns. Line 2: the turn number with the largest single-turn input (earliest wins ties).",
       challenge_constraints: [
         "1 ≤ t ≤ 100000",
@@ -809,7 +809,7 @@ cumulative input tokens: 1500`,
         { input: "3 20\n10 30\n15 25\n5 40", output: "210\n3", explanation: "Turn 1: 20+10 = 30. Turn 2: 20+(10+15)+30 = 75. Turn 3: 20+(10+15+5)+(30+25) = 105. Cumulative 30+75+105 = 210. The input grows every turn, so turn 3 is the peak." },
         { input: "2 100\n10 10\n10 10", output: "240\n2", explanation: "Turn 1: 100+10 = 110. Turn 2: 100+20+10 = 130. Total 240; turn 2 carries the heavier transcript." },
       ],
-      challenge_notes: "Because the input is monotonically growing in this model, the last turn is usually the peak — but the explicit peak-finding makes the cost of a long session concrete. This is exactly why **trimming or summarizing history** is the first cost lever teams reach for: every token you stop resending is re-saved on every future turn.",
+      challenge_notes: "Because the input is monotonically growing in this model, the last turn is usually the peak, but the explicit peak-finding makes the cost of a long session concrete. This is exactly why **trimming or summarizing history** is the first cost lever teams reach for: every token you stop resending is re-saved on every future turn.",
       challenge_hints: [
         "Keep a running sum of user tokens seen and a running sum of replies seen; the input on turn k is `s + running_user + running_reply` computed *before* you add the current reply.",
         "Add the current turn's user tokens to the running user sum first, compute the input, then add that turn's reply to the running reply sum for next turn.",
@@ -874,7 +874,7 @@ main()
       title: "Cutting Costs",
       concept: "Optimization",
       xp_reward: 10,
-      explanation: `You've found where the money goes: long outputs and a transcript that gets re-billed every turn. Now the satisfying part — there are a handful of simple levers that can quietly cut a bill by half or more, without making the product worse. Most teams reach for an expensive model when a few of these would have done it.
+      explanation: `You've found where the money goes: long outputs and a transcript that gets re-billed every turn. Now the satisfying part, there are a handful of simple levers that can quietly cut a bill by half or more, without making the product worse. Most teams reach for an expensive model when a few of these would have done it.
 
 ## What it is
 
@@ -883,7 +883,7 @@ Four practical levers, roughly in order of how often they help:
 1. **Trim or summarize history.** Don't resend the entire transcript forever. Keep the last few turns, or replace old turns with a short summary. This directly attacks the compounding-input problem from the last lesson.
 2. **Cap max output.** Set a limit on how many tokens the reply can use. Since output is the expensive side, a sensible cap is the highest-leverage single setting.
 3. **Use prompt caching.** If the same big chunk (a long system prompt, a fixed document) is sent on every call, providers can **cache** it so repeats are billed at a steep discount instead of full price.
-4. **Choose a smaller, cheaper model.** When the task is easy — classification, short rewrites, simple extraction — a smaller model often does it fine for a fraction of the price. Save the big model for when quality truly needs it.
+4. **Choose a smaller, cheaper model.** When the task is easy, classification, short rewrites, simple extraction, a smaller model often does it fine for a fraction of the price. Save the big model for when quality truly needs it.
 
 ## How it works
 
@@ -899,7 +899,7 @@ print(f"saved {saved} input tokens this turn")  # saved 700 input tokens this tu
 
 ## Why it matters
 
-The order matters: history trimming and an output cap are free to apply and hit the two biggest drivers head-on. Caching helps when you repeat a large fixed prefix. Model choice is the heaviest hammer — huge savings, but only when the smaller model's quality is good enough for the job. Reach for the cheap levers first; downgrade the model last, and only after checking it still works.
+The order matters: history trimming and an output cap are free to apply and hit the two biggest drivers head-on. Caching helps when you repeat a large fixed prefix. Model choice is the heaviest hammer, huge savings, but only when the smaller model's quality is good enough for the job. Reach for the cheap levers first; downgrade the model last, and only after checking it still works.
 
 ## The mental model to keep
 
@@ -911,7 +911,7 @@ The order matters: history trimming and an output cap are free to apply and hit 
       ],
       callouts: [
         { type: "tip", title: "Cap output first", content: "Setting a max output limit is the single highest-leverage move, because output is the priciest side. It's one setting and it caps your worst case.", position: "before" },
-        { type: "insight", title: "Downgrade the model last", content: "Switching to a smaller model saves the most but risks quality. Try the free levers — trim history, cap output, cache repeats — before reaching for a different model.", position: "after" }
+        { type: "insight", title: "Downgrade the model last", content: "Switching to a smaller model saves the most but risks quality. Try the free levers, trim history, cap output, cache repeats, before reaching for a different model.", position: "after" }
       ],
       concept_diagram: {
         title: "Four levers, cheapest effort first",
@@ -1026,7 +1026,7 @@ saved input tokens: 700`,
             "Before: 300 / 1,000,000 x $15 = $0.0045 per call.",
             "After: 300 / 1,000,000 x $0.60 = $0.00018 per call.",
             "Saving per call: $0.0045 - $0.00018 = $0.00432.",
-            "That's about a 96% cut on output cost — but only valid because the smaller model's quality was good enough."
+            "That's about a 96% cut on output cost, but only valid because the smaller model's quality was good enough."
           ],
           output: "Before $0.0045, after $0.00018, saving $0.00432 (~96%) when quality allows."
         }
@@ -1063,7 +1063,7 @@ saved input tokens: 700`,
       reflections: [
         {
           prompt: "In your own words: why should switching to a smaller model usually be the last lever you reach for, not the first?",
-          sampleAnswer: "Changing the model is the only lever that risks the quality of the output — a smaller model might handle an easy task fine but fail on a hard one, and you won't know until you check. The other levers (trimming history, capping output, caching a repeated prefix) cut cost without changing what the model is capable of, so they're safe to apply first. You downgrade the model only after the cheap, risk-free levers, and only once you've confirmed the smaller model still meets your quality bar."
+          sampleAnswer: "Changing the model is the only lever that risks the quality of the output, a smaller model might handle an easy task fine but fail on a hard one, and you won't know until you check. The other levers (trimming history, capping output, caching a repeated prefix) cut cost without changing what the model is capable of, so they're safe to apply first. You downgrade the model only after the cheap, risk-free levers, and only once you've confirmed the smaller model still meets your quality bar."
         }
       ],
       hints: [
@@ -1073,10 +1073,10 @@ saved input tokens: 700`,
       ],
       challenge_difficulty: "intermediate",
       challenge_title: "The Optimization Audit",
-      challenge_description: "Run a before/after audit on a chat feature: apply two cost levers — trim history to the last K turns and cap the reply length — then report the input tokens, output tokens, and dollars saved.",
+      challenge_description: "Run a before/after audit on a chat feature: apply two cost levers, trim history to the last K turns and cap the reply length, then report the input tokens, output tokens, and dollars saved.",
       challenge_story: "Your chat feature works, but the bill is climbing, so you run an optimization audit before the next billing cycle. You have two safe levers that don't touch model quality: **trim the resent history** down to the last `K` turns (instead of resending the whole transcript every turn), and **cap each reply** at a fixed output length (instead of letting answers run as long as they want). You project the feature over `t` turns under both the baseline and the optimized plan, then hand the team three numbers: input tokens saved, output tokens saved, and dollars saved. Numbers that justify the change.",
       challenge_statement: "A feature is projected over `t` turns. Each turn adds `m` tokens of history, so under the **baseline** plan turn `k` resends `m * k` input tokens (the full transcript). Under the **optimized** plan, turn `k` resends only the last `K` turns: `m * min(k, K)` input tokens.\n\nFor output: the **baseline** lets each reply run to `out_full` tokens; the **optimized** plan caps each reply at `out_cap` tokens. Every turn produces one reply.\n\nCompute, summed across all `t` turns:\n\n1. `saved_input`  = baseline input tokens − optimized input tokens.\n2. `saved_output` = baseline output tokens − optimized output tokens.\n3. `saved_cost`   = `(saved_input * input_price + saved_output * output_price) / 1_000_000`.\n\nPrint `saved_input`, then `saved_output`, then `$saved_cost` to exactly 6 decimal places.",
-      challenge_input_format: "The first line has five integers: `t m K input_price output_price` — turns, tokens added per turn, history window, and the two per-million prices.\n\nThe second line has two integers: `out_full out_cap` — the baseline reply length and the capped reply length.",
+      challenge_input_format: "The first line has five integers: `t m K input_price output_price`, turns, tokens added per turn, history window, and the two per-million prices.\n\nThe second line has two integers: `out_full out_cap`, the baseline reply length and the capped reply length.",
       challenge_output_format: "Three lines: `saved_input`, then `saved_output`, then `$` followed by the dollars saved to exactly 6 decimal places.",
       challenge_constraints: [
         "1 ≤ t ≤ 100000",
@@ -1089,7 +1089,7 @@ saved input tokens: 700`,
         { input: "8 120 2 3 15\n300 100", output: "2520\n1600\n$0.031560", explanation: "Baseline input = 120·(1+…+8) = 4320; optimized = 120·(1+2+2+2+2+2+2+2) = 1800 → saved 2520. Output: 300·8 − 100·8 = 1600 saved. Cost: (2520·3 + 1600·15)/1e6 = 31560/1e6 = $0.031560." },
         { input: "3 100 1 3 15\n200 50", output: "300\n450\n$0.007650", explanation: "Baseline input 100·(1+2+3)=600; optimized 100·(1+1+1)=300 → 300 saved. Output 200·3 − 50·3 = 450. Cost (300·3+450·15)/1e6 = 7650/1e6 = $0.007650." },
       ],
-      challenge_notes: "Trimming history and capping output are the **first** levers to reach for because they cut cost without changing what the model can do — unlike switching to a smaller model, which risks output quality. Notice how the savings compound: trimming a per-turn history of `m` saves on every future turn beyond the window `K`, which is why long sessions benefit most.",
+      challenge_notes: "Trimming history and capping output are the **first** levers to reach for because they cut cost without changing what the model can do, unlike switching to a smaller model, which risks output quality. Notice how the savings compound: trimming a per-turn history of `m` saves on every future turn beyond the window `K`, which is why long sessions benefit most.",
       challenge_hints: [
         "Baseline input is `m * (1+2+…+t)`; optimized input is `m * sum(min(k, K) for k in 1..t)`. A loop is fine, or use the closed form.",
         "Output is simpler: baseline `out_full * t`, optimized `out_cap * t`.",
@@ -1154,13 +1154,13 @@ main()
 
 ## What it is
 
-LLM pricing is **asymmetric**: input tokens and output tokens are billed at *different* rates, and output is almost always the expensive side. A common pattern is something like \\$3 per million input tokens against \\$15 per million output tokens — a clean **5x** gap. The provider charges more to *generate* text than to *read* it.
+LLM pricing is **asymmetric**: input tokens and output tokens are billed at *different* rates, and output is almost always the expensive side. A common pattern is something like \\$3 per million input tokens against \\$15 per million output tokens, a clean **5x** gap. The provider charges more to *generate* text than to *read* it.
 
 This means the token total alone tells you almost nothing. A call's cost depends on *which side* the tokens land on. Shift tokens from output to input and the same workload gets cheaper.
 
 ## How it works
 
-Cost is two products added together — never one flat per-token rate:
+Cost is two products added together, never one flat per-token rate:
 
 \`\`\`python
 input_tokens = 3000
@@ -1177,15 +1177,15 @@ print(f"output: \${output_cost:.6f}")   # bigger, even with fewer tokens
 print(f"total:  \${total:.6f}")
 \`\`\`
 
-Here 3,000 input tokens cost \\$0.009, but just 800 output tokens cost \\$0.012 — fewer tokens, higher cost, because each output token is priced 5x higher.
+Here 3,000 input tokens cost \\$0.009, but just 800 output tokens cost \\$0.012, fewer tokens, higher cost, because each output token is priced 5x higher.
 
 ## Why it matters
 
-The asymmetry flips your intuition about where to optimize. A bloated prompt feels wasteful, but it's billed on the *cheap* meter. A model that rambles a long answer is billed on the *expensive* meter. So the highest-leverage knob is usually **how much the model writes**, not how much you send. If your bill surprises you, do the input-versus-output split first — it almost always points straight at the output side.
+The asymmetry flips your intuition about where to optimize. A bloated prompt feels wasteful, but it's billed on the *cheap* meter. A model that rambles a long answer is billed on the *expensive* meter. So the highest-leverage knob is usually **how much the model writes**, not how much you send. If your bill surprises you, do the input-versus-output split first, it almost always points straight at the output side.
 
 ## The mental model to keep
 
-**Same tokens, different sides, different bill. Output is the dear meter — watch it first.**`,
+**Same tokens, different sides, different bill. Output is the dear meter, watch it first.**`,
       key_terms: [
         { term: "Asymmetric pricing", definition: "Input and output tokens are billed at different rates, with output usually several times more expensive." },
         { term: "Input cost", definition: "input_tokens / 1,000,000 x input_price. The cheaper of the two meters on a call." },

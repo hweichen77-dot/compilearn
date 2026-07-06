@@ -19,20 +19,20 @@ export default {
       title: "Models That Can See",
       concept: "Multimodal",
       xp_reward: 10,
-      explanation: `Show a photo of a fridge to a modern model and ask "what can I cook tonight?" It reads the ketchup, the half-onion, the carton of eggs, and gives you an omelette recipe. The model never "sees" pixels the way you do. It turns the image into the same kind of number-tokens it uses for text — and once that clicks, vision stops feeling magic.
+      explanation: `Show a photo of a fridge to a modern model and ask "what can I cook tonight?" It reads the ketchup, the half-onion, the carton of eggs, and gives you an omelette recipe. The model never "sees" pixels the way you do. It turns the image into the same kind of number-tokens it uses for text, and once that clicks, vision is easier to reason about.
 
 ## What it is
 
-A **multimodal model** is a model that accepts more than one type of input — typically text plus images — inside a single prompt. The "modes" are the input types: text, images, sometimes audio or video. The word **modality** just means "a kind of input." A text-only model has one modality; a vision model has two.
+A **multimodal model** is a model that accepts more than one type of input, typically text plus images, inside a single prompt. The "modes" are the input types: text, images, sometimes audio or video. The word **modality** just means "a kind of input." A text-only model has one modality; a vision model has two.
 
-The crucial idea: the model does not run a separate "image brain." Both your words and your picture are converted into the same internal currency — vectors of numbers — and processed by one network. Text and image meet in the same space.
+The crucial idea: the model does not run a separate "image brain." Both your words and your picture are converted into the same internal currency, vectors of numbers, and processed by one network. Text and image meet in the same space.
 
 ## How it works
 
 Walk through one vision request:
 
 1. **Your image is split into patches.** The picture is cut into a grid of small squares (often 14x14 or 16x16 pixels each), like tiles.
-2. **Each patch becomes an embedding.** A vision encoder turns every tile into a vector of numbers — an **image token**. A 1000x1000 photo can become hundreds of these.
+2. **Each patch becomes an embedding.** A vision encoder turns every tile into a vector of numbers, an image token. A 1000x1000 photo can become hundreds of these.
 3. **Image tokens join the text tokens.** Your words are tokenized too, and both streams are concatenated into one sequence the model reads together.
 4. **The model predicts text as usual.** From this point it is the same next-token prediction from earlier modules. It answers about the image because the image is now part of its context.
 
@@ -48,13 +48,13 @@ answer = model.predict(context)
 
 Seeing vision as "images turned into tokens" explains the behavior you'll hit:
 
-- **Images cost tokens too.** A photo isn't free — it becomes hundreds of image tokens, and you pay for them like any other tokens.
+- **Images cost tokens too.** A photo isn't free. It becomes hundreds of image tokens, and you pay for them like any other tokens.
 - **Detail has a price.** Higher resolution means more patches means more tokens. You can often choose a "low detail" mode to save money when fine detail doesn't matter.
-- **It is one model, not a pipeline.** Because text and image share the same space, the model can reason across them — "circle the cheapest item on this menu" works because the menu and the instruction live together.
+- **It is one model, not a pipeline.** Because text and image share the same space, the model can reason across them. "Circle the cheapest item on this menu" works because the menu and the instruction live together.
 
 ## The mental model to keep
 
-A vision model doesn't have eyes bolted onto a text brain. **It chops your image into tiles, turns each tile into a token, and reads those tokens right alongside your words** — one stream, one model, same prediction loop you already know.`,
+A vision model doesn't have eyes bolted onto a text brain. It chops your image into tiles, turns each tile into a token, and reads those tokens alongside your words: one stream, one model, the same prediction loop you already know.`,
       key_terms: [
         { term: "Multimodal model", definition: "A model that accepts more than one input type, typically text plus images, in a single prompt." },
         { term: "Modality", definition: "A kind of input, such as text, image, audio, or video." },
@@ -156,7 +156,7 @@ image tokens: 1024`,
           title: "from a photo to an answer",
           steps: [
             { label: "Split into patches", detail: "The image is cut into a grid of small tiles, each a fixed pixel size. A larger image makes more tiles.", code: "image -> 32 x 32 grid of 16x16 patches" },
-            { label: "Encode each patch", detail: "The vision encoder turns every tile into a vector of numbers — one image token per patch.", code: "patch -> vision_encoder(patch) -> [0.12, -0.8, ...]" },
+            { label: "Encode each patch", detail: "The vision encoder turns every tile into a vector of numbers, one image token per patch.", code: "patch -> vision_encoder(patch) -> [0.12, -0.8, ...]" },
             { label: "Merge with your words", detail: "Your text is tokenized too, then the image tokens and text tokens are joined into one sequence.", code: 'context = tokens("describe this") + image_tokens' },
             { label: "Predict the answer", detail: "From here it is ordinary next-token prediction. The model writes a reply because the image is part of its context.", code: 'model.predict(context) -> "A red bicycle..."' }
           ]
@@ -182,7 +182,7 @@ image tokens: 1024`,
             "Doubling each side quadruples the area, so token count grows with the square of the resolution.",
             "4096 / 1024 = 4."
           ],
-          output: "4x more tokens — resolution cost grows with area, not width."
+          output: "4x more tokens. Resolution cost grows with area, not width."
         }
       ],
       comparison_tables: [
@@ -217,7 +217,7 @@ image tokens: 1024`,
       reflections: [
         {
           prompt: "In your own words: if a model only predicts the next token, how can it possibly answer a question about a photo?",
-          sampleAnswer: "The photo is converted into image tokens — vectors that live in the same space as text tokens — and joined onto your words to form one input sequence. So when the model predicts the next token, the image is already part of the context it is continuing from, which lets the answer reflect what is in the picture even though the underlying operation is still plain text prediction."
+          sampleAnswer: "The photo is converted into image tokens, vectors that live in the same space as text tokens, and joined onto your words to form one input sequence. So when the model predicts the next token, the image is already part of the context it is continuing from, which lets the answer reflect what is in the picture even though the underlying operation is still plain text prediction."
         }
       ],
       hints: [
@@ -227,7 +227,7 @@ image tokens: 1024`,
       ],
       challenge_title: "The Patch Budget",
       challenge_description: "Compute exactly how many image tokens a multimodal model will charge for a batch of uploads, after it resizes each image and slices it into patches.",
-      challenge_story: "You run the vision pipeline for a document-AI product. Users upload photos of receipts, contracts, and whiteboards, and the model **doesn't see pixels** — it resizes each image, chops it into a grid of square **patches**, and turns every patch into one token. Finance is panicking because last month's image bill tripled, and nobody can explain why. Your job: build the **patch budgeter** that, given the model's patch size and a batch of uploads, reports the exact token count for each image *before* the request is sent — so the team can cap costs instead of discovering them on the invoice.",
+      challenge_story: "You run the vision pipeline for a document-AI product. Users upload photos of receipts, contracts, and whiteboards, and the model doesn't see pixels: it resizes each image, chops it into a grid of square **patches**, and turns every patch into one token. Finance is concerned because last month's image bill tripled, and nobody can explain why. Your job: build the patch budgeter that, given the model's patch size and a batch of uploads, reports the exact token count for each image *before* the request is sent, so the team can cap costs instead of discovering them on the invoice.",
       challenge_statement: "The model processes each image in two stages:\n\n1. **Resize.** Each image has a *detail mode*: \`low\` clamps the **longest side** to **512** pixels; \`high\` clamps the longest side to **1536** pixels. If the longest side already fits within the cap, the image is **left unchanged**. Otherwise both dimensions are scaled by \`cap / longest_side\` and **floored** to whole pixels (the shorter side may round down).\n2. **Patch.** The resized image is tiled by a square patch of side \`P\`. A partial patch at the right or bottom edge still counts as a full patch, so the patch count along a dimension of size \`d\` is \`ceil(d / P)\`. The token count for the image is \`patches_wide * patches_tall\`.\n\nFor each image in the batch, print its token count.",
       challenge_input_format: "The first line has two integers `P q`: the patch side and the number of images.\n\nEach of the next `q` lines describes one image: a detail mode (`low` or `high`), then two integers `w h` (original width and height in pixels), space-separated.",
       challenge_output_format: "Print `q` lines. Line `i` is the integer token count for image `i`, in input order.",
@@ -241,11 +241,11 @@ image tokens: 1024`,
         { input: "16 3\nlow 1024 1024\nhigh 2048 1024\nhigh 100 100", output: "1024\n4608\n49", explanation: "`low 1024 1024`: cap 512, scale to 512x512, 32x32 patches = 1024. `high 2048 1024`: cap 1536, scale to 1536x768, 96x48 = 4608. `high 100 100`: already under 1536, ceil(100/16)=7, 7x7 = 49." },
         { input: "16 1\nlow 4000 3000", output: "768", explanation: "Cap 512, scale by 512/4000: width 512, height floor(3000*512/4000)=384, patches 32x24 = 768." },
       ],
-      challenge_notes: "Real models charge by patches, not megabytes, which is why a tall skinny screenshot can cost more than a small square logo. The floor on resize and the ceil on patching pull in opposite directions — getting both rounding rules right is the whole problem. `low` is for 'is there a cat in this photo' questions; `high` is for reading the serial number on a chip.",
+      challenge_notes: "Real models charge by patches, not megabytes, which is why a tall skinny screenshot can cost more than a small square logo. The floor on resize and the ceil on patching pull in opposite directions, so getting both rounding rules right is the main difficulty. `low` is for 'is there a cat in this photo' questions; `high` is for reading the serial number on a chip.",
       challenge_hints: [
         "Find the longest side first. Only resize when it exceeds the cap; scale both dimensions by the same ratio and floor each.",
         "Use integer math for the resize: `nw = w * cap // longest` avoids float drift entirely.",
-        "Patch count along a side of length `d` is `(d + P - 1) // P` — that is ceil division without importing math.",
+        "Patch count along a side of length `d` is `(d + P - 1) // P`, which is ceil division without importing math.",
       ],
       challenge_difficulty: "intermediate",
       challenge_starter_code: `import sys
@@ -314,14 +314,14 @@ main()
 
 An **image input** is a picture supplied as part of a prompt, in a format the API can carry. There are two standard ways:
 
-- **A URL** — a link to an image the server can fetch over the internet.
-- **Base64** — the image's raw bytes encoded into a long plain-text string that rides inside the JSON request.
+- **A URL**: a link to an image the server can fetch over the internet.
+- **Base64**: the image's raw bytes encoded into a long plain-text string that rides inside the JSON request.
 
 **Base64** is just a way to write binary data using ordinary text characters, so a picture can travel inside a text-only field. It makes the data about 33 percent larger, but it needs no public hosting.
 
 ## How it works
 
-A vision request is a normal chat request whose user message contains a list of content blocks — some text, some image. Each block declares its type:
+A vision request is a normal chat request whose user message contains a list of content blocks, some text and some image. Each block declares its type:
 
 \`\`\`python
 import base64
@@ -343,7 +343,7 @@ message = {
 The pieces that matter:
 
 1. **content is a list, not a string.** Text and image blocks sit side by side.
-2. **media_type must match the real file** — image/png, image/jpeg, image/webp. Lie about it and decoding fails.
+2. **media_type must match the real file**: image/png, image/jpeg, image/webp. Lie about it and decoding fails.
 3. **Order can matter.** Many models read top to bottom, so put the instruction where it frames the image.
 
 ## Why it matters
@@ -356,7 +356,7 @@ The format choice has real consequences:
 
 ## The mental model to keep
 
-The model can't reach into your filesystem. **Either give it a link it can fetch, or turn the bytes into base64 text and put them in the message** — and always label the media_type honestly.`,
+The model can't reach into your filesystem. Either give it a link it can fetch, or turn the bytes into base64 text and put them in the message, and always label the media_type honestly.`,
       key_terms: [
         { term: "Image input", definition: "A picture supplied inside a prompt, either as a URL or as base64-encoded bytes." },
         { term: "Base64", definition: "A way to encode binary data, such as an image, as plain-text characters so it can travel inside a text field." },
@@ -460,7 +460,7 @@ text image`,
         {
           title: "base64-encoding a local image",
           steps: [
-            { label: "Open the file as bytes", detail: "Read the raw binary contents of the image. This is not text yet — it is the actual file bytes.", code: 'data = open("receipt.png", "rb").read()' },
+            { label: "Open the file as bytes", detail: "Read the raw binary contents of the image. This is not text yet; it is the actual file bytes.", code: 'data = open("receipt.png", "rb").read()' },
             { label: "Encode to base64", detail: "Convert the bytes into base64 characters so they can sit inside a text field. The result is a long string.", code: 'b64 = base64.b64encode(data).decode("utf-8")' },
             { label: "Wrap in an image block", detail: "Declare the type and the real media_type, then attach the base64 string as the data.", code: '{"type": "image", "source": {"media_type": "image/png", "data": b64}}' },
             { label: "Add it to the message", detail: "Put a text instruction and the image block into the content list, then send the request.", code: 'content = [text_block, image_block]' }
@@ -476,7 +476,7 @@ text image`,
             "A URL keeps the request small and avoids inflating it by 33 percent.",
             "Base64 is only needed when the image is private or local."
           ],
-          output: "Send it as a URL — it is already public and fetchable."
+          output: "Send it as a URL, since it is already public and fetchable."
         },
         {
           number: 2, difficulty: "medium",
@@ -531,8 +531,8 @@ text image`,
         "The image block's source includes media_type and the base64 data string."
       ],
       challenge_title: "The Attachment Gateway",
-      challenge_description: "Build the request builder that decides, per upload, the correct media_type and whether to send it as a URL or as inflated base64 — then reports the total payload it just committed to.",
-      challenge_story: "You're writing the **attachment gateway** that sits between your app and a multimodal model's API. Every image a user attaches has to be turned into a content block the model accepts. Two rules govern this. First, the block needs the right \`media_type\` derived from the file, or the API rejects it outright. Second, you choose how to *deliver* the bytes: a **public** image can be referenced by URL (cheap, the bytes never leave their host), but a **private** image must be **base64-encoded** and inlined into the request — which inflates its size. Get the routing wrong and you either leak private data or blow up your request size. Build the gateway that classifies every attachment correctly and totals the base64 weight you're about to ship.",
+      challenge_description: "Build the request builder that decides, per upload, the correct media_type and whether to send it as a URL or as inflated base64, then reports the total payload it just committed to.",
+      challenge_story: "You're writing the **attachment gateway** that sits between your app and a multimodal model's API. Every image a user attaches has to be turned into a content block the model accepts. Two rules govern this. First, the block needs the right \`media_type\` derived from the file, or the API rejects it outright. Second, you choose how to *deliver* the bytes: a public image can be referenced by URL (cheap, the bytes never leave their host), but a private image must be base64-encoded and inlined into the request, which inflates its size. Get the routing wrong and you either leak private data or blow up your request size. Build the gateway that classifies every attachment correctly and totals the base64 weight you're about to ship.",
       challenge_statement: "Process a batch of attachments. For each one:\n\n1. Determine its \`media_type\` from the **lowercased** filename extension: \`.png\` → \`image/png\`; \`.jpg\` or \`.jpeg\` → \`image/jpeg\`; \`.webp\` → \`image/webp\`; \`.gif\` → \`image/gif\`. Any other extension is **unsupported** and the attachment is rejected.\n\n2. If supported, choose delivery by visibility. A \`public\` attachment is sent by **url**. A \`private\` attachment is sent as **base64**; its encoded size in bytes is \`ceil(raw_bytes / 3) * 4\` (base64 turns every 3 raw bytes into 4 characters).\n\nFor each attachment, print one line:\n- rejected: \`<filename> REJECT unsupported\`\n- public + supported: \`<filename> url <media_type>\`\n- private + supported: \`<filename> base64 <media_type> <encoded_bytes>\`\n\nThen print a final summary line: \`SUMMARY <accepted> <rejected> <total_base64_bytes>\`.",
       challenge_input_format: "The first line is an integer `n`: the number of attachments.\n\nEach of the next `n` lines has three space-separated fields: `filename visibility raw_bytes`, where `visibility` is `public` or `private` and `raw_bytes` is the original file size in bytes.",
       challenge_output_format: "Print `n` per-attachment lines in input order, in the formats above, followed by one `SUMMARY` line.",
@@ -545,10 +545,10 @@ text image`,
         { input: "4\nlogo.PNG public 9000\nreceipt.jpeg private 1201\nnotes.txt private 500\nicon.webp private 10", output: "logo.PNG url image/png\nreceipt.jpeg base64 image/jpeg 1604\nnotes.txt REJECT unsupported\nicon.webp base64 image/webp 16\nSUMMARY 3 1 1620", explanation: "PNG is public so it goes by url. The jpeg is private: ceil(1201/3)*4 = 401*4 = 1604 base64 bytes. notes.txt is unsupported. The webp inflates 10 bytes to ceil(10/3)*4 = 16. Two base64 attachments total 1620 bytes." },
         { input: "1\nphoto.GIF public 100", output: "photo.GIF url image/gif\nSUMMARY 1 0 0", explanation: "Extension matching is case-insensitive, and public images never contribute base64 weight." },
       ],
-      challenge_notes: "The 4/3 base64 inflation is exactly why inlining big private images is so costly — a 10 MB photo becomes ~13.3 MB of request body. URL delivery sidesteps that entirely but only works when the host is publicly reachable, which is the real-world trade your gateway is encoding.",
+      challenge_notes: "The 4/3 base64 inflation is why inlining big private images is so costly: a 10 MB photo becomes about 13.3 MB of request body. URL delivery avoids that entirely but only works when the host is publicly reachable, which is the real-world trade your gateway is encoding.",
       challenge_hints: [
         "Lowercase the filename once, then test suffixes with `.endswith(...)`. Order doesn't matter since the extensions are distinct.",
-        "Base64 size is `((raw_bytes + 2) // 3) * 4` — that is `ceil(raw/3)*4` using only integers.",
+        "Base64 size is `((raw_bytes + 2) // 3) * 4`, which is `ceil(raw/3)*4` using only integers.",
         "Track three running totals as you go: accepted count, rejected count, and summed base64 bytes (public images add zero).",
       ],
       challenge_difficulty: "intermediate",
@@ -637,13 +637,13 @@ main()
       title: "OCR & Document Understanding",
       concept: "OCR",
       xp_reward: 10,
-      explanation: `For decades, "read the text in this photo" was its own brittle industry: scan, threshold, segment, guess each letter, pray the table lines up. A vision model collapses that pipeline into one prompt — and it can do something the old tools never could: not just read the receipt, but tell you the tip percentage. The leap from reading characters to understanding documents is the heart of this lesson.
+      explanation: `For decades, "read the text in this photo" was its own brittle industry: scan, threshold, segment, guess each letter, pray the table lines up. A vision model collapses that pipeline into one prompt, and it can do something the old tools never could: not just read the receipt, but tell you the tip percentage. This lesson covers the move from reading characters to interpreting documents.
 
 ## What it is
 
-**OCR** — optical character recognition — is pulling the text out of an image: a scanned page, a screenshot, a photo of a sign. Classic OCR stops there; it hands you a wall of characters.
+**OCR**, optical character recognition, is pulling the text out of an image: a scanned page, a screenshot, a photo of a sign. Classic OCR stops there; it hands you a wall of characters.
 
-**Document understanding** goes further: it reads the image and interprets its structure and meaning — which number is the total, which cell is the date, what the form is asking. A vision model does both in one step because it treats the words it reads as ordinary text it can then reason over.
+**Document understanding** goes further: it reads the image and interprets its structure and meaning, such as which number is the total, which cell is the date, what the form is asking. A vision model does both in one step because it treats the words it reads as ordinary text it can then reason over.
 
 ## How it works
 
@@ -661,7 +661,7 @@ content = [
 Two stages happen inside that single call:
 
 1. **Recognition.** The vision encoder turns the page into image tokens; the model reads the glyphs as text.
-2. **Interpretation.** Because that text now lives in the same context as your instruction, the model can locate the total, normalize the date, or output structured JSON — the same reasoning it does over typed text.
+2. **Interpretation.** Because that text now lives in the same context as your instruction, the model can locate the total, normalize the date, or output structured JSON, the same reasoning it does over typed text.
 
 This is why asking for **structured output** ("return JSON with these keys") works so well: you are reading and parsing in one shot.
 
@@ -675,7 +675,7 @@ Document understanding is one of the highest-value vision uses, but it has sharp
 
 ## The mental model to keep
 
-A vision model doesn't just transcribe — it reads and understands in one pass. **Treat OCR results like any model output: powerful, fast, and worth verifying when the number on the line is the one that matters.**`,
+A vision model doesn't just transcribe, it reads and understands in one pass. **Treat OCR results like any model output: powerful, fast, and worth verifying when the number on the line is the one that matters.**`,
       key_terms: [
         { term: "OCR", definition: "Optical character recognition: extracting the text contained inside an image." },
         { term: "Document understanding", definition: "Reading an image and interpreting its structure and meaning, not just its raw characters." },
@@ -788,7 +788,7 @@ total: 18.5`,
             "Reading characters out of an image is the definition of OCR.",
             "Document understanding would be asking what the sign means or extracting a specific fact from it."
           ],
-          output: "OCR — it is plain text extraction."
+          output: "OCR, it is plain text extraction."
         },
         {
           number: 2, difficulty: "hard",
@@ -835,7 +835,7 @@ total: 18.5`,
       reflections: [
         {
           prompt: "In your own words: why can a vision model extract the total from a receipt when old OCR tools could only hand you a wall of characters?",
-          sampleAnswer: "The old tools stopped at recognition — turning pixels into raw characters — and left any meaning for a separate, brittle parsing step. A vision model reads the characters and then keeps reasoning over them in the same call, because the recognized text now sits in the same context as your instruction. That lets it locate which number is the total and even return it as structured JSON, combining reading and understanding in one pass."
+          sampleAnswer: "The old tools stopped at recognition, turning pixels into raw characters, and left any meaning for a separate, brittle parsing step. A vision model reads the characters and then keeps reasoning over them in the same call, because the recognized text now sits in the same context as your instruction. That lets it locate which number is the total and even return it as structured JSON, combining reading and understanding in one pass."
         }
       ],
       hints: [
@@ -845,7 +845,7 @@ total: 18.5`,
       ],
       challenge_title: "The Extraction Auditor",
       challenge_description: "Take the raw fields a document-understanding model pulled off a receipt, scrub the ones that are blank or unreliable, and decide whether the record can be trusted or must go to human review.",
-      challenge_story: "Your accounts-payable bot uses a vision model to read receipts and emit structured fields — merchant, date, total, tax. But the model is honest about uncertainty: it attaches a **confidence score** to each field, and sometimes it returns an empty value or the literal word \`unreadable\` when a photo is blurry. If you pipe those straight into the ledger, garbage flows downstream silently. Build the **extraction auditor**: it normalizes every field, blanks out anything untrustworthy, and routes the whole record to a human when any field falls short — turning silent corruption into a visible review queue.",
+      challenge_story: "Your accounts-payable bot uses a vision model to read receipts and emit structured fields, merchant, date, total, tax. But the model is honest about uncertainty: it attaches a **confidence score** to each field, and sometimes it returns an empty value or the literal word \`unreadable\` when a photo is blurry. If you pipe those straight into the ledger, garbage flows downstream silently. Build the **extraction auditor**: it normalizes every field, blanks out anything untrustworthy, and routes the whole record to a human when any field falls short, turning silent corruption into a visible review queue.",
       challenge_statement: "You are given a confidence threshold and a list of extracted fields. For each field with name, value, and integer confidence:\n\n- A field is **bad** if its value (after trimming surrounding spaces) is the empty string, equals \`unreadable\` (case-insensitive), **or** its confidence is **strictly below** the threshold.\n- A bad field's value becomes missing; a good field keeps its trimmed value.\n\nPrint each field on its own line, in input order:\n- good: \`<name>: <trimmed_value>\`\n- bad: \`<name>: MISSING\`\n\nAfter the fields, print one routing line:\n- if **any** field was bad: \`REVIEW\` followed by the names of all bad fields in input order, space-separated.\n- if **none** were bad: \`OK\`.",
       challenge_input_format: "The first line has two integers `n threshold`: the number of fields and the confidence cutoff.\n\nEach of the next `n` lines is a field encoded as `name|value|confidence`, using `|` as the separator. The value may be empty (nothing between the bars) and never contains a `|`.",
       challenge_output_format: "Print `n` field lines in input order, then one routing line (`REVIEW ...` or `OK`).",
@@ -928,7 +928,7 @@ main()
       title: "Image Generation Basics",
       concept: "Generation",
       xp_reward: 10,
-      explanation: `Reading an image and making one are opposite jobs done by opposite machines. A vision model takes pixels and gives you text. An image generator takes text and gives you pixels. It does not "paint" — it starts with pure visual static and removes the noise, step by step, until a picture that matches your words emerges. Understanding that backwards-from-noise idea is the key to this whole lesson.
+      explanation: `Reading an image and making one are opposite jobs done by opposite machines. A vision model takes pixels and gives you text. An image generator takes text and gives you pixels. It does not "paint", it starts with pure visual static and removes the noise, step by step, until a picture that matches your words emerges. Understanding that backwards-from-noise idea is the key to this whole lesson.
 
 ## What it is
 
@@ -940,7 +940,7 @@ The trick is counterintuitive. During training the model watches clean images ge
 
 Generation runs as a loop of small cleanups, each guided by your text:
 
-1. **Start from noise.** Begin with a canvas of random static — no picture yet.
+1. **Start from noise.** Begin with a canvas of random static, no picture yet.
 2. **Predict the noise to remove.** Guided by your prompt, the model estimates what part of the current image is "just noise."
 3. **Subtract a little.** Remove a slice of that noise, nudging the canvas toward a coherent image.
 4. **Repeat for many steps.** After dozens of passes, a sharp image consistent with the prompt remains.
@@ -966,7 +966,7 @@ Generation has its own rules and limits, different from vision-reading:
 
 ## The mental model to keep
 
-An image generator is a noise-remover, not a painter. **It begins with random static and, guided by your words, subtracts noise step by step until a matching picture appears** — so the clearer your words, the better the steering.`,
+An image generator is a noise-remover, not a painter. **It begins with random static and, guided by your words, subtracts noise step by step until a matching picture appears**: so the clearer your words, the better the steering.`,
       key_terms: [
         { term: "Image generation", definition: "Producing a new picture from a text prompt." },
         { term: "Diffusion model", definition: "A generator that learns to turn random noise into an image matching a description." },
@@ -1083,7 +1083,7 @@ final noise: 7.78`,
             "Different starting noise denoises into a different image even with the same prompt.",
             "To get the same cat every time, fix the seed."
           ],
-          output: "Not broken — different seeds produce different images; fix the seed to reproduce one."
+          output: "Not broken, different seeds produce different images; fix the seed to reproduce one."
         },
         {
           number: 2, difficulty: "medium",
@@ -1139,8 +1139,8 @@ final noise: 7.78`,
       ],
       challenge_title: "The Denoising Scheduler",
       challenge_description: "Simulate a diffusion model's denoising loop step by step, reporting the noise level remaining after each of a fixed number of steps.",
-      challenge_story: "You're building the **denoising scheduler** for an image-generation model. Diffusion starts from pure noise and, on every step, removes a fixed fraction of the **remaining** noise — so the image gets cleaner step by step until a picture emerges. Your design team wants to *watch* that happen: given a render's starting noise and how aggressively each step removes noise, print the noise level after each step so they can see the steep early drop and the diminishing returns later on, and decide how many steps are worth paying for.",
-      challenge_statement: "A render begins at noise level \`start\`. Each step multiplies the **remaining** noise by \`(100 - removal) / 100\` — i.e. it removes \`removal\` percent of what's left. Noise only ever decreases.\n\nRun the loop for exactly \`steps\` steps. After **each** step, print the noise level remaining, formatted to **exactly 2 decimal places**, on its own line — one line per step, in order.",
+      challenge_story: "You're building the **denoising scheduler** for an image-generation model. Diffusion starts from pure noise and, on every step, removes a fixed fraction of the **remaining** noise, so the image gets cleaner step by step until a picture emerges. Your design team wants to *watch* that happen: given a render's starting noise and how aggressively each step removes noise, print the noise level after each step so they can see the steep early drop and the diminishing returns later on, and decide how many steps are worth paying for.",
+      challenge_statement: "A render begins at noise level \`start\`. Each step multiplies the **remaining** noise by \`(100 - removal) / 100\`, i.e. it removes \`removal\` percent of what's left. Noise only ever decreases.\n\nRun the loop for exactly \`steps\` steps. After **each** step, print the noise level remaining, formatted to **exactly 2 decimal places**, on its own line, one line per step, in order.",
       challenge_input_format: "A single line with three integers `start removal steps`.",
       challenge_output_format: "Print `steps` lines. Line `k` is the noise level remaining after the `k`-th step, formatted to exactly 2 decimal places.",
       challenge_constraints: [
@@ -1152,9 +1152,9 @@ final noise: 7.78`,
         { input: "100 30 4", output: "70.00\n49.00\n34.30\n24.01", explanation: "Each step keeps 70% of the noise. After step 1: 100*0.7 = 70.00; step 2: 49.00; step 3: 34.30; step 4: 24.01. Notice the early steps strip the most noise." },
         { input: "80 50 3", output: "40.00\n20.00\n10.00", explanation: "Removing 50% each step halves the noise: 80 → 40 → 20 → 10, printed after each of the 3 steps." },
       ],
-      challenge_notes: "This geometric decay is why diffusion samplers show steep early gains and diminishing returns — the first few steps strip most of the noise, and later steps just polish. Apply the decay once per step and report; don't search for a target. Formatting to a fixed 2 decimals keeps the output unambiguous — a bare `round()` would drop a trailing zero like `70.0`.",
+      challenge_notes: "This geometric decay is why diffusion samplers show steep early gains and diminishing returns, the first few steps strip most of the noise, and later steps just polish. Apply the decay once per step and report; don't search for a target. Formatting to a fixed 2 decimals keeps the output unambiguous, a bare `round()` would drop a trailing zero like `70.0`.",
       challenge_hints: [
-        "Keep the noise as a float and multiply by `(100 - removal) / 100` each step — the fraction matters, so don't subtract integers.",
+        "Keep the noise as a float and multiply by `(100 - removal) / 100` each step, the fraction matters, so don't subtract integers.",
         "Print inside the loop, right after updating the noise, so you emit one line per step.",
         "Format each line with `\"{:.2f}\".format(noise)` so `70.0` shows as `70.00`.",
       ],
@@ -1199,11 +1199,11 @@ main()
       title: "Costs & Limits of Vision",
       concept: "VisionCost",
       xp_reward: 10,
-      explanation: `A founder wired a vision model into a "snap a photo of your fridge" app, shipped it, and watched the bill explode. The culprit was not traffic. Every user was uploading 12-megapixel phone photos, and each one quietly became thousands of image tokens. The app worked perfectly and lost money on every scan. Vision is powerful, but pixels are not free — and knowing the cost math is what separates a demo from a product.
+      explanation: `A founder wired a vision model into a "snap a photo of your fridge" app, shipped it, and watched the bill explode. The culprit was not traffic. Every user was uploading 12-megapixel phone photos, and each one quietly became thousands of image tokens. The app worked perfectly and lost money on every scan. Vision is powerful, but pixels are not free, and knowing the cost math is what separates a demo from a product.
 
 ## What it is
 
-**Vision cost** is the extra token spend an image adds to a request. An image isn't billed as "one image." It is converted to **image tokens** — recall the patches from lesson 1 — and those tokens are billed like any input tokens. The higher the resolution, the more patches, the more tokens, the bigger the bill.
+**Vision cost** is the extra token spend an image adds to a request. An image isn't billed as "one image." It is converted to **image tokens**: recall the patches from lesson 1, and those tokens are billed like any input tokens. The higher the resolution, the more patches, the more tokens, the bigger the bill.
 
 Most APIs expose a **detail level** (often "low" and "high"). Low detail downscales the image to a small fixed size, capping its token count cheaply. High detail keeps more resolution and costs far more.
 
@@ -1236,7 +1236,7 @@ Vision economics shape what is worth building:
 
 ## The mental model to keep
 
-An image is just a pile of tokens in disguise. **Send the smallest image and lowest detail that still answers the question** — that single habit is the difference between a vision feature that scales and one that bankrupts the demo.`,
+An image is just a pile of tokens in disguise. **Send the smallest image and lowest detail that still answers the question**: that single habit is the difference between a vision feature that scales and one that bankrupts the demo.`,
       key_terms: [
         { term: "Vision cost", definition: "The extra token spend an image adds to a request, billed as image tokens." },
         { term: "Detail level", definition: "An API setting, often low or high, trading image quality for token cost." },
@@ -1365,7 +1365,7 @@ total cost: $0.006222`,
             "Low detail per photo: 800 / 1,000,000 * 3 = $0.0024.",
             "Savings per photo: 0.012 - 0.0024 = $0.0096.",
             "Across 100,000 photos: 0.0096 * 100000 = $960 per day.",
-            "Listing visible items is a coarse task, so low detail is enough — the savings come with no quality loss."
+            "Listing visible items is a coarse task, so low detail is enough, the savings come with no quality loss."
           ],
           output: "About $960 saved per day by using low detail for a task that does not need fine resolution."
         }
@@ -1412,8 +1412,8 @@ total cost: $0.006222`,
       ],
       challenge_title: "The Detail Router",
       challenge_description: "Route a batch of vision requests to low or high detail, bill each one exactly, and prove how much money the routing saves versus sending everything at high detail.",
-      challenge_story: "Your vision API is bleeding money. Every request was being sent at **high detail** by default — gorgeous transcriptions of serial numbers nobody needed, at full token price. You're shipping a **detail router**: a question like 'is there a dog in this photo?' goes \`low\`, while 'read the fine print on this contract' needs \`high\`. Each detail level produces a different image-token count, and the model bills input and output tokens at different rates. Build the router that prices every request at its chosen detail and reports, to the exact cent-fraction, how much you save over the old always-high policy — the number that justifies the whole project to finance.",
-      challenge_statement: "Input tokens (image + text) are billed at **$3 per 1,000,000 tokens**; output tokens at **$15 per 1,000,000 tokens**. Every cost is reported to **exactly 6 decimal places**, prefixed with \`$\`.\n\nEach request supplies the image-token count it would use at **low** detail and at **high** detail, plus its text and output token counts, and a flag for whether it **needs** high detail.\n\nFor each request, charge it at the detail it needs (\`high\` if the flag is 1, else \`low\`) and print: \`<name> <chosen_detail> <cost>\`.\n\nThen print three summary lines:\n- \`ALL_LOW <cost>\`: total cost if **every** request used low detail.\n- \`ALL_HIGH <cost>\`: total cost if **every** request used high detail.\n- \`SAVINGS <cost>\`: \`ALL_HIGH\` minus \`ALL_LOW\` — the money the router can save by routing to low wherever possible.",
+      challenge_story: "Your vision API is bleeding money. Every request was being sent at **high detail** by default, gorgeous transcriptions of serial numbers nobody needed, at full token price. You're shipping a **detail router**: a question like 'is there a dog in this photo?' goes \`low\`, while 'read the fine print on this contract' needs \`high\`. Each detail level produces a different image-token count, and the model bills input and output tokens at different rates. Build the router that prices every request at its chosen detail and reports, to the exact cent-fraction, how much you save over the old always-high policy, the number that justifies the whole project to finance.",
+      challenge_statement: "Input tokens (image + text) are billed at **$3 per 1,000,000 tokens**; output tokens at **$15 per 1,000,000 tokens**. Every cost is reported to **exactly 6 decimal places**, prefixed with \`$\`.\n\nEach request supplies the image-token count it would use at **low** detail and at **high** detail, plus its text and output token counts, and a flag for whether it **needs** high detail.\n\nFor each request, charge it at the detail it needs (\`high\` if the flag is 1, else \`low\`) and print: \`<name> <chosen_detail> <cost>\`.\n\nThen print three summary lines:\n- \`ALL_LOW <cost>\`: total cost if **every** request used low detail.\n- \`ALL_HIGH <cost>\`: total cost if **every** request used high detail.\n- \`SAVINGS <cost>\`: \`ALL_HIGH\` minus \`ALL_LOW\`, the money the router can save by routing to low wherever possible.",
       challenge_input_format: "The first line is an integer `n`: the number of requests.\n\nEach of the next `n` lines has: `name low_img high_img text output needs`, space-separated, where `low_img`/`high_img` are image-token counts at each detail, `text`/`output` are token counts, and `needs` is 1 (must use high) or 0 (low is fine).",
       challenge_output_format: "Print `n` per-request lines (`<name> <chosen_detail> $<cost>`), then `ALL_LOW`, `ALL_HIGH`, and `SAVINGS` lines, each cost as `$` plus exactly 6 decimals.",
       challenge_constraints: [
@@ -1426,7 +1426,7 @@ total cost: $0.006222`,
         { input: "2\nreceipt 800 4000 40 150 1\nbanner 800 4000 40 150 0", output: "receipt high $0.014370\nbanner low $0.004770\nALL_LOW $0.009540\nALL_HIGH $0.028740\nSAVINGS $0.019200", explanation: "receipt needs high: (4000+40)*3 + 150*15 = 14370 micro-dollars = $0.014370. banner is fine at low: (800+40)*3 + 150*15 = 4770 → $0.004770. All-low totals $0.009540, all-high $0.028740, so routing saves $0.019200." },
         { input: "1\nchip 256 4096 40 150 1", output: "chip high $0.014658\nALL_LOW $0.003138\nALL_HIGH $0.014658\nSAVINGS $0.011520", explanation: "A single high-detail OCR request: (4096+40)*3 + 150*15 = 14658 → $0.014658, and the all-low baseline shows what detail routing would have cost if low were acceptable." },
       ],
-      challenge_notes: "Computing the cost in integer **micro-dollars** (`input_tokens*3 + output_tokens*15`, since the rate is per 1,000,000) sidesteps float rounding entirely — the value is already cost times 1,000,000. Splitting it into a whole-dollar part and a 6-digit fractional part gives an exact, unambiguous string every time.",
+      challenge_notes: "Computing the cost in integer **micro-dollars** (`input_tokens*3 + output_tokens*15`, since the rate is per 1,000,000) sidesteps float rounding entirely, the value is already cost times 1,000,000. Splitting it into a whole-dollar part and a 6-digit fractional part gives an exact, unambiguous string every time.",
       challenge_hints: [
         "With rates of $3 and $15 per 1,000,000 tokens, `input*3 + output*15` is exactly the cost in micro-dollars (millionths). No division needed until you format.",
         "To format micro-dollars `m`: dollars = `m // 1_000_000`, fractional 6 digits = `str(m % 1_000_000).zfill(6)`.",
@@ -1531,7 +1531,7 @@ main()
 
 ## What it is
 
-**Image prompting** is combining a text instruction with an image in one request so the words steer what the model reports about the picture. The image is the evidence; the prompt is the question, the format, and the constraints. From earlier lessons you already know both the words and the picture become tokens in one shared context — so the instruction literally sits next to the image and shapes the prediction.
+**Image prompting** is combining a text instruction with an image in one request so the words steer what the model reports about the picture. The image is the evidence; the prompt is the question, the format, and the constraints. From earlier lessons you already know both the words and the picture become tokens in one shared context, so the instruction literally sits next to the image and shapes the prediction.
 
 A bare image invites a generic description. A pointed instruction turns the model into a specific tool: a counter, an extractor, a classifier, a grader.
 
@@ -1539,9 +1539,9 @@ A bare image invites a generic description. A pointed instruction turns the mode
 
 Your text does three jobs at once, each pulling the answer in a direction:
 
-1. **Task** — what to do: describe, count, locate, compare, judge.
-2. **Scope** — what to look at: "only the price tags," "ignore the background."
-3. **Format** — how to answer: "one word," "JSON with keys color and count," "yes or no."
+1. **Task**: what to do: describe, count, locate, compare, judge.
+2. **Scope**: what to look at: "only the price tags," "ignore the background."
+3. **Format**: how to answer: "one word," "JSON with keys color and count," "yes or no."
 
 \`\`\`python
 content = [
@@ -1566,7 +1566,7 @@ Steering with text is what turns a vision model from a party trick into a reliab
 
 ## The mental model to keep
 
-The picture is the dataset; your prompt is the query. **Aim the words and you choose which facts the image gives up** — a sharp instruction in front of the same pixels is the difference between a rambling caption and the one number you needed.`,
+The picture is the dataset; your prompt is the query. **Aim the words and you choose which facts the image gives up**: a sharp instruction in front of the same pixels is the difference between a rambling caption and the one number you needed.`,
       key_terms: [
         { term: "Image prompting", definition: "Pairing a text instruction with an image so the words steer what the model reports about it." },
         { term: "Instruction scope", definition: "The part of a prompt that limits what the model should look at, like 'only the price tags.'" },
@@ -1742,7 +1742,7 @@ text image`,
       ],
       challenge_title: "The Instruction Auditor",
       challenge_description: "Compare what each image prompt asked the model to report against what the model actually returned, score how faithfully it followed the instruction, and flag missing and extra fields.",
-      challenge_story: "You run a quality dashboard for a vision pipeline. Every request pairs an image with an instruction listing the exact fields the model should report — say \`merchant\`, \`date\`, \`total\`. The model doesn't always comply: sometimes it omits a requested field, sometimes it volunteers extra fields nobody asked for (chatty drift that bloats your tokens). You need an **instruction auditor** that, for every response, computes a follow-rate score, names the fields that went missing, and names the extras the model threw in — so you can tell which prompts steer cleanly and which need tightening.",
+      challenge_story: "You run a quality dashboard for a vision pipeline. Every request pairs an image with an instruction listing the exact fields the model should report, say \`merchant\`, \`date\`, \`total\`. The model doesn't always comply: sometimes it omits a requested field, sometimes it volunteers extra fields nobody asked for (chatty drift that bloats your tokens). You need an **instruction auditor** that, for every response, computes a follow-rate score, names the fields that went missing, and names the extras the model threw in, so you can tell which prompts steer cleanly and which need tightening.",
       challenge_statement: "Every request asks the model to report the same set of **requested** fields. For each response, you are given the fields the model actually **reported**.\n\nFor each response, in input order:\n\n1. Compute its **score**: the count of requested fields that appear in the response, times 100, integer-divided by the number of requested fields (\`hits * 100 // R\`).\n2. **missing** = requested fields not reported, in the order they appear in the requested list.\n3. **extra** = reported fields that were not requested, in the order they appear in the response.\n\nPrint one line per response, starting with \`<name> <score>\`. If there are missing fields, append \` MISSING \` and the missing names joined by commas. If there are extra fields, append \` EXTRA \` and the extra names joined by commas (MISSING before EXTRA when both occur).\n\nFinally print \`AVG <a>\` where \`a\` is the integer average of all scores (\`sum_of_scores // n\`).",
       challenge_input_format: "The first line is an integer `n`: the number of responses.\n\nThe second line lists the requested fields, space-separated (this set is the same for all responses).\n\nEach of the next `n` lines is `name|reported`, where `reported` is a space-separated list of fields the model returned. The reported list may be empty (nothing after the `|`).",
       challenge_output_format: "Print `n` per-response lines as described, then one `AVG <a>` line.",
@@ -1838,7 +1838,7 @@ main()
 
 ## What it is
 
-**Multi-image prompting** is putting more than one image in a single request so the model can compare, sequence, or reason across them. **Video frame sampling** is the special case where those images are stills pulled from a video at a chosen rate — one frame per second, every tenth frame, or however dense you need.
+**Multi-image prompting** is putting more than one image in a single request so the model can compare, sequence, or reason across them. **Video frame sampling** is the special case where those images are stills pulled from a video at a chosen rate, one frame per second, every tenth frame, or however dense you need.
 
 The model treats the frames as an ordered list of pictures, not as motion. It infers what changed between them the way you would by flipping through photos, not by watching playback.
 
@@ -1873,7 +1873,7 @@ Sequences unlock comparison tasks, but the trade-offs are sharp:
 
 ## The mental model to keep
 
-A model never watches video; it flips through a stack of stills you chose. **You decide how many frames to send and label their order** — sampling rate trades recall against cost, and without labels the model cannot tell before from after.`,
+A model never watches video; it flips through a stack of stills you chose. **You decide how many frames to send and label their order**: sampling rate trades recall against cost, and without labels the model cannot tell before from after.`,
       key_terms: [
         { term: "Multi-image prompt", definition: "A request containing more than one image so the model can compare or sequence them." },
         { term: "Frame sampling", definition: "Pulling still images from a video at a chosen rate to feed a vision model." },
@@ -2060,7 +2060,7 @@ total image tokens: 1024`,
         { input: "4 2 256\n50\n8\n10 11 20 21 90 91 95 96", output: "SAMPLED 4\nTOKENS 1024\nCUTS 1\nDURATION 2.00", explanation: "Step 2 samples indices 0,2,4,6 -> brightness 10,20,90,95 (k=4, tokens 4*256=1024). Consecutive diffs are 10, 70, 5; only 70 exceeds 50, so 1 cut. Duration 8/4 = 2.00s." },
         { input: "30 1 100\n30\n3\n0 100 0", output: "SAMPLED 3\nTOKENS 300\nCUTS 2\nDURATION 0.10", explanation: "Step 1 samples all 3 frames (300 tokens). Diffs 100 and 100 both exceed 30, so 2 cuts. Duration 3/30 = 0.10s." },
       ],
-      challenge_notes: "Sampling at fixed indices is the simplest scheme; real pipelines also sample by timestamp or only on detected motion. The strictly-greater cut test and the 2-decimal duration keep the output deterministic. Notice how a larger step shrinks both the token bill and the chance of catching a fast event between samples -- the recall-vs-cost dial from the lesson, made concrete.",
+      challenge_notes: "Sampling at fixed indices is the simplest scheme; real pipelines also sample by timestamp or only on detected motion. The strictly-greater cut test and the 2-decimal duration keep the output deterministic. Notice how a larger step shrinks both the token bill and the chance of catching a fast event between samples, the recall-vs-cost dial from the lesson, made concrete.",
       challenge_hints: [
         "Get the sampled indices with `range(0, n, step)`; `k` is the length of that range.",
         "For cuts, walk the sampled indices pairwise and test `abs(b[cur] - b[prev]) > thresh`.",
@@ -2163,7 +2163,7 @@ Editing is where vision generation earns its keep in real products, with its own
 
 ## The mental model to keep
 
-Editing is generation that starts from your image, not from noise. **The strength dial sets how far it drifts, and the mask says which pixels it may touch** — get those two right and you change exactly one thing while the rest of the picture stays put.`,
+Editing is generation that starts from your image, not from noise. **The strength dial sets how far it drifts, and the mask says which pixels it may touch**: get those two right and you change exactly one thing while the rest of the picture stays put.`,
       key_terms: [
         { term: "Image-to-image", definition: "Generating a new image starting from an existing one plus a prompt, keeping its structure." },
         { term: "Inpainting", definition: "Editing only a masked region of an image while preserving everything outside the mask." },
@@ -2288,7 +2288,7 @@ grid: [[1, 2, 3], [4, 0, 0], [7, 0, 0]]`,
             "High strength would drift far enough to alter the pose or face.",
             "Low strength keeps the structure and applies only the gentle change."
           ],
-          output: "Low strength — it preserves the original while applying a subtle shift."
+          output: "Low strength, it preserves the original while applying a subtle shift."
         },
         {
           number: 2, difficulty: "medium",
@@ -2344,7 +2344,7 @@ grid: [[1, 2, 3], [4, 0, 0], [7, 0, 0]]`,
       ],
       challenge_title: "The Inpaint Engine",
       challenge_description: "Apply one masked edit to an image grid: fill the masked rectangle from the prompt, count how many pixels actually changed, and print the resulting image.",
-      challenge_story: "You're building the core of an **inpainting engine**. The image is a grid of integer pixel values, and the editor marks a rectangular **mask** — 'replace this region with X' — while every pixel *outside* the mask must stay exactly as it was. That's the whole promise of inpainting: change only the masked region, leave the rest of the photo untouched. Your engine fills the masked rectangle, reports how many pixels it actually changed (painting a pixel the color it already was doesn't count), and outputs the final image.",
+      challenge_story: "You're building the core of an **inpainting engine**. The image is a grid of integer pixel values, and the editor marks a rectangular **mask**: 'replace this region with X', while every pixel *outside* the mask must stay exactly as it was. That's the whole promise of inpainting: change only the masked region, leave the rest of the photo untouched. Your engine fills the masked rectangle, reports how many pixels it actually changed (painting a pixel the color it already was doesn't count), and outputs the final image.",
       challenge_statement: "You have a grid of \`rows\` x \`cols\` integer pixels. A single rectangular mask is given by its inclusive corners \`r0 c0 r1 c1\` (with \`0 <= r0 <= r1 < rows\` and \`0 <= c0 <= c1 < cols\`) and a \`fill\` value.\n\nFor every pixel **inside** the mask rectangle, set it to \`fill\`. Leave every pixel **outside** the mask unchanged. Count a pixel as **changed** only if its value was different from \`fill\` before the edit.\n\nPrint, in order:\n1. \`CHANGED <c>\` where \`c\` is how many pixels actually changed value.\n2. The final grid: \`rows\` lines, each with \`cols\` space-separated integers.",
       challenge_input_format: "The first line has two integers `rows cols`.\n\nThe next `rows` lines each have `cols` space-separated integers: the starting pixel values.\n\nThe final line has five integers `r0 c0 r1 c1 fill`: the mask corners and the fill value.",
       challenge_output_format: "Print `CHANGED <c>` first, then the final grid as `rows` lines of `cols` space-separated integers.",
@@ -2354,10 +2354,10 @@ grid: [[1, 2, 3], [4, 0, 0], [7, 0, 0]]`,
         "0 ≤ r0 ≤ r1 < rows and 0 ≤ c0 ≤ c1 < cols",
       ],
       challenge_examples: [
-        { input: "3 3\n1 2 3\n4 5 6\n7 8 9\n1 1 2 2 0", output: "CHANGED 4\n1 2 3\n4 0 0\n7 0 0", explanation: "The mask covers (1,1)=5, (1,2)=6, (2,1)=8, (2,2)=9 — all set to 0, so 4 pixels changed. The first row and first column, outside the mask, are untouched." },
+        { input: "3 3\n1 2 3\n4 5 6\n7 8 9\n1 1 2 2 0", output: "CHANGED 4\n1 2 3\n4 0 0\n7 0 0", explanation: "The mask covers (1,1)=5, (1,2)=6, (2,1)=8, (2,2)=9, all set to 0, so 4 pixels changed. The first row and first column, outside the mask, are untouched." },
         { input: "2 2\n9 9\n9 9\n0 0 1 1 9", output: "CHANGED 0\n9 9\n9 9", explanation: "The mask covers the whole grid but every pixel is already 9, so filling with 9 changes nothing." },
       ],
-      challenge_notes: "The heart of inpainting is the boundary: pixels inside the mask are repainted, pixels outside are pinned to the original. Counting only real changes (skipping pixels already equal to the fill) mirrors how production editors report 'pixels touched' for undo and cost accounting. The nested loop over the masked rectangle is the whole operation — no clamping needed here since the mask is guaranteed in-bounds.",
+      challenge_notes: "The heart of inpainting is the boundary: pixels inside the mask are repainted, pixels outside are pinned to the original. Counting only real changes (skipping pixels already equal to the fill) mirrors how production editors report 'pixels touched' for undo and cost accounting. The nested loop over the masked rectangle is the whole operation, no clamping needed here since the mask is guaranteed in-bounds.",
       challenge_hints: [
         "The mask test is simply `r0 <= r <= r1 and c0 <= c <= c1` for a cell at row `r`, column `c`.",
         "Inside the mask, increment the counter only when `grid[r][c] != fill`, then set `grid[r][c] = fill`.",

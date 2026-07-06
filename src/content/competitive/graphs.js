@@ -11,11 +11,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["bfs", "graph", "shortest-path", "knowledge-graph"],
     story:
-      "Your retrieval-augmented assistant stores facts as a **knowledge graph**: each entity is a node, and an edge means two entities are directly related (\"Paris\" — \"France\", \"France\" — \"Europe\"). To answer a multi-hop question, the assistant walks from one entity to another along these relations. The fewer hops between two entities, the tighter their connection.\n\nGiven the graph, find the **minimum number of hops** to travel from a source entity to a target entity. Because every edge counts the same, this is a textbook **breadth-first search**.",
+      "Your retrieval-augmented assistant stores facts as a **knowledge graph**: each entity is a node, and an edge means two entities are directly related (\"Paris\", \"France\", \"France\", \"Europe\"). To answer a multi-hop question, the assistant walks from one entity to another along these relations. The fewer hops between two entities, the tighter their connection.\n\nGiven the graph, find the **minimum number of hops** to travel from a source entity to a target entity. Because every edge counts the same, this is a textbook **breadth-first search**.",
     statement:
       "You are given an undirected knowledge graph with `N` entities (numbered `0..N-1`) and `M` relations. Each relation connects two entities and can be traversed in either direction. Given a `source` entity and a `target` entity, output the **smallest number of edges** on any path from `source` to `target`.\n\nIf `source == target`, the distance is `0`. If the target cannot be reached from the source, output `-1`.",
     input_format:
-      "Line 1: two integers `N M` — the number of entities and the number of relations.\nNext `M` lines: each contains two integers `u v` meaning there is an undirected edge between entity `u` and entity `v`.\nLast line: two integers `source target`.",
+      "Line 1: two integers `N M`, the number of entities and the number of relations.\nNext `M` lines: each contains two integers `u v` meaning there is an undirected edge between entity `u` and entity `v`.\nLast line: two integers `source target`.",
     output_format:
       "Print a single integer: the minimum number of hops from `source` to `target`, or `-1` if `target` is unreachable.",
     constraints: [
@@ -35,11 +35,11 @@ export default [
         input: "5 2\n0 1\n2 3\n0 4",
         output: "-1",
         explanation:
-          "There are 5 entities but only 2 edges (0–1 and 2–3); the last line `0 4` is the query. Entity 4 has no edges at all, so it is isolated and cannot be reached from entity 0. The answer is -1.",
+          "There are 5 entities but only 2 edges (0, 1 and 2, 3); the last line `0 4` is the query. Entity 4 has no edges at all, so it is isolated and cannot be reached from entity 0. The answer is -1.",
       },
     ],
     notes:
-      "BFS explores the graph in layers, so the first time you reach a node you have already found its shortest hop count. Use an explicit queue and a `dist` array initialized to `-1` (meaning unvisited); set `dist[source] = 0` before you start. Build an adjacency list, not an adjacency matrix — `N` can be large.",
+      "BFS explores the graph in layers, so the first time you reach a node you have already found its shortest hop count. Use an explicit queue and a `dist` array initialized to `-1` (meaning unvisited); set `dist[source] = 0` before you start. Build an adjacency list, not an adjacency matrix, `N` can be large.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int N, M;\n    cin >> N >> M;\n    // TODO: build an adjacency list from the M undirected edges.\n    // Read source and target, then run BFS and print dist[target] (or -1).\n\n    return 0;\n}\n",
     solution_cpp:
@@ -50,7 +50,7 @@ export default [
       { input: "4 3\n0 1\n1 2\n2 3\n2 2", expected_output: "0" },
     ],
     editorial:
-      "Breadth-first search visits nodes in order of increasing distance from the source, so the moment a node is dequeued for the first time its recorded distance is already optimal. Initializing `dist` to `-1` does double duty: it marks unvisited nodes and provides the exact answer for unreachable targets. The whole search is O(N + M) because each node and edge is processed once. This is precisely how a knowledge-graph reasoner measures \"relational closeness\" between entities, and the layered expansion is the unweighted special case of Dijkstra's algorithm — when every edge weight is 1, a plain queue replaces the priority queue.",
+      "Breadth-first search visits nodes in order of increasing distance from the source, so the moment a node is dequeued for the first time its recorded distance is already optimal. Initializing `dist` to `-1` does double duty: it marks unvisited nodes and provides the exact answer for unreachable targets. The whole search is O(N + M) because each node and edge is processed once. This is precisely how a knowledge-graph reasoner measures \"relational closeness\" between entities, and the layered expansion is the unweighted special case of Dijkstra's algorithm, when every edge weight is 1, a plain queue replaces the priority queue.",
   },
   {
     id: "cp-graphs-2",
@@ -63,11 +63,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["dijkstra", "graph", "shortest-path", "priority-queue", "retrieval"],
     story:
-      "A vector-retrieval system links chunks of a document corpus into a **similarity graph**. Each edge carries a positive integer **cost** — how expensive it is to \"jump\" between two chunks (lower cost = more similar). To assemble context for an answer, the system hops from a starting chunk to a goal chunk along the cheapest possible route.\n\nWith non-negative edge weights, the cheapest route is found by **Dijkstra's algorithm**: always expand the frontier node with the smallest known cost so far, using a min-heap.",
+      "A vector-retrieval system links chunks of a document corpus into a **similarity graph**. Each edge carries a positive integer **cost**: how expensive it is to \"jump\" between two chunks (lower cost = more similar). To assemble context for an answer, the system hops from a starting chunk to a goal chunk along the cheapest possible route.\n\nWith non-negative edge weights, the cheapest route is found by **Dijkstra's algorithm**: always expand the frontier node with the smallest known cost so far, using a min-heap.",
     statement:
       "You are given an undirected similarity graph with `N` chunks (numbered `0..N-1`) and `M` weighted edges. Each edge `(u, v, w)` means chunks `u` and `v` are connected with traversal cost `w` (a positive integer), traversable in either direction. Given a `source` chunk and a `target` chunk, output the **minimum total cost** of any path from `source` to `target`.\n\nIf `source == target` the cost is `0`. If the target is unreachable, output `-1`.",
     input_format:
-      "Line 1: two integers `N M`.\nNext `M` lines: each contains three integers `u v w` — an undirected edge between `u` and `v` with cost `w`.\nLast line: two integers `source target`.",
+      "Line 1: two integers `N M`.\nNext `M` lines: each contains three integers `u v w`, an undirected edge between `u` and `v` with cost `w`.\nLast line: two integers `source target`.",
     output_format:
       "Print a single integer: the minimum total path cost from `source` to `target`, or `-1` if `target` is unreachable.",
     constraints: [
@@ -103,7 +103,7 @@ export default [
       { input: "3 3\n0 1 10\n1 2 10\n0 2 5\n0 2", expected_output: "5" },
     ],
     editorial:
-      "Dijkstra's algorithm grows a shortest-path tree by repeatedly settling the unsettled node with the smallest tentative distance. With a binary heap the cost is O((N + M) log N). The correctness hinges on non-negative weights: once a node is popped with its minimum distance, no later (necessarily longer) path can improve it. The 'lazy deletion' trick — pushing duplicates and discarding stale pops with `if (d > dist[u]) continue;` — avoids needing a decrease-key operation. In a real retrieval pipeline these edge costs come from embedding distances, and the cheapest path corresponds to the most semantically coherent chain of context chunks.",
+      "Dijkstra's algorithm grows a shortest-path tree by repeatedly settling the unsettled node with the smallest tentative distance. With a binary heap the cost is O((N + M) log N). The correctness hinges on non-negative weights: once a node is popped with its minimum distance, no later (necessarily longer) path can improve it. The 'lazy deletion' trick, pushing duplicates and discarding stale pops with `if (d > dist[u]) continue;`, avoids needing a decrease-key operation. In a real retrieval pipeline these edge costs come from embedding distances, and the cheapest path corresponds to the most semantically coherent chain of context chunks.",
   },
   {
     id: "cp-graphs-3",
@@ -116,7 +116,7 @@ export default [
     memory_limit_mb: 256,
     tags: ["topological-sort", "dag", "kahn", "priority-queue", "scheduling"],
     story:
-      "A neural network's forward pass is a **directed acyclic graph** of compute steps: a layer can only run once all the layers feeding into it have produced their outputs. The scheduler must pick a linear order in which to execute the steps that respects every dependency — a **topological order**.\n\nWhen several steps are simultaneously ready, the scheduler breaks ties by smallest step ID for deterministic, reproducible runs. This means you must output the **lexicographically smallest** valid topological order. And if the dependency graph accidentally contains a **cycle**, no valid order exists at all.",
+      "A neural network's forward pass is a **directed acyclic graph** of compute steps: a layer can only run once all the layers feeding into it have produced their outputs. The scheduler must pick a linear order in which to execute the steps that respects every dependency, a **topological order**.\n\nWhen several steps are simultaneously ready, the scheduler breaks ties by smallest step ID for deterministic, reproducible runs. This means you must output the **lexicographically smallest** valid topological order. And if the dependency graph accidentally contains a **cycle**, no valid order exists at all.",
     statement:
       "You are given a directed graph of `N` compute steps (numbered `0..N-1`) with `M` dependency edges. A directed edge `u → v` means step `u` must run **before** step `v`.\n\nOutput the **lexicographically smallest** topological ordering of all `N` steps: whenever more than one step has all of its prerequisites already scheduled, choose the one with the **smallest index** next. If the graph contains a cycle (so no topological order exists), output the single word `CYCLE` instead.",
     input_format:
@@ -155,6 +155,6 @@ export default [
       { input: "4 2\n0 1\n0 2", expected_output: "0 1 2 3" },
     ],
     editorial:
-      "Kahn's algorithm builds a topological order by repeatedly emitting a node whose in-degree has dropped to zero — every prerequisite already placed. Using a plain queue gives *some* valid order in O(N + M); swapping the queue for a min-heap forces the lexicographically smallest one, at a cost of O((N + M) log N). The cycle check is free: a directed acyclic graph always lets you drain all N nodes, so if the emitted count falls short, the leftover nodes sit inside a cycle that can never reach in-degree 0. This is exactly how ML compilers and dataflow schedulers (TensorFlow, PyTorch's autograd engine, build systems) linearize a dependency DAG before execution.",
+      "Kahn's algorithm builds a topological order by repeatedly emitting a node whose in-degree has dropped to zero, every prerequisite already placed. Using a plain queue gives *some* valid order in O(N + M); swapping the queue for a min-heap forces the lexicographically smallest one, at a cost of O((N + M) log N). The cycle check is free: a directed acyclic graph always lets you drain all N nodes, so if the emitted count falls short, the leftover nodes sit inside a cycle that can never reach in-degree 0. This is exactly how ML compilers and dataflow schedulers (TensorFlow, PyTorch's autograd engine, build systems) linearize a dependency DAG before execution.",
   },
 ];

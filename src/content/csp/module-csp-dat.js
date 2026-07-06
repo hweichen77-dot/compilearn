@@ -7,7 +7,7 @@ export default {
     "category": "apcsp",
     "order": 102,
     "track": "apcsp",
-    "unit": "Big Idea 2 — Data",
+    "unit": "Big Idea 2, Data",
     "tags": [
       "binary",
       "compression",

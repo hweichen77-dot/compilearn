@@ -19,15 +19,15 @@ export default {
       title: "The Message List",
       concept: "Messages",
       xp_reward: 10,
-      explanation: `Open the developer console while chatting with an AI app and you won't see a paragraph being sent. You'll see a list — a few labeled boxes, each tagged with who said it. That list *is* the request. Once you see chat as a list of messages instead of a stream of text, the whole API stops feeling like magic.
+      explanation: `Open the developer console while chatting with an AI app and you won't see a paragraph being sent. You'll see a list, a few labeled boxes, each tagged with who said it. That list *is* the request. Once you see chat as a list of messages instead of a stream of text, the whole API stops feeling like magic.
 
 ## What it is
 
 A chat request is an **ordered list of messages**. Each message is a small object with two parts: a **role** (who is speaking) and **content** (what they said). There are three roles you'll use constantly:
 
-- **system** — instructions that set up how the assistant should behave.
-- **user** — what the human typed.
-- **assistant** — what the model said back.
+- **system**: instructions that set up how the assistant should behave.
+- **user**: what the human typed.
+- **assistant**: what the model said back.
 
 The model reads the *entire list*, top to bottom, and predicts one thing: the next **assistant** message. That's the whole contract. You hand it a labeled transcript; it writes the next assistant line.
 
@@ -42,7 +42,7 @@ messages = [
 ]
 \`\`\`
 
-You send that list. The model treats it as one big input — the **context** from the prediction lessons — and continues it with an assistant turn:
+You send that list. The model treats it as one big input, the **context** from the prediction lessons, and continues it with an assistant turn:
 
 \`\`\`python
 reply = {"role": "assistant", "content": "A token is a chunk of text..."}
@@ -55,7 +55,7 @@ Order matters. The roles tell the model who said what, but the *sequence* tells 
 Thinking in messages instead of one big string unlocks everything else:
 
 - **Roles separate instructions from input.** The system role is for rules; the user role is for the actual request. Mixing them is a common beginner mistake.
-- **The output is just another message.** The assistant's reply is a message of the same shape — which is why you can append it back and keep going.
+- **The output is just another message.** The assistant's reply is a message of the same shape, which is why you can append it back and keep going.
 - **It's all one prediction.** No matter how many messages you send, the model still does one job: predict the next assistant message over the whole list.
 
 ## The mental model to keep
@@ -64,11 +64,11 @@ A chat request is a **script with labeled speakers**, and the model is an actor 
       key_terms: [
         { term: "Message", definition: "A small object with a role and content; the basic unit of a chat request." },
         { term: "Role", definition: "A label on a message saying who is speaking: system, user, or assistant." },
-        { term: "Content", definition: "The actual text of a message — the words attached to a role." }
+        { term: "Content", definition: "The actual text of a message, the words attached to a role." }
       ],
       callouts: [
         { type: "analogy", title: "It's a script with named speakers", content: "Picture a screenplay: each line is tagged SYSTEM, USER, or ASSISTANT. The model reads the whole script and writes the next ASSISTANT line. Roles are the speaker names; content is the dialogue.", position: "before" },
-        { type: "insight", title: "The reply is just another message", content: "The model's output has the exact same shape as the input messages — role 'assistant', plus content. That sameness is what lets you append it and continue the conversation later.", position: "after" }
+        { type: "insight", title: "The reply is just another message", content: "The model's output has the exact same shape as the input messages, role 'assistant', plus content. That sameness is what lets you append it and continue the conversation later.", position: "after" }
       ],
       concept_diagram: {
         title: "From a message list to the next reply",
@@ -183,7 +183,7 @@ user: What is a token?`,
             "With the question misplaced and the user message empty, the model has weak signal about what to actually answer.",
             "Fix: keep setup in system, put the real request in a user message."
           ],
-          output: "Setup belongs in system; the actual request belongs in a user message — separating them gives clearer signal."
+          output: "Setup belongs in system; the actual request belongs in a user message, separating them gives clearer signal."
         }
       ],
       comparison_tables: [
@@ -222,11 +222,11 @@ user: What is a token?`,
       ],
       hints: [
         "messages is a list of dicts; loop with 'for m in messages'.",
-        "Each dict has keys 'role' and 'content' — access them with m['role'] and m['content'].",
+        "Each dict has keys 'role' and 'content', access them with m['role'] and m['content'].",
         "An f-string like f\"{m['role']}: {m['content']}\" prints them on one line."
       ],
       challenge_title: "Transcript Renderer",
-      challenge_description: "Turn a raw message list into a labeled, numbered transcript — the view every chat-debugging tool ships — and report how many messages each role contributed.",
+      challenge_description: "Turn a raw message list into a labeled, numbered transcript, the view every chat-debugging tool ships, and report how many messages each role contributed.",
       challenge_story: "You're building the request inspector for an AI chat platform. When a conversation misbehaves, support engineers paste the raw message list and need to *see* it: who spoke, in what order, and how the back-and-forth flows. Your renderer takes the ordered list of \`{role, content}\` messages and prints a clean transcript. The **system** message is setup, not a turn, so it gets a \`[setup]\` tag. Every **user** and **assistant** message is a real turn and gets a sequential turn number. Finally you print a one-line role tally so engineers can spot a malformed request (say, two system messages, or a missing assistant reply) at a glance.",
       challenge_statement: "You are given an ordered list of chat messages. Render a transcript:\n\n1. For each message in order, print one line.\n2. A message with role \`system\` is setup: print \`[setup] System: <content>\`.\n3. A message with role \`user\` or \`assistant\` is a **turn**. Number turns starting at 1 in the order they appear (system messages do **not** advance the turn counter). Print \`[<turn>] <Role>: <content>\`, where \`<Role>\` is the role capitalized (\`User\`, \`Assistant\`).\n4. After all messages, print one summary line: \`system=<s> user=<u> assistant=<a>\` with the count of each role.",
       challenge_input_format: "The first line is an integer `n`: the number of messages.\n\nEach of the next `n` lines is one message: a role (`system`, `user`, or `assistant`), a single space, then the content (which may contain spaces).",
@@ -240,7 +240,7 @@ user: What is a token?`,
         { input: "4\nsystem Be concise.\nuser Hello\nassistant Hi there.\nuser Bye", output: "[setup] System: Be concise.\n[1] User: Hello\n[2] Assistant: Hi there.\n[3] User: Bye\nsystem=1 user=2 assistant=1", explanation: "The system line is tagged `[setup]` and never advances the turn counter; the three user/assistant turns are numbered 1, 2, 3." },
         { input: "1\nsystem You are a router.", output: "[setup] System: You are a router.\nsystem=1 user=0 assistant=0", explanation: "A request can be system-only; there are no turns, so the tally shows zero user and zero assistant messages." },
       ],
-      challenge_notes: "Splitting each line on the *first* space separates the role from content that may itself contain spaces — `line.split(' ', 1)` does exactly that. Keeping the turn counter independent of system messages mirrors how real APIs treat the system prompt as configuration, not conversation.",
+      challenge_notes: "Splitting each line on the *first* space separates the role from content that may itself contain spaces, `line.split(' ', 1)` does exactly that. Keeping the turn counter independent of system messages mirrors how real APIs treat the system prompt as configuration, not conversation.",
       challenge_hints: [
         "Read `n`, then loop `n` times; split each line once on the first space into `role` and `content`.",
         "Keep a separate `turn` counter that you increment only for `user`/`assistant` messages.",
@@ -302,11 +302,11 @@ main()
       title: "System Prompts: Setting Behavior",
       concept: "System prompt",
       xp_reward: 10,
-      explanation: `Hand the same model two different first lines and you get two different assistants. "You are a terse senior engineer" produces clipped, technical answers. "You are a warm kindergarten teacher" produces gentle, simple ones. Same model, same question — the only difference is one message at the top. That message is the **system prompt**, and it's the cheapest, most powerful lever you have.
+      explanation: `Hand the same model two different first lines and you get two different assistants. "You are a terse senior engineer" produces clipped, technical answers. "You are a warm kindergarten teacher" produces gentle, simple ones. Same model, same question, the only difference is one message at the top. That message is the **system prompt**, and it's the cheapest, most powerful lever you have.
 
 ## What it is
 
-The **system prompt** is the first message in the list, with role \`system\`. It's not part of the back-and-forth chatter — it's the setup. It tells the model *who it is* and *how it should behave* for the entire conversation that follows. The user never sees it; the app supplies it.
+The **system prompt** is the first message in the list, with role \`system\`. It's not part of the back-and-forth chatter, it's the setup. It tells the model *who it is* and *how it should behave* for the entire conversation that follows. The user never sees it; the app supplies it.
 
 Think of it as the director's note to an actor before the scene starts: persona, tone, rules, and the format of the lines they should deliver.
 
@@ -323,9 +323,9 @@ messages = [
 
 Because the model reads top to bottom, the system message colors how it interprets and answers everything below it. A good system prompt usually covers a few things:
 
-- **Persona** — who the assistant is ("a careful legal assistant").
-- **Rules** — what it must or must not do ("never give medical advice").
-- **Format** — how the answer should look ("reply in one sentence", "return JSON").
+- **Persona**: who the assistant is ("a careful legal assistant").
+- **Rules**: what it must or must not do ("never give medical advice").
+- **Format**: how the answer should look ("reply in one sentence", "return JSON").
 
 Keep it specific. Vague setup ("be helpful") barely steers anything; concrete setup ("reply in under 20 words, no emojis") steers a lot.
 
@@ -334,7 +334,7 @@ Keep it specific. Vague setup ("be helpful") barely steers anything; concrete se
 The system prompt is where most behavior problems get fixed:
 
 - **Consistency.** It applies to every turn, so the persona doesn't drift halfway through the chat.
-- **Cheaper than fine-tuning.** You can completely change the assistant's behavior by editing one string — no retraining, no code changes elsewhere.
+- **Cheaper than fine-tuning.** You can completely change the assistant's behavior by editing one string, no retraining, no code changes elsewhere.
 - **It's still just text.** A determined user *can* push against it, and the model can still ignore parts of it. It's strong guidance, not an unbreakable law.
 
 ## The mental model to keep
@@ -346,7 +346,7 @@ The system prompt is the **director's note** delivered before the scene: it sets
         { term: "Output format", definition: "The shape the answer should take (length, structure, style), often specified in the system prompt." }
       ],
       callouts: [
-        { type: "analogy", title: "A director's note before the scene", content: "Before an actor performs, the director says: you're a nervous detective, keep it short, no slang. The system prompt is that note — it shapes every line the assistant delivers afterward.", position: "before" },
+        { type: "analogy", title: "A director's note before the scene", content: "Before an actor performs, the director says: you're a nervous detective, keep it short, no slang. The system prompt is that note, it shapes every line the assistant delivers afterward.", position: "before" },
         { type: "tip", title: "Be concrete, not vague", content: "'Be helpful' steers almost nothing. 'Reply in under 20 words, no emojis, plain English' steers a lot. Specific rules and formats are what actually change behavior.", position: "after" }
       ],
       concept_diagram: {
@@ -398,7 +398,7 @@ The system prompt is the **director's note** delivered before the scene: it sets
             "It must be the last message in the list"
           ],
           correct_index: 2,
-          explanation: "A system prompt is influential text, not an absolute law — the model can still deviate or be pushed against it."
+          explanation: "A system prompt is influential text, not an absolute law, the model can still deviate or be pushed against it."
         }
       ],
       participation_activities: [
@@ -437,7 +437,7 @@ first role: system`,
           title: "writing setup that actually steers behavior",
           steps: [
             { label: "Pick a persona", detail: "Decide who the assistant is. This frames its tone and knowledge.", code: '"You are a careful legal assistant."' },
-            { label: "Add rules", detail: "State hard constraints — what it must or must not do. These prevent unwanted behavior.", code: '"Never give medical advice. Cite the source clause."' },
+            { label: "Add rules", detail: "State hard constraints, what it must or must not do. These prevent unwanted behavior.", code: '"Never give medical advice. Cite the source clause."' },
             { label: "Specify the format", detail: "Tell it the shape of the answer so output is predictable and parseable.", code: '"Reply in one sentence, no emojis."' },
             { label: "Place it first", detail: "Put it as the system message at the top so it governs every later turn.", code: 'messages = [{"role": "system", "content": setup}, ...]' }
           ]
@@ -458,7 +458,7 @@ first role: system`,
           number: 2, difficulty: "medium",
           prompt: 'Your assistant starts polite but turns blunt after a few turns. The system prompt says only "be nice." How do you fix the drift?',
           steps: [
-            "'Be nice' is vague — it gives the model little concrete behavior to lock onto.",
+            "'Be nice' is vague, it gives the model little concrete behavior to lock onto.",
             "Replace it with specific, testable rules: tone, banned phrasing, and a format.",
             "For example: 'Always use a warm, encouraging tone. Never use sarcasm. End with one supportive sentence.'",
             "Because the system prompt applies to every turn, concrete rules keep the persona consistent instead of drifting."
@@ -498,7 +498,7 @@ first role: system`,
       reflections: [
         {
           prompt: "In your own words: why can editing one system prompt change an assistant's behavior more easily than changing the model itself?",
-          sampleAnswer: "The model's weights are frozen and expensive to change, but the system prompt is just text fed in at the top of every request. Because the model reads it first and lets it color every reply, swapping that one string reshapes persona, rules, and format instantly — no retraining, no code changes elsewhere. It's the cheapest place to steer behavior."
+          sampleAnswer: "The model's weights are frozen and expensive to change, but the system prompt is just text fed in at the top of every request. Because the model reads it first and lets it color every reply, swapping that one string reshapes persona, rules, and format instantly, no retraining, no code changes elsewhere. It's the cheapest place to steer behavior."
         }
       ],
       hints: [
@@ -507,8 +507,8 @@ first role: system`,
         "messages[0] is the first message; check its 'role' key to confirm it's 'system'."
       ],
       challenge_title: "The System-Prompt Router",
-      challenge_description: "Build the dispatcher that reads an incoming user message, picks the right persona's system prompt by keyword, and falls back to a default — the routing layer behind every multi-skill AI assistant.",
-      challenge_story: "Your company runs one chat endpoint that wears many hats: billing questions need a calm **billing specialist**, broken-checkout reports need a **senior engineer**, and greetings get a **friendly greeter**. The model is the same every time — only the **system prompt** changes. You're writing the router that sits in front of the model: it scans each incoming user message for trigger keywords and selects the matching system prompt. If several rules match, the **highest-priority** rule wins (rules are listed in priority order, first = highest). If nothing matches, the message gets the **default** system prompt so no request goes unanswered.",
+      challenge_description: "Build the dispatcher that reads an incoming user message, picks the right persona's system prompt by keyword, and falls back to a default, the routing layer behind every multi-skill AI assistant.",
+      challenge_story: "Your company runs one chat endpoint that wears many hats: billing questions need a calm **billing specialist**, broken-checkout reports need a **senior engineer**, and greetings get a **friendly greeter**. The model is the same every time, only the **system prompt** changes. You're writing the router that sits in front of the model: it scans each incoming user message for trigger keywords and selects the matching system prompt. If several rules match, the **highest-priority** rule wins (rules are listed in priority order, first = highest). If nothing matches, the message gets the **default** system prompt so no request goes unanswered.",
       challenge_statement: "You are given a set of routing rules and a batch of incoming user messages. For each message, choose its system prompt:\n\n1. Each rule is a **keyword** plus the **system prompt** to use when that keyword appears. Rules are given in **priority order** (the first rule is highest priority).\n2. A rule matches a message if its keyword appears as a **case-insensitive substring** of the message.\n3. If one or more rules match a message, use the system prompt of the **highest-priority** matching rule (the one appearing earliest in the rule list).\n4. If no rule matches, use the **default** system prompt.\n\nPrint the chosen system prompt for each message, one per line, in input order.",
       challenge_input_format: "The first line has two integers `n q`: the number of rules and the number of incoming messages.\n\nEach of the next `n` lines is one rule: a keyword (no spaces), a single space, then the system prompt text (which may contain spaces).\n\nThe next line is the default system prompt.\n\nEach of the final `q` lines is one incoming user message.",
       challenge_output_format: "Print `q` lines: the chosen system prompt for each message, in order.",
@@ -522,7 +522,7 @@ first role: system`,
         { input: "3 4\nrefund You are a billing specialist.\nbug You are a senior engineer.\nhello You are a friendly greeter.\nYou are a general assistant.\nI need a refund please\nThere is a bug in checkout\nhello there\nWhat is the weather", output: "You are a billing specialist.\nYou are a senior engineer.\nYou are a friendly greeter.\nYou are a general assistant.", explanation: "Each of the first three messages hits exactly one keyword; the last matches nothing and falls back to the default." },
         { input: "1 1\ncode You are a coder.\nYou are default.\nNothing matches here", output: "You are default.", explanation: "The keyword `code` does not appear in the message, so the default prompt is used." },
       ],
-      challenge_notes: "Routing by keyword is the simplest form of *intent classification* — real systems use a small model or embeddings, but the dispatch pattern is identical: classify the request, then swap in the matching system prompt. Lowercasing both the keyword and the message before checking `in` makes the match case-insensitive.",
+      challenge_notes: "Routing by keyword is the simplest form of *intent classification*, real systems use a small model or embeddings, but the dispatch pattern is identical: classify the request, then swap in the matching system prompt. Lowercasing both the keyword and the message before checking `in` makes the match case-insensitive.",
       challenge_hints: [
         "Store rules in a list so their index encodes priority; lower index = higher priority.",
         "For each message, scan rules in order and take the first whose keyword is a substring of the lowercased message.",
@@ -590,13 +590,13 @@ main()
       title: "Multi-Turn Conversations",
       concept: "Conversation history",
       xp_reward: 10,
-      explanation: `You tell a chatbot "my name is Sam." Five messages later it still calls you Sam — so it clearly remembers, right? Wrong. The model forgot you the instant it finished replying. The app remembered. Every single turn, it quietly resends the entire conversation so far. Understanding this trick is the difference between using chat and building chat.
+      explanation: `You tell a chatbot "my name is Sam." Five messages later it still calls you Sam, so it clearly remembers, right? Wrong. The model forgot you the instant it finished replying. The app remembered. Every single turn, it quietly resends the entire conversation so far. Understanding this trick is the difference between using chat and building chat.
 
 ## What it is
 
-A **multi-turn conversation** is back-and-forth: user, assistant, user, assistant. But the model is **stateless** — from the prediction lessons, it keeps nothing between requests. So how does turn five know about turn one?
+A **multi-turn conversation** is back-and-forth: user, assistant, user, assistant. But the model is **stateless**: from the prediction lessons, it keeps nothing between requests. So how does turn five know about turn one?
 
-The answer: the app stores the **conversation history** — the full list of messages — and resends *all of it* on every request. Each turn isn't "continue where we left off." It's a brand-new prediction over the whole transcript, including the model's own past replies.
+The answer: the app stores the **conversation history**: the full list of messages, and resends *all of it* on every request. Each turn isn't "continue where we left off." It's a brand-new prediction over the whole transcript, including the model's own past replies.
 
 ## How it works
 
@@ -612,33 +612,33 @@ history = [
 # The whole list is sent. The model "knows" the name only because it's right there in the input.
 \`\`\`
 
-The list grows every turn: append the user's new message, send everything, get a reply, append the reply, repeat. The model never "remembers" — the *list* carries the memory, and the model re-reads it from scratch each time.
+The list grows every turn: append the user's new message, send everything, get a reply, append the reply, repeat. The model never "remembers", the *list* carries the memory, and the model re-reads it from scratch each time.
 
 ## Why it matters
 
 This re-send mechanism explains a lot of real behavior:
 
 - **"Memory" is resent text.** The bot doesn't store your name. The app puts it back in the input every time. Start a fresh conversation and it's gone.
-- **History costs tokens, every turn.** Because the whole list is resent each time, long conversations get more expensive per turn — you're paying to re-read the entire transcript repeatedly.
-- **Old turns can fall off.** When the history outgrows the context window, the app must drop or summarize the oldest messages — and then the model genuinely "forgets" them.
+- **History costs tokens, every turn.** Because the whole list is resent each time, long conversations get more expensive per turn, you're paying to re-read the entire transcript repeatedly.
+- **Old turns can fall off.** When the history outgrows the context window, the app must drop or summarize the oldest messages, and then the model genuinely "forgets" them.
 
 ## The mental model to keep
 
-The model has **amnesia after every reply**. The conversation feels continuous only because the app hands it the entire transcript — including the model's own previous lines — at the start of every single turn.`,
+The model has **amnesia after every reply**. The conversation feels continuous only because the app hands it the entire transcript, including the model's own previous lines, at the start of every single turn.`,
       key_terms: [
         { term: "Multi-turn conversation", definition: "A back-and-forth exchange of user and assistant messages over several turns." },
         { term: "Conversation history", definition: "The full list of past messages the app stores and resends on each new turn." },
         { term: "Stateless", definition: "The model keeps nothing between requests; each call is a fresh prediction over the messages it's given." }
       ],
       callouts: [
-        { type: "analogy", title: "An actor with no memory between takes", content: "Imagine an actor who forgets everything the moment 'cut' is called. To shoot the next take, the director hands them the full script — including their own past lines — every time. That re-handing is the app resending history.", position: "before" },
+        { type: "analogy", title: "An actor with no memory between takes", content: "Imagine an actor who forgets everything the moment 'cut' is called. To shoot the next take, the director hands them the full script, including their own past lines, every time. That re-handing is the app resending history.", position: "before" },
         { type: "warning", title: "Memory is an illusion, and it isn't free", content: "The model stores nothing. The app resends the whole transcript each turn, so longer chats cost more tokens per turn, and very old messages eventually get dropped to fit the context window.", position: "after" }
       ],
       concept_diagram: {
         title: "How one back-and-forth turn works",
         steps: [
           { label: "Append the user turn", desc: "Add the human's new message to the stored history." },
-          { label: "Resend everything", desc: "The whole list — including past assistant replies — goes to the model." },
+          { label: "Resend everything", desc: "The whole list, including past assistant replies, goes to the model." },
           { label: "Model predicts fresh", desc: "Stateless, it re-reads the full transcript and writes the next reply." },
           { label: "Append the reply", desc: "Add the assistant message to history, ready for the next turn." }
         ]
@@ -727,7 +727,7 @@ messages resent next turn: 3`,
           steps: [
             { label: "Turn 1: user speaks", detail: "The user says their name. The app appends it to history.", code: 'history = [{"role": "user", "content": "I am Sam."}]' },
             { label: "Turn 1: append the reply", detail: "The model replies; the app appends that assistant message so it's saved too.", code: 'history.append({"role": "assistant", "content": "Hi Sam!"})' },
-            { label: "Turn 2: resend everything", detail: "On the next user message, the app sends the whole list — old turns included.", code: 'history.append(new_user_msg); model(history)' },
+            { label: "Turn 2: resend everything", detail: "On the next user message, the app sends the whole list, old turns included.", code: 'history.append(new_user_msg); model(history)' },
             { label: "Model re-reads from scratch", detail: "Stateless, the model reads the full transcript again and finds 'Sam' right there in the input.", code: "# name is in the resent history, not in memory" }
           ]
         }
@@ -738,10 +738,10 @@ messages resent next turn: 3`,
           prompt: "You close a chat where the bot knew your name, then open a brand-new conversation. Does it still know your name?",
           steps: [
             "The model is stateless and stored nothing from the old chat.",
-            "A new conversation starts with a fresh, empty history — your name isn't in it.",
+            "A new conversation starts with a fresh, empty history, your name isn't in it.",
             "Without that text resent in the input, the model has no way to know your name."
           ],
-          output: "No — a new conversation has no prior history to resend, so the name is gone."
+          output: "No, a new conversation has no prior history to resend, so the name is gone."
         },
         {
           number: 2, difficulty: "medium",
@@ -787,7 +787,7 @@ messages resent next turn: 3`,
       reflections: [
         {
           prompt: "In your own words: if the model is stateless and forgets after every reply, why does a chat feel like one continuous conversation?",
-          sampleAnswer: "Because the app, not the model, holds the memory. After each reply the app appends both the user message and the assistant message to a stored history, and on every new turn it resends that entire transcript. The model re-reads the whole thing from scratch and continues it, so from the outside it looks seamless — but each turn is really a fresh prediction over re-supplied text."
+          sampleAnswer: "Because the app, not the model, holds the memory. After each reply the app appends both the user message and the assistant message to a stored history, and on every new turn it resends that entire transcript. The model re-reads the whole thing from scratch and continues it, so from the outside it looks seamless, but each turn is really a fresh prediction over re-supplied text."
         }
       ],
       hints: [
@@ -881,15 +881,15 @@ main()
       title: "Building the Message Array",
       concept: "Message array",
       xp_reward: 10,
-      explanation: `Every chatbot you've ever used is, at its core, one growing Python list and a loop that pokes it. There's no secret sauce — just "start with a system message, append a user turn, get a reply, append the reply, repeat." Once you can build that list correctly, you can build a chatbot. This lesson is where the previous three click into running code.
+      explanation: `Every chatbot you've ever used is, at its core, one growing Python list and a loop that pokes it. There's no secret sauce, just "start with a system message, append a user turn, get a reply, append the reply, repeat." Once you can build that list correctly, you can build a chatbot. This lesson is where the previous three click into running code.
 
 ## What it is
 
 The **message array** is the list of message dicts you assemble in code and send to the model. Building it well comes down to three rules:
 
-1. **Start with the system message** (if you have one) — it goes first.
-2. **Append turns in order** — each user message, then each assistant reply, in the sequence they happened.
-3. **Keep it a flat, ordered list** — no nesting, no shuffling; sequence carries the meaning.
+1. **Start with the system message** (if you have one), it goes first.
+2. **Append turns in order**: each user message, then each assistant reply, in the sequence they happened.
+3. **Keep it a flat, ordered list**: no nesting, no shuffling; sequence carries the meaning.
 
 ## How it works
 
@@ -907,14 +907,14 @@ messages.append(message("user", "Bye"))
 
 That's the entire pattern. A real chat loop just wraps it: read user input, append a user message, call the model, append the returned assistant message, loop. The list is the single source of truth for the conversation, and you send the *whole* list every time (from the multi-turn lesson).
 
-Two rules people break: putting the system message *not* first, and forgetting to append the assistant's reply — which makes the bot "forget" what it just said.
+Two rules people break: putting the system message *not* first, and forgetting to append the assistant's reply, which makes the bot "forget" what it just said.
 
 ## Why it matters
 
 Getting the array right is most of what a chat app does:
 
 - **Order is the conversation.** Append in the sequence things happened; a scrambled list is a scrambled chat.
-- **One list, sent whole.** You don't send "just the new message" — you send the entire array each turn.
+- **One list, sent whole.** You don't send "just the new message", you send the entire array each turn.
 - **Append both sides.** User *and* assistant turns go in. Skip the assistant turns and the model loses track of its own answers.
 
 ## The mental model to keep
@@ -926,8 +926,8 @@ A chat app is a **list you keep appending to, in order, and resend in full**. St
         { term: "Chat loop", definition: "The repeat cycle: read input, append a user message, call the model, append the reply." }
       ],
       callouts: [
-        { type: "analogy", title: "A guest list you keep adding names to", content: "You don't rewrite the whole list each time someone arrives — you add the new name to the bottom, in arrival order. The message array works the same way: append each turn at the end, never reshuffle.", position: "before" },
-        { type: "tip", title: "Always append the assistant reply", content: "The most common chatbot bug is forgetting to add the model's own reply back to the list. Skip it and the next turn won't know what the bot just said — it 'forgets' its own words.", position: "after" }
+        { type: "analogy", title: "A guest list you keep adding names to", content: "You don't rewrite the whole list each time someone arrives, you add the new name to the bottom, in arrival order. The message array works the same way: append each turn at the end, never reshuffle.", position: "before" },
+        { type: "tip", title: "Always append the assistant reply", content: "The most common chatbot bug is forgetting to add the model's own reply back to the list. Skip it and the next turn won't know what the bot just said, it 'forgets' its own words.", position: "after" }
       ],
       concept_diagram: {
         title: "Assembling the message array",
@@ -1090,9 +1090,9 @@ assistant`,
         "After appending, loop over messages and print each m['role'] to check order."
       ],
       challenge_title: "Sliding-Window Array Assembler",
-      challenge_description: "Assemble the exact message array your app sends to the model: system prompt first, then only the most recent K turns of history — the sliding-window memory that keeps long chats inside the context window.",
+      challenge_description: "Assemble the exact message array your app sends to the model: system prompt first, then only the most recent K turns of history, the sliding-window memory that keeps long chats inside the context window.",
       challenge_statement: "You are given a system prompt, a list of conversation turns (each a role and content, oldest-first), and a window size \`k\`. Assemble the message array the app will send:\n\n1. The \`system\` message is always **first**.\n2. Then append only the **last \`k\` turns**, in their original order. If there are \`k\` or fewer turns, include all of them. If \`k\` is \`0\`, include no turns (system only).\n3. Print the assembled array, one message per line, as \`<index> <role>: <content>\`, where \`<index>\` starts at \`0\` for the system message.\n4. After the array, print \`total <m>\`, the number of messages in the assembled array.",
-      challenge_story: "You're shipping the assembler at the heart of your chatbot's request builder. Conversations can run for hundreds of turns, but the model only needs recent context — so your app keeps a **sliding window**: the system prompt (always) plus the most recent \`k\` turns. Everything older is left out of the request. Build the function that takes the full history and the window size and produces the precise message array, in order, ready to send.",
+      challenge_story: "You're shipping the assembler at the heart of your chatbot's request builder. Conversations can run for hundreds of turns, but the model only needs recent context, so your app keeps a **sliding window**: the system prompt (always) plus the most recent \`k\` turns. Everything older is left out of the request. Build the function that takes the full history and the window size and produces the precise message array, in order, ready to send.",
       challenge_input_format: "The first line has two integers `n k`: the number of turns and the window size.\n\nThe second line is the system prompt text (may contain spaces).\n\nEach of the next `n` lines is a turn: a role (`user` or `assistant`), a single space, then the content (may contain spaces). Turns are oldest-first.",
       challenge_output_format: "Print the assembled messages, one per line as `<index> <role>: <content>` starting at index 0, then a final line `total <m>`.",
       challenge_constraints: [
@@ -1104,7 +1104,7 @@ assistant`,
         { input: "5 3\nBe brief.\nuser Hi\nassistant Hey\nuser How are you\nassistant Good\nuser Bye", output: "0 system: Be brief.\n1 user: How are you\n2 assistant: Good\n3 user: Bye\ntotal 4", explanation: "Window is 3, so only the last three turns survive; the system prompt leads, and the two oldest turns (`Hi`, `Hey`) are dropped." },
         { input: "3 0\nSys.\nuser A\nassistant B\nuser C", output: "0 system: Sys.\ntotal 1", explanation: "With `k = 0` no turns are kept, so the array is the system message alone." },
       ],
-      challenge_notes: "A sliding window is the simplest memory strategy: cheap, bounded, and predictable. Its weakness is that facts from dropped turns are gone forever — which is why richer systems pair it with summaries or retrieval. Slicing the last `k` items with `turns[len(turns)-k:]` (guarding `k == 0`) gives you the window.",
+      challenge_notes: "A sliding window is the simplest memory strategy: cheap, bounded, and predictable. Its weakness is that facts from dropped turns are gone forever, which is why richer systems pair it with summaries or retrieval. Slicing the last `k` items with `turns[len(turns)-k:]` (guarding `k == 0`) gives you the window.",
       challenge_hints: [
         "Read all `n` turns into a list, splitting each line once on the first space into role and content.",
         "Take the window: if `k == 0` keep none, else keep the final `k` turns in order.",
@@ -1168,11 +1168,11 @@ main()
       title: "The Assistant Turn and Prefilling",
       concept: "Assistant",
       xp_reward: 10,
-      explanation: `Ask a model to return JSON and it often opens with "Sure! Here is the JSON you requested:" before the actual data — useless for a parser. There's a quiet trick that fixes this in one line: you write the *beginning* of the assistant's reply yourself, and the model continues from there. It's called **prefilling**, and it works precisely because the assistant turn is just another message you control.
+      explanation: `Ask a model to return JSON and it often opens with "Sure! Here is the JSON you requested:" before the actual data, useless for a parser. There's a quiet trick that fixes this in one line: you write the *beginning* of the assistant's reply yourself, and the model continues from there. It's called **prefilling**, and it works precisely because the assistant turn is just another message you control.
 
 ## What it is
 
-The model's reply is an **assistant message** — same shape as everything else: a role of \`assistant\` and some content. From the message-array lessons you know you append it back to continue the chat. The new idea here is that you don't have to leave that assistant content empty. You can **prefill** it: put the opening text yourself as the last message, and the model picks up exactly where you stopped.
+The model's reply is an **assistant message**: same shape as everything else: a role of \`assistant\` and some content. From the message-array lessons you know you append it back to continue the chat. The new idea here is that you don't have to leave that assistant content empty. You can **prefill** it: put the opening text yourself as the last message, and the model picks up exactly where you stopped.
 
 Because generation is "continue the transcript," a half-finished assistant message is a strong hint. Start it with \`{\` and the model is almost forced to produce JSON next.
 
@@ -1195,9 +1195,9 @@ The model's continuation is appended to your prefill, so the full assistant turn
 
 Prefilling is a cheap, reliable steering tool:
 
-- **It removes preamble.** No "Certainly! Here is..." — the reply starts at the content you want.
+- **It removes preamble.** No "Certainly! Here is...", the reply starts at the content you want.
 - **It locks format.** Opening with \`{\` or \`[\` makes structured output far more likely than asking nicely.
-- **It has limits.** Not every provider supports prefill, and a clumsy prefill can box the model into a bad continuation. You also must remember the prefill text is part of the final answer — prepend it yourself when reading the output.
+- **It has limits.** Not every provider supports prefill, and a clumsy prefill can box the model into a bad continuation. You also must remember the prefill text is part of the final answer, prepend it yourself when reading the output.
 
 ## The mental model to keep
 
@@ -1208,7 +1208,7 @@ The assistant turn is **a message you can start writing**. Hand the model the fi
         { term: "Preamble", definition: "Filler the model adds before the real answer, like 'Sure, here is...', which prefilling removes." }
       ],
       callouts: [
-        { type: "insight", title: "You can finish the model's sentence for it", content: "Generation is just continuing the transcript. If the last message is a half-written assistant turn, the model completes it — so writing '{' as the prefill nearly guarantees the reply continues as JSON.", position: "before" },
+        { type: "insight", title: "You can finish the model's sentence for it", content: "Generation is just continuing the transcript. If the last message is a half-written assistant turn, the model completes it, so writing '{' as the prefill nearly guarantees the reply continues as JSON.", position: "before" },
         { type: "warning", title: "The prefill is part of the answer", content: "Whatever you put in the prefill is the start of the final assistant content. If you prefill '{', the model's output begins after it, so you must prepend your prefill yourself when reassembling the full reply.", position: "after" }
       ],
       concept_diagram: {
@@ -1402,7 +1402,7 @@ def main():
     data = sys.stdin.read().split("\\n")
     idx = 0
     n = int(data[idx]); idx += 1
-    items = []  # list of (prefill:str, continuation:str) — DON'T strip; spaces matter
+    items = []  # list of (prefill:str, continuation:str), DON'T strip; spaces matter
     for _ in range(n):
         prefill = data[idx]; idx += 1
         continuation = data[idx]; idx += 1
@@ -1445,7 +1445,7 @@ main()
       title: "Roles Beyond the Basics",
       concept: "Roles",
       xp_reward: 10,
-      explanation: `The first chatbots had three roles and that was the whole story. Then assistants started *doing* things — checking the weather, querying a database, running code — and three roles weren't enough. How does the model see the result of a database query it asked for? A new kind of message: the **tool result**. Once you add it, a transcript stops being a chat and becomes a record of an agent at work.
+      explanation: `The first chatbots had three roles and that was the whole story. Then assistants started *doing* things, checking the weather, querying a database, running code, and three roles weren't enough. How does the model see the result of a database query it asked for? A new kind of message: the **tool result**. Once you add it, a transcript stops being a chat and becomes a record of an agent at work.
 
 ## What it is
 
@@ -1467,7 +1467,7 @@ messages = [
 # The model now reads the tool result and writes a natural-language reply.
 \`\`\`
 
-The key point: a tool result is **just another message** in the same ordered list. The model can't run tools itself — it only emits the *request*. Your code executes it and hands the output back as a message. The \`name\` field ties the result to the call.
+The key point: a tool result is **just another message** in the same ordered list. The model can't run tools itself, it only emits the *request*. Your code executes it and hands the output back as a message. The \`name\` field ties the result to the call.
 
 ## Why it matters
 
@@ -1475,7 +1475,7 @@ Extra roles are how chat became *agentic*:
 
 - **Tools give the model fresh, real data.** Instead of guessing the weather, it reads a real API result you injected as a tool message.
 - **The name field disambiguates.** With several tools or several speakers, \`name\` says which one produced this message.
-- **It's still one transcript.** No magic — the assistant requests, your code runs, the result goes back as a message, and the loop continues exactly like multi-turn chat.
+- **It's still one transcript.** No magic, the assistant requests, your code runs, the result goes back as a message, and the loop continues exactly like multi-turn chat.
 
 ## The mental model to keep
 
@@ -1653,7 +1653,7 @@ tool result from get_weather: 18C, clear`,
       challenge_title: "Tool-Call Matcher",
       challenge_description: "Pair every tool result with the assistant request that triggered it, by name, the way an agent runtime reconciles a turn of parallel tool calls.",
       challenge_story: "You're writing the reconciler inside an agent loop. In one turn the assistant can fire off several tool calls by name; your runtime executes them and appends a tool-role message for each, each tagged with the tool's name. Before sending the transcript back to the model, you must verify every call got exactly one matching result and flag any mismatch (a call with no result, or a stray result with no call). Build the matcher: given the names the assistant called and the names that came back as tool messages, report what matched and what didn't.",
-      challenge_statement: "You are given the list of tool **names the assistant called** in a turn, and the list of tool **names that came back** as tool-role messages. Matching is by name; treat both as multisets (a name can appear more than once, and each call consumes one matching result).\n\nReport, in this order, one per line:\n\n1. \`matched <m>\` — the number of calls that have a corresponding result (the size of the multiset intersection).\n2. \`unanswered <u>\` — calls with no matching result.\n3. \`orphan <o>\` — results with no matching call.\n\nA turn is balanced when both \`unanswered\` and \`orphan\` are 0.",
+      challenge_statement: "You are given the list of tool **names the assistant called** in a turn, and the list of tool **names that came back** as tool-role messages. Matching is by name; treat both as multisets (a name can appear more than once, and each call consumes one matching result).\n\nReport, in this order, one per line:\n\n1. \`matched <m>\`, the number of calls that have a corresponding result (the size of the multiset intersection).\n2. \`unanswered <u>\`, calls with no matching result.\n3. \`orphan <o>\`, results with no matching call.\n\nA turn is balanced when both \`unanswered\` and \`orphan\` are 0.",
       challenge_input_format: "The first line has two integers `c r`: the number of tool calls and the number of tool results.\n\nThe second line has `c` space-separated tool names that were called (empty line if `c` is 0).\n\nThe third line has `r` space-separated tool names that came back (empty line if `r` is 0).",
       challenge_output_format: "Three lines: `matched <m>`, `unanswered <u>`, `orphan <o>`.",
       challenge_constraints: [
@@ -1725,7 +1725,7 @@ main()
       title: "Injecting Context Into Messages",
       concept: "Context",
       xp_reward: 10,
-      explanation: `You build a support bot and bolt on a search index so it can quote your docs. The retrieval works perfectly — the right paragraph comes back every time — yet the bot still hallucinates. The bug isn't retrieval. It's **placement**: the retrieved text got buried somewhere the model under-weights. Where context lives in the message list quietly decides whether the model trusts it.
+      explanation: `You build a support bot and bolt on a search index so it can quote your docs. The retrieval works perfectly, the right paragraph comes back every time, yet the bot still hallucinates. The bug isn't retrieval. It's **placement**: the retrieved text got buried somewhere the model under-weights. Where context lives in the message list quietly decides whether the model trusts it.
 
 ## What it is
 
@@ -2009,16 +2009,16 @@ main()
       title: "Common Message-List Bugs",
       concept: "Debugging",
       xp_reward: 10,
-      explanation: `Most "the model is dumb today" bug reports are not the model's fault — they're a malformed message list. A missing system message, two user turns in a row, a reply that never got appended. The model faithfully continues whatever transcript you hand it, so a broken list produces a broken conversation. This lesson is the field guide to the four bugs you'll actually hit.
+      explanation: `Most "the model is dumb today" bug reports are not the model's fault, they're a malformed message list. A missing system message, two user turns in a row, a reply that never got appended. The model faithfully continues whatever transcript you hand it, so a broken list produces a broken conversation. This lesson is the field guide to the four bugs you'll actually hit.
 
 ## What it is
 
-A **message-list bug** is a structural mistake in the array you send — not in the content of any one message, but in how they're ordered, labeled, or combined. The model can't warn you about most of these; it just produces confusing output. The four most common:
+A **message-list bug** is a structural mistake in the array you send, not in the content of any one message, but in how they're ordered, labeled, or combined. The model can't warn you about most of these; it just produces confusing output. The four most common:
 
-- **Wrong order** — turns appended out of sequence, so the conversation reads scrambled.
-- **Missing system message** — no setup, so behavior is generic and drifts.
-- **Role violations** — duplicated or non-alternating roles (two user messages in a row, no assistant between).
-- **Content typos** — a misspelled role string (\`"assitant"\`) or wrong key (\`"text"\` instead of \`"content"\`), which many APIs reject outright.
+- **Wrong order**: turns appended out of sequence, so the conversation reads scrambled.
+- **Missing system message**: no setup, so behavior is generic and drifts.
+- **Role violations**: duplicated or non-alternating roles (two user messages in a row, no assistant between).
+- **Content typos**: a misspelled role string (\`"assitant"\`) or wrong key (\`"text"\` instead of \`"content"\`), which many APIs reject outright.
 
 ## How it works
 
@@ -2038,7 +2038,7 @@ def find_bugs(messages):
     return bugs
 \`\`\`
 
-The two cheapest habits: always seed the system message, and after every model call append the assistant reply *before* reading the next user input — skipping that append is what creates two user turns in a row.
+The two cheapest habits: always seed the system message, and after every model call append the assistant reply *before* reading the next user input, skipping that append is what creates two user turns in a row.
 
 ## Why it matters
 
@@ -2047,7 +2047,7 @@ These bugs are silent and expensive:
 - **Wrong order changes meaning.** The model reads top to bottom; a scrambled list is a scrambled conversation, and the reply reflects the mess.
 - **Missing system message means drift.** Without setup, tone and format wander, and you'll blame the model for being inconsistent.
 - **Role violations break or confuse the API.** Some providers reject non-alternating roles; others accept them but the model loses track of who said what.
-- **Typos hard-fail.** A misspelled role or key is the easiest bug to fix once you look — and the easiest to stare past.
+- **Typos hard-fail.** A misspelled role or key is the easiest bug to fix once you look, and the easiest to stare past.
 
 ## The mental model to keep
 

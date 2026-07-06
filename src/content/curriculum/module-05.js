@@ -2,7 +2,7 @@ export default {
   project: {
     id: "ai-05",
     title: "Computer Vision Basics",
-    description: "Feed an image to a model, get structured data back — the practical way computers see now.",
+    description: "Feed an image to a model, get structured data back, the practical way computers see now.",
     difficulty: "intermediate",
     category: "vision_multimodal",
     estimated_time: 120,
@@ -19,23 +19,23 @@ export default {
       title: "How Computers See an Image",
       concept: "Pixels",
       xp_reward: 10,
-      explanation: `Zoom into any digital photo far enough and the picture dissolves into a checkerboard of tiny colored squares. Each square is a **pixel**, and each pixel is just a number. Take a photo of your cat: to you it's a cat, to a computer it's a grid of numbers. That grid is the whole starting point of computer vision — everything else is math on top of it.
+      explanation: `Zoom into any digital photo far enough and the picture dissolves into a checkerboard of tiny colored squares. Each square is a **pixel**, and each pixel is just a number. Take a photo of your cat: to you it's a cat, to a computer it's a grid of numbers. That grid is the whole starting point of computer vision, everything else is math on top of it.
 
 ## What an image really is
 
-A grayscale image is a single **2D grid** of brightness values. Every cell holds an integer from **0 (black) to 255 (white)**, with the values in between being shades of gray. A color image is bigger: it's a stack of three grids called **channels** — one for red, one for green, one for blue. Stack them and you get a **3D array** with shape \`(height, width, 3)\`.
+A grayscale image is a single **2D grid** of brightness values. Every cell holds an integer from **0 (black) to 255 (white)**, with the values in between being shades of gray. A color image is bigger: it's a stack of three grids called **channels**: one for red, one for green, one for blue. Stack them and you get a **3D array** with shape \`(height, width, 3)\`.
 
-Do the arithmetic and the numbers get large fast. A 1920×1080 photo is \`1080 × 1920 × 3 = 6,220,800\` values. So when someone says "the model takes an image as input," what they really mean is "the model takes a big array of integers." Nothing magical — just a lot of numbers arranged in a known shape.
+Do the arithmetic and the numbers get large fast. A 1920×1080 photo is \`1080 × 1920 × 3 = 6,220,800\` values. So when someone says "the model takes an image as input," what they really mean is "the model takes a big array of integers." Nothing magical, just a lot of numbers arranged in a known shape.
 
 ## Why the shape matters
 
-Vision models care about **structure**, not just the raw count of pixels. The value at position (10, 50) in the red channel sits next to (10, 51) for a reason — those points are physically adjacent in the world. A pixel and its neighbors usually describe the same edge, the same patch of fur, the same letter. Shuffle the grid and you destroy the very thing that makes an image an image.
+Vision models care about **structure**, not just the raw count of pixels. The value at position (10, 50) in the red channel sits next to (10, 51) for a reason, those points are physically adjacent in the world. A pixel and its neighbors usually describe the same edge, the same patch of fur, the same letter. Shuffle the grid and you destroy the very thing that makes an image an image.
 
-This is the big difference from the text work in earlier modules. **Text is a 1D sequence** — one direction of nearness. **An image is a 2D grid per channel** — the model must respect *two* directions of nearness, vertical and horizontal. That extra dimension is exactly why images need their own kind of model, which the next lesson covers.
+This is the big difference from the text work in earlier modules. **Text is a 1D sequence**: one direction of nearness. **An image is a 2D grid per channel**: the model must respect *two* directions of nearness, vertical and horizontal. That extra dimension is exactly why images need their own kind of model, which the next lesson covers.
 
 ## Normalize before you do anything
 
-Raw pixel values run 0–255. Almost every model expects them rescaled to a smaller, centered range — usually 0 to 1, or roughly -1 to 1. The most common move is **normalization**: divide every value by 255, and sometimes subtract a per-channel mean. This isn't a ritual. Large, unscaled inputs push a network's internal math into extreme ranges, which makes training slow and unstable.
+Raw pixel values run 0, 255. Almost every model expects them rescaled to a smaller, centered range, usually 0 to 1, or roughly -1 to 1. The most common move is **normalization**: divide every value by 255, and sometimes subtract a per-channel mean. This isn't a ritual. Large, unscaled inputs push a network's internal math into extreme ranges, which makes training slow and unstable.
 
 \`\`\`python
 import numpy as np
@@ -49,7 +49,7 @@ print(normalized.shape)    # (2, 2)
 print(normalized)
 \`\`\`
 
-Notice the division applies to the **whole array at once** — that's NumPy doing element-wise math, no loop required.
+Notice the division applies to the **whole array at once**: that's NumPy doing element-wise math, no loop required.
 
 ## Why it matters
 
@@ -59,15 +59,15 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
 
 **An image is a spreadsheet of brightness, one sheet per color.** Height by width by channels. Normalize it, respect its grid, and the rest of computer vision is operations on that array.`,
       key_terms: [
-        { term: "Pixel", definition: "The smallest unit of an image — one cell in the grid, holding a brightness value (0–255 per color channel)." },
+        { term: "Pixel", definition: "The smallest unit of an image, one cell in the grid, holding a brightness value (0, 255 per color channel)." },
         { term: "Channel", definition: "One of the color grids that stack to form an image. Color images have 3 (red, green, blue); grayscale has 1." },
-        { term: "Normalization", definition: "Rescaling raw pixel values (0–255) into a smaller centered range like 0–1 so a model trains stably." }
+        { term: "Normalization", definition: "Rescaling raw pixel values (0, 255) into a smaller centered range like 0, 1 so a model trains stably." }
       ],
       callouts: [
         {
           type: "analogy",
           title: "A spreadsheet you can't read at a glance",
-          content: "An image is like three giant spreadsheets stacked on top of each other — one for red, one for green, one for blue. Each cell is a number. Your eye sees a cat; the computer sees a 6-million-cell spreadsheet.",
+          content: "An image is like three giant spreadsheets stacked on top of each other, one for red, one for green, one for blue. Each cell is a number. Your eye sees a cat; the computer sees a 6-million-cell spreadsheet.",
           position: "before"
         },
         {
@@ -82,9 +82,9 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
         steps: [
           { label: "Physical scene", desc: "Light hits a camera sensor." },
           { label: "Sampling", desc: "The sensor measures brightness at each pixel location." },
-          { label: "Three channels", desc: "Each pixel gets a red, green, and blue value (0–255)." },
+          { label: "Three channels", desc: "Each pixel gets a red, green, and blue value (0, 255)." },
           { label: "Array", desc: "Values stored as a height × width × 3 grid of numbers." },
-          { label: "Normalize", desc: "Divide by 255 so the model sees values in 0–1." }
+          { label: "Normalize", desc: "Divide by 255 so the model sees values in 0, 1." }
         ]
       },
       inline_quizzes: [
@@ -105,18 +105,18 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
             "It has no effect; only the average pixel value matters"
           ],
           correct_index: 0,
-          explanation: "Neighboring pixels are physically related — they share edges, textures, and shapes. Losing the grid structure destroys the information that makes an image recognizable."
+          explanation: "Neighboring pixels are physically related, they share edges, textures, and shapes. Losing the grid structure destroys the information that makes an image recognizable."
         },
         {
           question: "What does dividing pixel values by 255 accomplish?",
           options: [
             "It converts color to grayscale",
-            "It rescales values from 0–255 into 0–1 so the model trains stably",
+            "It rescales values from 0, 255 into 0, 1 so the model trains stably",
             "It removes the alpha channel",
             "It doubles the resolution"
           ],
           correct_index: 1,
-          explanation: "255 is the max pixel value, so dividing by it maps everything into 0–1. Small, centered inputs keep training stable and fast."
+          explanation: "255 is the max pixel value, so dividing by it maps everything into 0, 1. Small, centered inputs keep training stable and fast."
         },
         {
           question: "How many numbers represent a single 100×100 grayscale image?",
@@ -136,10 +136,10 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
               explanation: "Grayscale has exactly one channel. Three channels (RGB) is what makes an image color."
             },
             {
-              question: "To rescale pixel values into the 0–1 range, you divide each one by ___.",
+              question: "To rescale pixel values into the 0, 1 range, you divide each one by ___.",
               type: "fill_in",
               correct_answer: "255",
-              explanation: "255 is the maximum possible pixel value, so dividing by it normalizes everything to 0–1."
+              explanation: "255 is the maximum possible pixel value, so dividing by it normalizes everything to 0, 1."
             }
           ]
         }
@@ -170,9 +170,9 @@ Normalized:
 [[0.        0.5019608]
  [1.        0.2509804]]`,
       hints: [
-        "Every NumPy array has a .shape attribute — print img.shape.",
+        "Every NumPy array has a .shape attribute, print img.shape.",
         "Dividing a whole array by a number applies the division to every element at once.",
-        "128 / 255 ≈ 0.502 and 64 / 255 ≈ 0.251 — float32 prints those with extra digits."
+        "128 / 255 ≈ 0.502 and 64 / 255 ≈ 0.251, float32 prints those with extra digits."
       ],
       step_throughs: [
         {
@@ -180,7 +180,7 @@ Normalized:
           steps: [
             { label: "Start with a photo", detail: "A real scene captured by a camera. Your eye sees objects; the file stores light.", code: "cat.png  (a 2x2 corner, zoomed way in)" },
             { label: "Resolve into pixels", detail: "Every position becomes a discrete cell. Each cell will hold one brightness value per channel.", code: "[ dark  mid ]\n[ bright dim ]" },
-            { label: "Read the numbers", detail: "Brightness is just an integer 0-255. Here as a grayscale grid — one channel.", code: "[[  0, 128],\n [255,  64]]   shape (2, 2)" },
+            { label: "Read the numbers", detail: "Brightness is just an integer 0-255. Here as a grayscale grid, one channel.", code: "[[  0, 128],\n [255,  64]]   shape (2, 2)" },
             { label: "Normalize to 0-1", detail: "Divide the whole grid by 255 so the model sees small, centered values.", code: "[[0.00, 0.50],\n [1.00, 0.25]]" }
           ]
         }
@@ -216,7 +216,7 @@ Normalized:
             { cells: ["Channels", "1", "3 (red, green, blue)"] },
             { cells: ["Array shape", "(H, W)", "(H, W, 3)"] },
             { cells: ["Numbers for 100x100", "10,000", "30,000"] },
-            { cells: ["Stores color?", "No — only brightness", "Yes — full color"], highlight: true },
+            { cells: ["Stores color?", "No, only brightness", "Yes, full color"], highlight: true },
             { cells: ["Value range per cell", "0-255", "0-255 per channel"] }
           ]
         }
@@ -241,13 +241,13 @@ Normalized:
       reflections: [
         {
           prompt: "In your own words: why must a vision model preserve the grid layout of pixels instead of treating the image as one long flat list of numbers?",
-          sampleAnswer: "Neighboring pixels are physically related — they share edges, textures, and shapes. The grid encodes which pixels are next to which. If you flatten the image into a flat list, the model loses the 2D nearness information, so it can no longer tell that a pixel and the one just below it belong to the same edge or object."
+          sampleAnswer: "Neighboring pixels are physically related, they share edges, textures, and shapes. The grid encodes which pixels are next to which. If you flatten the image into a flat list, the model loses the 2D nearness information, so it can no longer tell that a pixel and the one just below it belong to the same edge or object."
         }
       ],
       challenge_title: "The Brightness Gate",
       challenge_description: "Normalize a batch of RGB pixels, compute perceptual luminance, and count how many pass a brightness gate.",
-      challenge_story: "You're building the preprocessing stage of an image classifier. Before a single pixel reaches the neural network, raw camera bytes (0–255 per channel) must be **normalized** to the 0–1 range the model was trained on. Your team also wants a cheap quality gate: dark, underexposed frames waste GPU time, so the pipeline should flag how many pixels are 'bright enough' using the standard **perceptual luminance** formula before the batch is even uploaded.",
-      challenge_statement: "You are given `n` RGB pixels. For each pixel with channels `r g b` (each `0`–`255`):\n\n1. Normalize each channel to `0.0`–`1.0` by dividing by `255`.\n2. Compute its **luminance** using the Rec. 601 weights:\n   \`luminance = 0.299·r' + 0.587·g' + 0.114·b'\` where `r' g' b'` are the normalized channels.\n\nA pixel **passes the brightness gate** if its luminance is **greater than or equal to** the threshold `t`.\n\nPrint two lines:\n1. The **average luminance** across all `n` pixels, rounded to exactly **4 decimal places**.\n2. The **count** of pixels that pass the gate.",
+      challenge_story: "You're building the preprocessing stage of an image classifier. Before a single pixel reaches the neural network, raw camera bytes (0, 255 per channel) must be **normalized** to the 0, 1 range the model was trained on. Your team also wants a cheap quality gate: dark, underexposed frames waste GPU time, so the pipeline should flag how many pixels are 'bright enough' using the standard **perceptual luminance** formula before the batch is even uploaded.",
+      challenge_statement: "You are given `n` RGB pixels. For each pixel with channels `r g b` (each `0`, `255`):\n\n1. Normalize each channel to `0.0`, `1.0` by dividing by `255`.\n2. Compute its **luminance** using the Rec. 601 weights:\n   \`luminance = 0.299·r' + 0.587·g' + 0.114·b'\` where `r' g' b'` are the normalized channels.\n\nA pixel **passes the brightness gate** if its luminance is **greater than or equal to** the threshold `t`.\n\nPrint two lines:\n1. The **average luminance** across all `n` pixels, rounded to exactly **4 decimal places**.\n2. The **count** of pixels that pass the gate.",
       challenge_input_format: "The first line has an integer `n` and a float `t` (the threshold), separated by a space. Each of the next `n` lines has three integers `r g b`.",
       challenge_output_format: "Line 1: average luminance formatted to exactly 4 decimal places.\nLine 2: an integer, the number of pixels with luminance ≥ `t`.",
       challenge_constraints: [
@@ -259,7 +259,7 @@ Normalized:
         { input: "3 0.5\n255 255 255\n0 0 0\n100 150 200", output: "0.5173\n2", explanation: "White → luminance 1.0 (passes). Black → 0.0 (fails). (100,150,200) → ≈0.5519 (passes). Average = (1.0 + 0.0 + 0.5519)/3 ≈ 0.5173; two pixels pass the 0.5 gate." },
         { input: "1 0.0\n0 0 0", output: "0.0000\n1", explanation: "A single black pixel has luminance 0.0, and 0.0 ≥ 0.0, so it passes the gate." },
       ],
-      challenge_notes: "The Rec. 601 weights are not equal because human eyes are far more sensitive to green than to blue — that's why green is weighted ~0.587 and blue only ~0.114. Use `f\"{avg:.4f}\"` to format the average; use `>=` so a pixel exactly on the threshold passes.",
+      challenge_notes: "The Rec. 601 weights are not equal because human eyes are far more sensitive to green than to blue, that's why green is weighted ~0.587 and blue only ~0.114. Use `f\"{avg:.4f}\"` to format the average; use `>=` so a pixel exactly on the threshold passes.",
       challenge_hints: [
         "Read the first line and split it into an int `n` and a float `t`.",
         "For each pixel, divide each channel by 255 before applying the luminance weights.",
@@ -332,7 +332,7 @@ main()
       title: "What a CNN Actually Does",
       concept: "Convolution",
       xp_reward: 10,
-      explanation: `In 2012 a network called AlexNet won the ImageNet contest by a margin so wide it ended a debate. The architecture behind it — a **convolutional neural network**, or **CNN** — became the engine behind nearly every "is this a dog or a cat" system for the next decade. You won't build one from scratch, but understanding the single idea that makes it work, the **convolution**, unlocks everything that follows.
+      explanation: `In 2012 a network called AlexNet won the ImageNet contest by a margin so wide it ended a debate. The architecture behind it, a **convolutional neural network**, or **CNN**: became the engine behind nearly every "is this a dog or a cat" system for the next decade. You won't build one from scratch, but understanding the single idea that makes it work, the **convolution**, unlocks everything that follows.
 
 ## The problem CNNs solve
 
@@ -342,7 +342,7 @@ A convolution fixes both problems with one trick: a **small filter that slides a
 
 ## A filter is a tiny pattern detector
 
-A **filter** (also called a **kernel**) is a small grid of weights — typically 3×3. You slide it over every position in the image. At each spot you multiply the filter's values by the pixels underneath and add the products into a single number. Slide across the entire image and the outputs collect into a new grid called a **feature map** — a heatmap answering "where did this pattern show up?"
+A **filter** (also called a **kernel**) is a small grid of weights, typically 3×3. You slide it over every position in the image. At each spot you multiply the filter's values by the pixels underneath and add the products into a single number. Slide across the entire image and the outputs collect into a new grid called a **feature map**: a heatmap answering "where did this pattern show up?"
 
 \`\`\`python
 import numpy as np
@@ -363,24 +363,24 @@ print(response)  # high magnitude = strong edge here
 
 The element-wise multiply (\`patch * kernel\`) followed by \`np.sum\` is the entire operation at one position. A bright top row over a dark bottom row produces a large response; a uniform patch produces near zero.
 
-The key insight: **the same filter is reused at every position.** A filter that detects a vertical edge detects it anywhere in the frame. The model learns the filter once and applies it everywhere — a property called **weight sharing**. This is why CNNs need orders of magnitude fewer parameters than a fully connected network.
+The key insight: **the same filter is reused at every position.** A filter that detects a vertical edge detects it anywhere in the frame. The model learns the filter once and applies it everywhere, a property called **weight sharing**. This is why CNNs need orders of magnitude fewer parameters than a fully connected network.
 
 ## Stacking builds up complexity
 
-One layer of filters finds edges and color blobs. Feed those feature maps into another layer and it learns to combine edges into corners and textures. Another layer combines those into shapes — eyes, wheels, leaves. By the final layers, the network responds to whole objects. **Simple parts, composed upward.** You never program any of this; the filters are *learned* from labeled examples through training.
+One layer of filters finds edges and color blobs. Feed those feature maps into another layer and it learns to combine edges into corners and textures. Another layer combines those into shapes, eyes, wheels, leaves. By the final layers, the network responds to whole objects. **Simple parts, composed upward.** You never program any of this; the filters are *learned* from labeled examples through training.
 
-Between convolution layers sits **pooling**, which shrinks each feature map by, say, taking the maximum value in every 2×2 block. Pooling makes the model faster and a little tolerant of small shifts — a cat nudged five pixels to the left is still a cat.
+Between convolution layers sits **pooling**, which shrinks each feature map by, say, taking the maximum value in every 2×2 block. Pooling makes the model faster and a little tolerant of small shifts, a cat nudged five pixels to the left is still a cat.
 
 ## Why it matters
 
-CNNs slashed image-classification error rates and made vision practical at scale. Even though you'll rarely hand-code one today, every vision API — including the multimodal model in the next lesson — is built on these foundations. Understanding convolution means you understand what those APIs are doing under the hood.
+CNNs slashed image-classification error rates and made vision practical at scale. Even though you'll rarely hand-code one today, every vision API, including the multimodal model in the next lesson, is built on these foundations. Understanding convolution means you understand what those APIs are doing under the hood.
 
 ## The mental model to keep
 
 **A convolution is a stencil you drag across the page.** One small pattern, checked at every position, reused everywhere. Stack the stencils and simple edges compose into whole objects.`,
       key_terms: [
         { term: "Filter (kernel)", definition: "A small grid of weights slid across an image to detect a specific pattern like an edge or texture." },
-        { term: "Feature map", definition: "The grid of numbers produced when a filter is applied across an image — a heatmap of where that pattern appears." },
+        { term: "Feature map", definition: "The grid of numbers produced when a filter is applied across an image, a heatmap of where that pattern appears." },
         { term: "Weight sharing", definition: "Reusing the same filter at every position in the image, so a pattern learned once is detected everywhere." },
         { term: "Pooling", definition: "Downsampling a feature map (e.g. max over each 2×2 block) to shrink it and add tolerance to small shifts." }
       ],
@@ -388,13 +388,13 @@ CNNs slashed image-classification error rates and made vision practical at scale
         {
           type: "analogy",
           title: "A stencil you drag across the page",
-          content: "A filter is like a tiny stencil. You drag it over every part of the image and note where the shape underneath matches the stencil. One stencil, checked everywhere — that's a convolution.",
+          content: "A filter is like a tiny stencil. You drag it over every part of the image and note where the shape underneath matches the stencil. One stencil, checked everywhere, that's a convolution.",
           position: "before"
         },
         {
           type: "insight",
           title: "Depth = abstraction",
-          content: "Early layers see edges. Middle layers see textures and corners. Deep layers see whole objects. The network never gets told what an eye is — it discovers that combining certain edges reliably predicts the label.",
+          content: "Early layers see edges. Middle layers see textures and corners. Deep layers see whole objects. The network never gets told what an eye is, it discovers that combining certain edges reliably predicts the label.",
           position: "after"
         }
       ],
@@ -431,7 +431,7 @@ CNNs slashed image-classification error rates and made vision practical at scale
             "The set of weights inside one filter"
           ],
           correct_index: 1,
-          explanation: "Sliding a filter over the whole image produces a feature map — a grid that lights up wherever that pattern (an edge, a texture) is present."
+          explanation: "Sliding a filter over the whole image produces a feature map, a grid that lights up wherever that pattern (an edge, a texture) is present."
         },
         {
           question: "What do deeper layers of a CNN tend to detect compared to early layers?",
@@ -464,7 +464,7 @@ CNNs slashed image-classification error rates and made vision practical at scale
               question: "The same filter is applied at every position in the image.",
               type: "true_false",
               correct_answer: "true",
-              explanation: "That's weight sharing — one learned filter detects its pattern anywhere in the image."
+              explanation: "That's weight sharing, one learned filter detects its pattern anywhere in the image."
             },
             {
               question: "The grid produced by sliding a filter across an image is called a feature ___.",
@@ -514,10 +514,10 @@ print("Filter response:", response)
         {
           title: "image patch → slide filter → multiply-and-sum → feature map cell",
           steps: [
-            { label: "Take a 3x3 patch", detail: "Grab the pixels currently under the filter. Bright on top, dark on the bottom — an edge.", code: "[[100,100,100],\n [ 50, 50, 50],\n [  0,  0,  0]]" },
+            { label: "Take a 3x3 patch", detail: "Grab the pixels currently under the filter. Bright on top, dark on the bottom, an edge.", code: "[[100,100,100],\n [ 50, 50, 50],\n [  0,  0,  0]]" },
             { label: "Line up the kernel", detail: "An edge-detecting filter: positive weights on top, negative on the bottom.", code: "[[ 1, 1, 1],\n [ 0, 0, 0],\n [-1,-1,-1]]" },
             { label: "Multiply and sum", detail: "Multiply overlapping cells, then add every product into one number.", code: "(100+100+100) + 0 + (-0-0-0) = 300" },
-            { label: "Write one feature-map cell", detail: "300 is large, so this spot lit up — a strong edge here. Slide one step over and repeat.", code: "feature_map[r][c] = 300" }
+            { label: "Write one feature-map cell", detail: "300 is large, so this spot lit up, a strong edge here. Slide one step over and repeat.", code: "feature_map[r][c] = 300" }
           ]
         }
       ],
@@ -553,7 +553,7 @@ print("Filter response:", response)
             { cells: ["Connectivity", "Every input to every neuron", "Small filter over local patches"] },
             { cells: ["Parameters", "Huge (millions for one image)", "Tiny (just the filter weights)"] },
             { cells: ["Weight sharing", "None", "Same filter reused everywhere"], highlight: true },
-            { cells: ["Respects spatial layout", "No — input is flattened", "Yes — slides across the grid"] },
+            { cells: ["Respects spatial layout", "No, input is flattened", "Yes, slides across the grid"] },
             { cells: ["Best for", "Tabular / final classification", "Images and grid-structured data"] }
           ]
         }
@@ -582,24 +582,24 @@ print("Filter response:", response)
         }
       ],
       challenge_title: "Find the Strongest Edge",
-      challenge_description: "Given a CNN filter's response grid, find the cell where the filter fired strongest — the location of the edge it detected.",
-      challenge_story: "A CNN's first layer has already slid its edge-detecting filter across a grayscale frame for you, and handed you the **response grid** it produced: one number per position, where a large magnitude means the filter lit up strongly on a feature there. Your job on the debugging dashboard is to point at *where the filter responded strongest* — the cell with the biggest response — so the team can see exactly which spot in the image the edge detector latched onto. Whether the transition was bright-to-dark or dark-to-bright doesn't matter; both are strong edges, so you compare by **absolute value**.",
-      challenge_statement: "You are given a filter response grid of `H` rows and `W` columns. Each cell holds the filter's response at that position (it may be negative).\n\nFind the cell whose response has the **largest absolute value** — the position where the edge detector fired strongest. If several cells tie, choose the one with the smallest row `i`, then the smallest column `j` (reading order).\n\nPrint two lines:\n1. The largest absolute response (a non-negative integer).\n2. The position `i j` of that cell.",
-      challenge_input_format: "The first line has two integers `H W`. Each of the next `H` lines has `W` integers — one row of the response grid.",
+      challenge_description: "Given a CNN filter's response grid, find the cell where the filter fired strongest, the location of the edge it detected.",
+      challenge_story: "A CNN's first layer has already slid its edge-detecting filter across a grayscale frame for you, and handed you the **response grid** it produced: one number per position, where a large magnitude means the filter lit up strongly on a feature there. Your job on the debugging dashboard is to point at *where the filter responded strongest*, the cell with the biggest response, so the team can see exactly which spot in the image the edge detector latched onto. Whether the transition was bright-to-dark or dark-to-bright doesn't matter; both are strong edges, so you compare by **absolute value**.",
+      challenge_statement: "You are given a filter response grid of `H` rows and `W` columns. Each cell holds the filter's response at that position (it may be negative).\n\nFind the cell whose response has the **largest absolute value**: the position where the edge detector fired strongest. If several cells tie, choose the one with the smallest row `i`, then the smallest column `j` (reading order).\n\nPrint two lines:\n1. The largest absolute response (a non-negative integer).\n2. The position `i j` of that cell.",
+      challenge_input_format: "The first line has two integers `H W`. Each of the next `H` lines has `W` integers, one row of the response grid.",
       challenge_output_format: "Line 1: the maximum absolute response (integer).\nLine 2: two integers `i j`, the row and column of that cell.",
       challenge_constraints: [
         "1 ≤ H, W ≤ 200",
         "-1000000 ≤ response ≤ 1000000",
       ],
       challenge_examples: [
-        { input: "2 3\n10 -40 5\n0 12 -7", output: "40\n0 1", explanation: "The responses by magnitude are 10, 40, 5, 0, 12, 7. The largest absolute value is 40 at row 0, column 1 — that's where the filter fired strongest." },
+        { input: "2 3\n10 -40 5\n0 12 -7", output: "40\n0 1", explanation: "The responses by magnitude are 10, 40, 5, 0, 12, 7. The largest absolute value is 40 at row 0, column 1, that's where the filter fired strongest." },
         { input: "1 4\n-3 3 -3 3", output: "3\n0 0", explanation: "Four cells tie at absolute value 3; reading order picks the earliest, position (0, 0)." },
       ],
-      challenge_notes: "Absolute value matters because edges come in both polarities: a bright-to-dark transition and a dark-to-bright transition are equally strong edges, just with opposite signs. Track the max with `abs(value)` and update only when you find a strictly larger one, so the first cell wins ties automatically. (A real CNN computes this grid by multiply-and-summing the filter over the image — here it's given to you so you can focus on the argmax: the filter responds strongest at the edge.)",
+      challenge_notes: "Absolute value matters because edges come in both polarities: a bright-to-dark transition and a dark-to-bright transition are equally strong edges, just with opposite signs. Track the max with `abs(value)` and update only when you find a strictly larger one, so the first cell wins ties automatically. (A real CNN computes this grid by multiply-and-summing the filter over the image, here it's given to you so you can focus on the argmax: the filter responds strongest at the edge.)",
       challenge_hints: [
         "Read `H` and `W`, then read `H` rows of `W` integers each into the grid.",
         "Walk every cell in reading order, computing `abs(value)` for each.",
-        "Keep `best = -1`; update `best`, `best_i`, `best_j` only when `abs(value) > best` — this keeps the first cell on ties.",
+        "Keep `best = -1`; update `best`, `best_i`, `best_j` only when `abs(value) > best`, this keeps the first cell on ties.",
       ],
       challenge_difficulty: "beginner",
       challenge_starter_code: `import sys
@@ -660,15 +660,15 @@ main()
       title: "Calling a Multimodal Vision Model",
       concept: "Multimodal API",
       xp_reward: 10,
-      explanation: `Five years ago, "make the computer tell me what's in this photo" meant collecting thousands of labeled images, training a CNN, and deploying it — weeks of work for one narrow task. Today it's one API call. You send the image to a **multimodal model** like Claude and ask in plain English: "What's in this picture?" "Is the person wearing a helmet?" "Read the receipt total." It answers in words. That collapse from weeks to minutes is the most important shift in everyday vision work.
+      explanation: `Five years ago, "make the computer tell me what's in this photo" meant collecting thousands of labeled images, training a CNN, and deploying it, weeks of work for one narrow task. Today it's one API call. You send the image to a **multimodal model** like Claude and ask in plain English: "What's in this picture?" "Is the person wearing a helmet?" "Read the receipt total." It answers in words. That collapse from weeks to minutes is the most important shift in everyday vision work.
 
 ## What "multimodal" means
 
-A **multimodal model** accepts more than one kind of input. Claude takes **text and images in the same message**. Under the hood it still converts the image into numbers and runs them through learned vision layers — the CNN ideas from the last lesson didn't disappear, they got absorbed into a much larger model. What changed for *you* is the interface: you talk to it like a person instead of training a custom classifier for every new task.
+A **multimodal model** accepts more than one kind of input. Claude takes **text and images in the same message**. Under the hood it still converts the image into numbers and runs them through learned vision layers, the CNN ideas from the last lesson didn't disappear, they got absorbed into a much larger model. What changed for *you* is the interface: you talk to it like a person instead of training a custom classifier for every new task.
 
 ## The shape of the request
 
-You send a message whose \`content\` is a **list of blocks** — typically one image block and one text block. The image travels as **base64-encoded** bytes tagged with its **media type** (e.g. \`image/png\`). Base64 turns raw binary into text characters so the bytes can ride safely inside a JSON request.
+You send a message whose \`content\` is a **list of blocks**: typically one image block and one text block. The image travels as **base64-encoded** bytes tagged with its **media type** (e.g. \`image/png\`). Base64 turns raw binary into text characters so the bytes can ride safely inside a JSON request.
 
 \`\`\`python
 import os
@@ -710,17 +710,17 @@ That's the whole pattern. The image and the question travel together in one \`us
 
 The old workflow: collect thousands of labeled images, train a CNN, deploy it, retrain whenever the task changes. The new workflow: **one API call, and you change the task by editing the prompt.** Want to detect something different tomorrow? Rewrite the question. No labeled dataset, no training loop, no redeploy.
 
-The tradeoff is **cost and latency**. An API call per image isn't free, and it's slower than a tiny specialized CNN. For high-volume, fixed tasks — a factory line scanning the same part a million times a day — a dedicated model still wins on price and speed. For the long tail of "I just need to understand this one image" tasks, the multimodal API is the obvious tool.
+The tradeoff is **cost and latency**. An API call per image isn't free, and it's slower than a tiny specialized CNN. For high-volume, fixed tasks, a factory line scanning the same part a million times a day, a dedicated model still wins on price and speed. For the long tail of "I just need to understand this one image" tasks, the multimodal API is the obvious tool.
 
 ## Keep the key out of your code
 
-Notice \`Anthropic()\` is called with no arguments — it pulls the key from \`os.environ["ANTHROPIC_API_KEY"]\`. Never paste an API key into source. The moment you push to a repo, a hardcoded key leaks. Set it as an environment variable and let the client read it.
+Notice \`Anthropic()\` is called with no arguments, it pulls the key from \`os.environ["ANTHROPIC_API_KEY"]\`. Never paste an API key into source. The moment you push to a repo, a hardcoded key leaks. Set it as an environment variable and let the client read it.
 
 ## The mental model to keep
 
-**Calling a vision model is texting a knowledgeable friend a photo with a caption.** The picture and the question go in one message; a written answer comes back. Swap the question, get a new task — no retraining required.`,
+**Calling a vision model is texting a knowledgeable friend a photo with a caption.** The picture and the question go in one message; a written answer comes back. Swap the question, get a new task, no retraining required.`,
       key_terms: [
-        { term: "Multimodal model", definition: "A model that accepts more than one input type — here, text and images in the same message." },
+        { term: "Multimodal model", definition: "A model that accepts more than one input type, here, text and images in the same message." },
         { term: "Content block", definition: "One item in a message's content list. A vision request mixes an image block and a text block." },
         { term: "Base64 encoding", definition: "A text-safe way to represent raw image bytes so they can travel inside a JSON API request." },
         { term: "Media type", definition: "The label telling the API what kind of image you sent, e.g. image/png or image/jpeg." }
@@ -759,7 +759,7 @@ Notice \`Anthropic()\` is called with no arguments — it pulls the key from \`o
             "The question goes in the system prompt, the image in a file upload"
           ],
           correct_index: 1,
-          explanation: "Both go in the content list of a single user message — an image block and a text block together."
+          explanation: "Both go in the content list of a single user message, an image block and a text block together."
         }
       ],
       quiz_questions: [
@@ -767,7 +767,7 @@ Notice \`Anthropic()\` is called with no arguments — it pulls the key from \`o
           question: "What's the main advantage of a multimodal API over training a custom CNN for each new task?",
           options: [
             "It's always cheaper per image",
-            "You change the task by editing the text prompt — no retraining needed",
+            "You change the task by editing the text prompt, no retraining needed",
             "It doesn't use any vision layers internally",
             "It can only handle one fixed question"
           ],
@@ -791,7 +791,7 @@ Notice \`Anthropic()\` is called with no arguments — it pulls the key from \`o
             "For one-off 'what is this image' questions",
             "When the task changes constantly",
             "For high-volume, fixed tasks where cost and latency per image matter",
-            "Never — multimodal always wins"
+            "Never, multimodal always wins"
           ],
           correct_index: 2,
           explanation: "A factory scanning the same part millions of times wants a tiny, fast, cheap specialized model. The API shines for the varied, low-volume long tail."
@@ -805,7 +805,7 @@ Notice \`Anthropic()\` is called with no arguments — it pulls the key from \`o
               question: "You must retrain a multimodal model every time you want to ask a new question about an image.",
               type: "true_false",
               correct_answer: "false",
-              explanation: "You just change the text prompt. No retraining — that's the whole point."
+              explanation: "You just change the text prompt. No retraining, that's the whole point."
             },
             {
               question: "Anthropic() with no arguments reads the API key from the ___ ANTHROPIC_API_KEY variable.",
@@ -862,7 +862,7 @@ response = client.messages.create(
 print(response.content[0].text)
 `,
       illustrative: true,
-      expected_output: `(example reply — actual output will vary)
+      expected_output: `(example reply, actual output will vary)
 The receipt is from Blue Bottle Coffee.`,
       hints: [
         "The content field is a list. Put the image block first, then the text block.",
@@ -896,11 +896,11 @@ The receipt is from Blue Bottle Coffee.`,
           prompt: "You need to classify 50,000 identical factory parts per hour, forever, with the same yes/no check. Multimodal API call per image, or a dedicated CNN? Why?",
           steps: [
             "List the workload traits: extremely high volume, one fixed task that never changes.",
-            "A multimodal API charges per call and adds network latency every image — costly and slow at this scale.",
+            "A multimodal API charges per call and adds network latency every image, costly and slow at this scale.",
             "A dedicated CNN is tiny, fast, and cheap once trained, and the fixed task means no retraining churn.",
             "High-volume + fixed task favors the specialized CNN; the API wins for varied, low-volume work."
           ],
-          output: "Dedicated CNN — high volume and a fixed task make per-call cost and latency the deciding factor"
+          output: "Dedicated CNN, high volume and a fixed task make per-call cost and latency the deciding factor"
         }
       ],
       comparison_tables: [
@@ -940,10 +940,10 @@ The receipt is from Blue Bottle Coffee.`,
       ],
       challenge_title: "Triage the Vision Model's Verdicts",
       challenge_description: "Aggregate a batch of confidence-scored yes/no answers from a multimodal safety model and decide which frames to flag, escalate, or auto-approve.",
-      challenge_story: "You shipped a construction-site safety monitor: a multimodal vision model looks at each camera frame and answers 'Is the worker wearing a helmet?' with a confidence score. The raw model output is too noisy to act on directly — a low-confidence 'no' shouldn't trigger an alarm, but a high-confidence 'no' absolutely should. Your job is the **decision layer** that sits after the model: turn its per-frame verdicts into three buckets the operations dashboard understands.",
+      challenge_story: "You shipped a construction-site safety monitor: a multimodal vision model looks at each camera frame and answers 'Is the worker wearing a helmet?' with a confidence score. The raw model output is too noisy to act on directly, a low-confidence 'no' shouldn't trigger an alarm, but a high-confidence 'no' absolutely should. Your job is the **decision layer** that sits after the model: turn its per-frame verdicts into three buckets the operations dashboard understands.",
       challenge_statement: "You are given `n` frame verdicts from the vision model. Each verdict has a frame id, an answer (`yes` or `no`, case-insensitive), and a confidence score in `[0, 1]`. You are also given a confidence threshold `t`.\n\nApply this policy to every verdict:\n\n- If the confidence is **below** `t`, the model isn't sure → send it to **human review**.\n- Otherwise (confidence ≥ `t`), if the answer is **no** (no helmet) → **flag** it as a safety violation.\n- Otherwise (confident **yes**) → **auto-approve** it.\n\nPrint three lines, in this order:\n1. The number of **flagged** frames.\n2. The number sent to **human review**.\n3. The number **auto-approved**.",
       challenge_input_format: "The first line has an integer `n` and a float `t`. Each of the next `n` lines has a frame id (a token with no spaces), an answer (`yes`/`no`, any case), and a confidence score (a float), separated by spaces.",
-      challenge_output_format: "Three lines: the flagged count, the human-review count, and the auto-approved count — each an integer on its own line.",
+      challenge_output_format: "Three lines: the flagged count, the human-review count, and the auto-approved count, each an integer on its own line.",
       challenge_constraints: [
         "1 ≤ n ≤ 100000",
         "0.0 ≤ confidence ≤ 1.0",
@@ -952,7 +952,7 @@ The receipt is from Blue Bottle Coffee.`,
       ],
       challenge_examples: [
         { input: "4 0.80\nframe001 yes 0.95\nframe002 no 0.99\nframe003 yes 0.40\nframe004 no 0.60", output: "1\n2\n1", explanation: "frame002 is a confident 'no' → flagged. frame003 and frame004 fall below 0.80 → human review. frame001 is a confident 'yes' → auto-approved." },
-        { input: "2 0.99\nA yes 0.5\nB no 0.5", output: "0\n2\n0", explanation: "Both confidences are below the strict 0.99 threshold, so nothing is decided automatically — both go to human review." },
+        { input: "2 0.99\nA yes 0.5\nB no 0.5", output: "0\n2\n0", explanation: "Both confidences are below the strict 0.99 threshold, so nothing is decided automatically, both go to human review." },
       ],
       challenge_notes: "Check the confidence gate **before** the answer: an uncertain verdict shouldn't be trusted in either direction. Use `>=` for the threshold and lowercase the answer (`answer.lower()`) so 'No', 'NO', and 'no' are all treated the same.",
       challenge_hints: [
@@ -1035,7 +1035,7 @@ main()
       title: "Getting Structured Data Back",
       concept: "Structured Output",
       xp_reward: 10,
-      explanation: `"The receipt is from Blue Bottle Coffee and the total appears to be twelve dollars and fifty cents." Lovely for a human. Useless to a program — you can't add up a sentence, store it in a column, or branch on it. To *do* something with a vision answer you need **structured data**: JSON with known fields. This lesson turns "feed an image, get a paragraph" into "feed an image, get a clean object your code can use."
+      explanation: `"The receipt is from Blue Bottle Coffee and the total appears to be twelve dollars and fifty cents." Lovely for a human. Useless to a program, you can't add up a sentence, store it in a column, or branch on it. To *do* something with a vision answer you need **structured data**: JSON with known fields. This lesson turns "feed an image, get a paragraph" into "feed an image, get a clean object your code can use."
 
 ## Ask for JSON, get a string of JSON
 
@@ -1076,15 +1076,15 @@ data = json.loads(response.content[0].text)
 print(data["store"], "->", data["total"])
 \`\`\`
 
-Two things matter in that prompt. First, **name the exact fields and their types** — vague prompts give vague shapes. Second, **say "only the JSON, no other text"** so you don't have to strip a "Here's the JSON:" preamble before parsing.
+Two things matter in that prompt. First, **name the exact fields and their types**: vague prompts give vague shapes. Second, **say "only the JSON, no other text"** so you don't have to strip a "Here's the JSON:" preamble before parsing.
 
 ## Why structured output unlocks real work
 
 Once the answer is a dict, the image becomes a row in a table. Scan 500 receipts, get 500 objects, load them into a spreadsheet, sum the totals. The model did the *seeing*; your code does the *processing*. That division of labor is the whole game in applied vision: let the model handle perception, keep the deterministic logic in plain code.
 
-## Validate — the model can still surprise you
+## Validate, the model can still surprise you
 
-Treat the model's JSON like any untrusted input. It might omit a field, return a string where you expected a number, or — rarely — wrap the JSON in stray text. Wrap \`json.loads()\` in a try/except, check that required keys exist, and coerce types before you rely on them. A one-line guard saves a 2am crash.
+Treat the model's JSON like any untrusted input. It might omit a field, return a string where you expected a number, or, rarely, wrap the JSON in stray text. Wrap \`json.loads()\` in a try/except, check that required keys exist, and coerce types before you rely on them. A one-line guard saves a 2am crash.
 
 \`\`\`python
 try:
@@ -1094,7 +1094,7 @@ except (json.JSONDecodeError, KeyError, ValueError):
     total = None  # handle the miss instead of crashing
 \`\`\`
 
-For production, the API also offers a structured-outputs mode that constrains the response to a schema so it can't drift — worth reaching for once you're past prototyping. But the prompt-and-parse pattern above is the foundation, and it's enough to build something real today.
+For production, the API also offers a structured-outputs mode that constrains the response to a schema so it can't drift, worth reaching for once you're past prototyping. But the prompt-and-parse pattern above is the foundation, and it's enough to build something real today.
 
 ## Why it matters
 
@@ -1102,7 +1102,7 @@ This pattern is what makes vision *operational*. A pile of photos becomes a quer
 
 ## The mental model to keep
 
-**Structured output is the handoff line between perception and logic.** Tell the model the exact keys and types, demand JSON and nothing else, parse it behind a guard — then your deterministic code takes over.`,
+**Structured output is the handoff line between perception and logic.** Tell the model the exact keys and types, demand JSON and nothing else, parse it behind a guard, then your deterministic code takes over.`,
       key_terms: [
         { term: "Structured output", definition: "A model response shaped as data (JSON with known fields) rather than free-form prose, so your code can use it directly." },
         { term: "json.loads()", definition: "The Python function that parses a JSON string into a dict you can index by field name." },
@@ -1162,7 +1162,7 @@ This pattern is what makes vision *operational*. A pile of photos becomes a quer
           question: "Why should you wrap json.loads() in a try/except when parsing model output?",
           options: [
             "json.loads() is deprecated",
-            "The model's JSON might be malformed, miss a field, or have wrong types — treat it as untrusted",
+            "The model's JSON might be malformed, miss a field, or have wrong types, treat it as untrusted",
             "It speeds up the API call",
             "Try/except converts the image to JSON automatically"
           ],
@@ -1175,7 +1175,7 @@ This pattern is what makes vision *operational*. A pile of photos becomes a quer
             "Recognizing what's in the image",
             "The deterministic logic: storing, summing, and branching on the data",
             "Encoding the image to base64",
-            "Nothing — the model does everything"
+            "Nothing, the model does everything"
           ],
           correct_index: 1,
           explanation: "Perception goes to the model; deterministic processing stays in plain code. Structured output is the clean handoff between the two halves."
@@ -1249,8 +1249,8 @@ print(data["store"], "->", data["total"])
           steps: [
             "Reply 1 parses; total 12.50 adds in.",
             "Reply 2 parses; total 8.25 adds in (running sum 20.75).",
-            "Reply 3 is not valid JSON, so json.loads raises JSONDecodeError — skip it.",
-            'Reply 4 parses but has no "total" key, so indexing raises KeyError — skip it. Final sum 20.75.'
+            "Reply 3 is not valid JSON, so json.loads raises JSONDecodeError, skip it.",
+            'Reply 4 parses but has no "total" key, so indexing raises KeyError, skip it. Final sum 20.75.'
           ],
           output: "20.75"
         }
@@ -1261,7 +1261,7 @@ print(data["store"], "->", data["total"])
           columns: ["Property", "Free-form prose", "Structured JSON"],
           rows: [
             { cells: ["Shape", "A paragraph", "Known keys and types"] },
-            { cells: ["Index a field in code", "No — must parse text", "Yes — data['total']"], highlight: true },
+            { cells: ["Index a field in code", "No, must parse text", "Yes, data['total']"], highlight: true },
             { cells: ["Store in a database", "Awkward", "Drops into a row"] },
             { cells: ["Sum / branch / compute", "Not directly", "Directly"] },
             { cells: ["Good for", "Human reading", "Program processing"] }
@@ -1293,8 +1293,8 @@ print(data["store"], "->", data["total"])
       ],
       challenge_title: "Audit the Model's JSON Receipts",
       challenge_description: "Parse a batch of structured JSON replies from a receipt-extraction model, skip the malformed ones, and report a per-category expense breakdown.",
-      challenge_story: "Your finance automation pipeline photographs receipts and asks a vision model to return **structured JSON**: `{\"store\": ..., \"category\": ..., \"total\": ...}`. In the real world the model occasionally hallucinates broken JSON, drops a field, or returns a non-numeric total — and your accounting export can't crash on a single bad row. You're writing the **robust ingestion layer**: parse everything that's valid, quietly skip everything that isn't, and roll the valid receipts up into a category report the bookkeeper can paste straight into the ledger.",
-      challenge_statement: "You are given `n` lines, each a JSON reply from the extraction model. A reply is **valid** only if it parses as JSON **and** contains both a `category` (string) and a `total` that can be read as a number. Any reply that fails to parse, is missing either field, or has a non-numeric `total` must be **skipped** (it must not crash your program).\n\nFor every valid reply, add its `total` to a running sum for its `category`.\n\nPrint:\n1. The number of **valid** receipts.\n2. The number of **skipped** receipts.\n3. Then, for each category that has at least one valid receipt, a line `category sum` — where `sum` is that category's total formatted to exactly **2 decimal places**. Output these category lines in **alphabetical order** of category name.",
+      challenge_story: "Your finance automation pipeline photographs receipts and asks a vision model to return **structured JSON**: `{\"store\": ..., \"category\": ..., \"total\": ...}`. In the real world the model occasionally hallucinates broken JSON, drops a field, or returns a non-numeric total, and your accounting export can't crash on a single bad row. You're writing the **robust ingestion layer**: parse everything that's valid, quietly skip everything that isn't, and roll the valid receipts up into a category report the bookkeeper can paste straight into the ledger.",
+      challenge_statement: "You are given `n` lines, each a JSON reply from the extraction model. A reply is **valid** only if it parses as JSON **and** contains both a `category` (string) and a `total` that can be read as a number. Any reply that fails to parse, is missing either field, or has a non-numeric `total` must be **skipped** (it must not crash your program).\n\nFor every valid reply, add its `total` to a running sum for its `category`.\n\nPrint:\n1. The number of **valid** receipts.\n2. The number of **skipped** receipts.\n3. Then, for each category that has at least one valid receipt, a line `category sum`, where `sum` is that category's total formatted to exactly **2 decimal places**. Output these category lines in **alphabetical order** of category name.",
       challenge_input_format: "The first line is an integer `n`. Each of the next `n` lines is one JSON reply string (possibly malformed).",
       challenge_output_format: "Line 1: the count of valid receipts.\nLine 2: the count of skipped receipts.\nThen one line per category (alphabetical): the category name, a space, and its total to 2 decimal places.",
       challenge_constraints: [
@@ -1305,7 +1305,7 @@ print(data["store"], "->", data["total"])
       ],
       challenge_examples: [
         { input: "5\n{\"store\": \"Blue Bottle\", \"category\": \"coffee\", \"total\": 12.50}\n{\"store\": \"Philz\", \"category\": \"coffee\", \"total\": 8.25}\noops not json\n{\"store\": \"Sightglass\", \"category\": \"coffee\"}\n{\"store\": \"Office Depot\", \"category\": \"supplies\", \"total\": 30.00}", output: "3\n2\ncoffee 20.75\nsupplies 30.00", explanation: "Two coffee receipts (12.50 + 8.25 = 20.75) and one supplies receipt (30.00) are valid. The unparseable line and the one missing 'total' are skipped." },
-        { input: "2\ngarbage\n{\"category\": \"x\"}", output: "0\n2", explanation: "Neither reply is valid — one is not JSON, the other has no total — so there are no category lines at all." },
+        { input: "2\ngarbage\n{\"category\": \"x\"}", output: "0\n2", explanation: "Neither reply is valid, one is not JSON, the other has no total, so there are no category lines at all." },
       ],
       challenge_notes: "Wrap each parse in a `try`/`except` that catches `json.JSONDecodeError`, `KeyError`, `ValueError`, and `TypeError` so a single bad row can never take down the batch. Accumulate sums in a dict keyed by category, then emit them with `sorted(...)` for deterministic, alphabetical output.",
       challenge_hints: [
@@ -1389,17 +1389,17 @@ main()
       title: "Pixels, Channels, and Resolution",
       concept: "Pixels",
       xp_reward: 10,
-      explanation: `A 12-megapixel phone photo is roughly 36 million numbers. Send that straight to a vision API and two things happen: the model quietly **shrinks it** before looking, and your bill goes up for pixels the model never really used. Lesson 1 told you an image is a grid of numbers. This lesson is about *how many* numbers — and why resolution is the single biggest lever on both what a model can see and what it costs you.
+      explanation: `A 12-megapixel phone photo is roughly 36 million numbers. Send that straight to a vision API and two things happen: the model quietly **shrinks it** before looking, and your bill goes up for pixels the model never really used. Lesson 1 told you an image is a grid of numbers. This lesson is about *how many* numbers, and why resolution is the single biggest lever on both what a model can see and what it costs you.
 
 ## What it is
 
-**Resolution** is just the image's pixel dimensions: width times height. A photo that is \`1920 × 1080\` holds about two million pixels per channel, and three channels of color, so roughly **six million numbers**. Double the width and height and you don't double the count — you *quadruple* it, because area grows with the square of the side. That quadratic scaling is the whole story of why big images are expensive.
+**Resolution** is just the image's pixel dimensions: width times height. A photo that is \`1920 × 1080\` holds about two million pixels per channel, and three channels of color, so roughly **six million numbers**. Double the width and height and you don't double the count, you *quadruple* it, because area grows with the square of the side. That quadratic scaling is the whole story of why big images are expensive.
 
-The numbers themselves are unchanged from lesson 1: each pixel is **0–255 per channel**, three channels for RGB. What changes here is the *count*, and the count is what drives memory, speed, and money.
+The numbers themselves are unchanged from lesson 1: each pixel is **0, 255 per channel**, three channels for RGB. What changes here is the *count*, and the count is what drives memory, speed, and money.
 
 ## How it works
 
-Most vision systems don't accept your image at full size. They **resize** it to a fixed input — a CNN might want exactly \`224 × 224\`; a multimodal API caps the longest side and downscales anything larger. Resizing throws pixels away. Shrink a photo of a page of text too far and the letters blur into gray mush the model can no longer read. Keep it too large and you pay for detail that adds nothing.
+Most vision systems don't accept your image at full size. They **resize** it to a fixed input, a CNN might want exactly \`224 × 224\`; a multimodal API caps the longest side and downscales anything larger. Resizing throws pixels away. Shrink a photo of a page of text too far and the letters blur into gray mush the model can no longer read. Keep it too large and you pay for detail that adds nothing.
 
 Token-style cost for a vision model scales with **pixel area**, not with how interesting the picture is. Here is the resize-and-cost calculation in miniature:
 
@@ -1416,7 +1416,7 @@ print(w, h)                   # 1000 750  -> long side capped at 1000
 print(w * h, "pixels per channel")  # 750000, down from 12,000,000
 \`\`\`
 
-That one resize cut the pixel count by **16x** — a 4x reduction on each side — before the model saw a thing.
+That one resize cut the pixel count by **16x**: a 4x reduction on each side, before the model saw a thing.
 
 ## Why it matters
 
@@ -1433,7 +1433,7 @@ This is why "just send the original" is rarely the right answer. Match the resol
 **More pixels means more numbers, and area grows with the square of the side.** Resolution is a dial: turn it up for fine detail, down to save money, and find the lowest setting where the thing you need to see is still sharp.`,
       key_terms: [
         { term: "Resolution", definition: "The pixel dimensions of an image (width times height). More resolution means more numbers to process." },
-        { term: "Resize / downscale", definition: "Changing an image's dimensions, usually shrinking it to a fixed input size — which discards pixels and detail." },
+        { term: "Resize / downscale", definition: "Changing an image's dimensions, usually shrinking it to a fixed input size, which discards pixels and detail." },
         { term: "Pixel area", definition: "Width times height. It grows quadratically: doubling each side quadruples the pixel count and the cost." },
         { term: "Aspect ratio", definition: "The ratio of width to height. Preserving it during resize keeps shapes from being stretched or squashed." }
       ],
@@ -1441,7 +1441,7 @@ This is why "just send the original" is rarely the right answer. Match the resol
         {
           type: "insight",
           title: "Doubling the size quadruples the cost",
-          content: "Pixel count is width times height, so making an image twice as wide and twice as tall gives you four times the pixels — and roughly four times the processing cost. Resolution is a quadratic dial, not a linear one.",
+          content: "Pixel count is width times height, so making an image twice as wide and twice as tall gives you four times the pixels, and roughly four times the processing cost. Resolution is a quadratic dial, not a linear one.",
           position: "before"
         },
         {
@@ -1456,7 +1456,7 @@ This is why "just send the original" is rarely the right answer. Match the resol
         steps: [
           { label: "Original image", desc: "A large photo, e.g. 4000 x 3000 = 12 million pixels." },
           { label: "Resize to cap", desc: "The model shrinks the longest side to its input limit." },
-          { label: "New pixel area", desc: "Width times height of the smaller image — far fewer numbers." },
+          { label: "New pixel area", desc: "Width times height of the smaller image, far fewer numbers." },
           { label: "Cost scales with area", desc: "Tokens or compute grow with pixel count, not image content." },
           { label: "Detail tradeoff", desc: "Too small loses features; too large wastes money." }
         ]
@@ -1501,7 +1501,7 @@ This is why "just send the original" is rarely the right answer. Match the resol
             "The file's name length"
           ],
           correct_index: 2,
-          explanation: "Cost tracks the number of pixels the model processes, which is the area after any resize — not the content of the picture."
+          explanation: "Cost tracks the number of pixels the model processes, which is the area after any resize, not the content of the picture."
         }
       ],
       participation_activities: [
@@ -1624,7 +1624,7 @@ pixels per channel: 750000`,
       challenge_description: "Simulate a vision API's preprocessing: cap each image's longest side, convert its resized pixel area into tokens, and total the bill for a whole batch.",
       challenge_story: "Your team uploads thousands of images a day to a multimodal vision API, and finance wants the token cost predicted before the upload, not after the invoice. The API resizes every image so its **longest side** is at most a fixed cap (preserving aspect ratio), then bills by **pixel area**: every 750 pixels (or fraction thereof) of the resized image costs one token. Build the estimator that takes a batch of image dimensions and reports the total token bill and how many images had to be shrunk.",
       challenge_statement: "You are given `n` images and a longest-side cap `cap`. For each image with width `w` and height `h`:\n\n1. Let `longest = max(w, h)`. If `longest > cap`, compute `scale = longest / cap` and resize to `int(w / scale) x int(h / scale)` (integer truncation, aspect ratio preserved). Otherwise leave it unchanged. An image that is resized counts as **shrunk**.\n2. The resized pixel area is `new_w * new_h`. Its token cost is that area divided by 750, **rounded up** to the next whole token (i.e. `ceil(area / 750)`).\n\nPrint two lines:\n1. The **total tokens** summed across all images.\n2. The **count** of images that were shrunk.",
-      challenge_input_format: "The first line has two integers `n` and `cap`. Each of the next `n` lines has two integers `w h` — one image's width and height.",
+      challenge_input_format: "The first line has two integers `n` and `cap`. Each of the next `n` lines has two integers `w h`, one image's width and height.",
       challenge_output_format: "Line 1: the total token cost across all images (an integer).\nLine 2: the number of images that were resized (an integer).",
       challenge_constraints: [
         "1 ≤ n ≤ 100000",
@@ -1721,14 +1721,14 @@ main()
 There is a clean ladder of vision tasks, each one finer-grained than the last:
 
 - **Classification** answers "*what is this image?*" with **one label** for the whole picture. Input: an image. Output: a class like \`cat\` (often with a confidence). It does not say *where* anything is.
-- **Detection** answers "*what objects are here and where?*" with a **bounding box** around each object plus its label. Input: an image. Output: a list of \`(label, box)\` pairs. The box is four numbers — \`x1, y1, x2, y2\`.
+- **Detection** answers "*what objects are here and where?*" with a **bounding box** around each object plus its label. Input: an image. Output: a list of \`(label, box)\` pairs. The box is four numbers, \`x1, y1, x2, y2\`.
 - **Segmentation** answers "*which pixels belong to what?*" with a **per-pixel mask**. Input: an image. Output: a label for every single pixel. It traces the exact outline, not just a rectangle.
 
 Each step up gives more spatial precision and costs more to produce.
 
 ## How it works
 
-The same backbone (the CNN or vision layers from earlier lessons) feeds all three; what differs is the **output head** bolted on top. Classification ends in one set of class scores. Detection adds machinery that proposes boxes and scores each. Segmentation produces a full-resolution grid of labels. A bounding box is cheap to represent — just four numbers — while a mask is as big as the image itself.
+The same backbone (the CNN or vision layers from earlier lessons) feeds all three; what differs is the **output head** bolted on top. Classification ends in one set of class scores. Detection adds machinery that proposes boxes and scores each. Segmentation produces a full-resolution grid of labels. A bounding box is cheap to represent, just four numbers, while a mask is as big as the image itself.
 
 \`\`\`python
 # Three tasks, three output shapes for the same cat photo
@@ -1741,7 +1741,7 @@ box_area = (box[3] - box[1]) * (box[4] - box[2])        # (200-40) * (120-30)
 print("box covers", box_area, "pixels")                 # 14400
 \`\`\`
 
-A box tells you the object's rough rectangle; a mask tells you its precise silhouette. The further down the ladder, the more you know about *where* — and the more expensive the answer.
+A box tells you the object's rough rectangle; a mask tells you its precise silhouette. The further down the ladder, the more you know about *where*, and the more expensive the answer.
 
 ## Why it matters
 
@@ -1755,7 +1755,7 @@ Asking for segmentation when a label would do wastes money and compute; asking f
 
 ## The mental model to keep
 
-**Classification labels the whole picture, detection draws boxes around things, segmentation colors in every pixel.** One label, then boxes, then masks — each rung up the ladder is more precise and more expensive.`,
+**Classification labels the whole picture, detection draws boxes around things, segmentation colors in every pixel.** One label, then boxes, then masks, each rung up the ladder is more precise and more expensive.`,
       key_terms: [
         { term: "Classification", definition: "Assigning a single label to an entire image (e.g. 'cat'), with no information about location." },
         { term: "Object detection", definition: "Finding each object and drawing a bounding box around it, with a label per box." },
@@ -1781,7 +1781,7 @@ Asking for segmentation when a label would do wastes money and compute; asking f
         steps: [
           { label: "Classification", desc: "One label for the whole image: 'cat'." },
           { label: "Detection", desc: "A labeled bounding box around each object." },
-          { label: "Segmentation", desc: "A label for every pixel — exact outlines." },
+          { label: "Segmentation", desc: "A label for every pixel, exact outlines." },
           { label: "More precision", desc: "Each rung knows more about WHERE things are." },
           { label: "More cost", desc: "And each rung costs more compute and labeling." }
         ]
@@ -1826,7 +1826,7 @@ Asking for segmentation when a label would do wastes money and compute; asking f
             "When you want the cheapest possible task"
           ],
           correct_index: 2,
-          explanation: "Segmentation traces exact outlines pixel by pixel, which matters for things like outlining a tumor or replacing a background — at higher cost."
+          explanation: "Segmentation traces exact outlines pixel by pixel, which matters for things like outlining a tumor or replacing a background, at higher cost."
         }
       ],
       participation_activities: [
@@ -1945,7 +1945,7 @@ box area: 14400`,
       challenge_title: "The Detection Report",
       challenge_description: "Aggregate a frame's object-detection output into a report: the most common object class and the share of the image covered by boxes.",
       challenge_story: "You run the analytics layer behind a smart camera. The detection model hands you a list of bounding boxes per frame, each with a class label and four corner coordinates. The dashboard wants two summary numbers per frame: which object class appears most often (so it can headline 'mostly cars' or 'mostly people'), and how much of the frame is taken up by detected objects (so it can flag busy scenes). Turn the raw box list into that report.",
-      challenge_statement: "A frame is `w x h` pixels and contains `n` detected boxes. Each box has a `label` and corners `x1 y1 x2 y2` (with `x1 < x2`, `y1 < y2`). Its area is `(x2 - x1) * (y2 - y1)`.\n\nProduce two results:\n\n1. The label with the **most boxes**. If two labels tie on count, choose the one that is **alphabetically first**.\n2. The percentage of the frame covered by all boxes combined: `100 * (sum of all box areas) / (w * h)`, formatted to exactly **2 decimal places**. (Boxes may overlap; just sum their areas — do not deduplicate overlap.)\n\nPrint two lines:\n1. The top label and its count, separated by a space: `label count`.\n2. The coverage percentage to 2 decimals.",
+      challenge_statement: "A frame is `w x h` pixels and contains `n` detected boxes. Each box has a `label` and corners `x1 y1 x2 y2` (with `x1 < x2`, `y1 < y2`). Its area is `(x2 - x1) * (y2 - y1)`.\n\nProduce two results:\n\n1. The label with the **most boxes**. If two labels tie on count, choose the one that is **alphabetically first**.\n2. The percentage of the frame covered by all boxes combined: `100 * (sum of all box areas) / (w * h)`, formatted to exactly **2 decimal places**. (Boxes may overlap; just sum their areas, do not deduplicate overlap.)\n\nPrint two lines:\n1. The top label and its count, separated by a space: `label count`.\n2. The coverage percentage to 2 decimals.",
       challenge_input_format: "The first line has three integers `n w h`. Each of the next `n` lines has a label (a token with no spaces) followed by four integers `x1 y1 x2 y2`.",
       challenge_output_format: "Line 1: the most common label and its count, space-separated.\nLine 2: the coverage percentage to exactly 2 decimal places.",
       challenge_constraints: [
@@ -1957,7 +1957,7 @@ box area: 14400`,
         { input: "3 100 100\ncat 10 10 30 30\ndog 0 0 50 50\ncat 60 60 90 90", output: "cat 2\n38.00", explanation: "cat appears twice (areas 20x20=400 and 30x30=900) and dog once (50x50=2500). Total covered = 400+900+2500 = 3800 of 10000 pixels = 38.00%. cat wins the count." },
         { input: "1 10 10\nperson 0 0 10 10", output: "person 1\n100.00", explanation: "A single box covering the whole 10x10 frame: count 1, coverage 100.00%." },
       ],
-      challenge_notes: "Because boxes can overlap, summing areas can exceed 100% — that is intended; the metric is a busyness signal, not a true coverage fraction. Resolve count ties by iterating labels in sorted order and keeping the first to reach the max, so alphabetical order wins.",
+      challenge_notes: "Because boxes can overlap, summing areas can exceed 100%, that is intended; the metric is a busyness signal, not a true coverage fraction. Resolve count ties by iterating labels in sorted order and keeping the first to reach the max, so alphabetical order wins.",
       challenge_hints: [
         "Read `n w h`, then loop `n` times reading a label and four ints per line.",
         "Tally counts in a dict and accumulate `(x2-x1)*(y2-y1)` into a running area sum.",
@@ -2043,7 +2043,7 @@ main()
 
 A **confidence score** is the model's estimated probability for a prediction, a number between **0 and 1**. "Helmet detected, 0.97" means the model is very sure; "0.51" means it is barely past a coin flip. To turn that continuous score into a yes/no decision, you pick a **threshold** \`t\`: predictions at or above \`t\` are accepted as positive, everything below is treated as negative.
 
-The threshold is *your* dial, not the model's. The same model becomes trigger-happy at \`t = 0.3\` and cautious at \`t = 0.9\`. Nothing about the model changes — only where you draw the line.
+The threshold is *your* dial, not the model's. The same model becomes trigger-happy at \`t = 0.3\` and cautious at \`t = 0.9\`. Nothing about the model changes, only where you draw the line.
 
 ## How it works
 
@@ -2069,21 +2069,21 @@ def precision_recall(predictions, t):
     return precision, recall
 \`\`\`
 
-Here's the tension: **raise the threshold** and you only accept confident predictions, so false positives drop and precision rises — but you also reject borderline real ones, so recall falls. **Lower the threshold** and you catch more (recall up) at the cost of more false alarms (precision down). You cannot maximize both; you choose where to sit.
+Here's the tension: **raise the threshold** and you only accept confident predictions, so false positives drop and precision rises, but you also reject borderline real ones, so recall falls. **Lower the threshold** and you catch more (recall up) at the cost of more false alarms (precision down). You cannot maximize both; you choose where to sit.
 
 ## Why it matters
 
 The right threshold depends entirely on the cost of each kind of mistake:
 
-- **Cancer screening:** a miss (FN) is deadly, a false alarm (FP) just means another test. Favor **recall** — low threshold, catch everything, tolerate false alarms.
-- **Spam filter for important mail:** a false positive (real mail in spam) is awful, a miss (one spam in the inbox) is minor. Favor **precision** — high threshold.
+- **Cancer screening:** a miss (FN) is deadly, a false alarm (FP) just means another test. Favor **recall**: low threshold, catch everything, tolerate false alarms.
+- **Spam filter for important mail:** a false positive (real mail in spam) is awful, a miss (one spam in the inbox) is minor. Favor **precision**: high threshold.
 - **A confidence score is not a guarantee of truth.** As the hallucination lesson warned, a confident model can be confidently wrong. Confidence calibrates *the model's own certainty*, not reality.
 
 ## The mental model to keep
 
 **The threshold is a slider between crying wolf and missing the wolf.** Slide it up for fewer false alarms but more misses; slide it down to catch everything but drown in noise. Set it by which mistake hurts more.`,
       key_terms: [
-        { term: "Confidence score", definition: "The model's estimated probability for a prediction, between 0 and 1 — how sure it is, not whether it is right." },
+        { term: "Confidence score", definition: "The model's estimated probability for a prediction, between 0 and 1, how sure it is, not whether it is right." },
         { term: "Threshold", definition: "The cutoff you choose: predictions at or above it count as positive, below it as negative." },
         { term: "Precision", definition: "Of everything the model flagged as positive, the fraction that was actually correct: TP / (TP + FP)." },
         { term: "Recall", definition: "Of everything that was actually positive, the fraction the model caught: TP / (TP + FN)." }
@@ -2129,7 +2129,7 @@ The right threshold depends entirely on the cost of each kind of mistake:
           question: "What does a confidence score of 0.95 actually tell you?",
           options: [
             "The prediction is definitely correct",
-            "The model is 95% sure of this prediction — its own certainty, not a guarantee of truth",
+            "The model is 95% sure of this prediction, its own certainty, not a guarantee of truth",
             "95% of the image was used",
             "The threshold is set to 0.95"
           ],
@@ -2173,7 +2173,7 @@ The right threshold depends entirely on the cost of each kind of mistake:
               question: "A prediction that was flagged positive but is actually negative is called a false ___.",
               type: "fill_in",
               correct_answer: "positive",
-              explanation: "Predicted yes, actually no, is a false positive — a false alarm."
+              explanation: "Predicted yes, actually no, is a false positive, a false alarm."
             }
           ]
         }
@@ -2232,7 +2232,7 @@ print(f"precision: {precision:.4f}")
           prompt: "There are 10 truly positive items. At t=0.8 the model catches 6 of them; at t=0.5 it catches 9 but also adds 4 false positives it did not have before. How does recall change, and why does precision usually drop?",
           steps: [
             "Recall = TP / (TP + FN) = caught / total real positives.",
-            "At t=0.8: recall = 6/10 = 0.60. At t=0.5: recall = 9/10 = 0.90 — lowering the threshold raised recall.",
+            "At t=0.8: recall = 6/10 = 0.60. At t=0.5: recall = 9/10 = 0.90, lowering the threshold raised recall.",
             "But lowering t also accepted borderline predictions, adding 4 false positives.",
             "More FP with the same-or-similar TP lowers precision = TP/(TP+FP), which is the classic tradeoff."
           ],
@@ -2260,7 +2260,7 @@ print(f"precision: {precision:.4f}")
             { id: "recall", label: "Favor recall (lower threshold)" }
           ],
           items: [
-            { id: "i1", text: "Cancer screening — never miss a real case", bin: "recall" },
+            { id: "i1", text: "Cancer screening, never miss a real case", bin: "recall" },
             { id: "i2", text: "Auto-deleting suspected spam permanently", bin: "precision" },
             { id: "i3", text: "Security alert for a possible intruder", bin: "recall" },
             { id: "i4", text: "Flagging legit email as spam is unacceptable", bin: "precision" },
@@ -2277,7 +2277,7 @@ print(f"precision: {precision:.4f}")
       ],
       challenge_title: "Tune the Threshold",
       challenge_description: "Apply a confidence threshold to a batch of scored predictions, bucket each into TP/FP/FN/TN against ground truth, and report precision and recall.",
-      challenge_story: "Your defect-detection model scores every part on a production line with a confidence that it is defective. The plant manager wants to A/B test thresholds: for a given cutoff, how good is the system right now? You're building the evaluation harness. Given the model's confidence for each part and the ground-truth label from manual inspection, apply the threshold, sort every part into the four outcome buckets, and report the two numbers that matter — precision and recall — so the team can decide whether to slide the cutoff up or down.",
+      challenge_story: "Your defect-detection model scores every part on a production line with a confidence that it is defective. The plant manager wants to A/B test thresholds: for a given cutoff, how good is the system right now? You're building the evaluation harness. Given the model's confidence for each part and the ground-truth label from manual inspection, apply the threshold, sort every part into the four outcome buckets, and report the two numbers that matter, precision and recall, so the team can decide whether to slide the cutoff up or down.",
       challenge_statement: "You are given `n` predictions and a threshold `t`. Each prediction has a confidence in `[0, 1]` and a ground-truth label (`1` = positive, `0` = negative).\n\nA prediction is **predicted positive** if its confidence is **greater than or equal to** `t`. Classify each:\n\n- predicted positive AND truth 1 -> **TP**\n- predicted positive AND truth 0 -> **FP**\n- predicted negative AND truth 1 -> **FN**\n- predicted negative AND truth 0 -> **TN**\n\nCompute `precision = TP / (TP + FP)` and `recall = TP / (TP + FN)`. If a denominator is `0`, report that metric as `0.0000`.\n\nPrint two lines:\n1. Precision to exactly **4 decimal places**.\n2. Recall to exactly **4 decimal places**.",
       challenge_input_format: "The first line has an integer `n` and a float `t`. Each of the next `n` lines has a float confidence and an integer truth label (`0` or `1`), separated by a space.",
       challenge_output_format: "Line 1: precision to 4 decimal places.\nLine 2: recall to 4 decimal places.",
@@ -2291,7 +2291,7 @@ print(f"precision: {precision:.4f}")
         { input: "5 0.50\n0.90 1\n0.60 0\n0.40 1\n0.80 1\n0.30 0", output: "0.6667\n0.6667", explanation: "At t=0.50 the positives are 0.90(T), 0.60(F), 0.80(T): TP=2, FP=1. The 0.40 positive is missed (FN=1). Precision = 2/3 = 0.6667; recall = 2/(2+1) = 0.6667." },
         { input: "2 0.99\n0.50 1\n0.50 0", output: "0.0000\n0.0000", explanation: "Both confidences are below 0.99, so nothing is predicted positive: TP=0, FP=0, FN=1. Precision denominator is 0 -> 0.0000; recall = 0/1 = 0.0000." },
       ],
-      challenge_notes: "The threshold uses `>=`, so a confidence exactly equal to `t` counts as positive. Guard both divisions: with no positive predictions precision is reported as 0.0000, and with no real positives recall is 0.0000. Raising `t` typically trades recall away for precision — run a few thresholds to see the curve.",
+      challenge_notes: "The threshold uses `>=`, so a confidence exactly equal to `t` counts as positive. Guard both divisions: with no positive predictions precision is reported as 0.0000, and with no real positives recall is 0.0000. Raising `t` typically trades recall away for precision, run a few thresholds to see the curve.",
       challenge_hints: [
         "Read `n` and `t`; loop the next `n` lines, parsing a float confidence and an int truth.",
         "Predicted positive when `confidence >= t`; increment one of tp/fp/fn/tn for each prediction.",
@@ -2373,17 +2373,17 @@ main()
       title: "Where Vision Fails",
       concept: "Pitfalls",
       xp_reward: 10,
-      explanation: `Researchers once stuck a small, carefully designed sticker on a stop sign. To a human it still plainly said STOP. To a vision model, it now read "Speed Limit 45." Nothing about the sign's meaning changed — a few crafted pixels broke the model completely. Vision systems are powerful and genuinely useful, but they fail in specific, knowable ways. Knowing where they break is what separates a demo from a product you can trust.
+      explanation: `Researchers once stuck a small, carefully designed sticker on a stop sign. To a human it still plainly said STOP. To a vision model, it now read "Speed Limit 45." Nothing about the sign's meaning changed, a few crafted pixels broke the model completely. Vision systems are powerful and genuinely useful, but they fail in specific, knowable ways. Knowing where they break is what separates a demo from a product you can trust.
 
 ## What it is
 
-A **vision failure** is any case where the model's output is confidently wrong because the input falls outside what it handles well. These are not random glitches; they cluster into recognizable categories. The deeper danger is that the model usually **fails confidently** — it returns a clean, high-confidence answer with no built-in signal that it is out of its depth.
+A **vision failure** is any case where the model's output is confidently wrong because the input falls outside what it handles well. These are not random glitches; they cluster into recognizable categories. The deeper danger is that the model usually **fails confidently**: it returns a clean, high-confidence answer with no built-in signal that it is out of its depth.
 
-## How it works — the common failure modes
+## How it works, the common failure modes
 
 - **Lighting and occlusion.** Too dark, too bright, heavy shadow, or the object half-hidden behind something. The pixels the model relies on simply aren't there or are distorted.
 - **Edge and out-of-distribution cases.** The model only learned from its training data. A species, object, or scene it never saw, or one photographed from a weird angle, gets shoehorned into the closest thing it *did* see.
-- **Adversarial inputs.** Tiny, deliberate pixel changes — invisible or meaningless to you — that flip the prediction. The stop-sign sticker is the classic example.
+- **Adversarial inputs.** Tiny, deliberate pixel changes, invisible or meaningless to you, that flip the prediction. The stop-sign sticker is the classic example.
 - **Bias.** If the training data underrepresented some group, lighting, or context, accuracy drops there. A model tuned on one population can perform far worse on another.
 - **OCR limits.** Reading text from images stumbles on handwriting, low resolution, unusual fonts, skew, and glare. It will often *guess* a plausible character rather than admit it cannot read one.
 
@@ -2412,7 +2412,7 @@ The cost of a silent failure scales with the stakes. A mislabeled vacation photo
 
 ## The mental model to keep
 
-**A vision model is a sharp tool with blind spots, not an all-seeing eye.** It excels on inputs like its training data and fails — often confidently — on the edges. Trust it inside its competence, and put guards around everything else.`,
+**A vision model is a sharp tool with blind spots, not an all-seeing eye.** It excels on inputs like its training data and fails, often confidently, on the edges. Trust it inside its competence, and put guards around everything else.`,
       key_terms: [
         { term: "Adversarial input", definition: "A deliberately crafted, often tiny change to an image that flips the model's prediction while looking normal to a human." },
         { term: "Out-of-distribution", definition: "An input unlike anything in the training data; the model has no good basis for it and forces a wrong guess." },
@@ -2429,7 +2429,7 @@ The cost of a silent failure scales with the stakes. A mislabeled vacation photo
         {
           type: "insight",
           title: "Pair confidence with risk signals",
-          content: "Confidence alone is not enough. Combine it with known-hard conditions — poor lighting, occlusion, possible tampering — and route confident-but-risky cases to a human instead of trusting them blindly.",
+          content: "Confidence alone is not enough. Combine it with known-hard conditions, poor lighting, occlusion, possible tampering, and route confident-but-risky cases to a human instead of trusting them blindly.",
           position: "after"
         }
       ],
@@ -2438,7 +2438,7 @@ The cost of a silent failure scales with the stakes. A mislabeled vacation photo
         steps: [
           { label: "Hard input arrives", desc: "Dark, occluded, adversarial, rare, or hard-to-read text." },
           { label: "Outside competence", desc: "The input is unlike the training data the model learned from." },
-          { label: "Forced prediction", desc: "The model still outputs its closest match — it can't say 'I can't see this.'" },
+          { label: "Forced prediction", desc: "The model still outputs its closest match, it can't say 'I can't see this.'" },
           { label: "Confident error", desc: "A clean, high-confidence answer that happens to be wrong." },
           { label: "Guard it", desc: "Use risk signals and a human check before trusting high-stakes output." }
         ]
@@ -2483,7 +2483,7 @@ The cost of a silent failure scales with the stakes. A mislabeled vacation photo
             "Too low a confidence threshold"
           ],
           correct_index: 1,
-          explanation: "When training data underrepresents a group, lighting, or context, the model performs worse there — that gap is bias."
+          explanation: "When training data underrepresents a group, lighting, or context, the model performs worse there, that gap is bias."
         }
       ],
       participation_activities: [
@@ -2567,7 +2567,7 @@ print(decision)
             "The policy routes confident-but-risky readings to review, not trust.",
             "So do not auto-bill: send it to a human to confirm before charging."
           ],
-          output: "Decision: review. Do not auto-bill — glare is a known OCR risk despite high confidence."
+          output: "Decision: review. Do not auto-bill, glare is a known OCR risk despite high confidence."
         }
       ],
       comparison_tables: [
@@ -2587,8 +2587,8 @@ print(decision)
         {
           title: "trust the output vs treat it as high-risk",
           bins: [
-            { id: "trust", label: "Lower risk — likely reliable" },
-            { id: "risk", label: "High risk — verify it" }
+            { id: "trust", label: "Lower risk, likely reliable" },
+            { id: "risk", label: "High risk, verify it" }
           ],
           items: [
             { id: "i1", text: "A well-lit photo of a common object", bin: "trust" },
@@ -2611,7 +2611,7 @@ print(decision)
       challenge_story: "You're deploying an OCR system that reads utility meters from phone photos and auto-bills customers. You learned the hard way that a confident reading is not a correct one: glare, darkness, and occlusion produce confident misreads that overcharge people. So you add a **trust gate** before any reading reaches billing. The rule the team agreed on: if the model isn't confident enough, reject the reading; if it is confident but the capture is flagged with a known-risky condition, send it to a human; only a confident reading taken under clean conditions is trusted automatically. Implement the gate over a batch of readings.",
       challenge_statement: "There is a fixed set of risky conditions: `dark`, `blurry`, `occluded`, `glare`. You are given `n` readings and a confidence threshold `t`. Each reading has a confidence in `[0, 1]` followed by zero or more condition flags (single words).\n\nApply this policy to each reading, **in this order**:\n\n1. If confidence is **less than** `t` -> **reject** (the model isn't sure enough).\n2. Otherwise, if **any** of its flags is in the risky set -> **review** (confident, but conditions are unreliable).\n3. Otherwise -> **trust**.\n\nPrint three lines:\n1. The number **trusted**.\n2. The number sent to **review**.\n3. The number **rejected**.",
       challenge_input_format: "The first line has an integer `n` and a float `t`. Each of the next `n` lines starts with a float confidence, followed by zero or more space-separated flag words.",
-      challenge_output_format: "Three lines: the trusted count, the review count, and the rejected count — each an integer on its own line.",
+      challenge_output_format: "Three lines: the trusted count, the review count, and the rejected count, each an integer on its own line.",
       challenge_constraints: [
         "1 ≤ n ≤ 100000",
         "0.0 ≤ confidence ≤ 1.0",
@@ -2622,11 +2622,11 @@ print(decision)
         { input: "4 0.60\n0.95 clean\n0.90 dark\n0.40 clean\n0.99 occluded glare", output: "1\n2\n1", explanation: "0.95 clean -> confident, no risky flag -> trust. 0.90 dark -> confident but 'dark' is risky -> review. 0.40 -> below 0.60 -> reject. 0.99 occluded glare -> confident but risky -> review. Trusted 1, review 2, rejected 1." },
         { input: "2 0.50\n0.50 clean\n0.49 clean", output: "1\n0\n1", explanation: "0.50 >= 0.50 and 'clean' is not risky -> trust. 0.49 < 0.50 -> reject. The threshold is inclusive, so exactly 0.50 passes the confidence gate." },
       ],
-      challenge_notes: "Check the confidence gate **before** the flags: an uncertain reading is rejected no matter how clean the capture is. The threshold is inclusive (`>=`), so a confidence exactly equal to `t` clears the gate. A reading with no flags at all can never be 'review' — only confidence below `t` (reject) or a clean confident pass (trust).",
+      challenge_notes: "Check the confidence gate **before** the flags: an uncertain reading is rejected no matter how clean the capture is. The threshold is inclusive (`>=`), so a confidence exactly equal to `t` clears the gate. A reading with no flags at all can never be 'review', only confidence below `t` (reject) or a clean confident pass (trust).",
       challenge_hints: [
         "Define `RISKY = {\"dark\", \"blurry\", \"occluded\", \"glare\"}` as a set for fast membership tests.",
         "Split each reading line: the first token is the float confidence, the rest are flags.",
-        "Branch in order — confidence < t -> reject; else any(flag in RISKY) -> review; else trust — and keep three counters.",
+        "Branch in order, confidence < t -> reject; else any(flag in RISKY) -> review; else trust, and keep three counters.",
       ],
       challenge_difficulty: "beginner",
       challenge_starter_code: `import sys

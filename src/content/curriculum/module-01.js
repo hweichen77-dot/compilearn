@@ -19,22 +19,22 @@ export default {
       title: "Prediction Machines, Not Brains",
       concept: "Prediction",
       xp_reward: 10,
-      explanation: `Type "I'm running a little" into your phone and it suggests "late." That's the whole trick. A large language model is autocomplete that read most of the internet — and once that clicks, almost everything else about AI stops being magic.
+      explanation: `Type "I'm running a little" into your phone and it suggests "late." A large language model works the same way: it is autocomplete that read most of the internet. Once that idea is clear, most of the rest of how AI behaves follows from it.
 
 ## What it is
 
 A **language model** is a program that does exactly one thing: given some text, it predicts the next chunk of text. That's it. There is no module for "reasoning," no separate "memory bank," no truth-checker. The entire system is a giant function that takes the text so far and outputs a probability for every chunk that could come next.
 
-The key operation has a name: **next-token prediction**. The model scores thousands of candidate continuations, then picks one of the likely ones. Add it to the input. Predict again. This loop is the whole engine.
+The key operation is called **next-token prediction**. The model scores thousands of candidate continuations, picks a likely one, adds it to the input, and predicts again. That loop is the entire process.
 
 ## How it works
 
 Walk through one answer being built:
 
-1. You send text. Your question becomes the starting input — the **context**.
+1. You send text. Your question becomes the starting input, called the **context**.
 2. The model predicts. It assigns a likelihood to every possible next chunk and selects from the top candidates.
 3. It appends. The chosen chunk is glued onto the input.
-4. It repeats — predict, append, predict, append — until it emits a special *stop* signal.
+4. It repeats this predict-and-append cycle until it emits a special stop signal.
 
 There is no hidden step where the model "decides what to say" and then writes it down. **Writing the next word is the deciding.** The sentence assembles itself one piece at a time, each piece conditioned on everything before it. Here is the loop in miniature:
 
@@ -52,14 +52,14 @@ Because each step only ever looks at the text in front of it, the model is **sta
 Once you see the model as a prediction machine, weird behavior stops being mysterious:
 
 - It sounds confident even when wrong, because confident-sounding text is what usually follows a question online. It imitates the *style*, not the correctness.
-- It can write a poem and debug Python with the same machinery — both are just "what text comes next?"
+- It can write a poem and debug Python with the same machinery, since both are just "what text comes next?"
 - It has no memory of you between conversations. Each request is a fresh prediction over whatever text you handed it. Chat apps fake memory by resending old messages.
 
 This is also why one wrong word early can derail an entire answer: the model keeps predicting *consistent* continuations of its own mistake.
 
 ## The mental model to keep
 
-Picture a ridiculously well-read person who must answer every question by blurting out one word at a time, with no ability to pause and check anything. Fast. Fluent. Often right. Sometimes wrong with a straight face. Don't think "robot brain." Think **the most powerful autocomplete ever built.**`,
+Picture a very well-read person who must answer every question by saying one word at a time, with no ability to pause and check anything. It is fast and fluent, often right, and sometimes wrong while sounding certain. The accurate image is autocomplete at large scale, not a robot brain.`,
       key_terms: [
         { term: "Language model", definition: "A program that predicts the next chunk of text given the text before it." },
         { term: "Next-token prediction", definition: "The core operation: guess what comes next, add it, repeat." },
@@ -240,7 +240,7 @@ i am running a little late`,
       ],
       challenge_title: "Greedy Decoder",
       challenge_description: "Implement the autocomplete loop a real model runs: from a learned probability table, greedily pick the next token, append it, and repeat until you hit a stop signal or a length cap.",
-      challenge_story: "You're building the text-generation core of a tiny language model. Training already produced a **next-token table**: for every context token, it lists the candidate tokens that could follow and an integer score (how likely each is). Now you need the **decoder** — the loop that actually writes text. Your product team chose **greedy decoding**: at each step, emit the single highest-scoring token, glue it on, and feed it back in. Generation stops when the model emits the special \`<END>\` token or when the output reaches its length budget.",
+      challenge_story: "You're building the text-generation core of a tiny language model. Training already produced a **next-token table**: for every context token, it lists the candidate tokens that could follow and an integer score (how likely each is). Now you need the **decoder**, the loop that actually writes text. Your product team chose **greedy decoding**: at each step, emit the single highest-scoring token, glue it on, and feed it back in. Generation stops when the model emits the special \`<END>\` token or when the output reaches its length budget.",
       challenge_statement: "You are given a next-token table and a starting token. Generate text using **greedy decoding**:\n\n1. Begin with the start token already emitted.\n2. Repeatedly look up the **current** (most recently emitted) token in the table. Among its candidate continuations, choose the one with the **highest score**. If two candidates tie on score, choose the one that is **lexicographically smallest**.\n3. If the chosen token is \`<END>\`, stop (do **not** emit \`<END>\`). If the current token has no entry in the table, stop. Otherwise emit the chosen token and continue.\n4. Stop once the generated sequence reaches \`max_len\` tokens total (including the start token).\n\nPrint the generated sequence, space-separated.",
       challenge_input_format: "The first line has two integers `n max_len`: the number of table rows and the maximum sequence length.\n\nEach of the next `n` lines describes one context: a context token followed by one or more `token score` pairs, all space-separated (e.g. `the cat 7 dog 7`).\n\nThe final line is the single start token.",
       challenge_output_format: "One line: the generated tokens separated by single spaces.",
@@ -283,7 +283,7 @@ def main():
 
     # 'table' maps each context token -> list of (candidate_token, score).
     # 'start' is the starting token; 'max_len' caps the total sequence length.
-    # TODO: greedily generate from 'start' — at each step pick the highest-score
+    # TODO: greedily generate from 'start', at each step pick the highest-score
     #       candidate (ties: lexicographically smallest), stop on <END>, a dead
     #       end, or max_len, then print the sequence space-separated.
 
@@ -355,7 +355,7 @@ Rough rule of thumb for English: **1 token ≈ 4 characters ≈ ¾ of a word.** 
 Tokens aren't trivia. They control money, limits, and quality:
 
 - **Cost.** APIs charge per token, input and output. Longer prompts and longer answers cost more.
-- **Context limits.** A model can only "see" so many tokens at once — its context window. Stuff too much in and the oldest text falls off the edge.
+- **Context limits.** A model can only "see" so many tokens at once, up to its context window. Stuff too much in and the oldest text falls off the edge.
 - **Weird failures.** Tasks like "count the letters in 'strawberry'" trip models up partly because the model sees tokens, not individual letters. It literally isn't looking at the r's the way you are.
 
 ## How splitting works
@@ -463,7 +463,7 @@ estimated tokens: 8`,
         {
           title: "text → tokens → bill",
           steps: [
-            { label: "You write a prompt", detail: "A plain string of characters — what you typed.", code: '"The model sees tokens."' },
+            { label: "You write a prompt", detail: "A plain string of characters, the text you typed.", code: '"The model sees tokens."' },
             { label: "The tokenizer splits it", detail: "Each chunk is matched against the model's fixed vocabulary. Common words stay whole; rare ones shatter.", code: '["The", " model", " sees", " tokens", "."]  →  5 tokens' },
             { label: "Tokens become IDs", detail: "Every token maps to an integer. The model only ever does math on these numbers.", code: "[464, 2746, 7224, 16326, 13]" },
             { label: "You get billed + limited", detail: "Token count drives the API bill (in and out) and must fit inside the context window.", code: "5 tokens · $3 / 1M in  →  $0.000015" }
@@ -487,7 +487,7 @@ estimated tokens: 8`,
           steps: [
             "Input cost = 1000 / 1,000,000 × $3 = $0.003.",
             "Output cost = 600 / 1,000,000 × $15 = $0.009.",
-            "Output tokens cost 5× more — answers, not prompts, usually dominate the bill.",
+            "Output tokens cost 5× more, so answers, not prompts, usually dominate the bill.",
             "Total = $0.003 + $0.009 = $0.012."
           ],
           output: "$0.012000 per call"
@@ -499,8 +499,8 @@ estimated tokens: 8`,
           columns: ["Granularity", "Vocab size", "Tokens for 'unbelievable'", "Trade-off"],
           rows: [
             { cells: ["Character", "~100", "12 (one per letter)", "Tiny vocab, but sequences get very long"] },
-            { cells: ["Word", "millions", "1 — if seen, else unknown", "Short sequences, but chokes on rare/new words"] },
-            { cells: ["Subword (BPE)", "~50–100k", "3 (un · believ · able)", "The sweet spot every modern LLM uses"], highlight: true }
+            { cells: ["Word", "millions", "1 if seen, else unknown", "Short sequences, but chokes on rare/new words"] },
+            { cells: ["Subword (BPE)", "~50-100k", "3 (un · believ · able)", "The sweet spot every modern LLM uses"], highlight: true }
           ]
         }
       ],
@@ -523,7 +523,7 @@ estimated tokens: 8`,
       reflections: [
         {
           prompt: "In one or two sentences: why does rare or messy text cost more tokens than plain English?",
-          sampleAnswer: "The tokenizer only has whole-chunk symbols for text it saw often. Rare or messy text isn't in that set, so it gets rebuilt from many tiny pieces — and more pieces means more tokens, which means more cost."
+          sampleAnswer: "The tokenizer only has whole-chunk symbols for text it saw often. Rare or messy text isn't in that set, so it gets rebuilt from many tiny pieces, and more pieces means more tokens, which means more cost."
         }
       ],
       hints: [
@@ -545,7 +545,7 @@ estimated tokens: 8`,
         { input: "1000 500", output: "$0.010500", explanation: "Input: 1000/1e6 × $3 = $0.003. Output: 500/1e6 × $15 = $0.0075. Total = $0.0105." },
         { input: "1000000 1000000", output: "$18.000000", explanation: "1M input = $3, 1M output = $15, total $18." },
       ],
-      challenge_notes: "Output tokens cost 5× more than input tokens — in real apps the reply, not the prompt, usually dominates the bill. Use an f-string like `f\"\${cost:.6f}\"` to format to 6 decimals.",
+      challenge_notes: "Output tokens cost 5× more than input tokens. In real apps the reply, not the prompt, usually dominates the bill. Use an f-string like `f\"\${cost:.6f}\"` to format to 6 decimals.",
       challenge_hints: [
         "Read the line and split it into two integers with `map(int, input().split())`.",
         "cost = input/1_000_000*3 + output/1_000_000*15.",
@@ -579,7 +579,7 @@ print(f"\${total:.6f}")
       title: "Training vs Inference",
       concept: "Training",
       xp_reward: 10,
-      explanation: `A frontier model can cost over one hundred million dollars to build — and then answer your question for a fraction of a cent. That gap isn't a contradiction. It's the difference between the two phases of an AI's life: **training** and **inference**. People mix these up constantly, and getting them straight will save you a hundred confused conversations.
+      explanation: `A frontier model can cost over one hundred million dollars to build, and then answer your question for a fraction of a cent. That gap is not a contradiction. It is the difference between the two phases of an AI's life: **training** and **inference**. People mix these up constantly, and keeping them straight clears up a lot of confusion.
 
 ## What it is
 
@@ -587,7 +587,7 @@ Every model lives in two phases. **Training** is building the model: a slow, bru
 
 ## How it works
 
-**Training** plays a fill-in-the-blank game at impossible scale. Show the model mountains of text, hide the next token, let it guess, then nudge its internal numbers — its **weights** — slightly toward the right answer. Repeat billions of times. One nudge looks like this:
+**Training** plays a fill-in-the-blank game at impossible scale. Show the model mountains of text, hide the next token, let it guess, then nudge its internal numbers (its **weights**) slightly toward the right answer. Repeat billions of times. One nudge looks like this:
 
 \`\`\`python
 # one training step: move the weight toward the target
@@ -595,19 +595,19 @@ weight = weight + learning_rate * (target - weight)
 # 0.50  ->  0.55  ->  0.59  ...  the model is changing
 \`\`\`
 
-This phase takes weeks to months on thousands of GPUs and costs millions. When it ends, the weights **freeze** into a finished file — the model.
+This phase takes weeks to months on thousands of GPUs and costs millions. When it ends, the weights **freeze** into a finished file, the model.
 
-**Inference** never touches those weights. When you send a prompt, the model runs your text through the frozen numbers and predicts tokens — the autocomplete loop from lesson 1. It takes milliseconds, happens on every request, and teaches the model nothing.
+**Inference** never touches those weights. When you send a prompt, the model runs your text through the frozen numbers and predicts tokens using the autocomplete loop from lesson 1. It takes milliseconds, happens on every request, and teaches the model nothing.
 
-The textbook analogy nails it: training is *writing and printing* the book (slow, once, costly); inference is *reading* it (fast, repeatable). Reading never changes what's printed on the pages.
+The textbook analogy fits: training is *writing and printing* the book (slow, once, costly); inference is *reading* it (fast, repeatable). Reading never changes what's printed on the pages.
 
 ## Why it matters
 
 The freeze has consequences that trip everyone up:
 
-- **The model does not learn from your conversation.** Tell it your name, close the tab, come back tomorrow — it has no idea who you are. Inference leaves the weights untouched, so nothing is stored.
+- **The model does not learn from your conversation.** Tell it your name, close the tab, come back tomorrow, and it has no idea who you are. Inference leaves the weights untouched, so nothing is stored.
 - **Knowledge cutoff.** Its knowledge is frozen at training time. It cannot know about events after the data it trained on, no matter how confidently it talks about them.
-- **In-chat "memory" is an illusion.** When a chatbot remembers something you said five messages ago, the app is simply resending those earlier messages as part of each new prompt. Same frozen model, more input text — not learning.
+- **In-chat "memory" is an illusion.** When a chatbot remembers something you said five messages ago, the app is simply resending those earlier messages as part of each new prompt. Same frozen model, more input text, not learning.
 
 This also explains the cost shape of AI products: a giant up-front bill to train once, then a tiny per-request bill to serve answers forever.
 
@@ -673,7 +673,7 @@ This also explains the cost shape of AI products: a giant up-front bill to train
             "Tokens expiring after a year"
           ],
           correct_index: 1,
-          explanation: "The model only knows what was in its training data, which ends at some date — the cutoff."
+          explanation: "The model only knows what was in its training data, which ends at some date, the cutoff."
         }
       ],
       participation_activities: [
@@ -713,7 +713,7 @@ after: 0.5`,
         {
           title: "from raw text to a model you can use",
           steps: [
-            { label: "Collect data", detail: "Gather enormous amounts of text — books, code, web pages. This happens only during training; inference uses none of it.", code: "corpus = trillions of tokens of text" },
+            { label: "Collect data", detail: "Gather enormous amounts of text such as books, code, and web pages. This happens only during training; inference uses none of it.", code: "corpus = trillions of tokens of text" },
             { label: "Train: guess and nudge", detail: "Hide the next token, let the model guess, then adjust its weights toward the right answer. Repeat billions of times.", code: "weight += lr * (target - guess)  # weights change" },
             { label: "Freeze the weights", detail: "When training ends, the weights are saved into a fixed file. The model stops changing forever.", code: "model.save('weights.bin')  # now read-only" },
             { label: "Infer, again and again", detail: "Every user request runs the frozen weights to predict tokens. No weight is ever updated here.", code: "answer = model(prompt)  # weights unchanged" }
@@ -725,7 +725,7 @@ after: 0.5`,
           number: 1, difficulty: "easy",
           prompt: "You tell ChatGPT your dog's name. The next day, in a brand-new chat, it doesn't remember it. Which phase explains this?",
           steps: [
-            "Telling it something happens during inference — you sent a prompt and got a reply.",
+            "Telling it something happens during inference: you sent a prompt and got a reply.",
             "Inference runs the frozen weights and never updates them, so nothing you said was stored in the model.",
             "A brand-new chat starts with no prior messages, and the model has no memory of its own."
           ],
@@ -735,7 +735,7 @@ after: 0.5`,
           number: 2, difficulty: "medium",
           prompt: "A model trained on data up to early 2024 is asked who won an election held in late 2025. It answers confidently but wrongly. Why?",
           steps: [
-            "The model's knowledge is frozen at training time — its knowledge cutoff is early 2024.",
+            "The model's knowledge is frozen at training time, with a knowledge cutoff of early 2024.",
             "The 2025 election simply was not in its training data, so it has no real information about it.",
             "But the model still predicts plausible text, so it produces a confident-sounding guess instead of admitting the gap.",
             "Fix: give it the result in the prompt (grounding) rather than relying on its frozen memory."
@@ -775,13 +775,13 @@ after: 0.5`,
       reflections: [
         {
           prompt: "In your own words: when a chatbot seems to 'remember' what you said earlier in the same conversation, what is actually happening?",
-          sampleAnswer: "The model itself isn't remembering anything — its weights are frozen. The app stores the earlier messages and resends them as part of each new prompt, so the conversation history is fed back in as fresh input every time. It looks like memory, but it's just re-supplied context running through the same unchanged model."
+          sampleAnswer: "The model itself isn't remembering anything, since its weights are frozen. The app stores the earlier messages and resends them as part of each new prompt, so the conversation history is fed back in as fresh input every time. It looks like memory, but it's just re-supplied context running through the same unchanged model."
         }
       ],
       hints: [
         "infer() only reads weights; it returns a value and never reassigns the global.",
         "Print result to see the output of inference.",
-        "Print weights again afterward — it should be identical to 'before'."
+        "Print weights again afterward; it should be identical to 'before'."
       ],
       challenge_title: "Gradient Descent Trainer",
       challenge_description: "Run the inner loop of training: repeatedly nudge a weight toward its target and report where it lands after a fixed number of steps. This is the exact update rule that turns raw weights into a finished model.",
@@ -796,9 +796,9 @@ after: 0.5`,
       ],
       challenge_examples: [
         { input: "0.5 1.0 0.1 1", output: "0.5500", explanation: "One step: 0.5 + 0.1 × (1.0 − 0.5) = 0.55." },
-        { input: "0.0 1.0 0.5 3", output: "0.8750", explanation: "Step 1: 0.5. Step 2: 0.75. Step 3: 0.875 — each step closes half the remaining gap." },
+        { input: "0.0 1.0 0.5 3", output: "0.8750", explanation: "Step 1: 0.5. Step 2: 0.75. Step 3: 0.875. Each step closes half the remaining gap." },
       ],
-      challenge_notes: "With `steps = 0`, no update happens and the weight stays at its starting value — that's inference, not training. Watch the gap `(target - w)` shrink each step: this is why training shows diminishing returns and never quite reaches the target exactly. Format with an f-string like `f\"{w:.4f}\"`.",
+      challenge_notes: "With `steps = 0`, no update happens and the weight stays at its starting value, which is inference, not training. Watch the gap `(target - w)` shrink each step: this is why training shows diminishing returns and never quite reaches the target exactly. Format with an f-string like `f\"{w:.4f}\"`.",
       challenge_hints: [
         "Read the line and unpack it; remember `steps` is an int while the other three are floats.",
         "Loop `steps` times, reassigning `w` with the update rule each iteration.",
@@ -835,7 +835,7 @@ main()
       challenge_test_cases: [
         { input: "0.5 1.0 0.1 1", expected_output: "0.5500", description: "A single update step moves the weight from 0.5 to 0.55." },
         { input: "0.0 1.0 0.5 3", expected_output: "0.8750", description: "Three steps, each closing half the remaining gap to the target." },
-        { input: "0.5 1.0 0.1 0", expected_output: "0.5000", description: "Zero steps leaves the weight unchanged — inference, not training." },
+        { input: "0.5 1.0 0.1 0", expected_output: "0.5000", description: "Zero steps leaves the weight unchanged: inference, not training." },
         { input: "0.2 0.9 0.1 100", expected_output: "0.9000", description: "Over many steps the weight converges to the target." }
       ]
     },
@@ -846,13 +846,13 @@ main()
       title: "Why LLMs Make Things Up",
       concept: "Hallucination",
       xp_reward: 10,
-      explanation: `In 2023 a New York lawyer asked a model for cases to support his argument. It handed him six perfectly formatted citations — case names, courts, years, judges. All six were invented. He filed them, got caught, and was sanctioned by the court. The model wasn't lying. It was doing its only job: predicting plausible text.
+      explanation: `In 2023 a New York lawyer asked a model for cases to support his argument. It handed him six perfectly formatted citations with case names, courts, years, and judges. All six were invented. He filed them, got caught, and was sanctioned by the court. The model wasn't lying. It was doing its only job: predicting plausible text.
 
 ## What it is
 
-**Hallucination** is when a model produces confident output that is wrong or entirely made up. Not a typo, not a refusal — a fluent, authoritative-sounding answer that happens to be false. The unsettling part is *how convincing* it looks. The fake citations were formatted exactly like real ones, because the model learned what real citations look like.
+**Hallucination** is when a model produces confident output that is wrong or entirely made up. It is not a typo or a refusal but a fluent, authoritative-sounding answer that happens to be false. The part that causes trouble is how convincing it looks. The fake citations were formatted exactly like real ones, because the model learned what real citations look like.
 
-The root cause is a single fact from lesson 1: the model optimizes for **plausible**, not **true**. Most of the time those overlap, which is why the tool is useful. But when they split — when the most natural-sounding continuation isn't factually correct — the model produces the natural-sounding one anyway.
+The root cause is a single fact from lesson 1: the model optimizes for **plausible**, not **true**. Most of the time those overlap, which is why the tool is useful. But when they split, when the most natural-sounding continuation isn't factually correct, the model produces the natural-sounding one anyway.
 
 ## How it works
 
@@ -860,7 +860,7 @@ Three forces push a model toward making things up:
 
 - **No fact-checker inside.** There is no separate truth-verifier in the model. It generates text; it does not look anything up unless an app explicitly gives it a tool to.
 - **Gaps in training.** If the model saw little or conflicting information on a topic, it fills the gap with whatever sounds right. Obscure people, very recent events, and niche APIs are classic hallucination zones.
-- **Pressure to answer.** The model is built to *continue* text. After a confident-sounding question, "I don't know" is a rarer continuation in its training data than a confident answer — so it tends to guess rather than refuse.
+- **Pressure to answer.** The model is built to *continue* text. After a confident-sounding question, "I don't know" is a rarer continuation in its training data than a confident answer, so it tends to guess rather than refuse.
 
 You can picture the failure path: obscure question -> thin training signal -> predict plausible text -> confident wrong answer.
 
@@ -868,7 +868,7 @@ You can picture the failure path: obscure question -> thin training signal -> pr
 
 You don't need to fear the tool. You need to use it like a fast, fluent intern who is sometimes wrong:
 
-- **Verify anything that matters.** Names, numbers, citations, legal, medical, and financial claims — check them against a real source.
+- **Verify anything that matters.** Names, numbers, citations, legal, medical, and financial claims: check them against a real source.
 - **Give it the facts (grounding).** Paste the document and ask about *that*, instead of relying on the model's fuzzy memory. This is the core idea behind retrieval, covered in a later module.
 - **Watch for over-specific confidence.** Exact page numbers, precise dates, and tidy citations on obscure topics are classic hallucination tells.
 - **Ask it to flag uncertainty.** A prompt like the one below reduces, but does not eliminate, fabrication:
@@ -880,7 +880,7 @@ reply exactly: "Not stated in the source."
 
 ## The mental model to keep
 
-The fix isn't to make the model stop predicting — that's all it can do. **Put the truth-checking around the model, in how you use it,** not inside the model, where it doesn't exist.`,
+The fix isn't to make the model stop predicting, since that's all it can do. **Put the truth-checking around the model, in how you use it,** not inside the model, where it doesn't exist.`,
       key_terms: [
         { term: "Hallucination", definition: "When a model produces confident output that is wrong or entirely made up." },
         { term: "Plausible vs true", definition: "Models optimize for text that sounds right, which usually but not always matches reality." },
@@ -979,7 +979,7 @@ The capital of Australia is Sydney. (confidence 0.95) -> HALLUCINATION`,
             { label: "You ask an obscure question", detail: "The topic is niche, recent, or barely covered in training text.", code: 'prompt = "Cite a 2019 case on drone privacy law."' },
             { label: "Thin training signal", detail: "The model has weak or missing real information for this exact request. There's a gap.", code: "relevant_examples_seen = almost none" },
             { label: "Predict plausible text anyway", detail: "It can't say 'no data here'; it continues with what citations usually look like, inventing the specifics.", code: '"Smith v. Aerial Corp., 412 F.3d 88 (9th Cir. 2019)"' },
-            { label: "Confident wrong answer", detail: "The output is perfectly formatted and authoritative — and entirely fabricated. Looks real, isn't.", code: "case_exists = False  # hallucination" }
+            { label: "Confident wrong answer", detail: "The output is perfectly formatted and authoritative, and entirely fabricated. It looks real but is not.", code: "case_exists = False  # hallucination" }
           ]
         }
       ],
@@ -992,14 +992,14 @@ The capital of Australia is Sydney. (confidence 0.95) -> HALLUCINATION`,
             "Plausible-sounding falsehoods can score just as high as true statements.",
             "So a high confidence number tells you nothing reliable about correctness."
           ],
-          output: "No — confidence measures plausibility, not truth."
+          output: "No. Confidence measures plausibility, not truth."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "You need a model to summarize a contract without inventing clauses that aren't there. What's the most reliable way to set this up?",
           steps: [
             "Relying on the model's memory invites it to fill gaps with plausible-but-fake clauses.",
-            "Instead, paste the actual contract text into the prompt — this is grounding.",
+            "Instead, paste the actual contract text into the prompt. This is grounding.",
             'Constrain it: instruct it to answer only from the pasted text and to say "Not stated in the source" when something is missing.',
             "Then verify any high-stakes clause against the original document yourself."
           ],
@@ -1038,7 +1038,7 @@ The capital of Australia is Sydney. (confidence 0.95) -> HALLUCINATION`,
       reflections: [
         {
           prompt: "In your own words: why can't you fix hallucinations just by telling the model 'only say true things'?",
-          sampleAnswer: "The model has no internal way to check truth — it only predicts plausible continuations, and an instruction to be truthful is just more text that nudges its style, not a verifier it can consult. Real reliability comes from grounding it in source material and checking important claims yourself, putting the truth-checking around the model rather than inside it."
+          sampleAnswer: "The model has no internal way to check truth; it only predicts plausible continuations, and an instruction to be truthful is just more text that nudges its style, not a verifier it can consult. Real reliability comes from grounding it in source material and checking important claims yourself, putting the truth-checking around the model rather than inside it."
         }
       ],
       hints: [
@@ -1047,8 +1047,8 @@ The capital of Australia is Sydney. (confidence 0.95) -> HALLUCINATION`,
         "An f-string makes it easy to print text, confidence, and the flag together."
       ],
       challenge_title: "Hallucination Gate",
-      challenge_description: "Build the safety filter that sits between a model and your users: decide whether each claim can be trusted, must be human-verified, or should be rejected outright — based on grounding first, confidence second.",
-      challenge_story: "Your AI assistant drafts answers, but you've learned the hard way that a high **confidence** score means *plausible*, not *true*. To stop a fabricated answer from reaching a user, you add a **gate**. The rule your team agreed on: if a claim is backed by a **grounded fact** (something you pasted in as a real source), trust it. Otherwise it's coming from the model's fuzzy memory — so if its confidence clears a review threshold, route it to a human to **verify**; if it's below the threshold, **reject** it. Implement the gate and report how many claims were auto-trusted.",
+      challenge_description: "Build the safety filter that sits between a model and your users: decide whether each claim can be trusted, must be human-verified, or should be rejected outright, based on grounding first, confidence second.",
+      challenge_story: "Your AI assistant drafts answers, but you've learned the hard way that a high **confidence** score means *plausible*, not *true*. To stop a fabricated answer from reaching a user, you add a **gate**. The rule your team agreed on: if a claim is backed by a **grounded fact** (something you pasted in as a real source), trust it. Otherwise it's coming from the model's fuzzy memory, so if its confidence clears a review threshold, route it to a human to **verify**; if it's below the threshold, **reject** it. Implement the gate and report how many claims were auto-trusted.",
       challenge_statement: "You are given a confidence `threshold`, a set of **grounded facts**, and a list of **claims** (each with an integer confidence and the claim text). For each claim, decide its verdict in this exact priority order:\n\n1. If the claim text exactly matches a grounded fact, the verdict is `TRUST`.\n2. Otherwise, if its confidence is **greater than or equal to** the threshold, the verdict is `VERIFY`.\n3. Otherwise, the verdict is `REJECT`.\n\nPrint each claim and its verdict in input order, then print how many claims were auto-trusted.",
       challenge_input_format: "The first line is the integer `threshold`.\n\nThe second line is an integer `g`, the number of grounded facts. The next `g` lines each contain one grounded fact (full line, may contain spaces).\n\nThe next line is an integer `c`, the number of claims. Each of the next `c` lines starts with an integer confidence, a single space, then the claim text (which may contain spaces).",
       challenge_output_format: "For each claim, in input order, a line `<claim text> -> <VERDICT>`. After all claims, a final line `TRUSTED <count>` giving the number of claims that received the `TRUST` verdict.",
@@ -1144,17 +1144,17 @@ main()
       title: "Probability Distributions: The Next-Token Lottery",
       concept: "Probability",
       xp_reward: 10,
-      explanation: `When the model "picks the next token," it does not pick. It rolls a weighted die. Before any word comes out, the model holds a full **probability distribution** over every token in its vocabulary at once — maybe 50,000 numbers, each saying "this is how likely I am to come next." The word you see is one draw from that lottery.
+      explanation: `When the model "picks the next token," it does not pick. It rolls a weighted die. Before any word comes out, the model holds a full **probability distribution** over every token in its vocabulary at once, maybe 50,000 numbers, each saying "this is how likely I am to come next." The word you see is one draw from that lottery.
 
 ## What it is
 
-A **probability distribution** is a list of likelihoods that covers every option and sums to exactly 1.0 (100%). For next-token prediction, there is one entry per vocabulary token. " blue" might get 0.62, " green" 0.10, " falling" 0.03, and tens of thousands of others split the rest. The model never outputs just one guess — it always produces the whole spread, and sampling reaches in to pull one out.
+A **probability distribution** is a list of likelihoods that covers every option and sums to exactly 1.0 (100%). For next-token prediction, there is one entry per vocabulary token. " blue" might get 0.62, " green" 0.10, " falling" 0.03, and tens of thousands of others split the rest. The model never outputs just one guess, it always produces the whole spread, and sampling reaches in to pull one out.
 
-But the model does not compute these probabilities directly. It first produces raw, unbounded scores called **logits** — one per token, any real number, positive or negative. A function named **softmax** then squashes those logits into a clean probability distribution.
+But the model does not compute these probabilities directly. It first produces raw, unbounded scores called **logits**: one per token, any real number, positive or negative. A function named **softmax** then squashes those logits into a clean probability distribution.
 
 ## How it works
 
-Softmax does two jobs: it makes every number positive (by exponentiating), then it normalizes them to sum to 1. Bigger logit in, bigger probability out — but the gaps get exaggerated, so the top candidate often dominates.
+Softmax does two jobs: it makes every number positive (by exponentiating), then it normalizes them to sum to 1. Bigger logit in, bigger probability out, but the gaps get exaggerated, so the top candidate often dominates.
 
 \`\`\`python
 import math
@@ -1166,13 +1166,13 @@ probs = {tok: e / total for tok, e in exps.items()}
 # probs ~ {"blue": 0.88, "green": 0.12, "red": 0.002} -> sums to 1.0
 \`\`\`
 
-Then **sampling** draws one token according to those weights, ties back to the prediction loop from lesson 1: predict the distribution, sample a token, append it, repeat. **Temperature** (from lesson 1's worked example) is the dial that flattens or sharpens this distribution before the draw — high temperature evens out the odds and adds variety, low temperature spikes the top token and makes output predictable.
+Then **sampling** draws one token according to those weights, ties back to the prediction loop from lesson 1: predict the distribution, sample a token, append it, repeat. **Temperature** (from lesson 1's worked example) is the dial that flattens or sharpens this distribution before the draw, high temperature evens out the odds and adds variety, low temperature spikes the top token and makes output predictable.
 
 ## Why it matters
 
-- **Determinism is a choice.** Always take the single highest-probability token (greedy) and the model is repeatable. Sample, and the same prompt yields different answers — same distribution, different draw.
+- **Determinism is a choice.** Always take the single highest-probability token (greedy) and the model is repeatable. Sample, and the same prompt yields different answers, same distribution, different draw.
 - **"Confidence" is just a probability.** A token at 0.97 is not *verified*; it is only the model's predicted likelihood. Lesson 4 already warned: plausible is not true.
-- **The long tail is real.** Most probability piles onto a few tokens, but a tiny sliver is spread across thousands. Crank temperature up and you start drawing from that weird tail — which is how creative (and unhinged) outputs happen.
+- **The long tail is real.** Most probability piles onto a few tokens, but a tiny sliver is spread across thousands. Crank temperature up and you start drawing from that weird tail, which is how creative (and unhinged) outputs happen.
 
 ## The mental model to keep
 
@@ -1184,8 +1184,8 @@ The model does not choose a word. **It builds a full distribution over the whole
         { term: "Sampling", definition: "Drawing one token at random according to the distribution's weights." }
       ],
       callouts: [
-        { type: "analogy", title: "A weighted raffle, not a choice", content: "Imagine a raffle where 'blue' holds 620 tickets, 'green' 100, and thousands of rare words share the rest. The model doesn't decide the winner — it draws a ticket. Softmax printed the tickets; sampling pulls one.", position: "before" },
-        { type: "insight", title: "Logits are the unfair scores", content: "Logits can be any number, even negative. Softmax exponentiates them, so a logit lead of just 2 can turn into a near-total probability win. Big scores don't add up — they blow up.", position: "after" }
+        { type: "analogy", title: "A weighted raffle, not a choice", content: "Imagine a raffle where 'blue' holds 620 tickets, 'green' 100, and thousands of rare words share the rest. The model doesn't decide the winner, it draws a ticket. Softmax printed the tickets; sampling pulls one.", position: "before" },
+        { type: "insight", title: "Logits are the unfair scores", content: "Logits can be any number, even negative. Softmax exponentiates them, so a logit lead of just 2 can turn into a near-total probability win. Big scores don't add up, they blow up.", position: "after" }
       ],
       concept_diagram: {
         title: "From scores to a sampled token",
@@ -1236,7 +1236,7 @@ The model does not choose a word. **It builds a full distribution over the whole
             "Converts probabilities back into logits"
           ],
           correct_index: 1,
-          explanation: "Higher temperature flattens the distribution, giving lower-probability tokens a better shot — more creative, less predictable output."
+          explanation: "Higher temperature flattens the distribution, giving lower-probability tokens a better shot, more creative, less predictable output."
         }
       ],
       participation_activities: [
@@ -1302,9 +1302,9 @@ sum: 1.000`,
             "Softmax compares exponentials: e^4 vs e^2.",
             "e^4 = (e^2)^2 = 7.39^2 = about 54.6, and e^2 = about 7.39.",
             "Share of the first = 54.6 / (54.6 + 7.39) = 54.6 / 61.99.",
-            "That is about 0.88 — a logit lead of 2 turns into an 88% probability share."
+            "That is about 0.88, a logit lead of 2 turns into an 88% probability share."
           ],
-          output: "About 88% — softmax exaggerates the gap between logits."
+          output: "About 88%, softmax exaggerates the gap between logits."
         }
       ],
       comparison_tables: [
@@ -1315,7 +1315,7 @@ sum: 1.000`,
             { cells: ["Range", "Any real number, can be negative", "Between 0 and 1"] },
             { cells: ["Sum", "Whatever it happens to be", "Exactly 1.0"] },
             { cells: ["Produced by", "The model's final layer", "Softmax applied to logits"] },
-            { cells: ["What you sample from", "No — not a distribution yet", "Yes — this is the lottery"], highlight: true }
+            { cells: ["What you sample from", "No, not a distribution yet", "Yes, this is the lottery"], highlight: true }
           ]
         }
       ],
@@ -1339,17 +1339,17 @@ sum: 1.000`,
       reflections: [
         {
           prompt: "In your own words: why is it more accurate to say the model 'samples' a token than to say it 'knows' the next word?",
-          sampleAnswer: "The model never settles on one answer — it produces a probability for every token at once, then a draw selects one according to those weights. Because the choice is a weighted random draw rather than a lookup of a known fact, the same prompt can yield different words, and a high probability only means likely, not correct."
+          sampleAnswer: "The model never settles on one answer, it produces a probability for every token at once, then a draw selects one according to those weights. Because the choice is a weighted random draw rather than a lookup of a known fact, the same prompt can yield different words, and a high probability only means likely, not correct."
         }
       ],
       hints: [
         "math.exp(x) gives e raised to x; apply it to each logit first.",
         "Sum all the exponentials, then divide each one by that sum.",
-        "The probabilities should always add up to 1.0 — print the sum to check."
+        "The probabilities should always add up to 1.0, print the sum to check."
       ],
       challenge_title: "Softmax Sampler Odds",
       challenge_description: "Build the core of next-token selection: take raw logits, run softmax to get a distribution, and report the probability of the top candidates the way a sampler would weigh them.",
-      challenge_story: "You're implementing the decoder's final stage. The model has just produced one **logit** per candidate token — raw scores, no bounds. Before sampling can pick a token, those logits must become a real **probability distribution**. Your team wants the top **k** candidates shown as percentages so they can eyeball how 'peaked' the model is. To keep the simulator deterministic and free of floating-point surprises, you'll use a simplified normalization: treat each logit as its own un-exponentiated weight and report each candidate's share of the total. Sort by weight (highest first), breaking ties alphabetically.",
+      challenge_story: "You're implementing the decoder's final stage. The model has just produced one **logit** per candidate token, raw scores, no bounds. Before sampling can pick a token, those logits must become a real **probability distribution**. Your team wants the top **k** candidates shown as percentages so they can eyeball how 'peaked' the model is. To keep the simulator deterministic and free of floating-point surprises, you'll use a simplified normalization: treat each logit as its own un-exponentiated weight and report each candidate's share of the total. Sort by weight (highest first), breaking ties alphabetically.",
       challenge_statement: "You are given `n` candidate tokens, each with an integer logit (weight), and an integer `k`.\n\n1. Sort the tokens by logit **descending**; break ties by token text **ascending** (lexicographic).\n2. Keep the top `k` tokens.\n3. Let `S` be the sum of the logits of those top `k` tokens. For each kept token, its probability is `logit / S * 100`.\n4. Print each kept token (in the sorted order) followed by its percentage, rounded to exactly **2 decimal places**.",
       challenge_input_format: "The first line has two integers `n k`. Each of the next `n` lines has a token (no spaces) and its integer logit, separated by a space.",
       challenge_output_format: "`k` lines, each `<token> <percentage>` where the percentage is formatted to exactly 2 decimal places.",
@@ -1362,7 +1362,7 @@ sum: 1.000`,
         { input: "4 3\ncat 8\ndog 6\nfish 2\nbird 4", output: "cat 44.44\ndog 33.33\nbird 22.22", explanation: "Sorted by logit: cat 8, dog 6, bird 4, fish 2. Top 3 are cat, dog, bird; their sum is 18. cat = 8/18 = 44.44%, dog = 6/18 = 33.33%, bird = 4/18 = 22.22%." },
         { input: "2 2\nyes 3\nno 1", output: "yes 75.00\nno 25.00", explanation: "Sum is 4. yes = 3/4 = 75%, no = 1/4 = 25%." },
       ],
-      challenge_notes: "Real softmax exponentiates each logit first, which makes the top token dominate far more sharply than this linear version. We skip the exponential here only to keep the arithmetic clean and deterministic — the idea (normalize so shares sum to 100%) is identical. The tie-break keeps output unambiguous when two tokens share a logit.",
+      challenge_notes: "Real softmax exponentiates each logit first, which makes the top token dominate far more sharply than this linear version. We skip the exponential here only to keep the arithmetic clean and deterministic, the idea (normalize so shares sum to 100%) is identical. The tie-break keeps output unambiguous when two tokens share a logit.",
       challenge_hints: [
         "Read all tokens into a list of (token, logit) tuples, then sort with key=lambda x: (-x[1], x[0]).",
         "Slice the first k after sorting, then sum their logits to get S.",
@@ -1423,11 +1423,11 @@ main()
       title: "Weights and Parameters",
       concept: "Weights",
       xp_reward: 10,
-      explanation: `"GPT-3 has 175 billion parameters." You've seen numbers like this thrown around like horsepower stats. But what *is* a parameter? It is just a single number. The whole model — everything it knows about grammar, facts, code, and tone — is stored in billions of these plain numbers, and nothing else.
+      explanation: `"GPT-3 has 175 billion parameters." You've seen numbers like this thrown around like horsepower stats. But what *is* a parameter? It is just a single number. The whole model, everything it knows about grammar, facts, code, and tone, is stored in billions of these plain numbers, and nothing else.
 
 ## What it is
 
-A **parameter** (also called a **weight**) is one tunable number inside the model. Lesson 3 mentioned weights as the thing training adjusts; here we open the box. A model is a giant grid of these numbers organized into layers. When you run a prompt through, the model multiplies your token values by these weights, adds them up, and passes the result forward — over and over, through every layer — until logits pop out the other end.
+A **parameter** (also called a **weight**) is one tunable number inside the model. Lesson 3 mentioned weights as the thing training adjusts; here we open the box. A model is a giant grid of these numbers organized into layers. When you run a prompt through, the model multiplies your token values by these weights, adds them up, and passes the result forward, over and over, through every layer, until logits pop out the other end.
 
 There is no separate "knowledge database." The fact that Paris is the capital of France is not stored as a sentence anywhere. It is smeared across millions of weights as a pattern that makes "Paris" the likely continuation of "The capital of France is."
 
@@ -1444,27 +1444,27 @@ output = sum(x * w for x, w in zip(inputs, weights))
 # 1.0*0.5 + 2.0*-1.0 + 3.0*0.25 = 0.5 - 2.0 + 0.75 = -0.75
 \`\`\`
 
-A real model does this with billions of weights across dozens of layers. **Parameter count** is simply how many of these numbers the model has. More parameters means more capacity to store patterns — but also more memory, more compute, and a bigger training bill.
+A real model does this with billions of weights across dozens of layers. **Parameter count** is simply how many of these numbers the model has. More parameters means more capacity to store patterns, but also more memory, more compute, and a bigger training bill.
 
 ## Why it matters
 
 - **Size sets the floor on cost and speed.** A 7-billion-parameter model can run on a laptop; a 400-billion one needs a server rack. Parameter count drives memory, latency, and price.
-- **More parameters usually means more capable — up to a point.** Bigger models tend to handle subtler patterns and rarer knowledge. But the gains shrink as you scale, which is the whole topic of the next lesson.
+- **More parameters usually means more capable, up to a point.** Bigger models tend to handle subtler patterns and rarer knowledge. But the gains shrink as you scale, which is the whole topic of the next lesson.
 - **Parameters are frozen at inference.** Lesson 3 again: when you chat, the weights do not move. You are reading the printed grid, not editing it.
 - **The number is marketing-adjacent.** A well-trained 13B model can beat a sloppy 70B one. Parameter count is a rough proxy for capability, not a guarantee.
 
 ## The mental model to keep
 
-A model is **billions of dials**, each holding one number. Training spent millions of dollars setting every dial. **Inference just reads the dials** to turn your prompt into a prediction — the dials never move while you use it.`,
+A model is **billions of dials**, each holding one number. Training spent millions of dollars setting every dial. **Inference just reads the dials** to turn your prompt into a prediction, the dials never move while you use it.`,
       key_terms: [
         { term: "Parameter", definition: "A single tunable number inside the model; billions of them together define its behavior." },
-        { term: "Weight", definition: "Another name for a parameter — the value an input gets multiplied by inside a layer." },
+        { term: "Weight", definition: "Another name for a parameter, the value an input gets multiplied by inside a layer." },
         { term: "Parameter count", definition: "How many tunable numbers a model has, often quoted in billions." },
         { term: "Capacity", definition: "How much pattern and knowledge a model can store, tied loosely to its parameter count." }
       ],
       callouts: [
-        { type: "analogy", title: "Billions of dials", content: "Picture a mixing board with billions of dials, each set to one number. Training is the months-long session that tuned every dial. Inference is just playing the board as-is — no dial moves while the music plays.", position: "before" },
-        { type: "insight", title: "Knowledge has no address", content: "There is no row in the model that says 'Paris = capital of France.' That fact lives as a pattern spread across millions of weights. You can't point to where a fact is stored — only that the dials together make it likely.", position: "after" }
+        { type: "analogy", title: "Billions of dials", content: "Picture a mixing board with billions of dials, each set to one number. Training is the months-long session that tuned every dial. Inference is just playing the board as-is, no dial moves while the music plays.", position: "before" },
+        { type: "insight", title: "Knowledge has no address", content: "There is no row in the model that says 'Paris = capital of France.' That fact lives as a pattern spread across millions of weights. You can't point to where a fact is stored, only that the dials together make it likely.", position: "after" }
       ],
       concept_diagram: {
         title: "What a parameter does in one pass",
@@ -1498,7 +1498,7 @@ A model is **billions of dials**, each holding one number. Training spent millio
         {
           question: "What does a higher parameter count tend to cost you?",
           options: [
-            "Nothing — bigger is always free",
+            "Nothing, bigger is always free",
             "More memory, more compute, and more latency",
             "Fewer tokens of context",
             "A smaller vocabulary"
@@ -1548,7 +1548,7 @@ print(f"output: {output}")
             { label: "Weights start random", detail: "Before training, every parameter is a meaningless random number. The model predicts gibberish.", code: "weights = random grid of billions of numbers" },
             { label: "Training tunes every dial", detail: "Lesson 3's nudge runs billions of times, adjusting each weight so the grid predicts real text.", code: "weight += lr * (target - guess)  # x billions" },
             { label: "Freeze the grid", detail: "Training ends; the dials lock into a fixed file. Parameter count is just how many dials there are.", code: "175,000,000,000 frozen parameters" },
-            { label: "Read the dials to predict", detail: "Your prompt flows through the frozen weights — multiply, sum, pass on — until logits come out.", code: "logits = prompt run through frozen weights" }
+            { label: "Read the dials to predict", detail: "Your prompt flows through the frozen weights, multiply, sum, pass on, until logits come out.", code: "logits = prompt run through frozen weights" }
           ]
         }
       ],
@@ -1567,12 +1567,12 @@ print(f"output: {output}")
           number: 2, difficulty: "medium",
           prompt: "Model A has 7 billion parameters and runs on a laptop. Model B has 400 billion. Your task is simple grammar fixing on a phone. Which is the better pick and why?",
           steps: [
-            "Parameter count sets the floor on memory, speed, and cost — 400B needs a server rack, not a phone.",
+            "Parameter count sets the floor on memory, speed, and cost, 400B needs a server rack, not a phone.",
             "Grammar fixing is a common, well-covered task that does not need rare knowledge or deep reasoning.",
             "A 7B model has plenty of capacity for that, and runs cheaply and fast on-device.",
             "Bigger is not better when the smaller model already clears the task; you'd just pay more for no gain."
           ],
-          output: "Model A — its capacity covers the task, at far lower cost and latency."
+          output: "Model A, its capacity covers the task, at far lower cost and latency."
         }
       ],
       comparison_tables: [
@@ -1607,7 +1607,7 @@ print(f"output: {output}")
       reflections: [
         {
           prompt: "In your own words: why is parameter count only a rough guide to how good a model is?",
-          sampleAnswer: "Parameter count measures capacity — how much a model could store — but not how well that capacity was used. A model trained on better data with a smarter process can pack more useful patterns into fewer weights, so a sharp 13B model can beat a carelessly trained 70B one. Size sets the ceiling, but training quality decides how close you get to it."
+          sampleAnswer: "Parameter count measures capacity, how much a model could store, but not how well that capacity was used. A model trained on better data with a smarter process can pack more useful patterns into fewer weights, so a sharp 13B model can beat a carelessly trained 70B one. Size sets the ceiling, but training quality decides how close you get to it."
         }
       ],
       hints: [
@@ -1631,7 +1631,7 @@ print(f"output: {output}")
         { input: "3\nembedding 1000\nattention 5000\nmlp 4000\n12000", output: "embedding 10.0\nattention 50.0\nmlp 40.0\nTOTAL 10000\nFITS", explanation: "Total is 10000. embedding = 1000/10000 = 10.0%, attention = 50.0%, mlp = 40.0%. 10000 <= 12000, so FITS." },
         { input: "2\na 600\nb 600\n1000", output: "a 50.0\nb 50.0\nTOTAL 1200\nTOO BIG", explanation: "Total 1200 exceeds the 1000 budget, so TOO BIG, even though each layer is an even 50% share." },
       ],
-      challenge_notes: "The budget check is inclusive: a model exactly equal to the budget still FITS. In real life, parameter count is only part of the memory story — each weight also takes 2 or 4 bytes, plus overhead for activations — but counting parameters is the first sizing step every team does.",
+      challenge_notes: "The budget check is inclusive: a model exactly equal to the budget still FITS. In real life, parameter count is only part of the memory story, each weight also takes 2 or 4 bytes, plus overhead for activations, but counting parameters is the first sizing step every team does.",
       challenge_hints: [
         "Read all layers into a list first so you can sum the total before computing shares.",
         "Each share is count/total*100; format with f\"{share:.1f}\".",
@@ -1695,7 +1695,7 @@ main()
       title: "Attention in Plain English",
       concept: "Attention",
       xp_reward: 10,
-      explanation: `Read this: "The trophy didn't fit in the suitcase because it was too big." What does "it" mean — the trophy or the suitcase? You knew instantly: the trophy. To predict the next word sensibly, a model has to make the same call — it has to *look back* at the right earlier words. The mechanism that lets it do that is called **attention**, and it is the single idea that made modern LLMs work.
+      explanation: `Read this: "The trophy didn't fit in the suitcase because it was too big." What does "it" mean, the trophy or the suitcase? You knew instantly: the trophy. To predict the next word sensibly, a model has to make the same call, it has to *look back* at the right earlier words. The mechanism that lets it do that is called **attention**, and it is the single idea that made modern LLMs work.
 
 ## What it is
 
@@ -1705,7 +1705,7 @@ Think of it as the model asking, at every step: *given what I'm trying to predic
 
 ## How it works
 
-For the token it is currently focused on, the model computes a relevance score against every earlier token. Those scores get turned into weights that sum to 1 (yes — softmax again, from lesson 5). Then the earlier tokens are mixed together in proportion to their weights. High-weight tokens dominate the blend; near-zero ones are effectively ignored.
+For the token it is currently focused on, the model computes a relevance score against every earlier token. Those scores get turned into weights that sum to 1 (yes, softmax again, from lesson 5). Then the earlier tokens are mixed together in proportion to their weights. High-weight tokens dominate the blend; near-zero ones are effectively ignored.
 
 \`\`\`python
 # relevance scores for earlier tokens when predicting the next one
@@ -1717,17 +1717,17 @@ weights = [s / total for s in scores]
 # weights ~ [0.10, 0.20, 0.70] -> the model leans hardest on "sat"
 \`\`\`
 
-The model does this for every token, in parallel, across many separate **attention heads** — each head learns to track a different kind of relationship (one might follow subject-verb links, another might track quotation marks). Stack this through every layer and the model builds a rich sense of which words depend on which.
+The model does this for every token, in parallel, across many separate **attention heads**: each head learns to track a different kind of relationship (one might follow subject-verb links, another might track quotation marks). Stack this through every layer and the model builds a rich sense of which words depend on which.
 
 ## Why it matters
 
 - **It captures long-range meaning.** Attention can link "it" back to a noun many words earlier, which is why models handle pronouns, context, and structure so well.
 - **It is the "T" in GPT.** GPT stands for Generative Pre-trained **Transformer**, and the Transformer is the architecture built around attention. No attention, no modern LLM.
-- **It explains the context window.** Every token attends to every other, so doubling the context roughly quadruples the attention work — which is why long contexts are expensive (lesson 2's token cost, now you know the deeper reason).
+- **It explains the context window.** Every token attends to every other, so doubling the context roughly quadruples the attention work, which is why long contexts are expensive (lesson 2's token cost, now you know the deeper reason).
 
 ## The mental model to keep
 
-At every step the model asks **"which earlier words matter most for what comes next?"** and weights them accordingly. **Attention is selective focus** — not all context counts equally, and the model learns where to look.`,
+At every step the model asks **"which earlier words matter most for what comes next?"** and weights them accordingly. **Attention is selective focus**: not all context counts equally, and the model learns where to look.`,
       key_terms: [
         { term: "Attention", definition: "The mechanism that weights how relevant each earlier token is for predicting the next one." },
         { term: "Relevance weight", definition: "A number saying how much a given earlier token should influence the current prediction." },
@@ -1735,8 +1735,8 @@ At every step the model asks **"which earlier words matter most for what comes n
         { term: "Transformer", definition: "The neural network architecture built around attention; the 'T' in GPT." }
       ],
       callouts: [
-        { type: "analogy", title: "Reading with a highlighter", content: "Imagine rereading a sentence and highlighting only the words that matter for the next one you'll write. Attention is that highlighter, applied automatically at every step — bright on the relevant words, faint on the rest.", position: "before" },
-        { type: "insight", title: "Softmax shows up again", content: "Attention turns relevance scores into weights that sum to 1 using softmax — the same function from lesson 5. The model is constantly normalizing scores into distributions, whether over the vocabulary or over earlier tokens.", position: "after" }
+        { type: "analogy", title: "Reading with a highlighter", content: "Imagine rereading a sentence and highlighting only the words that matter for the next one you'll write. Attention is that highlighter, applied automatically at every step, bright on the relevant words, faint on the rest.", position: "before" },
+        { type: "insight", title: "Softmax shows up again", content: "Attention turns relevance scores into weights that sum to 1 using softmax, the same function from lesson 5. The model is constantly normalizing scores into distributions, whether over the vocabulary or over earlier tokens.", position: "after" }
       ],
       concept_diagram: {
         title: "How attention focuses each prediction",
@@ -1854,7 +1854,7 @@ focus: sat`,
             "Length 200 costs about 200 x 200 = 40,000 comparisons.",
             "40,000 / 10,000 = 4, so doubling the context roughly quadruples the attention work."
           ],
-          output: "About 4x the work — cost grows with the square of the length."
+          output: "About 4x the work, cost grows with the square of the length."
         }
       ],
       comparison_tables: [
@@ -1865,7 +1865,7 @@ focus: sat`,
             { cells: ["Token relevance", "All earlier tokens treated equally", "Each earlier token weighted by relevance"] },
             { cells: ["Long-range links", "Struggles to connect distant words", "Links 'it' to a noun many words back"] },
             { cells: ["Pronouns and structure", "Often confused", "Resolved by focusing on the right token"] },
-            { cells: ["Powers modern LLMs", "No", "Yes — the Transformer is built on it"], highlight: true }
+            { cells: ["Powers modern LLMs", "No", "Yes, the Transformer is built on it"], highlight: true }
           ]
         }
       ],
@@ -1889,7 +1889,7 @@ focus: sat`,
       reflections: [
         {
           prompt: "In your own words: why is attention better than just looking at the most recent few words?",
-          sampleAnswer: "Meaning often depends on words far back in the sentence — a pronoun can refer to a noun introduced many tokens earlier. Looking only at the last few words would miss that link, but attention scores every earlier token for relevance and can put heavy weight on a distant one when it matters. That selective, long-range focus is what lets the model handle pronouns, structure, and context coherently."
+          sampleAnswer: "Meaning often depends on words far back in the sentence, a pronoun can refer to a noun introduced many tokens earlier. Looking only at the last few words would miss that link, but attention scores every earlier token for relevance and can put heavy weight on a distant one when it matters. That selective, long-range focus is what lets the model handle pronouns, structure, and context coherently."
         }
       ],
       hints: [
@@ -1913,7 +1913,7 @@ focus: sat`,
         { input: "3\nThe 1\ncat 2\nsat 7", output: "The 10.0\ncat 20.0\nsat 70.0\nFOCUS sat", explanation: "Total is 10. The = 1/10 = 10.0%, cat = 20.0%, sat = 70.0%. 'sat' has the highest weight, so FOCUS sat." },
         { input: "4\na 5\nbig 5\nred 3\ndog 7", output: "a 25.0\nbig 25.0\nred 15.0\ndog 35.0\nFOCUS dog", explanation: "Total 20. dog at 7/20 = 35.0% is the highest, so FOCUS dog." },
       ],
-      challenge_notes: "This is a single-head, single-step view of attention: real models run many heads across many layers and use softmax (which exponentiates first). The linear normalization here keeps the arithmetic clean while preserving the key idea — relevance scores become a focus distribution that sums to 1. The earliest-wins tie-break makes the FOCUS line deterministic.",
+      challenge_notes: "This is a single-head, single-step view of attention: real models run many heads across many layers and use softmax (which exponentiates first). The linear normalization here keeps the arithmetic clean while preserving the key idea, relevance scores become a focus distribution that sums to 1. The earliest-wins tie-break makes the FOCUS line deterministic.",
       challenge_hints: [
         "Read all (token, score) pairs first so you can sum the total before computing weights.",
         "Each weight percentage is score/total*100; format with f\"{pct:.1f}\".",
@@ -1989,7 +1989,7 @@ main()
 
 ## What it is
 
-**Scaling laws** are the observed, remarkably smooth relationship between a model's resources and its performance. Pour in more **parameters** (lesson 6), more training **data**, and more **compute**, and prediction error falls in a predictable way. Crucially, these three must grow *together* — a giant model starved of data, or a mountain of data run through a tiny model, both waste the effort.
+**Scaling laws** are the observed, remarkably smooth relationship between a model's resources and its performance. Pour in more **parameters** (lesson 6), more training **data**, and more **compute**, and prediction error falls in a predictable way. Crucially, these three must grow *together*, a giant model starved of data, or a mountain of data run through a tiny model, both waste the effort.
 
 The surprise is how regular it is. Plot loss against scale and you get a clean downward curve, not a chaotic mess. That predictability let labs forecast that a bigger model *would* be better before spending the millions to build it.
 
@@ -1997,7 +1997,7 @@ The surprise is how regular it is. Plot loss against scale and you get a clean d
 
 As you scale, two things happen at once.
 
-First, prediction loss drops smoothly — but with **diminishing returns**. Each doubling of resources buys a smaller improvement than the last. A toy version of that shrinking-gain curve:
+First, prediction loss drops smoothly, but with **diminishing returns**. Each doubling of resources buys a smaller improvement than the last. A toy version of that shrinking-gain curve:
 
 \`\`\`python
 # loss falls as a power of model size, but ever more slowly
@@ -2008,17 +2008,17 @@ for params in [1, 100, 10000]:
 # 1 -> 10.0,  100 -> 1.0,  10000 -> 0.1  (100x size for each 10x gain)
 \`\`\`
 
-Second — and this is the wild part — some abilities appear **emergently**. Below a certain scale a model simply cannot do multi-step arithmetic or follow complex instructions, and then past a threshold the ability shows up, almost like a phase change. The smooth loss curve hides these sudden capability jumps.
+Second, and this is the wild part, some abilities appear **emergently**. Below a certain scale a model simply cannot do multi-step arithmetic or follow complex instructions, and then past a threshold the ability shows up, almost like a phase change. The smooth loss curve hides these sudden capability jumps.
 
 ## Why it matters
 
 - **It set the strategy of the whole field.** "Just scale it" became a multi-billion-dollar bet because the curves kept holding. Much of the 2020s AI boom is scaling, not new algorithms.
 - **Diminishing returns are real.** Each new tier of capability costs disproportionately more. That is why frontier models are so expensive and why the gap between releases can feel smaller over time.
-- **Bigger is not infinitely better.** You eventually run short of high-quality data and hit cost walls. Scaling is powerful, not magic — and lesson 6's lesson still holds: a well-trained smaller model can beat a poorly-trained giant.
+- **Bigger is not infinitely better.** You eventually run short of high-quality data and hit cost walls. Scaling is powerful, not magic, and lesson 6's lesson still holds: a well-trained smaller model can beat a poorly-trained giant.
 
 ## The mental model to keep
 
-**More parameters plus more data plus more compute equals lower error and, past thresholds, new abilities — but every gain costs more than the last.** Scaling is a dependable engine with a rising fuel bill.`,
+**More parameters plus more data plus more compute equals lower error and, past thresholds, new abilities, but every gain costs more than the last.** Scaling is a dependable engine with a rising fuel bill.`,
       key_terms: [
         { term: "Scaling laws", definition: "The smooth, predictable relationship between a model's resources and its prediction error." },
         { term: "Compute", definition: "The total processing power spent training a model, growing alongside parameters and data." },
@@ -2027,7 +2027,7 @@ Second — and this is the wild part — some abilities appear **emergently**. B
       ],
       callouts: [
         { type: "insight", title: "Three dials, turned together", content: "Scaling is not just 'more parameters.' Parameters, data, and compute have to grow in step. A huge model fed too little data, or a flood of data run through a tiny model, both waste the spend.", position: "before" },
-        { type: "warning", title: "Returns shrink as you climb", content: "Each doubling of resources buys less than the last doubling. That is why frontier models cost so much for gains that can look incremental — you are paying more and more for less and less.", position: "after" }
+        { type: "warning", title: "Returns shrink as you climb", content: "Each doubling of resources buys less than the last doubling. That is why frontier models cost so much for gains that can look incremental, you are paying more and more for less and less.", position: "after" }
       ],
       concept_diagram: {
         title: "What scaling buys you",
@@ -2110,9 +2110,9 @@ for size in [1, 100, 10000]:
         {
           title: "scaling up, gain by gain",
           steps: [
-            { label: "Start small", detail: "A tiny model has high loss and lacks complex skills entirely — no multi-step reasoning yet.", code: "params = 1x  ->  loss high, few abilities" },
+            { label: "Start small", detail: "A tiny model has high loss and lacks complex skills entirely, no multi-step reasoning yet.", code: "params = 1x  ->  loss high, few abilities" },
             { label: "Scale all three dials", detail: "Grow parameters, data, and compute together. Loss drops along the predictable scaling curve.", code: "10x params + 10x data + 10x compute" },
-            { label: "Cross a threshold", detail: "Past a certain scale, a new ability suddenly appears — arithmetic or instruction-following emerges.", code: "loss <= threshold  ->  new ability unlocks" },
+            { label: "Cross a threshold", detail: "Past a certain scale, a new ability suddenly appears, arithmetic or instruction-following emerges.", code: "loss <= threshold  ->  new ability unlocks" },
             { label: "Hit diminishing returns", detail: "Keep scaling and loss still falls, but each gain costs far more than the last. The bill outpaces the benefit.", code: "100x more spend  ->  10x less error" }
           ]
         }
@@ -2124,9 +2124,9 @@ for size in [1, 100, 10000]:
           steps: [
             "At size 100: sqrt(100) = 10, so loss = 10 / 10 = 1.0.",
             "At size 10000: sqrt(10000) = 100, so loss = 10 / 100 = 0.1.",
-            "You multiplied size by 100 but only cut loss by 10x — that is diminishing returns."
+            "You multiplied size by 100 but only cut loss by 10x, that is diminishing returns."
           ],
-          output: "Loss 1.0 at size 100, 0.1 at size 10000 — a 100x size for a 10x gain."
+          output: "Loss 1.0 at size 100, 0.1 at size 10000, a 100x size for a 10x gain."
         },
         {
           number: 2, difficulty: "medium",
@@ -2134,7 +2134,7 @@ for size in [1, 100, 10000]:
           steps: [
             "Scaling laws require parameters, data, and compute to grow together.",
             "The model is already starved of data, so it cannot learn enough patterns to use its capacity.",
-            "Adding parameters gives the model more room but nothing new to learn from — the bottleneck is data, not size.",
+            "Adding parameters gives the model more room but nothing new to learn from, the bottleneck is data, not size.",
             "The fix is more (and better) data and compute to match the model, not more parameters alone."
           ],
           output: "Data is the bottleneck; growing only the model wastes parameters that have nothing to learn from."
@@ -2172,7 +2172,7 @@ for size in [1, 100, 10000]:
       reflections: [
         {
           prompt: "In your own words: if scaling reliably improves models, why don't labs just keep making them infinitely bigger?",
-          sampleAnswer: "Scaling gives diminishing returns, so each new tier of capability costs far more than the last while delivering less improvement. On top of that, the three dials must grow together, and high-quality training data is finite — you eventually run short of it. Combined with hard limits on compute and budget, those rising costs and shrinking gains mean infinite scaling is impractical, even though the curves themselves keep pointing down."
+          sampleAnswer: "Scaling gives diminishing returns, so each new tier of capability costs far more than the last while delivering less improvement. On top of that, the three dials must grow together, and high-quality training data is finite, you eventually run short of it. Combined with hard limits on compute and budget, those rising costs and shrinking gains mean infinite scaling is impractical, even though the curves themselves keep pointing down."
         }
       ],
       hints: [
@@ -2182,7 +2182,7 @@ for size in [1, 100, 10000]:
       ],
       challenge_title: "Scaling Law Simulator",
       challenge_description: "Model how prediction loss falls as you scale a model up, and flag the point where a new ability emerges once loss drops below a threshold.",
-      challenge_story: "Your lab is deciding how big to build the next model. Training is governed by a **scaling law**: loss = base_loss x size raised to the power of negative alpha. As you grow the model `size`, loss falls — but with diminishing returns. Your team has also noticed that a key **emergent ability** (multi-step reasoning) only appears once loss drops to or below a target **threshold**. Simulate several candidate sizes, report each one's loss, mark which ones unlock the ability, and count how many do.",
+      challenge_story: "Your lab is deciding how big to build the next model. Training is governed by a **scaling law**: loss = base_loss x size raised to the power of negative alpha. As you grow the model `size`, loss falls, but with diminishing returns. Your team has also noticed that a key **emergent ability** (multi-step reasoning) only appears once loss drops to or below a target **threshold**. Simulate several candidate sizes, report each one's loss, mark which ones unlock the ability, and count how many do.",
       challenge_statement: "You are given `base_loss` and `alpha` (floats), then a `threshold` (float), then `q` candidate model sizes.\n\nFor each size `N`, compute `loss = base_loss * N ** (-alpha)`.\n\n- Print the size, its loss rounded to exactly **4 decimal places**, and a status: `EMERGENT` if the loss is **less than or equal to** the threshold, otherwise `BASIC`.\n- After all candidates, print `EMERGENT <count>` giving how many sizes unlocked the ability.",
       challenge_input_format: "The first line has two space-separated floats: `base_loss alpha`. The second line is the float `threshold`. The third line is the integer `q`. Each of the next `q` lines is one integer size `N`.",
       challenge_output_format: "`q` lines of `<N> <loss> <STATUS>` (loss to 4 decimal places), then a final line `EMERGENT <count>`.",
@@ -2197,7 +2197,7 @@ for size in [1, 100, 10000]:
         { input: "10.0 0.5\n1.0\n3\n4\n100\n10000", output: "4 5.0000 BASIC\n100 1.0000 EMERGENT\n10000 0.1000 EMERGENT\nEMERGENT 2", explanation: "loss = 10 / sqrt(N). At N=4: 10/2 = 5.0 > 1.0, BASIC. At N=100: 10/10 = 1.0 <= 1.0, EMERGENT. At N=10000: 10/100 = 0.1, EMERGENT. Two unlocked." },
         { input: "8.0 1.0\n2.0\n2\n2\n8", output: "2 4.0000 BASIC\n8 1.0000 EMERGENT\nEMERGENT 1", explanation: "loss = 8 / N. At N=2: 4.0 > 2.0, BASIC. At N=8: 1.0 <= 2.0, EMERGENT. One unlocked." },
       ],
-      challenge_notes: "The threshold is inclusive: a loss exactly equal to the threshold counts as EMERGENT. Notice how much you must grow N for a small loss drop — that is the diminishing-returns reality of scaling. Real scaling laws also depend on data and compute, not size alone, but the power-law shape here is the genuine curve labs observe.",
+      challenge_notes: "The threshold is inclusive: a loss exactly equal to the threshold counts as EMERGENT. Notice how much you must grow N for a small loss drop, that is the diminishing-returns reality of scaling. Real scaling laws also depend on data and compute, not size alone, but the power-law shape here is the genuine curve labs observe.",
       challenge_hints: [
         "Read base_loss and alpha from the first line as floats with map(float, ...).",
         "Compute each loss as base_loss * N ** (-alpha); Python handles the negative exponent directly.",

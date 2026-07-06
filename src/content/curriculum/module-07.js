@@ -2,7 +2,7 @@ export default {
   project: {
     id: "ai-07",
     title: "Build a RAG System",
-    description: "Stop your LLM from making things up — bolt a real document search onto it and build a Q&A tool that cites its sources.",
+    description: "Stop your LLM from making things up, bolt a real document search onto it and build a Q&A tool that cites its sources.",
     difficulty: "advanced",
     category: "rag_search",
     estimated_time: 180,
@@ -25,13 +25,13 @@ That's not a bug you can patch. It's how the model works.
 
 ## A model is a probability machine, not a database
 
-An LLM generates the next most likely token given everything so far. It learned those probabilities from training data it saw months or years ago. It has no live lookup, no source of truth, no way to say "I checked the file." When it doesn't know, it doesn't go quiet — it produces fluent text that *sounds* right. We call that a hallucination.
+An LLM generates the next most likely token given everything so far. It learned those probabilities from training data it saw months or years ago. It has no live lookup, no source of truth, no way to say "I checked the file." When it doesn't know, it doesn't go quiet, it produces fluent text that *sounds* right. We call that a hallucination.
 
 Three situations make it worse:
 
 - **Private data.** Your company's revenue was never in the training set. The model has literally nothing to draw on, so it guesses.
 - **Recent events.** Anything after the training cutoff doesn't exist to the model.
-- **Specifics.** Names, dates, dollar amounts, version numbers — exactly the things a confident wrong answer hurts most.
+- **Specifics.** Names, dates, dollar amounts, version numbers, exactly the things a confident wrong answer hurts most.
 
 ## The fix: give it the answer first
 
@@ -58,17 +58,17 @@ The rest of this module builds the retrieval half: how to chop documents into pi
         { term: "RAG", definition: "Retrieval-Augmented Generation: find relevant text, inject it into the prompt, then let the model answer from it." }
       ],
       callouts: [
-        { type: "analogy", title: "The open-book exam", content: "A closed-book exam tests memory — and a tired student bluffs answers. An open-book exam lets you look things up first. RAG hands the model the open book before it has to answer.", position: "before" },
+        { type: "analogy", title: "The open-book exam", content: "A closed-book exam tests memory, and a tired student bluffs answers. An open-book exam lets you look things up first. RAG hands the model the open book before it has to answer.", position: "before" },
         { type: "warning", title: "Confidence is not accuracy", content: "An LLM has no internal signal for 'I'm unsure.' A made-up revenue figure reads exactly as confidently as a real one. Never treat fluency as evidence the answer is correct.", position: "after" }
       ],
       concept_diagram: {
         title: "Plain LLM vs. RAG",
         steps: [
           { label: "User asks a question", desc: "e.g. 'What was Q3 revenue?'" },
-          { label: "Plain LLM guesses", desc: "Predicts plausible-sounding tokens from old training data — may invent the number." },
+          { label: "Plain LLM guesses", desc: "Predicts plausible-sounding tokens from old training data, may invent the number." },
           { label: "RAG retrieves first", desc: "Searches your documents for the relevant passage." },
           { label: "Inject context", desc: "Paste that passage into the prompt." },
-          { label: "Model answers from context", desc: "Reads the supplied text instead of recalling — grounded answer." }
+          { label: "Model answers from context", desc: "Reads the supplied text instead of recalling, grounded answer." }
         ]
       },
       inline_quizzes: [
@@ -93,7 +93,7 @@ The rest of this module builds the retrieval half: how to chop documents into pi
             "It lowers the temperature so the model stops being creative"
           ],
           correct_index: 0,
-          explanation: "RAG supplies the relevant text in the prompt, so the model reads and summarizes instead of recalling from training — its reliable skill, not its weak one."
+          explanation: "RAG supplies the relevant text in the prompt, so the model reads and summarizes instead of recalling from training, its reliable skill, not its weak one."
         },
         {
           question: "Which question is a plain LLM MOST likely to hallucinate on?",
@@ -109,7 +109,7 @@ The rest of this module builds the retrieval half: how to chop documents into pi
         {
           question: "A model returns a wrong answer with total confidence. What does that tell you?",
           options: [
-            "Nothing about accuracy — confidence and correctness are unrelated in an LLM",
+            "Nothing about accuracy, confidence and correctness are unrelated in an LLM",
             "The answer is probably right since the model sounds sure",
             "The model checked its sources and found a match",
             "The temperature was set too high"
@@ -170,7 +170,7 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
             { label: "User asks", detail: "A question about a fact the model never saw in training.", code: '"What was our Q3 revenue?"' },
             { label: "Retrieve the source", detail: "Find the passage from your own documents that holds the fact, instead of trusting the model's memory.", code: 'doc1: "Q3 revenue of $4.2 million, up 18%."' },
             { label: "Stuff it into the prompt", detail: "Paste that passage in as context and tell the model to answer using only it.", code: 'prompt = "Use ONLY this context: " + doc1' },
-            { label: "Grounded answer", detail: "The model reads the supplied text and reports the real figure — no guessing.", code: '"Q3 revenue was $4.2 million."' }
+            { label: "Grounded answer", detail: "The model reads the supplied text and reports the real figure, no guessing.", code: '"Q3 revenue was $4.2 million."' }
           ]
         }
       ],
@@ -181,7 +181,7 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
           steps: [
             "The fact lives only in your private docs, which were never in the training data.",
             "The model has no live lookup, so it cannot fetch the real number.",
-            "It predicts a plausible-sounding continuation — maybe '30 days' — with full confidence.",
+            "It predicts a plausible-sounding continuation, maybe '30 days', with full confidence.",
             "That answer might be right by luck or wrong by accident; either way it is a guess, not a fact."
           ],
           output: "A confident but unverifiable answer (a hallucination risk)"
@@ -192,8 +192,8 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
           steps: [
             "Pull every number-bearing token out of the answer: ['$5.8', 'million'].",
             "Strip symbols: '5.8'.",
-            "Search the source text for '5.8' — it is not present (the source says 4.2).",
-            "At least one number is unsupported, so the answer is NOT grounded — flag it as a likely hallucination."
+            "Search the source text for '5.8', it is not present (the source says 4.2).",
+            "At least one number is unsupported, so the answer is NOT grounded, flag it as a likely hallucination."
           ],
           output: "is_grounded -> False"
         }
@@ -204,9 +204,9 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
           columns: ["Aspect", "Plain LLM", "RAG"],
           rows: [
             { cells: ["Source of the answer", "Frozen training memory", "Your live documents"] },
-            { cells: ["Private / recent data", "Invisible — must guess", "Retrieved and supplied"] },
+            { cells: ["Private / recent data", "Invisible, must guess", "Retrieved and supplied"] },
             { cells: ["When it lacks the fact", "Bluffs a fluent guess", "Can say 'I don't know'"] },
-            { cells: ["Traceable to a source", "No", "Yes — cites the chunk"], highlight: true }
+            { cells: ["Traceable to a source", "No", "Yes, cites the chunk"], highlight: true }
           ]
         }
       ],
@@ -230,11 +230,11 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
       reflections: [
         {
           prompt: "In your own words: why does giving the model the document first reduce hallucination, when the model itself hasn't changed?",
-          sampleAnswer: "The model's weakness is recall — pulling exact facts from fuzzy memory. Its strength is reading comprehension. By pasting the document in, you swap the hard job (remember this number) for the easy one (summarize this paragraph). Same model, easier task, so it stops guessing."
+          sampleAnswer: "The model's weakness is recall, pulling exact facts from fuzzy memory. Its strength is reading comprehension. By pasting the document in, you swap the hard job (remember this number) for the easy one (summarize this paragraph). Same model, easier task, so it stops guessing."
         }
       ],
       hints: [
-        "naive_answer ignores the docs entirely — it just returns a hardcoded wrong figure to mimic a hallucination.",
+        "naive_answer ignores the docs entirely, it just returns a hardcoded wrong figure to mimic a hallucination.",
         "grounded_answer should look inside the context string before answering, and fall back to 'I don't have that information.' if the fact isn't there.",
         "Pass docs['doc1'] (the relevant doc) as the context to grounded_answer."
       ],
@@ -243,8 +243,8 @@ With context: Based on the document, Q3 revenue was $4.2 million.`,
       challenge_description: "Audit a batch of model answers and flag every one whose numbers don't appear anywhere in the retrieved source.",
       challenge_story: "You run trust-and-safety for a financial-research assistant. The LLM drafts answers from retrieved filings, but legal won't sign off until you can prove no answer invents a figure that isn't in its source. A made-up revenue number reads exactly as confidently as a real one, so a human can't eyeball thousands of them. Tonight you're building the nightly **grounding auditor**: it scans every answer, extracts the numeric tokens, and flags any answer that cites a number the source never mentioned.",
       challenge_statement: "You are given a set of **source lines** (the retrieved context) followed by a batch of **answers**. A *numeric token* is any whitespace-separated token that contains at least one digit, after stripping the surrounding punctuation characters `.,!?$%:;()\"'` from both ends.\n\nAn answer is **grounded** if every numeric token it contains also appears as a numeric token somewhere in the source. An answer with no numeric tokens is trivially grounded.\n\nReport how many answers are grounded, then list the 1-based indices of the answers that are **not** grounded (in increasing order).",
-      challenge_input_format: "The first line contains an integer `S` — the number of source lines.\nThe next `S` lines are the source text.\nThe next line contains an integer `Q` — the number of answers.\nThe next `Q` lines are the answers, one per line.",
-      challenge_output_format: "Line 1: the number of grounded answers.\nLine 2: the 1-based indices of the ungrounded answers, space-separated, in increasing order — or the word `NONE` if every answer is grounded.",
+      challenge_input_format: "The first line contains an integer `S`, the number of source lines.\nThe next `S` lines are the source text.\nThe next line contains an integer `Q`, the number of answers.\nThe next `Q` lines are the answers, one per line.",
+      challenge_output_format: "Line 1: the number of grounded answers.\nLine 2: the 1-based indices of the ungrounded answers, space-separated, in increasing order, or the word `NONE` if every answer is grounded.",
       challenge_constraints: [
         "1 ≤ S ≤ 1000",
         "1 ≤ Q ≤ 1000",
@@ -355,7 +355,7 @@ main()
       xp_reward: 10,
       explanation: `You can't stuff a 50-page PDF into every prompt. It's expensive, it blows past context limits, and burying the one relevant paragraph in 49 pages of noise makes the model's answer *worse*, not better.
 
-So before anything else, you split documents into chunks — small, searchable pieces. Get this step wrong and the rest of your RAG system retrieves garbage.
+So before anything else, you split documents into chunks, small, searchable pieces. Get this step wrong and the rest of your RAG system retrieves garbage.
 
 ## Why not one chunk per document?
 
@@ -366,11 +366,11 @@ Because retrieval needs to be precise. If a document is one giant blob, searchin
 - **Chunks too big** → each one covers many topics, so similarity search gets fuzzy and you waste tokens shipping irrelevant text.
 - **Chunks too small** → you slice a sentence away from the context that gives it meaning. "It costs $4.2M" is useless without the sentence naming what "it" is.
 
-A common starting point is a few hundred words per chunk. Don't agonize over the exact number — measure retrieval quality and adjust.
+A common starting point is a few hundred words per chunk. Don't agonize over the exact number, measure retrieval quality and adjust.
 
 ## Overlap saves split-up ideas
 
-Fixed-size chunking has an ugly failure: an important fact lands right on a chunk boundary and gets cut in half. The fix is **overlap** — let each chunk repeat the last few words of the previous one.
+Fixed-size chunking has an ugly failure: an important fact lands right on a chunk boundary and gets cut in half. The fix is **overlap**: let each chunk repeat the last few words of the previous one.
 
 \`\`\`python
 def chunk_words(text, size, overlap):
@@ -388,18 +388,18 @@ With \`size=12, overlap=3\`, each chunk shares its last 3 words with the next ch
 
 ## Smarter: split on natural boundaries
 
-Word-count chunking is blunt — it can slice mid-sentence. A better approach respects structure: split on sentences or paragraphs, then pack them into chunks up to a size limit. That keeps related sentences together so context survives. You'll build exactly that in the challenge.
+Word-count chunking is blunt, it can slice mid-sentence. A better approach respects structure: split on sentences or paragraphs, then pack them into chunks up to a size limit. That keeps related sentences together so context survives. You'll build exactly that in the challenge.
 
-Chunking is unglamorous plumbing, but it's the foundation. Bad chunks mean bad retrieval mean bad answers — no clever prompt downstream can rescue them.`,
+Chunking is unglamorous plumbing, but it's the foundation. Bad chunks mean bad retrieval mean bad answers, no clever prompt downstream can rescue them.`,
       key_terms: [
-        { term: "Chunk", definition: "A small piece of a document — typically a few hundred words — sized to be searched and retrieved independently." },
+        { term: "Chunk", definition: "A small piece of a document, typically a few hundred words, sized to be searched and retrieved independently." },
         { term: "Overlap", definition: "Shared text between adjacent chunks so a fact sitting on a boundary still appears whole in at least one chunk." },
         { term: "Chunk size", definition: "How much text goes in each chunk. Too big blurs search; too small strips away context." },
         { term: "Semantic boundary", definition: "A natural break point like a sentence or paragraph end, used to chunk without slicing ideas in half." }
       ],
       callouts: [
-        { type: "analogy", title: "Index cards, not a textbook", content: "Searching a whole textbook for one fact is slow and noisy. Index cards — one idea each — let you grab exactly the card you need. Chunks are your index cards.", position: "before" },
-        { type: "tip", title: "Overlap is cheap insurance", content: "A 10–20% overlap costs a little extra storage but rescues facts that would otherwise be guillotined by a chunk boundary. Almost always worth it.", position: "after" }
+        { type: "analogy", title: "Index cards, not a textbook", content: "Searching a whole textbook for one fact is slow and noisy. Index cards, one idea each, let you grab exactly the card you need. Chunks are your index cards.", position: "before" },
+        { type: "tip", title: "Overlap is cheap insurance", content: "A 10, 20% overlap costs a little extra storage but rescues facts that would otherwise be guillotined by a chunk boundary. Almost always worth it.", position: "after" }
       ],
       concept_diagram: {
         title: "Chunking a document with overlap",
@@ -462,7 +462,7 @@ Chunking is unglamorous plumbing, but it's the foundation. Bad chunks mean bad r
         {
           activity_title: "Chunking trade-offs",
           questions: [
-            { question: "Overlapping chunks share some text with their neighbors to avoid splitting a fact across a boundary.", type: "true_false", correct_answer: "true", explanation: "That shared tail is exactly what overlap provides — boundary facts survive intact." },
+            { question: "Overlapping chunks share some text with their neighbors to avoid splitting a fact across a boundary.", type: "true_false", correct_answer: "true", explanation: "That shared tail is exactly what overlap provides, boundary facts survive intact." },
             { question: "Splitting on sentence or paragraph ends instead of raw word counts keeps related ideas together; these natural break points are called ______ boundaries.", type: "fill_in", correct_answer: "semantic", explanation: "Semantic boundaries respect the document's structure so chunks don't slice ideas mid-thought." }
           ]
         }
@@ -532,8 +532,8 @@ Chunks created: 4
           prompt: 'Pack these sentences into chunks of at most 40 chars: "First fact. Second fact. Third fact."',
           steps: [
             "Split on '.' into sentences and re-add the period: ['First fact.', 'Second fact.', 'Third fact.'].",
-            "Start empty. Add 'First fact.' (11 chars) — fits.",
-            "Try adding 'Second fact.' -> 'First fact. Second fact.' is 24 chars — still under 40, keep it.",
+            "Start empty. Add 'First fact.' (11 chars), fits.",
+            "Try adding 'Second fact.' -> 'First fact. Second fact.' is 24 chars, still under 40, keep it.",
             "Try adding 'Third fact.' -> would reach 36 chars... but checking the +1 separator pushes past 40, so flush the current chunk and start a new one with 'Third fact.'"
           ],
           output: "['First fact. Second fact.', 'Third fact.']"
@@ -546,7 +546,7 @@ Chunks created: 4
           rows: [
             { cells: ["Split point", "Every N words, anywhere", "On natural boundaries"] },
             { cells: ["Risk", "Slices mid-sentence", "Keeps ideas intact"] },
-            { cells: ["Implementation", "Trivial — slice a list", "Needs sentence detection"] },
+            { cells: ["Implementation", "Trivial, slice a list", "Needs sentence detection"] },
             { cells: ["Retrieval quality", "Lower, needs overlap", "Higher, context survives"], highlight: true }
           ]
         }
@@ -582,7 +582,7 @@ Chunks created: 4
       challenge_title: "The Sentence-Safe Chunker",
       challenge_difficulty: "intermediate",
       challenge_description: "Pack a document into the fewest chunks possible without ever splitting a sentence across a chunk boundary.",
-      challenge_story: "Your RAG ingestion pipeline keeps retrieving garbage. The culprit: a naive fixed-width chunker that guillotines sentences mid-thought, so half a fact lands in one chunk and half in another — and neither matches the query. You're rewriting the chunker to respect **sentence boundaries**. It splits the document on periods, then greedily packs whole sentences into each chunk up to a character budget, so every chunk is a clean set of complete sentences. Fewer, cleaner chunks mean sharper retrieval.",
+      challenge_story: "Your RAG ingestion pipeline keeps retrieving garbage. The culprit: a naive fixed-width chunker that guillotines sentences mid-thought, so half a fact lands in one chunk and half in another, and neither matches the query. You're rewriting the chunker to respect **sentence boundaries**. It splits the document on periods, then greedily packs whole sentences into each chunk up to a character budget, so every chunk is a clean set of complete sentences. Fewer, cleaner chunks mean sharper retrieval.",
       challenge_statement: "You are given a character budget `max_chars` and a single line of `text`. Split the text into sentences by splitting on `.`, dropping empty pieces, trimming surrounding whitespace, and re-attaching a single `.` to each sentence.\n\nGreedily build chunks: start a new chunk with the first sentence; for each following sentence, append it to the current chunk (joined by a single space) **only if** the resulting chunk length would be `≤ max_chars`; otherwise close the current chunk and start a new one with that sentence.\n\nA single sentence longer than `max_chars` becomes its own chunk on its own (it cannot be split further).\n\nReport the number of chunks, then each chunk prefixed by its character length.",
       challenge_input_format: "Line 1: an integer `max_chars`.\nLine 2: the document text on a single line.",
       challenge_output_format: "Line 1: the number of chunks `C`.\nThe next `C` lines each describe one chunk in order, formatted as `LEN|CHUNK` where `LEN` is the chunk's character length and `CHUNK` is the chunk text.",
@@ -596,7 +596,7 @@ Chunks created: 4
         { input: "40\nFirst fact here. Second fact here. Third fact here. Fourth fact.", output: "2\n34|First fact here. Second fact here.\n29|Third fact here. Fourth fact.", explanation: "\"First... Second...\" is 34 chars (≤40). Adding \"Third fact here.\" would exceed 40, so a new chunk starts. The last two sentences fit in 29 chars." },
         { input: "10\nThis one sentence is quite long indeed.", output: "1\n39|This one sentence is quite long indeed.", explanation: "The single sentence is 39 chars, longer than the 10-char budget, so it stands alone as its own chunk." },
       ],
-      challenge_notes: "Real chunkers add 10–20% overlap between chunks as insurance against facts split across boundaries; here we keep it boundary-aligned for a clean, deterministic result. Watch the join math: a chunk of length `len(current)` plus a space plus the next sentence costs `len(current) + 1 + len(s)` characters.",
+      challenge_notes: "Real chunkers add 10, 20% overlap between chunks as insurance against facts split across boundaries; here we keep it boundary-aligned for a clean, deterministic result. Watch the join math: a chunk of length `len(current)` plus a space plus the next sentence costs `len(current) + 1 + len(s)` characters.",
       challenge_hints: [
         "Build sentences with `[p.strip() + '.' for p in text.split('.') if p.strip()]`.",
         "Track `current` as a string; when empty, the first sentence always starts it (even if oversized).",
@@ -665,11 +665,11 @@ main()
       xp_reward: 10,
       explanation: `You've got chunks. Now: when a user asks "How was revenue growth?", how do you find the chunk that answers it?
 
-Keyword matching won't cut it. The question says "revenue growth" but the relevant chunk might say "earnings increased" — zero word overlap, same meaning. You need to search by **meaning**, not by exact words. That's what embeddings give you.
+Keyword matching won't cut it. The question says "revenue growth" but the relevant chunk might say "earnings increased", zero word overlap, same meaning. You need to search by **meaning**, not by exact words. That's what embeddings give you.
 
 ## An embedding is a list of numbers that captures meaning
 
-An embedding model turns a piece of text into a vector — a fixed-length list of floats. The magic property: texts with similar *meaning* land close together in that number-space, even if they share no words. "Revenue growth" and "earnings increased" point in nearly the same direction; "office dog" points somewhere else entirely.
+An embedding model turns a piece of text into a vector, a fixed-length list of floats. The magic property: texts with similar *meaning* land close together in that number-space, even if they share no words. "Revenue growth" and "earnings increased" point in nearly the same direction; "office dog" points somewhere else entirely.
 
 Real embedding models (the production kind) output vectors with hundreds or thousands of dimensions, trained on huge text corpora. The principle is identical to the toy version you'll build here, which just counts keyword occurrences into a small vector.
 
@@ -689,7 +689,7 @@ def cosine_similarity(a, b):
     return dot / (mag_a * mag_b)
 \`\`\`
 
-Why the angle and not raw distance? Because it ignores length. A long chunk and a short query can still be a perfect match in meaning — cosine cares about *direction*, not magnitude.
+Why the angle and not raw distance? Because it ignores length. A long chunk and a short query can still be a perfect match in meaning, cosine cares about *direction*, not magnitude.
 
 ## The vector store
 
@@ -704,7 +704,7 @@ scores = {cid: cosine_similarity(q_vec, v) for cid, v in vectors.items()}
 ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 \`\`\`
 
-In production you'd reach for a real vector database (Pinecone, Chroma, pgvector) that does this similarity search across millions of vectors fast, with indexes. But it's the exact same three steps — embed, compare, rank. Build it by hand once and the libraries stop being magic.`,
+In production you'd reach for a real vector database (Pinecone, Chroma, pgvector) that does this similarity search across millions of vectors fast, with indexes. But it's the exact same three steps, embed, compare, rank. Build it by hand once and the libraries stop being magic.`,
       key_terms: [
         { term: "Embedding", definition: "A fixed-length vector of floats representing the meaning of text, where similar meanings produce nearby vectors." },
         { term: "Cosine similarity", definition: "A score from -1 to 1 measuring the angle between two vectors; near 1 means very similar meaning, near 0 means unrelated." },
@@ -713,7 +713,7 @@ In production you'd reach for a real vector database (Pinecone, Chroma, pgvector
       ],
       callouts: [
         { type: "analogy", title: "A map of meaning", content: "Picture every chunk as a pin on a map where nearby pins mean similar things. Embedding the query drops a new pin; you just grab the closest existing pins. Cosine similarity is your ruler.", position: "before" },
-        { type: "insight", title: "Why direction beats distance", content: "Cosine compares the angle between vectors, not their length. That's why a one-line query can perfectly match a long paragraph — same direction in meaning-space, different magnitude.", position: "after" }
+        { type: "insight", title: "Why direction beats distance", content: "Cosine compares the angle between vectors, not their length. That's why a one-line query can perfectly match a long paragraph, same direction in meaning-space, different magnitude.", position: "after" }
       ],
       concept_diagram: {
         title: "Semantic search with embeddings",
@@ -747,7 +747,7 @@ In production you'd reach for a real vector database (Pinecone, Chroma, pgvector
             "It only works when the query and chunk share identical words"
           ],
           correct_index: 0,
-          explanation: "Embeddings place similar meanings near each other, so matching survives different wording — something keyword search can't do."
+          explanation: "Embeddings place similar meanings near each other, so matching survives different wording, something keyword search can't do."
         },
         {
           question: "Why does cosine similarity use the angle between vectors rather than raw distance?",
@@ -769,7 +769,7 @@ In production you'd reach for a real vector database (Pinecone, Chroma, pgvector
             "Lower the temperature, raise max_tokens, then stream"
           ],
           correct_index: 0,
-          explanation: "Embed, compare, rank — the same loop whether you write it by hand or use Pinecone, Chroma, or pgvector."
+          explanation: "Embed, compare, rank, the same loop whether you write it by hand or use Pinecone, Chroma, or pgvector."
         }
       ],
       participation_activities: [
@@ -840,7 +840,7 @@ Best match: doc1`,
           steps: [
             { label: "Embed every chunk once", detail: "Convert each stored chunk into a vector up front and keep it.", code: 'doc1 -> [1, 0, 0, 1, 1, 0]' },
             { label: "Embed the query", detail: "Turn the user's question into a vector the exact same way.", code: '"revenue growth?" -> [1, 0, 0, 1, 0, 0]' },
-            { label: "Score with cosine", detail: "Measure the angle between the query vector and each chunk vector — direction, not length.", code: 'cosine(q, doc1) = 0.816' },
+            { label: "Score with cosine", detail: "Measure the angle between the query vector and each chunk vector, direction, not length.", code: 'cosine(q, doc1) = 0.816' },
             { label: "Rank and return", detail: "Sort highest-to-lowest and hand back the top matches.", code: 'best match -> doc1' }
           ]
         }
@@ -853,7 +853,7 @@ Best match: doc1`,
             "Dot product = (1)(1) + (0)(0) = 1.",
             "Magnitude of a = sqrt(1 + 0) = 1; magnitude of b = 1.",
             "Cosine = dot / (mag_a * mag_b) = 1 / (1 * 1) = 1.0.",
-            "A score of 1.0 means identical direction — the closest possible match."
+            "A score of 1.0 means identical direction, the closest possible match."
           ],
           output: "1.0 (maximally similar)"
         },
@@ -911,10 +911,10 @@ Best match: doc1`,
       ],
       challenge_title: "The Vector-Store Retriever",
       challenge_difficulty: "intermediate",
-      challenge_description: "Embed a query and pull the k nearest document vectors by cosine similarity — the core retrieval call of every RAG system.",
-      challenge_story: "You're building the retrieval engine at the heart of your RAG stack. Every document chunk has already been turned into an embedding vector and stored in a vector store. When a question arrives, you embed it too, then find the chunks whose vectors point in the most similar *direction* — because in embedding space, direction means meaning. Cosine similarity is your ruler. Ship the function that, given the query vector and the store, returns the top-k chunk IDs to stuff into the prompt.",
+      challenge_description: "Embed a query and pull the k nearest document vectors by cosine similarity, the core retrieval call of every RAG system.",
+      challenge_story: "You're building the retrieval engine at the heart of your RAG stack. Every document chunk has already been turned into an embedding vector and stored in a vector store. When a question arrives, you embed it too, then find the chunks whose vectors point in the most similar *direction*, because in embedding space, direction means meaning. Cosine similarity is your ruler. Ship the function that, given the query vector and the store, returns the top-k chunk IDs to stuff into the prompt.",
       challenge_statement: "You are given `N` document vectors (each a `D`-dimensional list of floats with a string ID) and a single `D`-dimensional query vector. Score each document against the query with **cosine similarity**:\n\n`cos(a, b) = (a · b) / (||a|| · ||b||)`, where a vector with zero magnitude scores `0.0`.\n\nReturn the top `k` documents ranked by similarity, **highest first**. Break ties between equal scores by ID in ascending lexicographic order.",
-      challenge_input_format: "Line 1: three integers `N D k`.\nThe next `N` lines each contain a document: an ID token followed by `D` floats.\nThe final line contains `D` floats — the query vector.",
+      challenge_input_format: "Line 1: three integers `N D k`.\nThe next `N` lines each contain a document: an ID token followed by `D` floats.\nThe final line contains `D` floats, the query vector.",
       challenge_output_format: "`k` lines (or fewer if `N < k`). Each line is `ID SCORE`, where `SCORE` is the cosine similarity formatted to exactly 4 decimal places. Lines are ordered by descending score, ties broken by ascending ID.",
       challenge_constraints: [
         "1 ≤ N ≤ 5000",
@@ -927,7 +927,7 @@ Best match: doc1`,
         { input: "3 2 2\na 1.0 0.0\nb 0.0 1.0\nc 1.0 1.0\n1.0 0.0", output: "a 1.0000\nc 0.7071", explanation: "`a` is identical to the query (cos = 1.0). `c` sits at 45° (cos ≈ 0.7071). `b` is perpendicular (0.0) and falls outside the top 2." },
         { input: "3 2 2\nz 1.0 0.0\na 1.0 0.0\nb 0.0 1.0\n1.0 0.0", output: "a 1.0000\nz 1.0000", explanation: "Both `a` and `z` tie at cos = 1.0; the tie is broken by ascending ID, so `a` comes before `z`." },
       ],
-      challenge_notes: "Cosine compares the *angle* between vectors, not their length — which is why a one-line query can perfectly match a long paragraph. Guard against zero-magnitude vectors (return 0.0) so you never divide by zero. Deterministic tie-breaking by ID keeps the output reproducible across runs.",
+      challenge_notes: "Cosine compares the *angle* between vectors, not their length, which is why a one-line query can perfectly match a long paragraph. Guard against zero-magnitude vectors (return 0.0) so you never divide by zero. Deterministic tie-breaking by ID keeps the output reproducible across runs.",
       challenge_hints: [
         "Compute dot product with `sum(x*y for x, y in zip(a, b))` and magnitude with `math.sqrt(sum(x*x for x in a))`.",
         "If either magnitude is 0, the similarity is 0.0.",
@@ -1006,7 +1006,7 @@ main()
       title: "Assembling the RAG Pipeline",
       concept: "Pipeline",
       xp_reward: 10,
-      explanation: `You have the pieces: chunk, embed, store, search. Now you wire them into one flow and — critically — build the prompt that turns retrieved text into a grounded answer.
+      explanation: `You have the pieces: chunk, embed, store, search. Now you wire them into one flow and, critically, build the prompt that turns retrieved text into a grounded answer.
 
 ## The end-to-end flow
 
@@ -1020,7 +1020,7 @@ Everything before "send to LLM" you already know how to do. The new skill is the
 
 1. **Supplies the context.** Paste the retrieved chunks in clearly, usually as a labeled block.
 2. **Constrains the model to it.** Tell it, in plain words, to answer using *only* the provided context.
-3. **Gives it an out.** Tell it to say "I don't know" when the context doesn't contain the answer. Without this, the model falls back to guessing — the exact hallucination you're trying to kill.
+3. **Gives it an out.** Tell it to say "I don't know" when the context doesn't contain the answer. Without this, the model falls back to guessing, the exact hallucination you're trying to kill.
 
 \`\`\`python
 def build_prompt(query, chunks):
@@ -1041,7 +1041,7 @@ Retrieval decides *what* the model sees. Prompting decides *how* it's allowed to
 
 ## Format matters
 
-Notice the prompt labels the context block and separates it from the question. Models follow structure. A wall of undifferentiated text invites the model to blur the line between "given context" and "the actual question." Clear sections — \`Context:\` then \`Question:\` — keep those roles distinct.
+Notice the prompt labels the context block and separates it from the question. Models follow structure. A wall of undifferentiated text invites the model to blur the line between "given context" and "the actual question." Clear sections, \`Context:\` then \`Question:\`, keep those roles distinct.
 
 In the next lesson you'll plug a real Claude API call onto the end of this pipeline. For now, get the assembly right: retrieve, then build a prompt that grounds and constrains. That prompt *is* your RAG system's quality.`,
       key_terms: [
@@ -1073,7 +1073,7 @@ In the next lesson you'll plug a real Claude API call onto the end of this pipel
             "Because the API rejects prompts without it"
           ],
           correct_index: 0,
-          explanation: "Without an out, the model guesses whenever the context lacks the answer — reintroducing hallucination. The instruction is the safety valve."
+          explanation: "Without an out, the model guesses whenever the context lacks the answer, reintroducing hallucination. The instruction is the safety valve."
         }
       ],
       quiz_questions: [
@@ -1091,7 +1091,7 @@ In the next lesson you'll plug a real Claude API call onto the end of this pipel
         {
           question: "Retrieval and prompting are described as partners. Why?",
           options: [
-            "Retrieval decides what the model sees; prompting decides how it's allowed to use it — both must be right",
+            "Retrieval decides what the model sees; prompting decides how it's allowed to use it, both must be right",
             "They are the same step with different names",
             "Prompting replaces retrieval once you have enough data",
             "Retrieval only matters when the prompt is empty"
@@ -1102,7 +1102,7 @@ In the next lesson you'll plug a real Claude API call onto the end of this pipel
         {
           question: "Why label the context block and separate it from the question in the prompt?",
           options: [
-            "Clear structure keeps the model from blurring 'given context' and 'the question' — models follow structure",
+            "Clear structure keeps the model from blurring 'given context' and 'the question', models follow structure",
             "It reduces the token count of the request",
             "The API requires a 'Context:' header",
             "It makes embeddings more accurate"
@@ -1115,7 +1115,7 @@ In the next lesson you'll plug a real Claude API call onto the end of this pipel
         {
           activity_title: "Pipeline order",
           questions: [
-            { question: "In a RAG pipeline, you build the prompt before retrieving the relevant chunks.", type: "true_false", correct_answer: "false", explanation: "You retrieve first — the retrieved chunks are what you put into the prompt's context block." },
+            { question: "In a RAG pipeline, you build the prompt before retrieving the relevant chunks.", type: "true_false", correct_answer: "false", explanation: "You retrieve first, the retrieved chunks are what you put into the prompt's context block." },
             { question: "The prompt directive that tells the model to answer using only the supplied context is the ______ instruction.", type: "fill_in", correct_answer: "grounding", explanation: "The grounding instruction constrains the model to the provided context instead of its training memory." }
           ]
         }
@@ -1213,7 +1213,7 @@ Question: How long do I have to return something for a refund?`,
           steps: [
             "The model is built to continue text, and 'I don't know' is an unlikely continuation after a question.",
             "Without an explicit out, it falls back to its training memory to produce a fluent answer.",
-            "That answer is ungrounded — the exact hallucination RAG is meant to prevent.",
+            "That answer is ungrounded, the exact hallucination RAG is meant to prevent.",
             "Adding the 'say you don't know' instruction gives the model a permitted escape hatch."
           ],
           output: "Model bluffs a guess instead of admitting the gap"
@@ -1222,9 +1222,9 @@ Question: How long do I have to return something for a refund?`,
           number: 2, difficulty: "medium",
           prompt: 'Build a prompt from chunks ["Refunds within 30 days.", "Ships in 5-7 days."] for the question "What is the refund window?". What are the three required parts?',
           steps: [
-            "Part 1 — context: join the chunks into a labeled block ('Context:\\n- Refunds within 30 days.\\n- Ships in 5-7 days.').",
-            "Part 2 — constraint: 'Answer the question using ONLY the context below.'",
-            "Part 3 — fallback: 'If the answer is not in the context, say you don't know.'",
+            "Part 1, context: join the chunks into a labeled block ('Context:\\n- Refunds within 30 days.\\n- Ships in 5-7 days.').",
+            "Part 2, constraint: 'Answer the question using ONLY the context below.'",
+            "Part 3, fallback: 'If the answer is not in the context, say you don't know.'",
             "Append the question last on its own line so its role stays distinct from the context."
           ],
           output: "A prompt with labeled context + constraint + I-don't-know + question"
@@ -1273,9 +1273,9 @@ Question: How long do I have to return something for a refund?`,
       challenge_title: "Assemble the RAG Pipeline",
       challenge_difficulty: "advanced",
       challenge_description: "Wire retrieval to prompt: embed the query, pull the top-k chunks, and stuff them into a grounded user message ready for the model.",
-      challenge_story: "Retrieval and chunking are done; now you connect them. You're the engineer who owns the **pipeline glue** — the step that turns a raw question into a model-ready prompt. The query gets embedded, the vector store returns its closest chunks, and you stitch those chunks into a single grounded message: context up top, the question below, and a firm instruction to answer *only* from what's provided. Get this assembly exactly right and the model stops hallucinating; get it sloppy and even perfect retrieval is wasted.",
-      challenge_statement: "Build the full retrieve-then-prompt step. You are given `N` chunks — each with an ID, a `D`-dimensional embedding, and its text — plus a question and its query embedding.\n\n1. Rank the chunks by **cosine similarity** to the query (zero magnitude → 0.0), highest first, ties broken by ascending ID.\n2. Take the top `k` chunk IDs **in ranked order**.\n3. Join those chunks' texts (in ranked order) with a blank line between them to form the context block.\n4. Build a single user message with this exact body:\n\n```\nContext:\n<context>\n\nQuestion: <query>\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"\n```",
-      challenge_input_format: "Line 1: three integers `N D k`.\nThen `N` chunk blocks, each spanning 3 lines: the ID, then `D` floats, then the chunk text.\nNext line: the question text.\nFinal line: `D` floats — the query embedding.",
+      challenge_story: "Retrieval and chunking are done; now you connect them. You're the engineer who owns the **pipeline glue**: the step that turns a raw question into a model-ready prompt. The query gets embedded, the vector store returns its closest chunks, and you stitch those chunks into a single grounded message: context up top, the question below, and a firm instruction to answer *only* from what's provided. Get this assembly exactly right and the model stops hallucinating; get it sloppy and even perfect retrieval is wasted.",
+      challenge_statement: "Build the full retrieve-then-prompt step. You are given `N` chunks, each with an ID, a `D`-dimensional embedding, and its text, plus a question and its query embedding.\n\n1. Rank the chunks by **cosine similarity** to the query (zero magnitude → 0.0), highest first, ties broken by ascending ID.\n2. Take the top `k` chunk IDs **in ranked order**.\n3. Join those chunks' texts (in ranked order) with a blank line between them to form the context block.\n4. Build a single user message with this exact body:\n\n```\nContext:\n<context>\n\nQuestion: <query>\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"\n```",
+      challenge_input_format: "Line 1: three integers `N D k`.\nThen `N` chunk blocks, each spanning 3 lines: the ID, then `D` floats, then the chunk text.\nNext line: the question text.\nFinal line: `D` floats, the query embedding.",
       challenge_output_format: "Line 1: the number of chunks selected `C` (= min(k, N)).\nLine 2: the selected chunk IDs in ranked order, space-separated.\nLine 3: `CHARS ` followed by the integer character length of the assembled user-message content.\nLine 4: a literal `---` separator.\nThe remaining lines: the full assembled user-message content.",
       challenge_constraints: [
         "1 ≤ N ≤ 1000",
@@ -1287,7 +1287,7 @@ Question: How long do I have to return something for a refund?`,
       challenge_examples: [
         { input: "3 2 2\nc1\n1.0 0.0\nParis is the capital of France.\nc2\n0.0 1.0\nThe Eiffel Tower is in Paris.\nc3\n0.9 0.1\nFrance is in Europe.\nWhat is the capital of France?\n1.0 0.0", output: "2\nc1 c3\nCHARS 199\n---\nContext:\nParis is the capital of France.\n\nFrance is in Europe.\n\nQuestion: What is the capital of France?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"", explanation: "c1 (cos 1.0) and c3 (cos ≈ 0.995) rank above c2 (cos 0.0). Their texts are joined with a blank line; the final message is 199 characters." },
       ],
-      challenge_notes: "The 'answer only from the context, else say I don't know' instruction is the safety valve of RAG — without an explicit out, the model invents an answer whenever retrieval misses. Reuse your cosine-similarity ranking from the previous lesson; the only new work is assembling the prompt string exactly.",
+      challenge_notes: "The 'answer only from the context, else say I don't know' instruction is the safety valve of RAG, without an explicit out, the model invents an answer whenever retrieval misses. Reuse your cosine-similarity ranking from the previous lesson; the only new work is assembling the prompt string exactly.",
       challenge_hints: [
         "Parse each chunk block as three consecutive lines: ID, vector, text.",
         "Rank with key `lambda t: (-score, id)` and slice the first k.",
@@ -1387,7 +1387,7 @@ main()
 
 ## The Messages API call
 
-The Anthropic SDK uses one endpoint for this: \`client.messages.create\`. You pass a model, a token budget, and your messages list — the same list your pipeline built.
+The Anthropic SDK uses one endpoint for this: \`client.messages.create\`. You pass a model, a token budget, and your messages list, the same list your pipeline built.
 
 \`\`\`python
 import os
@@ -1405,13 +1405,13 @@ print(response.content[0].text)
 
 A few things to lock in:
 
-- **The key comes from the environment**, never hardcoded — \`os.environ["ANTHROPIC_API_KEY"]\`. A leaked key in source is a real incident, not a style nit.
+- **The key comes from the environment**, never hardcoded, \`os.environ["ANTHROPIC_API_KEY"]\`. A leaked key in source is a real incident, not a style nit.
 - **\`messages\` is a list of role/content dicts.** Your RAG prompt goes in as a single user message. That's exactly what \`build_messages\` produced last lesson.
 - **The answer is in \`response.content[0].text\`.** The response is a list of content blocks; for a plain text answer you read the first block's \`text\`.
 
 ## Put a system prompt to work
 
-You can sharpen grounding by moving the rules into a \`system\` prompt — the model treats system instructions as higher-authority standing rules, separate from the per-question context:
+You can sharpen grounding by moving the rules into a \`system\` prompt, the model treats system instructions as higher-authority standing rules, separate from the per-question context:
 
 \`\`\`python
 response = client.messages.create(
@@ -1442,16 +1442,16 @@ def answer_question(query, store, client):
 
 That's RAG end to end: chunk your docs once, embed them into a store, and every question flows through retrieve -> build prompt -> call Claude -> grounded answer.
 
-You've built the thing. It hallucinates far less than a bare model because it answers from *your* documents, and it can say "I don't know" instead of bluffing. From here it's all upgrades — a real embedding model, a real vector database, smarter chunking — but the architecture you just built is the architecture the big systems use.`,
+You've built the thing. It hallucinates far less than a bare model because it answers from *your* documents, and it can say "I don't know" instead of bluffing. From here it's all upgrades, a real embedding model, a real vector database, smarter chunking, but the architecture you just built is the architecture the big systems use.`,
       key_terms: [
         { term: "Messages API", definition: "Anthropic's endpoint (client.messages.create) that takes a model, max_tokens, and a messages list, and returns content blocks." },
         { term: "System prompt", definition: "A higher-authority instruction block (the 'system' field) holding standing rules like the grounding constraint, separate from the per-turn user message." },
-        { term: "content[0].text", definition: "Where a plain text answer lives in the response — the text of the first content block." },
+        { term: "content[0].text", definition: "Where a plain text answer lives in the response, the text of the first content block." },
         { term: "Environment variable", definition: "A value read at runtime (e.g. os.environ['ANTHROPIC_API_KEY']) so secrets stay out of source code." }
       ],
       callouts: [
         { type: "insight", title: "System vs. user, two different jobs", content: "The system prompt holds the unchanging rules ('answer only from context'). The user message holds the changing part (this question, these chunks). Keeping them apart makes the model follow the rules more reliably.", position: "before" },
-        { type: "warning", title: "Never hardcode the API key", content: "Read it from os.environ['ANTHROPIC_API_KEY']. A key committed to a repo can be scraped and abused within minutes — treat it like a password, because it is one.", position: "after" }
+        { type: "warning", title: "Never hardcode the API key", content: "Read it from os.environ['ANTHROPIC_API_KEY']. A key committed to a repo can be scraped and abused within minutes, treat it like a password, because it is one.", position: "after" }
       ],
       concept_diagram: {
         title: "From question to grounded answer",
@@ -1460,7 +1460,7 @@ You've built the thing. It hallucinates far less than a bare model because it an
           { label: "build_prompt(...)", desc: "Assemble context + question + grounding instruction." },
           { label: "messages.create(...)", desc: "Send the prompt to Claude via the Messages API." },
           { label: "read content[0].text", desc: "Extract the model's answer from the response." },
-          { label: "Return to user", desc: "A grounded answer — or an honest 'I don't know.'" }
+          { label: "Return to user", desc: "A grounded answer, or an honest 'I don't know.'" }
         ]
       },
       inline_quizzes: [
@@ -1507,7 +1507,7 @@ You've built the thing. It hallucinates far less than a bare model because it an
             "The embedding vectors of every chunk"
           ],
           correct_index: 0,
-          explanation: "The assembled prompt — context plus question — goes in as one user message, which is what the whole pipeline was building toward."
+          explanation: "The assembled prompt, context plus question, goes in as one user message, which is what the whole pipeline was building toward."
         }
       ],
       participation_activities: [
@@ -1568,7 +1568,7 @@ def answer_question(query, store, client=None):
         "messages": [{"role": "user", "content": prompt}],
     }
     if client is None:
-        # No live LLM here — return the request we WOULD send.
+        # No live LLM here, return the request we WOULD send.
         return request
     # With a real client:
     #   client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
@@ -1612,7 +1612,7 @@ Answer from the context only.`,
           number: 1, difficulty: "easy",
           prompt: "You call client.messages.create(...) and want the plain text answer. Where do you read it from?",
           steps: [
-            "The response is not a bare string — it holds a list of content blocks.",
+            "The response is not a bare string, it holds a list of content blocks.",
             "For a normal text answer there is one block of type 'text'.",
             "Index the first block and read its .text attribute.",
             "So the answer lives at response.content[0].text."
@@ -1625,7 +1625,7 @@ Answer from the context only.`,
           steps: [
             "Standing rules that never change ('answer only from context; else say I don't know') go in the system field.",
             "The model treats system instructions as higher-authority, separate from the turn's content.",
-            "The changing parts — this question and these retrieved chunks — go in the user message.",
+            "The changing parts, this question and these retrieved chunks, go in the user message.",
             "Result: system holds the policy, user holds the data; the model follows the rules more reliably."
           ],
           output: "system = rules; messages = [{role: user, content: context + question}]"
@@ -1674,7 +1674,7 @@ Answer from the context only.`,
       challenge_title: "Wire the Grounded Claude Request",
       challenge_difficulty: "intermediate",
       challenge_description: "Build the exact Messages API request your RAG service sends to Claude: grounding rules in the system prompt, context and question in the user message.",
-      challenge_story: "Your RAG service is one function away from production. Retrieval works; chunking works; now you have to hand the model a request it can't go off the rails with. The trick the team learned the hard way: put the *unchanging rules* (\"answer only from context; if it's not there, say so\") in the **system** prompt, and the *changing part* (these chunks, this question) in the **user** message. Keep them apart and Claude follows the rules far more reliably. Assemble that request — model, token cap, system, messages — and emit a deterministic fingerprint of it for your request-logging audit.",
+      challenge_story: "Your RAG service is one function away from production. Retrieval works; chunking works; now you have to hand the model a request it can't go off the rails with. The trick the team learned the hard way: put the *unchanging rules* (\"answer only from context; if it's not there, say so\") in the **system** prompt, and the *changing part* (these chunks, this question) in the **user** message. Keep them apart and Claude follows the rules far more reliably. Assemble that request, model, token cap, system, messages, and emit a deterministic fingerprint of it for your request-logging audit.",
       challenge_statement: "Construct an Anthropic Messages API request dict for one grounded RAG call.\n\nGiven `N` context chunks, a `max_tokens` budget, a `model` name, and a question, build:\n\n- `model`: the given model name.\n- `max_tokens`: the given integer.\n- `system`: exactly `You are a Q&A assistant. Answer only from the provided context. If the context lacks the answer, reply exactly: I don't know.`\n- `messages`: a single-element list `[{\"role\": \"user\", \"content\": <user>}]` where `<user>` is `Context:\\n<context>\\n\\nQuestion: <query>` and `<context>` is the chunks joined by single newlines.\n\nThen print a fingerprint of the request so it can be logged deterministically.",
       challenge_input_format: "Line 1: two integers `N max_tokens`.\nLine 2: the `model` name.\nThe next `N` lines: the context chunks, one per line.\nThe final line: the question.",
       challenge_output_format: "Print exactly five lines describing the request:\nLine 1: the model name.\nLine 2: max_tokens.\nLine 3: the character length of the system prompt.\nLine 4: the role of the only message (always `user`).\nLine 5: the character length of that message's content.",
@@ -1689,10 +1689,10 @@ Answer from the context only.`,
         { input: "2 512\nclaude-sonnet-4-6\nAcme was founded by Dale in 1999.\nAcme makes rockets.\nWho founded Acme?", output: "claude-sonnet-4-6\n512\n125\nuser\n91", explanation: "model and max_tokens echo the input. The fixed system prompt is 125 chars. The single user message (Context + both chunks + Question) is 91 chars." },
         { input: "1 256\nclaude-opus-4-1\nThe Moon orbits Earth.\nWhat orbits Earth?", output: "claude-opus-4-1\n256\n125\nuser\n61", explanation: "A different model and token cap pass through; the system length stays 125; the shorter context yields a 61-char user message." },
       ],
-      challenge_notes: "The system prompt is the contract; the user message is the payload. Hardcoding the rules in `system` (not in the user turn) is what makes the model reliably refuse to speculate. In real code you'd read `os.environ['ANTHROPIC_API_KEY']` and never hardcode it — but this exercise stays offline and just builds the request, so no key or network is involved.",
+      challenge_notes: "The system prompt is the contract; the user message is the payload. Hardcoding the rules in `system` (not in the user turn) is what makes the model reliably refuse to speculate. In real code you'd read `os.environ['ANTHROPIC_API_KEY']` and never hardcode it, but this exercise stays offline and just builds the request, so no key or network is involved.",
       challenge_hints: [
         "Join the chunks with `\"\\n\".join(chunks)` to form the context.",
-        "The system prompt is a fixed string — copy it exactly, including the period after `I don't know`.",
+        "The system prompt is a fixed string, copy it exactly, including the period after `I don't know`.",
         "The user content is `f\"Context:\\n{context}\\n\\nQuestion: {query}\"`.",
         "Print `len(system)` and `len(content)` to fingerprint the request deterministically.",
       ],
@@ -1765,17 +1765,17 @@ main()
       title: "Citations and Grounding",
       concept: "Citations",
       xp_reward: 10,
-      explanation: `Your RAG system gives a correct answer. A user asks, "Where did that come from?" If you can't point to the exact chunk, you don't have a trustworthy system — you have a confident black box that happened to be right this time.
+      explanation: `Your RAG system gives a correct answer. A user asks, "Where did that come from?" If you can't point to the exact chunk, you don't have a trustworthy system, you have a confident black box that happened to be right this time.
 
 ## What it is
 
-A **citation** is a pointer from a claim in the answer back to the specific retrieved chunk that supports it. Grounding isn't just feeding the model context — it's making the answer *traceable*, so every fact can be checked against its source. Without citations, "the model used my documents" is an act of faith. With them, it's an auditable fact: claim -> chunk -> original document.
+A **citation** is a pointer from a claim in the answer back to the specific retrieved chunk that supports it. Grounding isn't just feeding the model context, it's making the answer *traceable*, so every fact can be checked against its source. Without citations, "the model used my documents" is an act of faith. With them, it's an auditable fact: claim -> chunk -> original document.
 
 This is the difference between a demo and a product. Lawyers, doctors, and analysts will not act on an answer they can't verify. Citations turn "trust me" into "here, look."
 
 ## How it works
 
-The trick: don't just paste chunks into the prompt — **label each chunk with an ID**, then instruct the model to tag every sentence with the ID of the chunk it drew from. After the model answers, you parse out those tags and verify each one points to a real, retrieved chunk.
+The trick: don't just paste chunks into the prompt, **label each chunk with an ID**, then instruct the model to tag every sentence with the ID of the chunk it drew from. After the model answers, you parse out those tags and verify each one points to a real, retrieved chunk.
 
 \`\`\`python
 import re
@@ -1791,21 +1791,21 @@ def extract_citations(answer, valid_ids):
     return grounded, invented
 \`\`\`
 
-If the model emits a citation tag for a chunk it was never given, that is a **citation hallucination** — the answer invented its own source. Catching it is as important as catching a made-up fact, because a fake citation is a fake fact wearing a uniform.
+If the model emits a citation tag for a chunk it was never given, that is a **citation hallucination**: the answer invented its own source. Catching it is as important as catching a made-up fact, because a fake citation is a fake fact wearing a uniform.
 
 ## Why it matters
 
 - **Auditability.** A reviewer can click a citation and read the exact sentence that backs the claim. No re-running the model, no guessing.
-- **Hallucination detection.** An answer with zero valid citations on a factual question is a red flag — it likely came from training memory, not your context.
+- **Hallucination detection.** An answer with zero valid citations on a factual question is a red flag, it likely came from training memory, not your context.
 - **User trust.** Surfacing sources ("according to [policy1]...") is what makes people comfortable relying on the tool for real decisions.
-- **Debugging retrieval.** If answers cite the wrong chunks, your retrieval is pulling the wrong text — citations expose that immediately.
+- **Debugging retrieval.** If answers cite the wrong chunks, your retrieval is pulling the wrong text, citations expose that immediately.
 
 ## The mental model to keep
 
 A grounded answer without citations is a witness who refuses to say how they know. **Make the model show its work: every claim points back to a numbered source, and you verify the pointer is real.**`,
       key_terms: [
         { term: "Citation", definition: "A pointer from a claim in the answer back to the specific retrieved chunk that supports it." },
-        { term: "Citation hallucination", definition: "When an answer cites a source ID that was never among the retrieved chunks — an invented reference." },
+        { term: "Citation hallucination", definition: "When an answer cites a source ID that was never among the retrieved chunks, an invented reference." },
         { term: "Traceability", definition: "The property that every claim in an answer can be followed back to a real document passage." },
         { term: "Chunk ID", definition: "A stable label attached to each retrieved chunk so the model and the verifier can refer to it unambiguously." }
       ],
@@ -1831,7 +1831,7 @@ A grounded answer without citations is a witness who refuses to say how they kno
             "The model lowers its temperature before answering"
           ],
           correct_index: 0,
-          explanation: "Traceability means each claim can be followed back to a real source passage — that is exactly what citations provide."
+          explanation: "Traceability means each claim can be followed back to a real source passage, that is exactly what citations provide."
         }
       ],
       quiz_questions: [
@@ -1849,18 +1849,18 @@ A grounded answer without citations is a witness who refuses to say how they kno
         {
           question: "The model cites chunk [c9], but [c9] was never among the retrieved chunks. What is this?",
           options: [
-            "A citation hallucination — an invented source that must be flagged",
+            "A citation hallucination, an invented source that must be flagged",
             "A normal citation that should be trusted",
             "A sign the retrieval returned too few chunks",
             "A formatting error with no consequences"
           ],
           correct_index: 0,
-          explanation: "A cited ID that doesn't match any retrieved chunk is a fabricated reference — as dangerous as a fabricated fact, since it looks authoritative."
+          explanation: "A cited ID that doesn't match any retrieved chunk is a fabricated reference, as dangerous as a fabricated fact, since it looks authoritative."
         },
         {
           question: "An answer to a factual question contains zero valid citations. What does that suggest?",
           options: [
-            "The answer likely came from training memory rather than your context — a hallucination risk",
+            "The answer likely came from training memory rather than your context, a hallucination risk",
             "The retrieval step was perfect",
             "The answer is automatically more concise",
             "The model used a system prompt"
@@ -1873,7 +1873,7 @@ A grounded answer without citations is a witness who refuses to say how they kno
         {
           activity_title: "Citation check",
           questions: [
-            { question: "Validating that every cited chunk ID matches a real retrieved chunk catches citation hallucinations.", type: "true_false", correct_answer: "true", explanation: "An ID with no matching retrieved chunk is an invented source — exactly what the validation step is designed to catch." },
+            { question: "Validating that every cited chunk ID matches a real retrieved chunk catches citation hallucinations.", type: "true_false", correct_answer: "true", explanation: "An ID with no matching retrieved chunk is an invented source, exactly what the validation step is designed to catch." },
             { question: "A pointer from a claim in the answer back to the chunk that supports it is called a ______.", type: "fill_in", correct_answer: "citation", explanation: "Citations make answers traceable back to their sources." }
           ]
         }
@@ -1931,15 +1931,15 @@ invented: []`,
             "Check each against the retrieved set {c1, c2}.",
             "c1 is present, so it is a valid citation and nothing was invented."
           ],
-          output: "Grounded — cites c1, which is a real retrieved chunk."
+          output: "Grounded, cites c1, which is a real retrieved chunk."
         },
         {
           number: 2, difficulty: "medium",
           prompt: 'Retrieved chunks are [c1], [c2]. The answer reads: "The fee is waived [c1] under the gold tier [c5]." Evaluate it.',
           steps: [
             "Extract the cited IDs in order: ['c1', 'c5'].",
-            "c1 is in the retrieved set {c1, c2} — valid.",
-            "c5 is NOT in the retrieved set — it was never supplied, so it is invented.",
+            "c1 is in the retrieved set {c1, c2}, valid.",
+            "c5 is NOT in the retrieved set, it was never supplied, so it is invented.",
             "The presence of even one invented citation means the answer is partly ungrounded and must be flagged for review."
           ],
           output: "grounded=['c1'], invented=['c5'] -> flag the answer"
@@ -1950,9 +1950,9 @@ invented: []`,
           title: "uncited answer vs. cited answer",
           columns: ["Aspect", "Uncited answer", "Cited answer"],
           rows: [
-            { cells: ["Can a reviewer verify it?", "No — must re-run or trust", "Yes — click the source"] },
-            { cells: ["Detects citation hallucination", "No", "Yes — validate each ID"] },
-            { cells: ["User confidence", "Low for high-stakes use", "High — sources shown"] },
+            { cells: ["Can a reviewer verify it?", "No, must re-run or trust", "Yes, click the source"] },
+            { cells: ["Detects citation hallucination", "No", "Yes, validate each ID"] },
+            { cells: ["User confidence", "Low for high-stakes use", "High, sources shown"] },
             { cells: ["Exposes bad retrieval", "Hidden", "Wrong chunk cited = visible"], highlight: true }
           ]
         }
@@ -1977,7 +1977,7 @@ invented: []`,
       reflections: [
         {
           prompt: "In your own words: why is a citation that points to a chunk the model was never given just as dangerous as a made-up fact?",
-          sampleAnswer: "A citation looks like evidence, so it raises the reader's trust. If that citation points to a source that doesn't exist among the retrieved chunks, the model has fabricated the very thing that's supposed to prove it isn't fabricating. The reader sees a reference and assumes the claim is checked, when actually nothing backs it — so a fake citation can be more misleading than an obviously unsupported sentence."
+          sampleAnswer: "A citation looks like evidence, so it raises the reader's trust. If that citation points to a source that doesn't exist among the retrieved chunks, the model has fabricated the very thing that's supposed to prove it isn't fabricating. The reader sees a reference and assumes the claim is checked, when actually nothing backs it, so a fake citation can be more misleading than an obviously unsupported sentence."
         }
       ],
       hints: [
@@ -1988,9 +1988,9 @@ invented: []`,
       challenge_title: "The Citation Validator",
       challenge_difficulty: "intermediate",
       challenge_description: "Parse the citation tags out of a model's answer and decide whether the answer is properly grounded, ungrounded, or citing invented sources.",
-      challenge_story: "Your RAG assistant now appends a source tag like \`[c2]\` to each sentence it writes, pointing back to the chunk it used. Legal will not ship until every answer is auditable: each citation must resolve to a chunk that was actually retrieved, and a factual answer with no citations at all is treated as unverified. You're building the **citation validator** that runs on every response before it reaches a user — it pulls the tags, checks them against the retrieved chunk IDs, and routes the answer to GROUNDED, UNGROUNDED, or INVALID.",
+      challenge_story: "Your RAG assistant now appends a source tag like \`[c2]\` to each sentence it writes, pointing back to the chunk it used. Legal will not ship until every answer is auditable: each citation must resolve to a chunk that was actually retrieved, and a factual answer with no citations at all is treated as unverified. You're building the **citation validator** that runs on every response before it reaches a user, it pulls the tags, checks them against the retrieved chunk IDs, and routes the answer to GROUNDED, UNGROUNDED, or INVALID.",
       challenge_statement: "You are given the IDs of the `N` chunks that were retrieved for this question, followed by a single answer line. A *citation* is any text enclosed in square brackets, e.g. `[c1]`. Extract citations left to right.\n\nClassify the answer:\n\n- If any citation refers to an ID **not** among the retrieved chunks, the answer is **INVALID**. List the invented IDs in the order they first appear (deduplicated).\n- Otherwise, if the answer contains **no** citations at all, it is **UNGROUNDED**.\n- Otherwise, the answer is **GROUNDED**. List the cited IDs in first-appearance order, deduplicated.",
-      challenge_input_format: "Line 1: an integer `N` — the number of retrieved chunks.\nThe next `N` lines: one chunk ID per line.\nThe final line: the answer text (may contain zero or more `[id]` citation tags).",
+      challenge_input_format: "Line 1: an integer `N`, the number of retrieved chunks.\nThe next `N` lines: one chunk ID per line.\nThe final line: the answer text (may contain zero or more `[id]` citation tags).",
       challenge_output_format: "Line 1: one of `GROUNDED`, `UNGROUNDED`, or `INVALID`.\nLine 2:\n- For `GROUNDED`: the cited IDs in first-appearance order, deduplicated, space-separated.\n- For `UNGROUNDED`: the word `NONE`.\n- For `INVALID`: the invented IDs in first-appearance order, deduplicated, space-separated.",
       challenge_constraints: [
         "1 ≤ N ≤ 1000",
@@ -2002,7 +2002,7 @@ invented: []`,
         { input: "3\nc1\nc2\nc3\nThe window is 30 days [c2] and we ship widely [c1]. See also [c2].", output: "GROUNDED\nc2 c1", explanation: "Citations in order: c2, c1, c2. All are retrieved, so GROUNDED. Deduplicated first-appearance order is c2 then c1." },
         { input: "3\nc1\nc2\nc3\nThe rate is fixed [c4] per the table.", output: "INVALID\nc4", explanation: "c4 was never retrieved, so the answer cites an invented source and is INVALID." },
       ],
-      challenge_notes: "This is the production guardrail behind every 'sources' panel you see in a RAG product: a cheap, deterministic check that runs on every answer. The INVALID case is the most important — a citation that resolves to nothing is a fabricated reference, and it must be caught before a human ever trusts it. Use a regex like `re.findall(r\"\\[([^\\[\\]]+)\\]\", answer)` to pull the tags.",
+      challenge_notes: "This is the production guardrail behind every 'sources' panel you see in a RAG product: a cheap, deterministic check that runs on every answer. The INVALID case is the most important, a citation that resolves to nothing is a fabricated reference, and it must be caught before a human ever trusts it. Use a regex like `re.findall(r\"\\[([^\\[\\]]+)\\]\", answer)` to pull the tags.",
       challenge_hints: [
         "Read the N chunk IDs into a set for O(1) membership checks.",
         "Pull all citations with `re.findall(r\"\\[([^\\[\\]]+)\\]\", answer)`, preserving order.",
@@ -2086,17 +2086,17 @@ main()
       title: "When Retrieval Fails",
       concept: "Fallback",
       xp_reward: 10,
-      explanation: `Someone asks your document Q&A tool, "What's the company's policy on Mars colonization?" There is no such policy. Retrieval dutifully returns the three *least irrelevant* chunks it could find — and your model, handed garbage context, confidently summarizes the garbage. The system didn't break loudly. It failed silently, which is worse.
+      explanation: `Someone asks your document Q&A tool, "What's the company's policy on Mars colonization?" There is no such policy. Retrieval dutifully returns the three *least irrelevant* chunks it could find, and your model, handed garbage context, confidently summarizes the garbage. The system didn't break loudly. It failed silently, which is worse.
 
 ## What it is
 
-**Retrieval failure** is when the vector store has nothing genuinely relevant, yet still returns *something* — because similarity search always returns the top-k, even when the top match is weak. The **fallback** is the deliberate decision to refuse: detect that the best match is too weak, and have the system say "I don't know" or "not in the docs" instead of answering from junk.
+**Retrieval failure** is when the vector store has nothing genuinely relevant, yet still returns *something*, because similarity search always returns the top-k, even when the top match is weak. The **fallback** is the deliberate decision to refuse: detect that the best match is too weak, and have the system say "I don't know" or "not in the docs" instead of answering from junk.
 
 Top-k retrieval never returns empty. Ask about Mars and it hands back your three closest chunks no matter how far away they are. The closest chunk to an unanswerable question is still a wrong chunk.
 
 ## How it works
 
-The fix is a **similarity threshold**. After scoring, look at the *best* chunk's similarity. If even the best score falls below a cutoff, the store has nothing relevant — so refuse before you ever build a prompt.
+The fix is a **similarity threshold**. After scoring, look at the *best* chunk's similarity. If even the best score falls below a cutoff, the store has nothing relevant, so refuse before you ever build a prompt.
 
 \`\`\`python
 def retrieve_or_refuse(query, store, threshold=0.5, k=3):
@@ -2120,20 +2120,20 @@ Picking the threshold is empirical: too high and you refuse answerable questions
 
 - **Silent wrong answers are the worst failure.** A loud error gets fixed; a confident answer from irrelevant context gets believed and acted on.
 - **Refusing is a feature, not a bug.** "I don't know" is the correct answer to an unanswerable question. A system that never refuses cannot be trusted on the questions it *should* refuse.
-- **It bounds the blast radius.** Out-of-scope questions, typos, and adversarial prompts all tend to produce low top scores — the threshold catches them in one cheap check.
+- **It bounds the blast radius.** Out-of-scope questions, typos, and adversarial prompts all tend to produce low top scores, the threshold catches them in one cheap check.
 
 ## The mental model to keep
 
-Top-k always hands you *something*. Your job is to ask, **"is the best thing it found actually good enough?"** — and to refuse out loud when the answer is no.`,
+Top-k always hands you *something*. Your job is to ask, **"is the best thing it found actually good enough?"**: and to refuse out loud when the answer is no.`,
       key_terms: [
         { term: "Retrieval failure", definition: "When the store holds nothing genuinely relevant but top-k search still returns its closest (weak) chunks anyway." },
         { term: "Similarity threshold", definition: "A cutoff score below which a chunk is treated as not relevant enough to use." },
         { term: "Fallback / refusal", definition: "Deliberately answering 'I don't know' or 'not in the docs' when the best match is too weak, instead of answering from junk." },
-        { term: "Silent failure", definition: "A confident, fluent answer built from irrelevant context — wrong without any visible error." }
+        { term: "Silent failure", definition: "A confident, fluent answer built from irrelevant context, wrong without any visible error." }
       ],
       callouts: [
-        { type: "analogy", title: "A librarian who always hands you a book", content: "Ask for a book the library doesn't own, and a bad librarian still hands you the nearest one off the shelf. A good librarian checks whether the closest match actually fits your request — and says 'we don't have that' when it doesn't. The threshold is that check.", position: "before" },
-        { type: "insight", title: "Refusing is the trustworthy answer", content: "A RAG system earns trust not by always answering, but by knowing when it can't. The threshold is what lets it draw that line — and it is the single cheapest defense against confidently answering from irrelevant context.", position: "after" }
+        { type: "analogy", title: "A librarian who always hands you a book", content: "Ask for a book the library doesn't own, and a bad librarian still hands you the nearest one off the shelf. A good librarian checks whether the closest match actually fits your request, and says 'we don't have that' when it doesn't. The threshold is that check.", position: "before" },
+        { type: "insight", title: "Refusing is the trustworthy answer", content: "A RAG system earns trust not by always answering, but by knowing when it can't. The threshold is what lets it draw that line, and it is the single cheapest defense against confidently answering from irrelevant context.", position: "after" }
       ],
       concept_diagram: {
         title: "Score, check the best, then answer or refuse",
@@ -2153,7 +2153,7 @@ Top-k always hands you *something*. Your job is to ask, **"is the best thing it 
             "It randomly samples chunks when nothing matches"
           ],
           correct_index: 0,
-          explanation: "Top-k is ranking, not filtering — it hands back the closest matches regardless of how far away they are. You need a threshold to filter."
+          explanation: "Top-k is ranking, not filtering, it hands back the closest matches regardless of how far away they are. You need a threshold to filter."
         }
       ],
       quiz_questions: [
@@ -2233,7 +2233,7 @@ else:
           title: "top-k always returns -> check the best -> refuse if weak",
           steps: [
             { label: "Score the whole store", detail: "Cosine the query against every chunk; you get a score for each.", code: 'scores = {c1: 0.82, c2: 0.41, c3: 0.18}' },
-            { label: "Top-k returns the closest", detail: "Ranking hands back the nearest chunks no matter how far away they are — it never returns empty.", code: 'ranked[0] = (c1, 0.82)' },
+            { label: "Top-k returns the closest", detail: "Ranking hands back the nearest chunks no matter how far away they are, it never returns empty.", code: 'ranked[0] = (c1, 0.82)' },
             { label: "Compare best to threshold", detail: "Look only at the single best score. If even that is below the cutoff, nothing is relevant.", code: 'best_score 0.82 >= threshold 0.5 ?' },
             { label: "Answer or refuse", detail: "Above the line: keep the passing chunks. Below: short-circuit to a refusal.", code: "keep c1  (or, if best < 0.5, refuse with I don't know.)" }
           ]
@@ -2257,7 +2257,7 @@ else:
             "Best score is c1 at 0.78, which clears the 0.50 threshold, so the system answers rather than refuses.",
             "Rank all chunks by descending score: c1 (0.78), c2 (0.55), c4 (0.49), c3 (0.31).",
             "Keep only those at or above 0.50: c1 and c2 pass; c4 (0.49) and c3 (0.31) are dropped.",
-            "Even though k=3, only two chunks clear the threshold, so the system uses just those two — the threshold filters, k only caps."
+            "Even though k=3, only two chunks clear the threshold, so the system uses just those two, the threshold filters, k only caps."
           ],
           output: "Keep c1, c2 (in that order); c3 and c4 fall below threshold."
         }
@@ -2294,7 +2294,7 @@ else:
       reflections: [
         {
           prompt: "Explain in your own words why a similarity threshold matters even though the model's prompt already says 'say I don't know if the answer isn't in the context.'",
-          sampleAnswer: "The prompt-side instruction depends on the model correctly judging that the supplied chunks don't answer the question — and models are unreliable at that, especially when the junk chunks are topically nearby. The threshold is a cheaper, deterministic guard that fires before the model is even involved: if the best match is too weak, you refuse without spending a token. Using both layers means a weak retrieval is caught either by the threshold or, if it slips through, by the model's own out."
+          sampleAnswer: "The prompt-side instruction depends on the model correctly judging that the supplied chunks don't answer the question, and models are unreliable at that, especially when the junk chunks are topically nearby. The threshold is a cheaper, deterministic guard that fires before the model is even involved: if the best match is too weak, you refuse without spending a token. Using both layers means a weak retrieval is caught either by the threshold or, if it slips through, by the model's own out."
         }
       ],
       hints: [
@@ -2319,7 +2319,7 @@ else:
         { input: "3 0.50\nc1 0.82\nc2 0.40\nc3 0.61", output: "ANSWER\nc1 c3", explanation: "Best score is c1 at 0.82, above 0.50, so the system answers. c1 (0.82) and c3 (0.61) clear the threshold; c2 (0.40) is dropped." },
         { input: "3 0.70\nc1 0.55\nc2 0.41\nc3 0.62", output: "REFUSE\nI don't know.", explanation: "The best score is c3 at 0.62, still below the 0.70 threshold, so nothing is relevant enough and the system refuses." },
       ],
-      challenge_notes: "This gate is the cheapest, most reliable defense against confidently answering from irrelevant context. The threshold is empirical: too high refuses answerable questions, too low lets junk through — you tune it against a test set (the next lesson's topic). Note the boundary: a chunk exactly at the threshold passes (>=), but the best score must be strictly below to trigger a refusal (<).",
+      challenge_notes: "This gate is the cheapest, most reliable defense against confidently answering from irrelevant context. The threshold is empirical: too high refuses answerable questions, too low lets junk through, you tune it against a test set (the next lesson's topic). Note the boundary: a chunk exactly at the threshold passes (>=), but the best score must be strictly below to trigger a refusal (<).",
       challenge_hints: [
         "Read all chunks into a list of (id, score) tuples.",
         "Sort by `key=lambda t: (-t[1], t[0])` so the first element is the best (highest score, ascending ID on ties).",
@@ -2393,8 +2393,8 @@ main()
 
 A RAG system has two stages, so it has two things to measure:
 
-- **Retrieval quality** — did the search return the *right* chunks? Measured with **precision** and **recall**.
-- **Answer quality** — given the retrieved chunks, is the final answer actually *supported* by them? Measured with **faithfulness**.
+- **Retrieval quality**: did the search return the *right* chunks? Measured with **precision** and **recall**.
+- **Answer quality**: given the retrieved chunks, is the final answer actually *supported* by them? Measured with **faithfulness**.
 
 You need both, because they break separately. Perfect retrieval with an unfaithful model still hallucinates. A faithful model fed the wrong chunks faithfully summarizes the wrong thing.
 
@@ -2419,9 +2419,9 @@ You run this over a **test set** of many questions and average. There's a tug-of
 
 ## Why it matters
 
-- **You can't improve what you can't measure.** Metrics tell you *which* stage to fix — bad recall means tune chunking or the threshold; bad faithfulness means tighten the prompt.
+- **You can't improve what you can't measure.** Metrics tell you *which* stage to fix, bad recall means tune chunking or the threshold; bad faithfulness means tighten the prompt.
 - **Regression detection.** A test set turns "it feels worse" into a number that drops, so you catch breakage before users do.
-- **Honest comparison.** Two chunking strategies, two thresholds, two models — metrics pick the winner instead of vibes.
+- **Honest comparison.** Two chunking strategies, two thresholds, two models, metrics pick the winner instead of vibes.
 
 ## The mental model to keep
 
@@ -2434,7 +2434,7 @@ You run this over a **test set** of many questions and average. There's a tug-of
       ],
       callouts: [
         { type: "insight", title: "Two stages, two failure modes", content: "Retrieval can fail (wrong chunks) and generation can fail (unsupported claims) completely independently. A single 'is it good?' score hides which one broke. Measure precision/recall and faithfulness separately so a regression tells you exactly where to look.", position: "before" },
-        { type: "tip", title: "The precision-recall tug-of-war", content: "Retrieving more chunks (raising k) tends to raise recall but lower precision, and vice versa. There's no universally 'best' k — pick the operating point your application needs, then hold it fixed while you measure everything else.", position: "after" }
+        { type: "tip", title: "The precision-recall tug-of-war", content: "Retrieving more chunks (raising k) tends to raise recall but lower precision, and vice versa. There's no universally 'best' k, pick the operating point your application needs, then hold it fixed while you measure everything else.", position: "after" }
       ],
       concept_diagram: {
         title: "Measuring the whole pipeline",
@@ -2528,7 +2528,7 @@ faithfulness: 0.7500`,
         {
           title: "retrieved vs gold -> precision/recall -> claims -> faithfulness",
           steps: [
-            { label: "Intersect with gold", detail: "Count how many retrieved chunks are also in the gold set — those are the hits.", code: 'hits = len({c1,c2,c3} & {c1,c2}) = 2' },
+            { label: "Intersect with gold", detail: "Count how many retrieved chunks are also in the gold set, those are the hits.", code: 'hits = len({c1,c2,c3} & {c1,c2}) = 2' },
             { label: "Precision", detail: "Of everything you pulled, what fraction was relevant?", code: 'precision = 2 / 3 = 0.6667' },
             { label: "Recall", detail: "Of everything you needed, what fraction did you find?", code: 'recall = 2 / 2 = 1.0000' },
             { label: "Faithfulness", detail: "Of the answer's claims, what fraction is supported by the context?", code: 'faithfulness = 3 / 4 = 0.7500' }
@@ -2543,7 +2543,7 @@ faithfulness: 0.7500`,
             "Hits = chunks in both retrieved and gold = {c1, c2} = 2.",
             "Precision = hits / retrieved = 2 / 2 = 1.0.",
             "Recall = hits / gold = 2 / 2 = 1.0.",
-            "Every claim is supported, so faithfulness = 1.0 — a perfect score on this question."
+            "Every claim is supported, so faithfulness = 1.0, a perfect score on this question."
           ],
           output: "precision 1.0, recall 1.0, faithfulness 1.0"
         },
@@ -2552,10 +2552,10 @@ faithfulness: 0.7500`,
           prompt: "Retrieved = [c1, c2, c9, c8], gold = [c1, c2, c5]. The answer makes 3 claims, all supported. Diagnose the failure.",
           steps: [
             "Hits = retrieved intersect gold = {c1, c2} = 2.",
-            "Precision = 2 / 4 = 0.50 — half of what you retrieved (c9, c8) was junk.",
-            "Recall = 2 / 3 = 0.667 — you missed c5, a gold chunk the answer may have needed.",
-            "Faithfulness = 3 / 3 = 1.0 — the model only stated things its context supports.",
-            "Diagnosis: generation is healthy, but retrieval is the weak stage — it pulls junk (low precision) and misses a gold chunk (imperfect recall). Fix chunking or the threshold, not the prompt."
+            "Precision = 2 / 4 = 0.50, half of what you retrieved (c9, c8) was junk.",
+            "Recall = 2 / 3 = 0.667, you missed c5, a gold chunk the answer may have needed.",
+            "Faithfulness = 3 / 3 = 1.0, the model only stated things its context supports.",
+            "Diagnosis: generation is healthy, but retrieval is the weak stage, it pulls junk (low precision) and misses a gold chunk (imperfect recall). Fix chunking or the threshold, not the prompt."
           ],
           output: "precision 0.50, recall 0.667, faithfulness 1.0 -> fix retrieval, not generation"
         }
@@ -2592,7 +2592,7 @@ faithfulness: 0.7500`,
       reflections: [
         {
           prompt: "In your own words: why can a RAG system score perfect on faithfulness and still give a useless answer?",
-          sampleAnswer: "Faithfulness only checks whether the answer's claims are supported by the chunks that were retrieved — not whether those chunks were the right ones. If retrieval missed the gold chunk (low recall), the model can faithfully and correctly summarize the wrong context, producing an answer that is fully grounded yet doesn't actually address the question. That's why you measure recall too: a faithful answer over the wrong evidence is still a failure."
+          sampleAnswer: "Faithfulness only checks whether the answer's claims are supported by the chunks that were retrieved, not whether those chunks were the right ones. If retrieval missed the gold chunk (low recall), the model can faithfully and correctly summarize the wrong context, producing an answer that is fully grounded yet doesn't actually address the question. That's why you measure recall too: a faithful answer over the wrong evidence is still a failure."
         }
       ],
       hints: [
@@ -2603,7 +2603,7 @@ faithfulness: 0.7500`,
       challenge_title: "The RAG Scorecard",
       challenge_difficulty: "intermediate",
       challenge_description: "Compute the three core RAG quality metrics for one test question and decide whether the answer passes your quality bar.",
-      challenge_story: "Your RAG system is going to production, and 'it seems to work' won't satisfy the review board. You're building the **evaluation harness** that scores the pipeline on a labeled test set. For each question you know the gold chunks (the ones that truly answer it), the chunks your system actually retrieved, and which of the answer's claims a grader marked as supported by the context. Turn that into the three numbers everyone trusts — precision, recall, faithfulness — and a single PASS/FAIL verdict against the quality bar.",
+      challenge_story: "Your RAG system is going to production, and 'it seems to work' won't satisfy the review board. You're building the **evaluation harness** that scores the pipeline on a labeled test set. For each question you know the gold chunks (the ones that truly answer it), the chunks your system actually retrieved, and which of the answer's claims a grader marked as supported by the context. Turn that into the three numbers everyone trusts, precision, recall, faithfulness, and a single PASS/FAIL verdict against the quality bar.",
       challenge_statement: "You are given, for one test question:\n\n- `R` retrieved chunk IDs,\n- `G` gold (truly relevant) chunk IDs,\n- `A` claim flags, each `1` (supported by context) or `0` (unsupported).\n\nA *hit* is a retrieved chunk that is also gold. Compute:\n\n- **precision** = hits / R (or 0.0 if R is 0),\n- **recall** = hits / G (or 0.0 if G is 0),\n- **faithfulness** = (number of 1 flags) / A.\n\nPrint each metric rounded to exactly 4 decimal places, then print `PASS` if precision >= 0.5 AND recall >= 0.5 AND faithfulness == 1.0, otherwise `FAIL`.",
       challenge_input_format: "Line 1: three integers `R G A`.\nLine 2: `R` retrieved chunk IDs, space-separated.\nLine 3: `G` gold chunk IDs, space-separated.\nLine 4: `A` claim flags (each 0 or 1), space-separated.",
       challenge_output_format: "Line 1: precision to 4 decimal places.\nLine 2: recall to 4 decimal places.\nLine 3: faithfulness to 4 decimal places.\nLine 4: `PASS` or `FAIL`.",
@@ -2617,7 +2617,7 @@ faithfulness: 0.7500`,
         { input: "3 2 4\nc1 c2 c3\nc1 c2\n1 1 1 0", output: "0.6667\n1.0000\n0.7500\nFAIL", explanation: "Hits = {c1,c2} = 2. Precision 2/3 = 0.6667, recall 2/2 = 1.0, faithfulness 3/4 = 0.75. Faithfulness is below 1.0, so FAIL." },
         { input: "2 2 2\nc1 c2\nc1 c2\n1 1", output: "1.0000\n1.0000\n1.0000\nPASS", explanation: "Perfect retrieval (precision and recall 1.0) and every claim supported (faithfulness 1.0) clears all three bars, so PASS." },
       ],
-      challenge_notes: "Run this over a whole test set and average to get your headline numbers; here you score a single question. The PASS rule demands perfect faithfulness because an unsupported claim is a hallucination — the exact thing RAG exists to prevent — while it tolerates imperfect precision/recall above 0.5. Watch the rounding: print metrics with an f-string like `f\"{value:.4f}\"`.",
+      challenge_notes: "Run this over a whole test set and average to get your headline numbers; here you score a single question. The PASS rule demands perfect faithfulness because an unsupported claim is a hallucination, the exact thing RAG exists to prevent, while it tolerates imperfect precision/recall above 0.5. Watch the rounding: print metrics with an f-string like `f\"{value:.4f}\"`.",
       challenge_hints: [
         "Build sets from the retrieved and gold ID lists; hits = len(retrieved_set & gold_set).",
         "precision = hits / R, recall = hits / G; both denominators are at least 1 here, but guarding for 0 is good habit.",

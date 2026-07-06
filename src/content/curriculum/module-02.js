@@ -25,16 +25,16 @@ export default {
 
 **API** stands for **Application Programming Interface**. Strip the jargon: it's a defined way for your code to ask someone else's code to do something, without you knowing *how* they do it.
 
-The coffee-shop version: you order a latte. You don't walk behind the counter, grind the beans, and pull the shot yourself. You tell the barista what you want, they do the work, they hand you a cup. The counter is the **interface** — the agreed spot where you place an order and receive a result. You never see the espresso machine.
+The coffee-shop version: you order a latte. You don't walk behind the counter, grind the beans, and pull the shot yourself. You tell the barista what you want, they do the work, they hand you a cup. The counter is the **interface**, the agreed spot where you place an order and receive a result. You never see the espresso machine.
 
 ## How it works
 
-When you want Claude to answer a question, you don't run the model on your laptop. You can't — it's hundreds of gigabytes of numbers. Instead your script sends a **request** over the internet to Anthropic's servers. Their code runs the model and sends a **response** back. Your script never touches the machinery.
+When you want Claude to answer a question, you don't run the model on your laptop. You can't. It's hundreds of gigabytes of numbers. Instead your script sends a **request** over the internet to Anthropic's servers. Their code runs the model and sends a **response** back. Your script never touches the machinery.
 
 Every API call is exactly two halves:
 
-- **The request** — what you send. "Here's my question. Here's who I am."
-- **The response** — what comes back. "Here's the answer."
+- **The request**: what you send. "Here's my question. Here's who I am."
+- **The response**: what comes back. "Here's the answer."
 
 That pattern never changes. You send something, you get something back. The whole rest of this module is just learning the precise shape of those two halves for Claude:
 
@@ -45,17 +45,17 @@ Your script  <---  response <---  Anthropic's API
 
 ## Why it matters
 
-APIs are how modern software is built. Your weather app doesn't own a satellite — it calls a weather API. Your banking app doesn't keep its own copy of the stock market — it calls a finance API. Splitting work across APIs lets each team be great at one thing and lets everyone else borrow that thing with a single call.
+APIs are how modern software is built. Your weather app doesn't own a satellite; it calls a weather API. Your banking app doesn't keep its own copy of the stock market; it calls a finance API. Splitting work across APIs lets each team be great at one thing and lets everyone else borrow that thing with a single call.
 
-For you, that means you can build something that talks to one of the best AI models in the world in about ten lines of Python. No PhD, no data center. You need two things: an **address** to send the request to, and **permission** to send it. The next three lessons hand you both.
+For you, that means you can build something that talks to one of the best AI models in the world in about ten lines of Python. You don't need a PhD or a data center. You need two things: an **address** to send the request to, and **permission** to send it. The next three lessons hand you both.
 
-There's a cost side too. Because the work happens on someone else's servers, every call travels the network (so it has **latency**, a small delay) and often costs money. That shapes how you design real programs — you batch calls, cache answers, and avoid hammering the API in a tight loop.
+There's a cost side too. Because the work happens on someone else's servers, every call travels the network (so it has **latency**, a small delay) and often costs money. That shapes how you design real programs: you batch calls, cache answers, and avoid hammering the API in a tight loop.
 
 ## The mental model to keep
 
-An API is a counter, not a kitchen. You place an order, you wait, you get a result — and you never need to know how the kitchen works.`,
+An API is a counter, not a kitchen. You place an order, you wait, you get a result, and you never need to know how the kitchen works.`,
       key_terms: [
-        { term: "API", definition: "Application Programming Interface — a defined way for one program to ask another program to do something." },
+        { term: "API", definition: "Application Programming Interface, a defined way for one program to ask another program to do something." },
         { term: "Request", definition: "The message your code sends to an API describing what you want." },
         { term: "Response", definition: "The message the API sends back with the result." }
       ],
@@ -63,7 +63,7 @@ An API is a counter, not a kitchen. You place an order, you wait, you get a resu
         {
           type: "analogy",
           title: "The restaurant",
-          content: "You're the customer, your code writes the order, the API is the waiter, and the server's code is the kitchen. You never see the kitchen — you just get the plate.",
+          content: "You're the customer, your code writes the order, the API is the waiter, and the server's code is the kitchen. You never see the kitchen; you just get the plate.",
           position: "before"
         },
         {
@@ -78,7 +78,7 @@ An API is a counter, not a kitchen. You place an order, you wait, you get a resu
         steps: [
           { label: "Build the request", desc: "Your code packages up what you want to ask." },
           { label: "Send it", desc: "The request travels over the internet to the API's address." },
-          { label: "Server does the work", desc: "Their code runs — in our case, it runs Claude." },
+          { label: "Server does the work", desc: "Their code runs. In our case, it runs Claude." },
           { label: "Get the response", desc: "The result comes back to your script." }
         ]
       },
@@ -129,7 +129,7 @@ An API is a counter, not a kitchen. You place an order, you wait, you get a resu
           ]
         }
       ],
-      starter_code: `# No code to run yet — this lesson is about the idea.
+      starter_code: `# No code to run yet, this lesson is about the idea.
 # Describe an API in your own words by filling in the message below.
 
 description = "An API is ..."
@@ -164,7 +164,7 @@ Response: what comes back`,
             "It sends a request to a lyrics API: 'give me the lyrics for this song.'",
             "The lyrics API responds with the text, and the app displays it."
           ],
-          output: "The app calls a lyrics API — request out, lyrics back."
+          output: "The app calls a lyrics API: request out, lyrics back."
         },
         {
           number: 2, difficulty: "medium",
@@ -172,7 +172,7 @@ Response: what comes back`,
           steps: [
             "Identify the request: your script sends the text to translate plus the target language.",
             "Identify the response: the service sends back the translated text.",
-            "Notice you never see how the translation model works — only the counter.",
+            "Notice you never see how the translation model works, only the counter.",
             "This is the same send-then-receive pattern as every other API."
           ],
           output: "Request = {text, target_language}; Response = {translated_text}"
@@ -209,7 +209,7 @@ Response: what comes back`,
       reflections: [
         {
           prompt: "In your own words, why is it a good thing that you don't run the Claude model on your own computer?",
-          sampleAnswer: "The model is enormous and needs expensive hardware to run. By sending a request to Anthropic's servers instead, I borrow that power with a few lines of code — they handle the heavy machinery and I just send a question and read the answer."
+          sampleAnswer: "The model is enormous and needs expensive hardware to run. By sending a request to Anthropic's servers instead, I borrow that power with a few lines of code. They handle the heavy machinery and I just send a question and read the answer."
         }
       ],
       hints: [
@@ -220,8 +220,8 @@ Response: what comes back`,
       challenge_title: "Gateway Traffic Auditor",
       challenge_description: "Read a raw API-gateway log and count how many lines are request halves versus response halves.",
       challenge_story: "You run the gateway that sits between thousands of apps and Anthropic's servers. Every byte that crosses the wire is logged with a direction tag: \`SEND\` for the request half your apps push out, \`RECV\` for the response half that comes back. Before the on-call engineer can debug a latency spike, they need a clean tally: how much of the traffic was outbound requests, how much was inbound responses. Build the auditor that scans the log and counts the two halves.",
-      challenge_statement: "Every API call is exactly two halves: a **request** you send and a **response** you get back. You are given a gateway log of \`n\` entries. Each entry begins with a direction tag:\n\n- \`SEND\` — this line is part of a **request** (outbound).\n- \`RECV\` — this line is part of a **response** (inbound).\n\nAfter the tag there is a label describing the field (e.g. \`model\`, \`content\`). Count how many entries are requests and how many are responses.",
-      challenge_input_format: "The first line is an integer \`n\` — the number of log entries. Each of the next \`n\` lines starts with either \`SEND\` or \`RECV\`, followed by a space and a one-word field label.",
+      challenge_statement: "Every API call is exactly two halves: a **request** you send and a **response** you get back. You are given a gateway log of \`n\` entries. Each entry begins with a direction tag:\n\n- \`SEND\`: this line is part of a **request** (outbound).\n- \`RECV\`: this line is part of a **response** (inbound).\n\nAfter the tag there is a label describing the field (e.g. \`model\`, \`content\`). Count how many entries are requests and how many are responses.",
+      challenge_input_format: "The first line is an integer \`n\`, the number of log entries. Each of the next \`n\` lines starts with either \`SEND\` or \`RECV\`, followed by a space and a one-word field label.",
       challenge_output_format: "Two lines:\n- \`request R\` where \`R\` is the number of \`SEND\` entries.\n- \`response S\` where \`S\` is the number of \`RECV\` entries.",
       challenge_constraints: [
         "0 ≤ n ≤ 100000",
@@ -231,7 +231,7 @@ Response: what comes back`,
         { input: "5\nSEND model\nSEND messages\nRECV content\nSEND max_tokens\nRECV usage", output: "request 3\nresponse 2", explanation: "Three `SEND` lines (model, messages, max_tokens) and two `RECV` lines (content, usage)." },
         { input: "1\nRECV answer", output: "request 0\nresponse 1", explanation: "A lone inbound line is one response half and zero request halves." },
       ],
-      challenge_notes: "The request/response split never changes — every call has both halves. Here you're just classifying log lines by their direction tag. Read the count first, then loop exactly that many lines so trailing blank lines never trip you up.",
+      challenge_notes: "The request/response split never changes. Every call has both halves. Here you're just classifying log lines by their direction tag. Read the count first, then loop exactly that many lines so trailing blank lines never trip you up.",
       challenge_hints: [
         "Read all of stdin, split on newlines, and take the first line as the integer count `n`.",
         "Loop over the next `n` lines; the first whitespace-separated token is the direction tag.",
@@ -288,11 +288,11 @@ print(f"response {res}")
       title: "JSON: How Data Travels",
       concept: "JSON",
       xp_reward: 10,
-      explanation: `Your Python script holds a dictionary. Anthropic's servers run on different code, maybe a different language, on a machine across the country. How do two strangers agree on the exact shape of a message? They both speak **JSON** — a plain-text format so simple it has a one-page spec, yet it carries nearly every API request on the internet.
+      explanation: `Your Python script holds a dictionary. Anthropic's servers run on different code, maybe a different language, on a machine across the country. How do two strangers agree on the exact shape of a message? They both speak **JSON**, a plain-text format with a one-page spec that carries nearly every API request on the internet.
 
 ## What it is
 
-**JSON** (JavaScript Object Notation, despite the name it's used everywhere, not just JavaScript) is text arranged as **key-value pairs** inside curly braces. If you've ever filled out a form with labeled boxes — name, email, message — you already understand it.
+**JSON** (JavaScript Object Notation, despite the name it's used everywhere, not just JavaScript) is text arranged as **key-value pairs** inside curly braces. If you've ever filled out a form with labeled boxes (name, email, message), you already understand it.
 
 \`\`\`json
 {
@@ -317,7 +317,7 @@ The other 10%: a value can itself be a **list** or another box. That nesting is 
 }
 \`\`\`
 
-The square brackets \`[ ]\` hold a list. Inside it, another set of curly braces — a box inside a box. This is exactly the shape of a Claude request. Don't memorize it yet; just notice that it's labeled boxes all the way down.
+The square brackets \`[ ]\` hold a list. Inside it, another set of curly braces, a box inside a box. This is exactly the shape of a Claude request. Don't memorize it yet; just notice that it's labeled boxes all the way down.
 
 In Python, JSON is pleasant because a JSON object looks almost identical to a Python **dictionary**. Two functions move between them:
 
@@ -336,15 +336,15 @@ print(back["name"])         # Ada
 
 ## Why it matters
 
-Only **text** can travel over a network — not a live Python object. JSON is the agreed text format both sides serialize to and parse from, which is why it's everywhere. The SDK you'll meet in lesson 4 does the dumps/loads for you, but when an error message mentions a malformed body or you print a raw response, knowing what's underneath means you're never lost.
+Only **text** can travel over a network, not a live Python object. JSON is the agreed text format both sides serialize to and parse from, which is why it's everywhere. The SDK you'll meet in lesson 4 does the dumps/loads for you, but when an error message mentions a malformed body or you print a raw response, knowing what's underneath means you're never lost.
 
-JSON is also strict, and that strictness causes most beginner errors. Keys and string values **must** use double quotes — single quotes break it. A **trailing comma** after the last pair breaks it too. When an API rejects your request with a vague error, check for a stray quote or comma first.
+JSON is also strict, and that strictness causes most beginner errors. Keys and string values **must** use double quotes; single quotes break it. A **trailing comma** after the last pair breaks it too. When an API rejects your request with a vague error, check for a stray quote or comma first.
 
 ## The mental model to keep
 
-JSON is labeled boxes for data — \`dumps\` to pack them for the trip, \`loads\` to unpack them when they arrive.`,
+JSON is labeled boxes for data: \`dumps\` to pack them for the trip, \`loads\` to unpack them when they arrive.`,
       key_terms: [
-        { term: "JSON", definition: "JavaScript Object Notation — a text format for data, written as key-value pairs inside curly braces." },
+        { term: "JSON", definition: "JavaScript Object Notation, a text format for data, written as key-value pairs inside curly braces." },
         { term: "Key-value pair", definition: "A label and its data, like \"name\": \"Ada\". The key names it; the value is the data." },
         { term: "json.dumps", definition: "A Python function that converts a dictionary into a JSON string you can send." },
         { term: "json.loads", definition: "A Python function that converts a received JSON string back into a Python dictionary." }
@@ -460,7 +460,7 @@ Ada`,
             "Here both 'role' and 'user' use single quotes.",
             "Single quotes are not allowed, so it is invalid."
           ],
-          output: 'Invalid — must be {"role": "user"} with double quotes.'
+          output: 'Invalid: must be {"role": "user"} with double quotes.'
         },
         {
           number: 2, difficulty: "medium",
@@ -503,7 +503,7 @@ Ada`,
       ],
       reflections: [
         {
-          prompt: "Why can't you just send a Python dictionary straight across the network — why convert it to JSON first?",
+          prompt: "Why can't you just send a Python dictionary straight across the network, why convert it to JSON first?",
           sampleAnswer: "A network can only carry text, not live Python objects. json.dumps serializes the dict into a plain JSON string both sides agree on, so the server (which may not even run Python) can parse it. On the way back, json.loads turns the JSON text into a dict I can use again."
         }
       ],
@@ -514,8 +514,8 @@ Ada`,
       ],
       challenge_title: "Parse the Request Body",
       challenge_description: "Decode an incoming JSON request body, estimate its token cost, and emit a compact JSON summary.",
-      challenge_story: "Your serverless function sits at the edge of the API. Apps POST a JSON body containing a list of conversation messages, and before you forward anything to the model you want a cheap pre-flight estimate: roughly how many tokens this prompt will cost, and how many user turns it contains (useful for abuse detection). The body arrives as raw JSON text on stdin. Parse it with \`json.loads\`, do the math, and return your summary as JSON with \`json.dumps\` — the exact round trip every API layer performs.",
-      challenge_statement: "You receive one JSON object on stdin with a single key \`messages\`, whose value is a list of message objects. Each message has a string \`role\` (\`\"user\"\` or \`\"assistant\"\`) and a string \`content\`.\n\nCompute two values:\n\n- \`tokens\` — a token estimate. Sum the lengths (in characters) of **every** message's \`content\`, then divide by 4 and round **up** to the nearest integer (the classic ~4-chars-per-token rule).\n- \`user_turns\` — how many messages have role \`\"user\"\`.\n\nPrint the result as a single-line JSON object with keys sorted alphabetically and no spaces after separators.",
+      challenge_story: "Your serverless function sits at the edge of the API. Apps POST a JSON body containing a list of conversation messages, and before you forward anything to the model you want a cheap pre-flight estimate: roughly how many tokens this prompt will cost, and how many user turns it contains (useful for abuse detection). The body arrives as raw JSON text on stdin. Parse it with \`json.loads\`, do the math, and return your summary as JSON with \`json.dumps\`, the exact round trip every API layer performs.",
+      challenge_statement: "You receive one JSON object on stdin with a single key \`messages\`, whose value is a list of message objects. Each message has a string \`role\` (\`\"user\"\` or \`\"assistant\"\`) and a string \`content\`.\n\nCompute two values:\n\n- \`tokens\`: a token estimate. Sum the lengths (in characters) of **every** message's \`content\`, then divide by 4 and round **up** to the nearest integer (the classic ~4-chars-per-token rule).\n- \`user_turns\`: how many messages have role \`\"user\"\`.\n\nPrint the result as a single-line JSON object with keys sorted alphabetically and no spaces after separators.",
       challenge_input_format: "A single JSON object on stdin: \`{\"messages\": [{\"role\": ..., \"content\": ...}, ...]}\`. The list may be empty.",
       challenge_output_format: "One line of JSON: \`{\"tokens\":T,\"user_turns\":U}\` with keys sorted and compact separators (no spaces).",
       challenge_constraints: [
@@ -589,7 +589,7 @@ print(json.dumps(out, separators=(",", ":"), sort_keys=True))
 
 ## What it is
 
-An API key tells Anthropic who's calling, so they can check you're allowed and **bill the right account**. A Claude key is a long string like \`sk-ant-...\`, generated in the Anthropic console. Every request includes it, and the server verifies it before doing any work. No valid key, no answer — you get a \`401 Unauthorized\`.
+An API key tells Anthropic who's calling, so they can check you're allowed and **bill the right account**. A Claude key is a long string like \`sk-ant-...\`, generated in the Anthropic console. Every request includes it, and the server verifies it before doing any work. No valid key, no answer. You get a \`401 Unauthorized\`.
 
 Treat it exactly like a credit card number. Anyone holding your key can spend your money.
 
@@ -597,7 +597,7 @@ Treat it exactly like a credit card number. Anyone holding your key can spend yo
 
 The rule that saves careers: **never paste your key into your script.** If it ends up in code you push to GitHub, bots will find it and drain your account.
 
-Instead, store the key in an **environment variable** — a value that lives in your computer's environment, outside your source code. You set it once in your terminal:
+Instead, store the key in an **environment variable**, a value that lives in your computer's environment, outside your source code. You set it once in your terminal:
 
 \`\`\`bash
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
@@ -616,9 +616,9 @@ Now you can share the code freely; the key stays on your machine. (Use \`.get\` 
 
 ## Why it matters
 
-The second guardrail is **rate limits**. You can't fire a million requests a second — APIs cap how many **requests or tokens** you can use per minute. Go over and the server replies with \`429 Too Many Requests\` instead of an answer.
+The second guardrail is **rate limits**. You can't fire a million requests a second. APIs cap how many **requests or tokens** you can use per minute. Go over and the server replies with \`429 Too Many Requests\` instead of an answer.
 
-Limits exist so one user can't hog a shared service or rack up a runaway bill. While learning you'll never come close, but build something that loops over thousands of items and you'll hit them fast. The fix is to slow down, spread requests out, and **retry after waiting** — production code does this automatically with **exponential backoff** (wait 1s, then 2s, then 4s, retrying until it succeeds).
+Limits exist so one user can't hog a shared service or rack up a runaway bill. While learning you'll never come close, but build something that loops over thousands of items and you'll hit them fast. The fix is to slow down, spread requests out, and **retry after waiting**. Production code does this automatically with **exponential backoff** (wait 1s, then 2s, then 4s, retrying until it succeeds).
 
 A handful of status codes tell you what happened:
 
@@ -741,7 +741,7 @@ else:
           number: 1, difficulty: "easy",
           prompt: "Your script runs and immediately returns a 401 error. What is the most likely cause?",
           steps: [
-            "401 means 'Unauthorized' — the server could not verify who you are.",
+            "401 means 'Unauthorized', so the server could not verify who you are.",
             "That points to the key, not the request body or rate limits.",
             "Check that ANTHROPIC_API_KEY is set and correct in your environment."
           ],
@@ -751,7 +751,7 @@ else:
           number: 2, difficulty: "hard",
           prompt: "You loop over 5,000 items, one API call each, and start getting 429s after a few hundred.\nDesign a fix using exponential backoff.",
           steps: [
-            "429 means you exceeded the rate limit, so the fix is to slow down and retry — not to give up.",
+            "429 means you exceeded the rate limit, so the fix is to slow down and retry, not to give up.",
             "On a 429, wait, then retry the same request.",
             "Each retry, double the wait: 1s, then 2s, then 4s. This is exponential backoff.",
             "Cap the number of retries so a truly broken request eventually stops.",
@@ -762,7 +762,7 @@ else:
       ],
       comparison_tables: [
         {
-          title: "401 vs 429 — two very different problems",
+          title: "401 vs 429: two very different problems",
           columns: ["Code", "Meaning", "Cause", "What to do"],
           rows: [
             { cells: ["200", "OK", "Request succeeded", "Read the response"] },
@@ -791,17 +791,17 @@ else:
       reflections: [
         {
           prompt: "Explain why storing your API key in an environment variable is safer than writing it directly in your code.",
-          sampleAnswer: "Code gets shared, pushed to GitHub, and copied between machines. If the key lives in the file, it travels with the code and can be scraped by bots within minutes. An environment variable keeps the secret on my machine only — the code reads it at runtime, so the file I share never contains the actual key."
+          sampleAnswer: "Code gets shared, pushed to GitHub, and copied between machines. If the key lives in the file, it travels with the code and can be scraped by bots within minutes. An environment variable keeps the secret on my machine only. The code reads it at runtime, so the file I share never contains the actual key."
         }
       ],
       hints: [
-        "Use os.environ.get(\"ANTHROPIC_API_KEY\") — .get returns None instead of raising an error when the variable is missing.",
+        "Use os.environ.get(\"ANTHROPIC_API_KEY\"); .get returns None instead of raising an error when the variable is missing.",
         "An if/else on api_key lets you print a different message for found vs missing.",
         "In this sandbox the variable isn't set, so the else branch runs."
       ],
       challenge_title: "The Rate Limiter",
       challenge_description: "Simulate a sliding-window rate limiter and report how many requests get 200 OK versus 429 Too Many Requests.",
-      challenge_story: "Anthropic's gateway protects the model from overload with a rate limit: only so many requests are allowed inside any rolling 60-second window. Send too fast and you get a \`429 Too Many Requests\` instead of a \`200 OK\` — not a failure, a please-wait. You're building the limiter itself. Requests arrive at known timestamps; you must decide, for each one, whether it slips through (200) or gets throttled (429), using a sliding window of accepted requests.",
+      challenge_story: "Anthropic's gateway protects the model from overload with a rate limit: only so many requests are allowed inside any rolling 60-second window. Send too fast and you get a \`429 Too Many Requests\` instead of a \`200 OK\`, not a failure but a please-wait. You're building the limiter itself. Requests arrive at known timestamps; you must decide, for each one, whether it slips through (200) or gets throttled (429), using a sliding window of accepted requests.",
       challenge_statement: "A request is **accepted** (\`200\`) if, at its arrival second, **fewer than \`limit\`** previously-accepted requests fall within the trailing 60-second window (i.e. arrived strictly later than \`t - 60\`). Otherwise it is **throttled** (\`429\`) and does **not** occupy a slot.\n\nProcess the requests in arrival order. Count how many get \`200\` and how many get \`429\`.",
       challenge_input_format: "Line 1: integer \`limit\` (max accepted requests per 60-second window).\nLine 2: integer \`n\` (number of requests).\nLine 3: \`n\` space-separated non-decreasing integer arrival times in seconds (omit/blank line if \`n = 0\`).",
       challenge_output_format: "Two lines:\n- \`200 A\` where \`A\` is the number of accepted requests.\n- \`429 B\` where \`B\` is the number of throttled requests.",
@@ -881,11 +881,11 @@ print(f"429 {limited}")
       title: "Call Claude and Print the Reply",
       concept: "Messages API",
       xp_reward: 10,
-      explanation: `Everything so far was setup — the counter, the JSON, the key, the limits. Now you walk up and place the order. About ten lines of Python sends a question to Claude and prints the answer. By the end of this lesson, every line of it will make sense.
+      explanation: `Everything so far was setup: the counter, the JSON, the key, the limits. Now you walk up and place the order. About ten lines of Python sends a question to Claude and prints the answer. By the end of this lesson, every line of it will make sense.
 
 ## What it is
 
-Anthropic ships an **SDK** (Software Development Kit) — a Python library that wraps the raw API so you don't hand-build the JSON. Install it once:
+Anthropic ships an **SDK** (Software Development Kit), a Python library that wraps the raw API so you don't hand-build the JSON. Install it once:
 
 \`\`\`bash
 pip install anthropic
@@ -916,15 +916,15 @@ print(response.content[0].text)
 
 Read it top to bottom:
 
-- **client** — your connection. It reads the key from the environment (lesson 3) and holds it.
-- **messages.create** — the call itself. Here the request goes out and the response comes back (lesson 1).
-- **model** — which Claude to use. \`claude-sonnet-4-6\` is a fast, capable default.
-- **max_tokens** — a cap on how long the reply can be, measured in tokens. 200 is plenty for a sentence; set it too low and the answer gets cut off mid-thought.
-- **messages** — a list of **turns**. Each turn has a \`role\` (\`user\` is you) and \`content\` (what you said). Recognize the shape? It's exactly the JSON from lesson 2.
+- **client**: your connection. It reads the key from the environment (lesson 3) and holds it.
+- **messages.create**: the call itself. Here the request goes out and the response comes back (lesson 1).
+- **model**: which Claude to use. \`claude-sonnet-4-6\` is a fast, capable default.
+- **max_tokens**: a cap on how long the reply can be, measured in tokens. 200 is plenty for a sentence; set it too low and the answer gets cut off mid-thought.
+- **messages**: a list of **turns**. Each turn has a \`role\` (\`user\` is you) and \`content\` (what you said). Recognize the shape? It's exactly the JSON from lesson 2.
 
 ## Why it matters
 
-The reply comes back as an object, and the text lives at \`response.content[0].text\`. Why the \`[0]\`? Because \`content\` is a **list of blocks**. A plain text answer is one block — the first — so you grab \`content[0]\` and read its \`.text\`. (The list exists because richer replies can carry multiple blocks, like tool calls, which you'll meet later.)
+The reply comes back as an object, and the text lives at \`response.content[0].text\`. Why the \`[0]\`? Because \`content\` is a **list of blocks**. A plain text answer is one block (the first), so you grab \`content[0]\` and read its \`.text\`. (The list exists because richer replies can carry multiple blocks, like tool calls, which you'll meet later.)
 
 This is the full loop from lesson 1, made real: you built a request, sent it, the server ran Claude, and you read the response. Change the \`content\` string and you change the question. Wrap it in a loop and you have a chatbot; feed it a document and you have a summarizer. Every Claude program you ever write is a variation on these ten lines.
 
@@ -932,7 +932,7 @@ This is the full loop from lesson 1, made real: you built a request, sent it, th
 
 \`messages.create\` is the counter from lesson 1 with a real menu: hand it a model, a length cap, and your messages list, and read your answer out of \`content[0].text\`.`,
       key_terms: [
-        { term: "SDK", definition: "Software Development Kit — a library that wraps an API so you call simple functions instead of building raw requests." },
+        { term: "SDK", definition: "Software Development Kit, a library that wraps an API so you call simple functions instead of building raw requests." },
         { term: "messages.create", definition: "The Anthropic SDK call that sends your message to Claude and returns the response." },
         { term: "max_tokens", definition: "The maximum length of Claude's reply, measured in tokens (roughly word-pieces)." },
         { term: "role", definition: "Who is speaking in a message. \"user\" is you; Claude's replies come back as \"assistant\"." }
@@ -1032,7 +1032,7 @@ response = client.messages.create(
 print(response.content[0].text)
 `,
       illustrative: true,
-      expected_output: `(example reply — actual output will vary)
+      expected_output: `(example reply, actual output will vary)
 Hello! It's great to meet you.`,
       step_throughs: [
         {
@@ -1061,7 +1061,7 @@ Hello! It's great to meet you.`,
           prompt: "You run the program and Claude's answer is cut off halfway through a sentence.\nWhat parameter is to blame and how do you fix it?",
           steps: [
             "A truncated reply means the model hit its length cap before finishing.",
-            "That cap is max_tokens — the maximum length of the response.",
+            "That cap is max_tokens, the maximum length of the response.",
             "Raise it (for example from 50 to 500) so the answer has room to complete.",
             "Tokens are roughly word-pieces, so estimate generously for longer replies."
           ],
@@ -1100,19 +1100,19 @@ Hello! It's great to meet you.`,
       reflections: [
         {
           prompt: "Connect this lesson back to lesson 1: how is messages.create the same request-and-response loop you learned at the start?",
-          sampleAnswer: "messages.create is the request half — I package the model, max_tokens, and my messages and send them to Anthropic's servers. The returned object is the response half — Claude's answer, which I read from content[0].text. It's the exact send-something, get-something-back pattern from lesson 1, just with the real Claude shape filled in."
+          sampleAnswer: "messages.create is the request half: I package the model, max_tokens, and my messages and send them to Anthropic's servers. The returned object is the response half: Claude's answer, which I read from content[0].text. It's the exact send-something, get-something-back pattern from lesson 1, just with the real Claude shape filled in."
         }
       ],
       hints: [
         "Pass three things to messages.create: model=\"claude-sonnet-4-6\", max_tokens=200, and the messages list.",
         "Each message is a dict with \"role\": \"user\" and \"content\": your question.",
-        "Print response.content[0].text — content is a list, so grab the first block and read its .text."
+        "Print response.content[0].text; content is a list, so grab the first block and read its .text."
       ],
       challenge_title: "Validate the Conversation",
       challenge_description: "Check whether a sequence of message roles is a legal Messages API conversation before it's sent to Claude.",
-      challenge_story: "The Messages API is strict about the shape of a conversation. Before your client library ships a request, it validates the \`messages\` list locally — a rejected call still costs you a round trip and a 400 error. The rules: the list can't be empty, it must **start with a \`user\` turn**, and roles must **strictly alternate** between \`user\` and \`assistant\` (no two user turns in a row, no two assistant turns in a row). Build the pre-flight validator that decides if a conversation is well-formed.",
-      challenge_statement: "You're given the ordered list of roles in a \`messages\` array. The conversation is **valid** only if all of these hold:\n\n1. It has at least one message.\n2. The first role is \`user\`.\n3. Roles strictly alternate — no two consecutive messages share the same role.\n\nEvery role is either \`user\` or \`assistant\`. Print \`valid\` if all rules hold, otherwise \`invalid\`.",
-      challenge_input_format: "Line 1: integer \`n\` — the number of messages. Each of the next \`n\` lines holds one role, either \`user\` or \`assistant\`.",
+      challenge_story: "The Messages API is strict about the shape of a conversation. Before your client library ships a request, it validates the \`messages\` list locally. A rejected call still costs you a round trip and a 400 error. The rules: the list can't be empty, it must **start with a \`user\` turn**, and roles must **strictly alternate** between \`user\` and \`assistant\` (no two user turns in a row, no two assistant turns in a row). Build the pre-flight validator that decides if a conversation is well-formed.",
+      challenge_statement: "You're given the ordered list of roles in a \`messages\` array. The conversation is **valid** only if all of these hold:\n\n1. It has at least one message.\n2. The first role is \`user\`.\n3. Roles strictly alternate: no two consecutive messages share the same role.\n\nEvery role is either \`user\` or \`assistant\`. Print \`valid\` if all rules hold, otherwise \`invalid\`.",
+      challenge_input_format: "Line 1: integer \`n\`, the number of messages. Each of the next \`n\` lines holds one role, either \`user\` or \`assistant\`.",
       challenge_output_format: "A single line: \`valid\` or \`invalid\`.",
       challenge_constraints: [
         "0 ≤ n ≤ 100000",
@@ -1122,11 +1122,11 @@ Hello! It's great to meet you.`,
         { input: "3\nuser\nassistant\nuser", output: "valid", explanation: "Starts with user and alternates user -> assistant -> user. All rules satisfied." },
         { input: "2\nuser\nuser", output: "invalid", explanation: "Two user turns in a row break the strict-alternation rule." },
       ],
-      challenge_notes: "These are the real constraints the Messages API enforces. A common mistake is sending two user turns back-to-back after retrying — the API rejects it. An empty list (\`n = 0\`) is invalid because there's nothing to send.",
+      challenge_notes: "These are the real constraints the Messages API enforces. A common mistake is sending two user turns back-to-back after retrying. The API rejects it. An empty list (\`n = 0\`) is invalid because there's nothing to send.",
       challenge_hints: [
         "Read `n`, then read the next `n` lines into a list of roles.",
         "Fail fast: `n == 0` is invalid, and `roles[0] != \"user\"` is invalid.",
-        "Loop from index 1 and check `roles[i] == roles[i - 1]` — if so, it's not alternating.",
+        "Loop from index 1 and check `roles[i] == roles[i - 1]`: if so, it's not alternating.",
       ],
       challenge_difficulty: "beginner",
       challenge_starter_code: `import sys
@@ -1193,13 +1193,13 @@ print("valid" if valid else "invalid")
 
 An HTTP request is a structured envelope with three pieces:
 
-- **Endpoint** — the **URL** you send to, plus the HTTP method. For Claude it's a \`POST\` to \`https://api.anthropic.com/v1/messages\`. The method \`POST\` means "I'm sending data up"; the path \`/v1/messages\` names the exact thing you want.
-- **Headers** — labeled metadata *about* the request: who you are and what format you're speaking. The two that matter here are your auth header (the API key from lesson 3) and \`content-type: application/json\` (telling the server "my body is JSON").
-- **Body** — the actual payload: the JSON object (lesson 2) holding \`model\`, \`messages\`, and parameters like \`max_tokens\`.
+- **Endpoint**: the **URL** you send to, plus the HTTP method. For Claude it's a \`POST\` to \`https://api.anthropic.com/v1/messages\`. The method \`POST\` means "I'm sending data up"; the path \`/v1/messages\` names the exact thing you want.
+- **Headers**: labeled metadata *about* the request: who you are and what format you're speaking. The two that matter here are your auth header (the API key from lesson 3) and \`content-type: application/json\` (telling the server "my body is JSON").
+- **Body**: the actual payload: the JSON object (lesson 2) holding \`model\`, \`messages\`, and parameters like \`max_tokens\`.
 
 ## How it works
 
-Picture mailing a package. The **endpoint** is the address on the box. The **headers** are the labels stuck on the outside — return address, "FRAGILE", "contents: documents". The **body** is what's actually inside. The post office routes by the address and labels without ever opening the box. Here is the same Claude call written as a raw request instead of through the SDK:
+Picture mailing a package. The **endpoint** is the address on the box. The **headers** are the labels stuck on the outside, return address, "FRAGILE", "contents: documents". The **body** is what's actually inside. The post office routes by the address and labels without ever opening the box. Here is the same Claude call written as a raw request instead of through the SDK:
 
 \`\`\`python
 import os, requests
@@ -1225,9 +1225,9 @@ Three parts, every time: where it goes, the labels on it, the cargo inside. The 
 
 When a request fails, the error usually points at one of the three parts, and naming the part tells you where to look:
 
-- A \`401\` is almost always a **header** problem — a missing or wrong API key.
-- A \`404\` is an **endpoint** problem — a typo in the URL or path.
-- A \`400\` is usually a **body** problem — malformed JSON, a missing required field, or a value out of range.
+- A \`401\` is almost always a **header** problem, a missing or wrong API key.
+- A \`404\` is an **endpoint** problem, a typo in the URL or path.
+- A \`400\` is usually a **body** problem, malformed JSON, a missing required field, or a value out of range.
 
 Mixing them up wastes hours. Separating endpoint, headers, and body in your head turns a vague "it broke" into a precise "the body is missing \`max_tokens\`."
 
@@ -1237,7 +1237,7 @@ A request is a package: the **endpoint** is the address, the **headers** are the
       key_terms: [
         { term: "Endpoint", definition: "The URL plus HTTP method a request is sent to, e.g. POST to /v1/messages." },
         { term: "Header", definition: "Labeled metadata about a request, such as the API key and the content-type." },
-        { term: "Body", definition: "The actual payload of the request — the JSON object with model, messages, and parameters." },
+        { term: "Body", definition: "The actual payload of the request, the JSON object with model, messages, and parameters." },
         { term: "content-type", definition: "A header that tells the server what format the body is in, e.g. application/json." }
       ],
       callouts: [
@@ -1257,9 +1257,9 @@ A request is a package: the **endpoint** is the address, the **headers** are the
       concept_diagram: {
         title: "The three parts of a request",
         steps: [
-          { label: "Endpoint", desc: "POST to https://api.anthropic.com/v1/messages — where it goes." },
+          { label: "Endpoint", desc: "POST to https://api.anthropic.com/v1/messages, where it goes." },
           { label: "Headers", desc: "Auth key + content-type: labels about the request." },
-          { label: "Body", desc: "JSON with model, messages, max_tokens — the cargo." },
+          { label: "Body", desc: "JSON with model, messages, max_tokens, the cargo." },
           { label: "Sent together", desc: "All three travel as one HTTP request to the server." }
         ]
       },
@@ -1276,19 +1276,19 @@ A request is a package: the **endpoint** is the address, the **headers** are the
           question: "What does the content-type: application/json header tell the server?",
           options: ["The reply must be short", "The request body is formatted as JSON", "The user is authenticated", "The endpoint is correct"],
           correct_index: 1,
-          explanation: "content-type announces the format of the body so the server knows how to parse it — here, JSON."
+          explanation: "content-type announces the format of the body so the server knows how to parse it, here, JSON."
         },
         {
           question: "Where do model, messages, and max_tokens live in the request?",
           options: ["In the endpoint URL", "In the headers", "In the body", "In a separate file"],
           correct_index: 2,
-          explanation: "Those are the actual payload, so they go in the JSON body — the cargo of the package."
+          explanation: "Those are the actual payload, so they go in the JSON body, the cargo of the package."
         },
         {
           question: "A request fails with a 404. Which part should you check first?",
           options: ["The headers (your key)", "The body (your JSON)", "The endpoint (the URL/path)", "Your internet speed"],
           correct_index: 2,
-          explanation: "404 Not Found means the address didn't resolve — a typo in the endpoint URL or path is the usual cause."
+          explanation: "404 Not Found means the address didn't resolve, a typo in the endpoint URL or path is the usual cause."
         }
       ],
       participation_activities: [
@@ -1346,7 +1346,7 @@ body keys: model, max_tokens, messages`,
           number: 1, difficulty: "easy",
           prompt: "Which of these belongs in the headers, not the body: the model name, or the content-type?",
           steps: [
-            "The body carries the actual payload — model, messages, parameters.",
+            "The body carries the actual payload, model, messages, parameters.",
             "content-type is metadata describing the format of that payload.",
             "Metadata about the request goes in the headers."
           ],
@@ -1356,12 +1356,12 @@ body keys: model, max_tokens, messages`,
           number: 2, difficulty: "medium",
           prompt: "Your raw request returns 400 Bad Request even though your key works fine elsewhere.\nWhich part is the problem and how do you narrow it down?",
           steps: [
-            "Your key works elsewhere, so the header auth is fine — rule out 401/headers.",
+            "Your key works elsewhere, so the header auth is fine, rule out 401/headers.",
             "400 means the server understood who you are but couldn't accept the payload.",
             "That points at the body: malformed JSON, a missing required field, or a bad value.",
             "Print the body before sending and check for required keys like model and max_tokens and valid JSON."
           ],
-          output: "The body is malformed or missing a required field — inspect the JSON payload."
+          output: "The body is malformed or missing a required field, inspect the JSON payload."
         }
       ],
       comparison_tables: [
@@ -1407,9 +1407,9 @@ body keys: model, max_tokens, messages`,
       challenge_title: "Request Linter",
       challenge_description: "Validate the three parts of a raw request and report the first thing that's wrong, mimicking the error a server would return.",
       challenge_story: "Before your gateway forwards a request to Anthropic, it runs a local linter so obvious mistakes never burn a round trip. The linter checks the three parts of every HTTP request in a fixed priority: first the **endpoint** (right method and path), then the **headers** (key present, JSON content-type), then the **body** (required fields present). Whichever part fails first determines the status code you'd get back. Build the linter.",
-      challenge_statement: "You are given a request described across three sections: a method and path, a list of headers, and a list of body fields that are present. Validate in this exact priority order and print the FIRST failing check (stop at the first failure):\n\n1. **Endpoint** — the method must be \`POST\` and the path must be \`/v1/messages\`. If not, output \`404\`.\n2. **Headers** — there must be a header named \`x-api-key\` AND a header named \`content-type\` whose value is exactly \`application/json\`. If either is missing, output \`401\`.\n3. **Body** — the body must contain both fields \`model\` and \`messages\`. If either is missing, output \`400\`.\n\nIf all checks pass, output \`200\`.",
+      challenge_statement: "You are given a request described across three sections: a method and path, a list of headers, and a list of body fields that are present. Validate in this exact priority order and print the FIRST failing check (stop at the first failure):\n\n1. **Endpoint**: the method must be \`POST\` and the path must be \`/v1/messages\`. If not, output \`404\`.\n2. **Headers**: there must be a header named \`x-api-key\` AND a header named \`content-type\` whose value is exactly \`application/json\`. If either is missing, output \`401\`.\n3. **Body**: the body must contain both fields \`model\` and \`messages\`. If either is missing, output \`400\`.\n\nIf all checks pass, output \`200\`.",
       challenge_input_format: "Line 1: the method and path separated by a space (e.g. \`POST /v1/messages\`).\nLine 2: integer \`h\`, the number of headers. Each of the next \`h\` lines is \`name value\` (name and value separated by a single space).\nThe next line: integer \`b\`, the number of body fields present. Each of the next \`b\` lines is one field name.",
-      challenge_output_format: "A single line: one status code — \`404\`, \`401\`, \`400\`, or \`200\`.",
+      challenge_output_format: "A single line: one status code, \`404\`, \`401\`, \`400\`, or \`200\`.",
       challenge_constraints: [
         "0 ≤ h ≤ 100",
         "0 ≤ b ≤ 100",
@@ -1511,18 +1511,18 @@ else:
       title: "Reading the Full Response Object",
       concept: "Response",
       xp_reward: 10,
-      explanation: `In lesson 4 you grabbed one field — \`response.content[0].text\` — and printed it. That's the headline. But the response that comes back from Claude carries a whole receipt of useful information: an ID for support tickets, the exact model that answered, how many tokens you spent, and *why* the reply stopped. Read the whole object and you can debug, bill, and monitor a real app.
+      explanation: `In lesson 4 you grabbed one field, \`response.content[0].text\`, and printed it. That's the headline. But the response that comes back from Claude carries a whole receipt of useful information: an ID for support tickets, the exact model that answered, how many tokens you spent, and *why* the reply stopped. Read the whole object and you can debug, bill, and monitor a real app.
 
 ## What it is
 
 A Claude **response** is a JSON object (lesson 2) with a handful of top-level fields. The ones you'll use constantly:
 
-- **id** — a unique identifier for this exact call, like \`msg_01ABC...\`. Quote it when reporting a problem to support.
-- **model** — the exact model that produced the reply. Useful when you asked for an alias and want to know what actually ran.
-- **role** — always \`assistant\` on a reply (Claude is the one speaking).
-- **content** — the list of blocks holding the answer. \`content[0].text\` is the text of a plain reply.
-- **usage** — a small object: \`input_tokens\` (what your prompt cost) and \`output_tokens\` (what the reply cost). This is your bill.
-- **stop_reason** — *why* generation ended: \`end_turn\` (Claude finished naturally), \`max_tokens\` (it hit your length cap and was cut off), and a few others.
+- **id**: a unique identifier for this exact call, like \`msg_01ABC...\`. Quote it when reporting a problem to support.
+- **model**: the exact model that produced the reply. Useful when you asked for an alias and want to know what actually ran.
+- **role**: always \`assistant\` on a reply (Claude is the one speaking).
+- **content**: the list of blocks holding the answer. \`content[0].text\` is the text of a plain reply.
+- **usage**: a small object: \`input_tokens\` (what your prompt cost) and \`output_tokens\` (what the reply cost). This is your bill.
+- **stop_reason**: *why* generation ended: \`end_turn\` (Claude finished naturally), \`max_tokens\` (it hit your length cap and was cut off), and a few others.
 
 ## How it works
 
@@ -1539,7 +1539,7 @@ print(response.usage.output_tokens)    # e.g. 45
 print(response.stop_reason)            # "end_turn" or "max_tokens"
 \`\`\`
 
-The most operationally important field is \`stop_reason\`. If it reads \`max_tokens\`, the reply was **truncated** — Claude wasn't done, it ran out of room. The fix is to raise \`max_tokens\` and call again.
+The most operationally important field is \`stop_reason\`. If it reads \`max_tokens\`, the reply was **truncated**: Claude wasn't done, it ran out of room. The fix is to raise \`max_tokens\` and call again.
 
 ## Why it matters
 
@@ -1547,7 +1547,7 @@ The headline text is only part of the value:
 
 - **usage** is how you compute cost (recall the per-token math from module 1) and watch for runaway prompts.
 - **stop_reason** is how you detect a cut-off answer *programmatically* instead of eyeballing it. A robust app checks \`if response.stop_reason == "max_tokens"\` and reacts.
-- **id** and **model** make support and monitoring possible — you can log them and trace any single call later.
+- **id** and **model** make support and monitoring possible, you can log them and trace any single call later.
 
 Ignoring these fields is how beginners ship apps that silently truncate long answers or quietly blow a token budget.
 
@@ -1555,7 +1555,7 @@ Ignoring these fields is how beginners ship apps that silently truncate long ans
 
 The response is a receipt, not just an answer. The text is the product; **usage** is the price, **stop_reason** is whether the order was complete, and **id** is the receipt number.`,
       key_terms: [
-        { term: "usage", definition: "A response object reporting input_tokens and output_tokens — the cost of the call." },
+        { term: "usage", definition: "A response object reporting input_tokens and output_tokens, the cost of the call." },
         { term: "stop_reason", definition: "Why generation ended: end_turn (finished) or max_tokens (cut off at the length cap), among others." },
         { term: "id", definition: "A unique identifier for one API call, useful for logging and support tickets." },
         { term: "input_tokens / output_tokens", definition: "Tokens consumed by your prompt and by Claude's reply, respectively." }
@@ -1570,7 +1570,7 @@ The response is a receipt, not just an answer. The text is the product; **usage*
         {
           type: "warning",
           title: "max_tokens means cut off",
-          content: "If stop_reason is 'max_tokens', Claude was still talking and got truncated. Don't trust the answer as complete — raise max_tokens and call again.",
+          content: "If stop_reason is 'max_tokens', Claude was still talking and got truncated. Don't trust the answer as complete, raise max_tokens and call again.",
           position: "after"
         }
       ],
@@ -1579,7 +1579,7 @@ The response is a receipt, not just an answer. The text is the product; **usage*
         steps: [
           { label: "id + model", desc: "Which call this was and exactly which model answered." },
           { label: "role + content", desc: "role is 'assistant'; content[0].text holds the answer." },
-          { label: "usage", desc: "input_tokens and output_tokens — the cost of the call." },
+          { label: "usage", desc: "input_tokens and output_tokens, the cost of the call." },
           { label: "stop_reason", desc: "Why it stopped: end_turn (done) or max_tokens (cut off)." }
         ]
       },
@@ -1596,7 +1596,7 @@ The response is a receipt, not just an answer. The text is the product; **usage*
           question: "What does response.usage contain?",
           options: ["The model's confidence score", "input_tokens and output_tokens for the call", "The user's account balance", "The full text of the reply"],
           correct_index: 1,
-          explanation: "usage reports how many tokens the prompt and the reply consumed — that's what you're billed on."
+          explanation: "usage reports how many tokens the prompt and the reply consumed, that's what you're billed on."
         },
         {
           question: "stop_reason comes back as 'end_turn'. What does that mean?",
@@ -1619,7 +1619,7 @@ The response is a receipt, not just an answer. The text is the product; **usage*
               question: "If stop_reason is 'max_tokens', the reply is guaranteed to be a complete answer.",
               type: "true_false",
               correct_answer: "false",
-              explanation: "max_tokens means it was truncated — Claude hit the length cap before finishing."
+              explanation: "max_tokens means it was truncated, Claude hit the length cap before finishing."
             },
             {
               question: "Fill in the blank: response.usage.output_tokens tells you how many tokens Claude's _____ consumed.",
@@ -1687,7 +1687,7 @@ stop_reason: end_turn`,
           prompt: "Your app asks for a long summary, but users complain the summary ends abruptly.\nWhich response field confirms the cause, and how do you fix it in code?",
           steps: [
             "An abruptly-ending reply is a classic truncation symptom.",
-            "Check response.stop_reason — if it's 'max_tokens', the reply was cut off at the cap.",
+            "Check response.stop_reason, if it's 'max_tokens', the reply was cut off at the cap.",
             "Fix it by raising max_tokens so the reply has room to finish.",
             "Make it robust: if stop_reason == 'max_tokens', log it or retry with a higher cap automatically."
           ],
@@ -1699,7 +1699,7 @@ stop_reason: end_turn`,
           title: "what each response field is for",
           columns: ["Field", "What it holds", "When you use it"],
           rows: [
-            { cells: ["content[0].text", "The answer text", "Almost always — it's the reply"] },
+            { cells: ["content[0].text", "The answer text", "Almost always, it's the reply"] },
             { cells: ["usage", "input + output tokens", "Billing and budget monitoring"] },
             { cells: ["stop_reason", "Why generation ended", "Detecting truncated replies"], highlight: true },
             { cells: ["id / model", "Call ID + model used", "Logging, support, tracing"] }
@@ -1737,7 +1737,7 @@ stop_reason: end_turn`,
       challenge_title: "Response Inspector",
       challenge_description: "Parse a batch of JSON responses and report total tokens spent plus how many replies were truncated.",
       challenge_story: "Your dashboard ingests every response your app receives from Claude and turns it into two numbers ops cares about: the **total tokens** burned across all calls (the bill) and how many replies came back **truncated** because they hit the token cap. Each response arrives as a JSON object with a \`usage\` block and a \`stop_reason\`. Parse the batch and produce the summary.",
-      challenge_statement: "You are given \`n\` responses, one JSON object per line. Each object has a \`usage\` field with integer \`input_tokens\` and \`output_tokens\`, and a string \`stop_reason\`.\n\nCompute two things:\n\n- \`total_tokens\` — the sum of \`input_tokens + output_tokens\` across all \`n\` responses.\n- \`truncated\` — how many responses have \`stop_reason\` exactly equal to \`\"max_tokens\"\`.\n\nPrint \`total <total_tokens>\` on the first line and \`truncated <truncated>\` on the second.",
+      challenge_statement: "You are given \`n\` responses, one JSON object per line. Each object has a \`usage\` field with integer \`input_tokens\` and \`output_tokens\`, and a string \`stop_reason\`.\n\nCompute two things:\n\n- \`total_tokens\`, the sum of \`input_tokens + output_tokens\` across all \`n\` responses.\n- \`truncated\`, how many responses have \`stop_reason\` exactly equal to \`\"max_tokens\"\`.\n\nPrint \`total <total_tokens>\` on the first line and \`truncated <truncated>\` on the second.",
       challenge_input_format: "Line 1: integer \`n\`. Each of the next \`n\` lines is one JSON object with keys \`usage\` (an object with \`input_tokens\` and \`output_tokens\`) and \`stop_reason\` (a string).",
       challenge_output_format: "Two lines:\n- \`total T\` where \`T\` is the summed input+output tokens.\n- \`truncated C\` where \`C\` is the count of responses with stop_reason \"max_tokens\".",
       challenge_constraints: [
@@ -1749,7 +1749,7 @@ stop_reason: end_turn`,
         { input: "2\n{\"usage\": {\"input_tokens\": 10, \"output_tokens\": 5}, \"stop_reason\": \"end_turn\"}\n{\"usage\": {\"input_tokens\": 20, \"output_tokens\": 40}, \"stop_reason\": \"max_tokens\"}", output: "total 75\ntruncated 1", explanation: "Tokens: (10+5) + (20+40) = 75. One response stopped on max_tokens." },
         { input: "1\n{\"usage\": {\"input_tokens\": 3, \"output_tokens\": 3}, \"stop_reason\": \"end_turn\"}", output: "total 6\ntruncated 0", explanation: "6 tokens total, nothing truncated." },
       ],
-      challenge_notes: "Parse each line with \`json.loads\`. Reach into the nested usage object with \`obj[\"usage\"][\"input_tokens\"]\`. Only an exact match on \`\"max_tokens\"\` counts as truncated — \`\"end_turn\"\` and other reasons do not. With \`n = 0\` the answer is \`total 0\` and \`truncated 0\`.",
+      challenge_notes: "Parse each line with \`json.loads\`. Reach into the nested usage object with \`obj[\"usage\"][\"input_tokens\"]\`. Only an exact match on \`\"max_tokens\"\` counts as truncated, \`\"end_turn\"\` and other reasons do not. With \`n = 0\` the answer is \`total 0\` and \`truncated 0\`.",
       challenge_hints: [
         "Read `n`, then loop the next `n` lines, calling `json.loads` on each.",
         "Add `obj[\"usage\"][\"input_tokens\"] + obj[\"usage\"][\"output_tokens\"]` to a running total.",
@@ -1814,19 +1814,19 @@ print(f"truncated {truncated}")
 
 ## What it is
 
-When a request fails, the API returns an **HTTP status code** — a three-digit number that classifies what went wrong. You met a few in lesson 3; here is the working set:
+When a request fails, the API returns an **HTTP status code**: a three-digit number that classifies what went wrong. You met a few in lesson 3; here is the working set:
 
-- **200** — success. Your answer is in the response.
-- **400** — Bad Request. *Your* fault: malformed JSON, a missing field, a bad parameter. Retrying won't help; fix the request.
-- **401** — Unauthorized. Your API key is missing or wrong. Retrying won't help; fix the key.
-- **429** — Too Many Requests. You hit the rate limit. Retrying *after a wait* is exactly right.
-- **500 / 503** — the server had a problem or is overloaded. Not your fault; retrying after a wait usually works.
+- **200**: success. Your answer is in the response.
+- **400**: Bad Request. *Your* fault: malformed JSON, a missing field, a bad parameter. Retrying won't help; fix the request.
+- **401**: Unauthorized. Your API key is missing or wrong. Retrying won't help; fix the key.
+- **429**: Too Many Requests. You hit the rate limit. Retrying *after a wait* is exactly right.
+- **500 / 503**: the server had a problem or is overloaded. Not your fault; retrying after a wait usually works.
 
-A separate failure is a **timeout**: the request takes too long and your client gives up waiting. No status code at all — the answer simply never arrived.
+A separate failure is a **timeout**: the request takes too long and your client gives up waiting. No status code at all, the answer simply never arrived.
 
 ## How it works
 
-The crucial split: **which errors are worth retrying?** A \`400\` or \`401\` is deterministic — the same request will fail the same way forever, so retrying just wastes calls. A \`429\`, \`500\`, \`503\`, or timeout is **transient** — the same request may well succeed a moment later.
+The crucial split: **which errors are worth retrying?** A \`400\` or \`401\` is deterministic, the same request will fail the same way forever, so retrying just wastes calls. A \`429\`, \`500\`, \`503\`, or timeout is **transient**: the same request may well succeed a moment later.
 
 For transient errors, the standard tool is **exponential backoff**: wait a little, retry; if it fails again, wait twice as long; repeat up to a cap.
 
@@ -1850,7 +1850,7 @@ Doubling the wait keeps you from hammering a struggling server, and the retry ca
 
 ## Why it matters
 
-Retry logic is where reliability lives. Retry a \`401\` and you waste a thousand doomed calls; *don't* retry a \`429\` and a brief traffic spike crashes your whole job. Production SDKs (including Anthropic's) build sensible backoff in for you, but you must still decide what to do on a fatal error: surface it to the user, log it, fall back. **The status code is the instruction — read it before reacting.**
+Retry logic is where reliability lives. Retry a \`401\` and you waste a thousand doomed calls; *don't* retry a \`429\` and a brief traffic spike crashes your whole job. Production SDKs (including Anthropic's) build sensible backoff in for you, but you must still decide what to do on a fatal error: surface it to the user, log it, fall back. **The status code is the instruction, read it before reacting.**
 
 ## The mental model to keep
 
@@ -1865,13 +1865,13 @@ Failures are a triage desk. **400/401 are your bug** (fix it, never retry). **42
         {
           type: "analogy",
           title: "A busy phone line vs a wrong number",
-          content: "429/500 is a busy signal — redial in a bit and you'll get through. 401 is dialing the wrong number — redialing the same wrong number a hundred times never connects. Fix the number first.",
+          content: "429/500 is a busy signal, redial in a bit and you'll get through. 401 is dialing the wrong number, redialing the same wrong number a hundred times never connects. Fix the number first.",
           position: "before"
         },
         {
           type: "warning",
           title: "Never retry a 400 or 401",
-          content: "These are deterministic — the same request fails identically every time. Retrying burns calls and money without ever succeeding. Fix the request or the key instead.",
+          content: "These are deterministic, the same request fails identically every time. Retrying burns calls and money without ever succeeding. Fix the request or the key instead.",
           position: "after"
         }
       ],
@@ -1889,7 +1889,7 @@ Failures are a triage desk. **400/401 are your bug** (fix it, never retry). **42
           question: "Which of these errors is worth retrying after a short wait?",
           options: ["401 Unauthorized", "429 Too Many Requests", "400 Bad Request"],
           correct_index: 1,
-          explanation: "429 is transient — a brief wait then a retry usually succeeds. 400 and 401 are your bug and will fail identically on retry."
+          explanation: "429 is transient, a brief wait then a retry usually succeeds. 400 and 401 are your bug and will fail identically on retry."
         }
       ],
       quiz_questions: [
@@ -1920,7 +1920,7 @@ Failures are a triage desk. **400/401 are your bug** (fix it, never retry). **42
               question: "A 500 Internal Server Error is usually worth retrying after a short wait.",
               type: "true_false",
               correct_answer: "true",
-              explanation: "500 is a server-side hiccup and often transient — backoff and retry frequently succeeds."
+              explanation: "500 is a server-side hiccup and often transient, backoff and retry frequently succeeds."
             },
             {
               question: "Fill in the blank: Retrying with waits that double each time (1s, 2s, 4s) is called exponential _____.",
@@ -1960,7 +1960,7 @@ for code in [200, 401, 429, 500, 400]:
         {
           title: "handling one failed call",
           steps: [
-            { label: "Read the status code", detail: "Every response carries a code. Read it before doing anything else — it's the instruction.", code: "status = response.status_code  # e.g. 429" },
+            { label: "Read the status code", detail: "Every response carries a code. Read it before doing anything else, it's the instruction.", code: "status = response.status_code  # e.g. 429" },
             { label: "Is it fatal?", detail: "400 and 401 are your bug. Stop, surface the error, and fix the request or key. Never retry.", code: "if status in (400, 401): raise FatalError" },
             { label: "Is it transient?", detail: "429, 500, 503, and timeouts may succeed later. Wait before trying again.", code: "if status in (429, 500, 503): time.sleep(delay)" },
             { label: "Back off and retry", detail: "Retry the same request, but double the wait each attempt, up to a retry cap.", code: "delay *= 2  # 1s -> 2s -> 4s, stop after max_retries" }
@@ -1972,11 +1972,11 @@ for code in [200, 401, 429, 500, 400]:
           number: 1, difficulty: "easy",
           prompt: "Your script gets a 400 Bad Request. Should you wrap it in a retry loop?",
           steps: [
-            "400 means the request itself is malformed — your bug.",
+            "400 means the request itself is malformed, your bug.",
             "The same request will fail identically no matter how many times you send it.",
             "Retrying only wastes calls; fix the request body instead."
           ],
-          output: "No — fix the request. 400 is deterministic and never succeeds on retry."
+          output: "No, fix the request. 400 is deterministic and never succeeds on retry."
         },
         {
           number: 2, difficulty: "medium",
@@ -1995,7 +1995,7 @@ for code in [200, 401, 429, 500, 400]:
           title: "status codes and the right reaction",
           columns: ["Code", "Meaning", "Whose fault", "Reaction"],
           rows: [
-            { cells: ["200", "Success", "—", "Read the response"] },
+            { cells: ["200", "Success", ", ", "Read the response"] },
             { cells: ["400", "Bad Request", "You", "Fix the body, do not retry"] },
             { cells: ["401", "Unauthorized", "You", "Fix the key, do not retry"] },
             { cells: ["429", "Too Many Requests", "Load", "Wait, then retry (backoff)"], highlight: true },
@@ -2033,7 +2033,7 @@ for code in [200, 401, 429, 500, 400]:
       ],
       challenge_title: "Backoff Scheduler",
       challenge_description: "Replay a sequence of call outcomes through retry logic and report whether each call ultimately succeeds and the total wait incurred.",
-      challenge_story: "You're building the retry layer for your API client. Each outbound call returns a status code; your layer must decide whether to retry, how long to wait, and when to give up. The agreed policy: \`200\` succeeds immediately. \`400\` and \`401\` are fatal — fail at once, no waiting. \`429\`, \`500\`, and \`503\` are transient — wait and retry with exponential backoff (1s, then 2s, then 4s, ...) up to a retry cap. You're given the exact outcome each attempt would produce, so you can simulate the policy deterministically and report the result.",
+      challenge_story: "You're building the retry layer for your API client. Each outbound call returns a status code; your layer must decide whether to retry, how long to wait, and when to give up. The agreed policy: \`200\` succeeds immediately. \`400\` and \`401\` are fatal, fail at once, no waiting. \`429\`, \`500\`, and \`503\` are transient, wait and retry with exponential backoff (1s, then 2s, then 4s, ...) up to a retry cap. You're given the exact outcome each attempt would produce, so you can simulate the policy deterministically and report the result.",
       challenge_statement: "You simulate one logical API call. You are given a retry cap \`max_retries\` and the ordered list of status codes that successive attempts return.\n\nApply this policy, attempt by attempt:\n\n1. The first attempt is free (no wait). If it returns \`200\`, the call SUCCEEDS.\n2. If an attempt returns \`400\` or \`401\`, the call FAILS immediately (fatal, no further attempts, no added wait).\n3. If an attempt returns \`429\`, \`500\`, or \`503\`, it is transient: wait, then make another attempt. The wait before retry number \`k\` (1-indexed) is \`2^(k-1)\` seconds, i.e. 1, 2, 4, 8, ... You may perform at most \`max_retries\` retries (so up to \`max_retries + 1\` total attempts).\n4. If you exhaust all retries without a \`200\`, the call FAILS.\n\nPrint \`SUCCESS\` or \`FAIL\` on the first line, and \`waited W\` on the second, where \`W\` is the total seconds spent waiting.",
       challenge_input_format: "Line 1: integer \`max_retries\`.\nLine 2: integer \`m\`, the number of attempt outcomes provided.\nLine 3: \`m\` space-separated status codes, the result each attempt would return in order.",
       challenge_output_format: "Two lines:\n- \`SUCCESS\` or \`FAIL\`.\n- \`waited W\` where \`W\` is the total seconds waited (an integer).",
@@ -2131,13 +2131,13 @@ print(f"waited {total_wait}")
       title: "Keeping API Keys Safe",
       concept: "Secrets",
       xp_reward: 10,
-      explanation: `Lesson 3 told you the one rule: never paste your key into your code. This lesson is the full discipline behind that rule — where secrets actually live, how to stop them ever reaching GitHub, and what to do the moment one leaks. Companies have lost serious money to a single committed key. The habits here are cheap insurance.
+      explanation: `Lesson 3 told you the one rule: never paste your key into your code. This lesson is the full discipline behind that rule, where secrets actually live, how to stop them ever reaching GitHub, and what to do the moment one leaks. Companies have lost serious money to a single committed key. The habits here are cheap insurance.
 
 ## What it is
 
-A **secret** is any value that grants access and must never be public: API keys, database passwords, tokens. The professional way to handle one is an **environment variable** — a name-value pair stored in your operating system's environment, *outside* your source files. Your code reads the value at runtime by name; the value itself never appears in the code.
+A **secret** is any value that grants access and must never be public: API keys, database passwords, tokens. The professional way to handle one is an **environment variable**: a name-value pair stored in your operating system's environment, *outside* your source files. Your code reads the value at runtime by name; the value itself never appears in the code.
 
-For convenience during development, secrets often live in a **\`.env\` file** — a tiny text file of \`NAME=value\` lines that a loader reads into environment variables when your program starts.
+For convenience during development, secrets often live in a **\`.env\` file**: a tiny text file of \`NAME=value\` lines that a loader reads into environment variables when your program starts.
 
 \`\`\`text
 # .env  (this file must NEVER be committed)
@@ -2146,7 +2146,7 @@ ANTHROPIC_API_KEY=sk-ant-your-key-here
 
 ## How it works
 
-The whole pattern is three moves. First, put the secret in a \`.env\` file. Second — the move everyone forgets — add \`.env\` to \`.gitignore\` so Git refuses to track it:
+The whole pattern is three moves. First, put the secret in a \`.env\` file. Second, the move everyone forgets, add \`.env\` to \`.gitignore\` so Git refuses to track it:
 
 \`\`\`text
 # .gitignore
@@ -2169,7 +2169,7 @@ Notice what's shareable: the code (safe, just reads a name), a committed \`.env.
 
 Three more practices separate hobby code from production:
 
-- **Rotation.** Keys should be rotated — replaced with fresh ones — periodically, and *immediately* if you suspect a leak. A leaked key you've already rotated is worthless to an attacker. Treat any key that ever touched a commit as compromised, even after you delete it: Git history remembers.
+- **Rotation.** Keys should be rotated, replaced with fresh ones, periodically, and *immediately* if you suspect a leak. A leaked key you've already rotated is worthless to an attacker. Treat any key that ever touched a commit as compromised, even after you delete it: Git history remembers.
 - **Scoping (least privilege).** Give a key only the access it needs. A read-only key, or one capped to a small spending limit, limits the blast radius if it leaks. Never hand a production-grade key to a throwaway script.
 - **Never log it.** Printing a key to logs or error traces leaks it just as surely as committing it. Log \`key is set: True\`, never the key itself.
 
@@ -2192,7 +2192,7 @@ A secret is a house key. You don't tape it to the front door (hardcode it), you 
         {
           type: "warning",
           title: "Git history never forgets",
-          content: "Deleting a committed key in a later commit does NOT remove it — it lives in history forever. Any key that ever touched a commit must be treated as compromised and rotated.",
+          content: "Deleting a committed key in a later commit does NOT remove it, it lives in history forever. Any key that ever touched a commit must be treated as compromised and rotated.",
           position: "after"
         }
       ],
@@ -2224,7 +2224,7 @@ A secret is a house key. You don't tape it to the front door (hardcode it), you 
           question: "What is the point of scoping a key to least privilege?",
           options: ["It makes the key longer", "It limits the damage if the key leaks", "It speeds up requests", "It avoids rate limits"],
           correct_index: 1,
-          explanation: "A narrowly-scoped or spend-capped key can do far less harm if it's stolen — the blast radius is smaller."
+          explanation: "A narrowly-scoped or spend-capped key can do far less harm if it's stolen, the blast radius is smaller."
         },
         {
           question: "Which file is SAFE to commit to a public repo?",
@@ -2257,7 +2257,7 @@ A secret is a house key. You don't tape it to the front door (hardcode it), you 
 # Confirm a secret is loaded WITHOUT ever printing its value.
 api_key = os.environ.get("ANTHROPIC_API_KEY")
 
-# TODO: print "key is set: True" or "key is set: False" — never the key itself.
+# TODO: print "key is set: True" or "key is set: False", never the key itself.
 `,
       solution_code: `import os
 
@@ -2294,11 +2294,11 @@ print("key is set:", api_key is not None)
           prompt: "You realize a key was pushed to a public repo two weeks ago, even though you deleted it the next day.\nWhat must you do, and why isn't the delete enough?",
           steps: [
             "Git history retains every past commit, so the key is still recoverable from the old commit.",
-            "Assume it has already been scraped by automated scanners — public keys are found within minutes.",
+            "Assume it has already been scraped by automated scanners, public keys are found within minutes.",
             "Rotate immediately: generate a new key and revoke the leaked one in the console.",
             "Optionally scope the new key tighter and add alerts, so a future leak does less damage."
           ],
-          output: "Rotate the key now — the delete doesn't help because the key still lives in Git history and was likely already scraped."
+          output: "Rotate the key now, the delete doesn't help because the key still lives in Git history and was likely already scraped."
         }
       ],
       comparison_tables: [
@@ -2332,7 +2332,7 @@ print("key is set:", api_key is not None)
       reflections: [
         {
           prompt: "Explain why a committed-then-deleted key still needs to be rotated, drawing on what you know about how Git stores history.",
-          sampleAnswer: "Git records every commit as a permanent snapshot, so deleting the key in a new commit only removes it from the latest version — the old commit that contained it is still in the repository's history and can be checked out by anyone. Public-repo scanners typically find leaked keys within minutes, so by the time I delete it, it's likely already been copied. The only real fix is rotation: revoke the exposed key and issue a new one, which makes the leaked value useless."
+          sampleAnswer: "Git records every commit as a permanent snapshot, so deleting the key in a new commit only removes it from the latest version, the old commit that contained it is still in the repository's history and can be checked out by anyone. Public-repo scanners typically find leaked keys within minutes, so by the time I delete it, it's likely already been copied. The only real fix is rotation: revoke the exposed key and issue a new one, which makes the leaked value useless."
         }
       ],
       hints: [
@@ -2342,7 +2342,7 @@ print("key is set:", api_key is not None)
       ],
       challenge_title: "Secret Leak Scanner",
       challenge_description: "Scan lines of code and config for leaked secrets, mimicking the automated scanners that find keys within minutes of a push.",
-      challenge_story: "Before any commit reaches your public repo, a pre-commit scanner sweeps the staged lines looking for secrets that should never be there. The rule your team uses: a line **leaks** a secret if it contains the token prefix \`sk-ant-\` AND the line is NOT a safe reference. A safe reference is a line that only names the variable rather than embedding its value — specifically, lines that read the key by name (containing \`os.environ\`) or document it as a placeholder (containing \`.env.example\`) are allowed even if they mention the prefix in a comment. Build the scanner that flags the leaking lines and blocks the commit if any are found.",
+      challenge_story: "Before any commit reaches your public repo, a pre-commit scanner sweeps the staged lines looking for secrets that should never be there. The rule your team uses: a line **leaks** a secret if it contains the token prefix \`sk-ant-\` AND the line is NOT a safe reference. A safe reference is a line that only names the variable rather than embedding its value, specifically, lines that read the key by name (containing \`os.environ\`) or document it as a placeholder (containing \`.env.example\`) are allowed even if they mention the prefix in a comment. Build the scanner that flags the leaking lines and blocks the commit if any are found.",
       challenge_statement: "You are given \`n\` lines of staged content. A line is a LEAK if BOTH of these are true:\n\n1. It contains the substring \`sk-ant-\` (a real key value).\n2. It does NOT contain \`os.environ\` AND does NOT contain \`.env.example\` (i.e. it is not a safe by-name reference or placeholder).\n\nFor each line, in order, print its 1-based line number and \`LEAK\` or \`OK\`. After all lines, print \`BLOCKED\` if at least one leak was found, otherwise \`CLEAN\`.",
       challenge_input_format: "Line 1: integer \`n\`. Each of the next \`n\` lines is one line of staged content (may contain spaces; treat the whole line as-is).",
       challenge_output_format: "For each line, in order: \`<line_number> LEAK\` or \`<line_number> OK\`. Then a final line: \`BLOCKED\` or \`CLEAN\`.",

@@ -23,7 +23,7 @@ export default {
 
 ## What it is
 
-An **agent** is a language model wrapped in a loop that lets it take actions in the world and react to the results. A plain LLM is a one-shot function: text in, text out, done. An agent adds three pieces around that function — a set of **tools** it can call, a **loop** that runs until the job is finished, and **memory** of what it has done so far.
+An **agent** is a language model wrapped in a loop that lets it take actions in the world and react to the results. A plain LLM is a one-shot function: text in, text out, done. An agent adds three pieces around that function, a set of **tools** it can call, a **loop** that runs until the job is finished, and **memory** of what it has done so far.
 
 The crucial shift: a chatbot only ever produces text. An agent produces text *and* decisions about which tool to run next. It can fetch a webpage, query a database, run code, or send an email, then feed the result back to itself and keep going.
 
@@ -31,12 +31,12 @@ The crucial shift: a chatbot only ever produces text. An agent produces text *an
 
 Every agent cycles through the same four moves:
 
-1. **Observe.** It reads the current state — your goal plus everything that has happened so far.
+1. **Observe.** It reads the current state, your goal plus everything that has happened so far.
 2. **Decide.** It predicts the next action: either call a tool, or produce a final answer.
 3. **Act.** If it chose a tool, the surrounding program actually runs that tool and captures the result.
-4. **Loop.** The result is appended to the agent's context, and it observes again — until it decides it is done.
+4. **Loop.** The result is appended to the agent's context, and it observes again, until it decides it is done.
 
-The model itself never runs the tool. It only *requests* it. A piece of ordinary code — the **agent runtime** — executes the request and hands back the output. Here is the skeleton:
+The model itself never runs the tool. It only *requests* it. A piece of ordinary code, the **agent runtime**: executes the request and hands back the output. Here is the skeleton:
 
 \`\`\`python
 goal = "Find today's USD to EUR rate"
@@ -60,16 +60,16 @@ Agents close the two biggest gaps in plain LLMs:
 
 ## The mental model to keep
 
-A plain LLM is a brain in a jar that can only talk. An **agent is that same brain given hands and a to-do list** — it can reach out, touch the world, see what happened, and try again.`,
+A plain LLM is a brain in a jar that can only talk. An **agent is that same brain given hands and a to-do list**: it can reach out, touch the world, see what happened, and try again.`,
       key_terms: [
         { term: "Agent", definition: "A language model wrapped in a loop that can call tools, observe results, and keep acting until a goal is met." },
-        { term: "Tool", definition: "A function the agent can request — a web search, calculator, database query — that runs outside the model." },
+        { term: "Tool", definition: "A function the agent can request, a web search, calculator, database query, that runs outside the model." },
         { term: "Agent runtime", definition: "The ordinary code around the model that executes its tool requests and feeds results back in." },
         { term: "Loop", definition: "The repeat cycle of observe-decide-act that separates an agent from a single prediction." }
       ],
       callouts: [
         { type: "analogy", title: "A brain with hands", content: "A chatbot is a brain in a jar that can only talk. An agent is the same brain given hands and a to-do list: it can reach out, do something, see the result, and decide what to do next.", position: "before" },
-        { type: "warning", title: "Actions are real", content: "When an agent 'acts,' actual code runs — an email gets sent, a row gets deleted. A wrong answer from a chatbot is annoying; a wrong action from an agent can be expensive.", position: "after" }
+        { type: "warning", title: "Actions are real", content: "When an agent 'acts,' actual code runs, an email gets sent, a row gets deleted. A wrong answer from a chatbot is annoying; a wrong action from an agent can be expensive.", position: "after" }
       ],
       concept_diagram: {
         title: "The agent loop, one pass",
@@ -93,7 +93,7 @@ A plain LLM is a brain in a jar that can only talk. An **agent is that same brai
           question: "In an agent, who actually executes a tool the model asks for?",
           options: [
             "The language model runs it internally",
-            "The agent runtime — ordinary code around the model — runs it",
+            "The agent runtime, ordinary code around the model, runs it",
             "The user copies and runs it by hand",
             "No one; the model only pretends to call tools"
           ],
@@ -205,7 +205,7 @@ final answer: 42`,
             "Stuffing everything in means guessing in advance exactly what the task will need, which you rarely can.",
             "Live or changing data (prices, weather, a database row) goes stale the instant the prompt is written.",
             "The context window is finite, so a giant static prompt crowds out room and raises cost on every call.",
-            "Tools let the agent fetch only what it needs, when it needs it, with fresh data — smaller prompts, fewer guesses."
+            "Tools let the agent fetch only what it needs, when it needs it, with fresh data, smaller prompts, fewer guesses."
           ],
           output: "Tools fetch fresh, targeted data on demand; a giant static prompt is stale, bloated, and guesses needs up front."
         }
@@ -217,7 +217,7 @@ final answer: 42`,
           rows: [
             { cells: ["Output", "Text only", "Text plus tool actions"] },
             { cells: ["Number of model calls", "One per request", "One per loop step"] },
-            { cells: ["Access to fresh data", "None — frozen memory", "Yes, via tools"] },
+            { cells: ["Access to fresh data", "None, frozen memory", "Yes, via tools"] },
             { cells: ["Main capability", "Answer in one shot", "Chain multiple real actions to a goal"], highlight: true }
           ]
         }
@@ -242,7 +242,7 @@ final answer: 42`,
       reflections: [
         {
           prompt: "In your own words: what does wrapping an LLM in a loop with tools let it do that a single LLM call cannot?",
-          sampleAnswer: "A single call can only turn the prompt into one block of text using frozen knowledge. Wrapping it in a loop with tools lets the model take an action, see the real result, and decide what to do next — so it can fetch fresh data and chain many steps together instead of guessing everything at once."
+          sampleAnswer: "A single call can only turn the prompt into one block of text using frozen knowledge. Wrapping it in a loop with tools lets the model take an action, see the real result, and decide what to do next, so it can fetch fresh data and chain many steps together instead of guessing everything at once."
         }
       ],
       hints: [
@@ -252,7 +252,7 @@ final answer: 42`,
       ],
       challenge_title: "The Tool Dispatcher",
       challenge_description: "Register the agent's tools, then run a batch of tool calls and print each result.",
-      challenge_story: "You're building the runtime for a customer-support agent. The model never runs anything itself — it only *names* a tool and hands you an argument. Your dispatcher owns the real table of tools: each one is a tiny operation (\`add\`, \`mul\`, or \`sub\`) bound to a fixed constant. The model then fires off a queue of calls, and your job is to execute each one against the registered tools and report the result. If the model hallucinates a tool you never registered, you must refuse it safely instead of crashing the whole loop.",
+      challenge_story: "You're building the runtime for a customer-support agent. The model never runs anything itself, it only *names* a tool and hands you an argument. Your dispatcher owns the real table of tools: each one is a tiny operation (\`add\`, \`mul\`, or \`sub\`) bound to a fixed constant. The model then fires off a queue of calls, and your job is to execute each one against the registered tools and report the result. If the model hallucinates a tool you never registered, you must refuse it safely instead of crashing the whole loop.",
       challenge_statement: "First read **N** tool definitions. Each defines a tool by `name`, an operation (`add`, `mul`, or `sub`), and an integer `constant`.\n\n- `add`  → result = `arg + constant`\n- `mul`  → result = `arg * constant`\n- `sub`  → result = `arg - constant`\n\nThen read **Q** tool calls, each a `name` and an integer `arg`. For each call, run the matching registered tool and print its result on its own line. If the call names a tool that was **not** registered, print `ERROR` for that call instead.",
       challenge_input_format: "Line 1: integer `N`, the number of tool definitions.\nNext `N` lines: `name op constant` (op is one of `add`, `mul`, `sub`).\nNext line: integer `Q`, the number of calls.\nNext `Q` lines: `name arg`.",
       challenge_output_format: "Exactly `Q` lines. For each call in order, print the integer result, or `ERROR` if the tool is not registered.",
@@ -260,17 +260,17 @@ final answer: 42`,
         "1 ≤ N ≤ 100",
         "1 ≤ Q ≤ 1000",
         "-1000000 ≤ constant, arg ≤ 1000000",
-        "Tool names are lowercase letters, length 1–20, and unique",
+        "Tool names are lowercase letters, length 1, 20, and unique",
       ],
       challenge_examples: [
         { input: "3\ndouble mul 2\nincrement add 1\nshift sub 5\n4\ndouble 10\nincrement 41\nshift 5\nsquare 9", output: "20\n42\n0\nERROR", explanation: "double=10*2=20, increment=41+1=42, shift=5-5=0, and `square` was never registered so it is ERROR." },
         { input: "1\ndouble mul 2\n2\ndouble 0\nghost 7", output: "0\nERROR", explanation: "double=0*2=0; `ghost` is unknown." },
       ],
-      challenge_notes: "The model only requests tools; the runtime (your code) is the only thing that actually executes them. Always validate the requested name against the registry before running — a real agent must survive a model that asks for tools that don't exist.",
+      challenge_notes: "The model only requests tools; the runtime (your code) is the only thing that actually executes them. Always validate the requested name against the registry before running, a real agent must survive a model that asks for tools that don't exist.",
       challenge_hints: [
         "Store the tools in a dict: `tools[name] = (op, constant)`.",
         "Read all N definitions before you start processing calls.",
-        "For an unknown name, print `ERROR` and continue to the next call — never raise.",
+        "For an unknown name, print `ERROR` and continue to the next call, never raise.",
       ],
       challenge_difficulty: "beginner",
       challenge_starter_code: `import sys
@@ -352,7 +352,7 @@ main()
 
 ## What it is
 
-A **tool** is just a function you make available to the model — a calculator, a web search, a database query. To use it, you describe the tool to the model: its **name**, what it does, and the **parameters** it takes. When the model decides the tool is needed, it does not run it. It emits a structured request naming the tool and its arguments, usually as **JSON**.
+A **tool** is just a function you make available to the model, a calculator, a web search, a database query. To use it, you describe the tool to the model: its **name**, what it does, and the **parameters** it takes. When the model decides the tool is needed, it does not run it. It emits a structured request naming the tool and its arguments, usually as **JSON**.
 
 The model's only new skill is *deciding when* to call a tool and *filling in the arguments correctly*. The actual execution is plain code you control.
 
@@ -365,7 +365,7 @@ The cycle has four clear stages:
 3. Your code **executes** the real function with those arguments.
 4. You **return** the result back to the model so it can continue or answer.
 
-A tool request the model emits looks like this — note it is data, not a finished sentence:
+A tool request the model emits looks like this, note it is data, not a finished sentence:
 
 \`\`\`python
 # what the model returns (it does NOT run anything itself)
@@ -397,7 +397,7 @@ The model is a smart dispatcher filling out request forms. **You build the tools
         { term: "Tool result", definition: "The output your code returns to the model after running the requested function." }
       ],
       callouts: [
-        { type: "analogy", title: "Filling out a request form", content: "The model is a clerk who can't touch the machinery. It fills out a form — 'run get_weather, city=Tokyo' — and hands it to you. You run the machine and bring back the result.", position: "before" },
+        { type: "analogy", title: "Filling out a request form", content: "The model is a clerk who can't touch the machinery. It fills out a form, 'run get_weather, city=Tokyo', and hands it to you. You run the machine and bring back the result.", position: "before" },
         { type: "tip", title: "Write descriptions like API docs", content: "The model chooses tools from your descriptions alone. Be specific about what each tool does and when to use it, exactly like good function documentation.", position: "after" }
       ],
       concept_diagram: {
@@ -444,7 +444,7 @@ The model is a smart dispatcher filling out request forms. **You build the tools
           question: "Who controls what a tool is actually allowed to do?",
           options: [
             "The model decides at runtime",
-            "You do — you write each tool's code and can validate its arguments",
+            "You do, you write each tool's code and can validate its arguments",
             "The user types the function body",
             "The tool schema runs itself"
           ],
@@ -497,7 +497,7 @@ tool result: {'city': 'Tokyo', 'temp': 18, 'units': 'celsius'}`,
           title: "from question to tool result",
           steps: [
             { label: "Describe the tool", detail: "You tell the model a tool exists, what it does, and its parameters. The model now knows it can ask for it.", code: 'tools = [{"name": "get_weather", "params": ["city"]}]' },
-            { label: "Model emits a request", detail: "Given 'weather in Tokyo?', the model returns a structured call — data, not prose. It does not run anything.", code: '{"name": "get_weather", "arguments": {"city": "Tokyo"}}' },
+            { label: "Model emits a request", detail: "Given 'weather in Tokyo?', the model returns a structured call, data, not prose. It does not run anything.", code: '{"name": "get_weather", "arguments": {"city": "Tokyo"}}' },
             { label: "Your runtime executes", detail: "Your code parses the request, validates it, and runs the real function with the given arguments.", code: 'result = get_weather(city="Tokyo")  # -> {"temp": 18}' },
             { label: "Return the result", detail: "The result is fed back to the model, which now writes a normal answer using the real data.", code: '"It is 18 C in Tokyo right now."' }
           ]
@@ -521,7 +521,7 @@ tool result: {'city': 'Tokyo', 'temp': 18, 'units': 'celsius'}`,
             "The model can't email from memory, so it first calls search_docs to gather facts about the outage.",
             "Your runtime runs search_docs and returns the retrieved text to the model.",
             "Now the model has content and emits a send_email call with structured 'to' and 'body' arguments.",
-            "Before running send_email, your code validates the arguments — for example, confirming 'to' is an allowed address — because you control execution, not the model.",
+            "Before running send_email, your code validates the arguments, for example, confirming 'to' is an allowed address, because you control execution, not the model.",
             "Only after validation does your runtime actually send, then it returns a confirmation to the model."
           ],
           output: "The model chains search_docs then send_email; your runtime validates the email arguments before actually sending, keeping control."
@@ -569,7 +569,7 @@ tool result: {'city': 'Tokyo', 'temp': 18, 'units': 'celsius'}`,
       ],
       challenge_title: "The Tool Router",
       challenge_description: "Route a stream of model-emitted tool calls to the right function and tally the running total.",
-      challenge_story: "Your data-analysis agent answers questions by emitting tool calls — the model picks the tool and fills in two numeric arguments, but it's *your* router that actually executes them. Today the agent is crunching a spreadsheet, firing off a sequence of arithmetic tool calls (`add`, `subtract`, `multiply`, `max`). You must dispatch each call to the correct operation, print every intermediate result, and keep a running sum of all results so the agent can report one final aggregate. And because language models drift, an occasional call names a tool you don't support — you must flag it without derailing the rest of the run.",
+      challenge_story: "Your data-analysis agent answers questions by emitting tool calls, the model picks the tool and fills in two numeric arguments, but it's *your* router that actually executes them. Today the agent is crunching a spreadsheet, firing off a sequence of arithmetic tool calls (`add`, `subtract`, `multiply`, `max`). You must dispatch each call to the correct operation, print every intermediate result, and keep a running sum of all results so the agent can report one final aggregate. And because language models drift, an occasional call names a tool you don't support, you must flag it without derailing the rest of the run.",
       challenge_statement: "Read **N** tool calls. Each call is a tool `name` followed by two integers `a` and `b`. Execute each call:\n\n- `add` → `a + b`\n- `subtract` → `a - b`\n- `multiply` → `a * b`\n- `max` → the larger of `a` and `b` (if equal, that value)\n\nFor each call, print the integer result on its own line. If the tool name is none of the four above, print `UNKNOWN_TOOL` for that call and **do not** add anything to the running total. After all calls, print `TOTAL` followed by the sum of every successful result.",
       challenge_input_format: "Line 1: integer `N`.\nNext `N` lines: `name a b`.",
       challenge_output_format: "`N` lines, one per call (the integer result, or `UNKNOWN_TOOL`), followed by one final line `TOTAL X` where X is the sum of all successful results.",
@@ -655,7 +655,7 @@ main()
 
 ## What it is
 
-**ReAct** interleaves two kinds of steps. A **Thought** is the model reasoning in plain language about what to do next. An **Action** is a tool call. After each action, the runtime returns an **Observation** — the tool's result — and the cycle repeats. The full trace reads as a chain: Thought, Action, Observation, Thought, Action, Observation, until the model decides it has enough and writes the final answer.
+**ReAct** interleaves two kinds of steps. A **Thought** is the model reasoning in plain language about what to do next. An **Action** is a tool call. After each action, the runtime returns an **Observation**: the tool's result, and the cycle repeats. The full trace reads as a chain: Thought, Action, Observation, Thought, Action, Observation, until the model decides it has enough and writes the final answer.
 
 The key insight is that *forcing the model to reason before acting* dramatically improves which tool it picks and which arguments it uses. The thought is not decoration; it is the planning that makes the next action correct.
 
@@ -668,7 +668,7 @@ One ReAct iteration looks like this:
 3. **Observation.** The runtime runs the tool and returns the result, which is appended to the trace.
 4. **Repeat or answer.** The model reads the observation and either reasons toward the next action or produces the final answer.
 
-A trace looks like this — notice how each thought sets up the next action:
+A trace looks like this, notice how each thought sets up the next action:
 
 \`\`\`text
 Thought: I need the third-largest city in France first.
@@ -688,14 +688,14 @@ Without the thoughts, the model might call \`search("population of the third-lar
 ReAct is the workhorse pattern for building dependable agents:
 
 - **Better decisions.** Reasoning before acting cuts down on wrong tools and malformed arguments. The thought catches mistakes before they cost a tool call.
-- **It self-corrects.** When an observation is empty or surprising, the next thought can notice and try a different approach — an agent that just acts blindly cannot.
+- **It self-corrects.** When an observation is empty or surprising, the next thought can notice and try a different approach, an agent that just acts blindly cannot.
 - **It is debuggable.** The thought trace is a readable log of *why* the agent did each thing, which is gold when something goes wrong.
 
 The cost: more model calls (every thought is generated text) and longer traces that eat context. ReAct trades tokens for reliability.
 
 ## The mental model to keep
 
-Don't let the agent act on reflex. **Make it narrate a plan, take one step, look at what happened, then re-plan.** Thought, action, observation, repeat — that rhythm is what turns a tool-caller into a problem-solver.`,
+Don't let the agent act on reflex. **Make it narrate a plan, take one step, look at what happened, then re-plan.** Thought, action, observation, repeat, that rhythm is what turns a tool-caller into a problem-solver.`,
       key_terms: [
         { term: "ReAct", definition: "An agent pattern that interleaves reasoning steps (Thought) with tool calls (Action) and their results (Observation)." },
         { term: "Thought", definition: "A plain-language reasoning step the model writes before deciding its next action." },
@@ -703,7 +703,7 @@ Don't let the agent act on reflex. **Make it narrate a plan, take one step, look
         { term: "Observation", definition: "The result of an action, returned by the runtime and fed back into the agent's reasoning." }
       ],
       callouts: [
-        { type: "insight", title: "Thinking out loud makes it smarter", content: "Forcing the model to write a thought before acting isn't decoration — it's the planning step. It catches the wrong tool or bad arguments before a single action runs.", position: "before" },
+        { type: "insight", title: "Thinking out loud makes it smarter", content: "Forcing the model to write a thought before acting isn't decoration, it's the planning step. It catches the wrong tool or bad arguments before a single action runs.", position: "before" },
         { type: "tip", title: "The trace is your debugger", content: "When an agent misbehaves, read its Thought-Action-Observation trace. It shows exactly where the reasoning or a tool result went sideways.", position: "after" }
       ],
       concept_diagram: {
@@ -838,7 +838,7 @@ Answer: Lyon, about 520000 people`,
           prompt: 'An agent searches "weather Springfield" and the Observation is "Did you mean: Springfield, IL / Springfield, MA / Springfield, MO?". A reflex agent would pick one at random. How does ReAct handle this better?',
           steps: [
             "ReAct does not act on the ambiguous observation directly; it generates a Thought about it first.",
-            "The thought notices the result is a disambiguation list, not a weather report — the action did not succeed.",
+            "The thought notices the result is a disambiguation list, not a weather report, the action did not succeed.",
             "Instead of guessing a city, the next thought decides to gather the missing detail: which Springfield does the user mean?",
             "The agent can then ask a clarifying question or use context to choose, then re-issue a precise search.",
             "Because every observation is reasoned about, surprising results trigger correction rather than blind continuation."
@@ -888,21 +888,21 @@ Answer: Lyon, about 520000 people`,
         "End by appending a line that starts with 'Answer:' and includes the population."
       ],
       challenge_title: "The ReAct Trace Walker",
-      challenge_description: "Drive a Reason–Act–Observe loop that chases links through a knowledge graph until it reaches the goal.",
-      challenge_story: "Your research agent answers multi-hop questions like *\"what continent is the country whose capital is Lima on?\"* It can't leap straight to the answer — each fact only unlocks the next. So it runs a **ReAct** loop: it thinks, fires a `lookup` action against a knowledge graph, observes the single fact that comes back, then repeats with that new fact. You must emit the exact reasoning trace as the agent hops from the starting entity toward the goal — and you must defend against the two classic failures of an unguarded loop: hitting a **dead end** (a fact with no further link) and getting trapped in a **cycle** (looping back to a node it already visited).",
+      challenge_description: "Drive a Reason, Act, Observe loop that chases links through a knowledge graph until it reaches the goal.",
+      challenge_story: "Your research agent answers multi-hop questions like *\"what continent is the country whose capital is Lima on?\"* It can't leap straight to the answer, each fact only unlocks the next. So it runs a **ReAct** loop: it thinks, fires a `lookup` action against a knowledge graph, observes the single fact that comes back, then repeats with that new fact. You must emit the exact reasoning trace as the agent hops from the starting entity toward the goal, and you must defend against the two classic failures of an unguarded loop: hitting a **dead end** (a fact with no further link) and getting trapped in a **cycle** (looping back to a node it already visited).",
       challenge_statement: "You're given a knowledge graph as **N** directed links, each `from to` meaning a `lookup(from)` returns `to`. Then you're given a `start` entity and a `goal` entity.\n\nRun the ReAct loop from `start`:\n\n1. Print `Thought: start at <start>`.\n2. While the current entity is not the goal, perform a `lookup`:\n   - Print `Action: lookup(<current>)` then `Observation: <result>`.\n   - If the current entity has **no** outgoing link, stop and print `Answer: DEAD_END after <k> steps` (where `k` counts the lookups actually performed).\n   - If the observed result is an entity already visited, stop and print `Answer: LOOP after <k> steps`.\n3. When you reach the goal, print `Answer: reached <goal> in <k> steps`.\n\nIf `start` already equals `goal`, no lookups happen: print only the Thought line and `Answer: reached <goal> in 0 steps`.",
       challenge_input_format: "Line 1: integer `N`.\nNext `N` lines: `from to` (each entity is a unique key with exactly one outgoing link; entities are tokens without spaces).\nNext line: `start`.\nNext line: `goal`.",
       challenge_output_format: "The full trace: a `Thought:` line, alternating `Action:` / `Observation:` lines for each lookup, and a final `Answer:` line describing how the run ended.",
       challenge_constraints: [
         "1 ≤ N ≤ 1000",
         "Each `from` key appears at most once (deterministic lookups)",
-        "Entity names contain no whitespace, length 1–30",
+        "Entity names contain no whitespace, length 1, 30",
       ],
       challenge_examples: [
         { input: "3\nPeru Lima\nLima SouthAmerica\nSouthAmerica Earth\nPeru\nEarth", output: "Thought: start at Peru\nAction: lookup(Peru)\nObservation: Lima\nAction: lookup(Lima)\nObservation: SouthAmerica\nAction: lookup(SouthAmerica)\nObservation: Earth\nAnswer: reached Earth in 3 steps", explanation: "Three hops chain Peru → Lima → SouthAmerica → Earth, reaching the goal." },
         { input: "2\nA B\nB A\nA\nC", output: "Thought: start at A\nAction: lookup(A)\nObservation: B\nAction: lookup(B)\nObservation: A\nAnswer: LOOP after 2 steps", explanation: "A → B → A revisits A, so the loop guard fires after 2 lookups." },
       ],
-      challenge_notes: "This is the engine inside every ReAct agent: think, act, observe, repeat. The cycle and dead-end guards are not decoration — without them a real agent will spin forever or crash. Counting steps is how you'd later enforce a budget.",
+      challenge_notes: "This is the engine inside every ReAct agent: think, act, observe, repeat. The cycle and dead-end guards are not decoration, without them a real agent will spin forever or crash. Counting steps is how you'd later enforce a budget.",
       challenge_hints: [
         "Store links in a dict `nxt[from] = to`; a missing key means a dead end.",
         "Track visited entities in a set so you can detect a revisit (a loop).",
@@ -985,13 +985,13 @@ main()
       title: "Multi-Step Tasks & Memory",
       concept: "Planning",
       xp_reward: 10,
-      explanation: `"Plan a weekend trip to Lisbon, book a hotel under 150 a night, and add it to my calendar." That is not one action — it is a small project. The agent has to break the goal into steps, do them in order, and remember the hotel it picked when it later writes the calendar event. Two skills carry this: **planning** (decompose then sequence) and **memory** (carry results forward).
+      explanation: `"Plan a weekend trip to Lisbon, book a hotel under 150 a night, and add it to my calendar." That is not one action, it is a small project. The agent has to break the goal into steps, do them in order, and remember the hotel it picked when it later writes the calendar event. Two skills carry this: **planning** (decompose then sequence) and **memory** (carry results forward).
 
 ## What it is
 
 **Planning** is the agent breaking a big goal into an ordered list of sub-tasks before diving in. **Memory** is how the agent keeps track of what it has already done and learned, so step five can use the result of step two.
 
-There are two flavors of memory, and mixing them up causes bugs. **Short-term (working) memory** is the running context of the current task — the trace of thoughts, actions, and observations so far. **Long-term memory** is information stored outside the context window — in a database or file — that the agent can retrieve later, even in a future session.
+There are two flavors of memory, and mixing them up causes bugs. **Short-term (working) memory** is the running context of the current task, the trace of thoughts, actions, and observations so far. **Long-term memory** is information stored outside the context window, in a database or file, that the agent can retrieve later, even in a future session.
 
 ## How it works
 
@@ -1023,7 +1023,7 @@ Planning and memory are what separate a toy demo from a useful agent:
 
 - **Order matters.** You can't book a hotel before searching, or add to a calendar before booking. A plan enforces dependencies between steps.
 - **Context windows are finite.** A long task overflows the window. Long-term memory lets the agent offload finished work and retrieve only what the current step needs.
-- **Failures need recovery.** When a step fails — the hotel is sold out — a good agent re-plans from where it is, rather than restarting or charging ahead with stale assumptions.
+- **Failures need recovery.** When a step fails, the hotel is sold out, a good agent re-plans from where it is, rather than restarting or charging ahead with stale assumptions.
 
 ## The mental model to keep
 
@@ -1064,7 +1064,7 @@ Treat the agent like a project manager with a notebook. **It writes a plan, does
           question: "Why does a multi-step agent need a plan rather than just acting?",
           options: [
             "Plans make the model smaller",
-            "Steps have dependencies and an order — you can't book before searching",
+            "Steps have dependencies and an order, you can't book before searching",
             "Planning removes the need for tools",
             "It prevents the agent from using memory"
           ],
@@ -1168,7 +1168,7 @@ final: calendar event for booked: Hotel Lisboa, 120/night`,
           number: 2, difficulty: "hard",
           prompt: 'A research agent must read 50 documents and answer a question, but only 10 fit in its context window at once. How do planning and memory make this possible?',
           steps: [
-            "It can't load all 50 documents into working memory at once — the window overflows.",
+            "It can't load all 50 documents into working memory at once, the window overflows.",
             "Plan: process the documents in batches, extracting the relevant facts from each batch.",
             "After each batch, write the extracted facts to long-term memory (a store outside the window).",
             "Working memory only ever holds the current batch plus a running summary, staying within the limit.",
@@ -1220,10 +1220,10 @@ final: calendar event for booked: Hotel Lisboa, 120/night`,
       ],
       challenge_title: "The Dependent Pipeline",
       challenge_description: "Execute a multi-step agent plan where each step reads earlier results out of working memory.",
-      challenge_story: "Your agent has decomposed a big task into a pipeline of named steps — `fetch`, `clean`, `summarize`, and so on — and it runs them one at a time, stashing every result in a shared **working memory** dict. The catch is that later steps *depend* on earlier ones: `summarize` can't run until `fetch` and `clean` have each left their results in memory. Each step contributes its own base value plus the sum of the values its dependencies already produced. Run the plan in the given order, recording every step's result, and print the final pipeline output. If a step ever needs a dependency that isn't in memory yet, the plan is broken and must halt safely.",
+      challenge_story: "Your agent has decomposed a big task into a pipeline of named steps, `fetch`, `clean`, `summarize`, and so on, and it runs them one at a time, stashing every result in a shared **working memory** dict. The catch is that later steps *depend* on earlier ones: `summarize` can't run until `fetch` and `clean` have each left their results in memory. Each step contributes its own base value plus the sum of the values its dependencies already produced. Run the plan in the given order, recording every step's result, and print the final pipeline output. If a step ever needs a dependency that isn't in memory yet, the plan is broken and must halt safely.",
       challenge_statement: "Read **N** steps in execution order. Each step has a `name`, an integer `base` value, a dependency count `d`, and then `d` dependency names.\n\nExecute the steps in the order given. A step's result is:\n\n```\nresult = base + (sum of the results of all its dependencies)\n```\n\nStore each result in working memory under the step's name and print `name = result`. If any dependency of a step is **not** already in working memory, immediately print `name MISSING_DEP` and stop (print nothing further). If all steps succeed, finally print `FINAL` followed by the result of the **last** step in the plan.",
       challenge_input_format: "Line 1: integer `N`.\nNext `N` lines: `name base d dep1 dep2 ... depd` (when `d` is 0 there are no dependency tokens).",
-      challenge_output_format: "One `name = result` line per executed step, then a final `FINAL X` line — unless a missing dependency is hit, in which case the last line is `name MISSING_DEP`.",
+      challenge_output_format: "One `name = result` line per executed step, then a final `FINAL X` line, unless a missing dependency is hit, in which case the last line is `name MISSING_DEP`.",
       challenge_constraints: [
         "1 ≤ N ≤ 1000",
         "-1000000 ≤ base ≤ 1000000",
@@ -1316,11 +1316,11 @@ main()
 
 ## What it is
 
-A **guardrail** is a constraint you put around an agent to limit what it can do and stop it when it goes wrong. Guardrails are not part of the model — they are code and rules you wrap around the agent loop. They exist because agents have signature failure modes:
+A **guardrail** is a constraint you put around an agent to limit what it can do and stop it when it goes wrong. Guardrails are not part of the model, they are code and rules you wrap around the agent loop. They exist because agents have signature failure modes:
 
 - **Infinite loops.** The agent repeats the same action forever, never deciding it is done.
 - **Cost explosions.** Each loop step is a model call, so a runaway agent can rack up a huge bill fast.
-- **Harmful actions.** A misread goal leads to a destructive tool call — deleting the wrong files, emailing the wrong people.
+- **Harmful actions.** A misread goal leads to a destructive tool call, deleting the wrong files, emailing the wrong people.
 - **Cascading errors.** One bad observation poisons the next thought, which poisons the next action, drifting further from the goal.
 
 ## How it works
@@ -1348,7 +1348,7 @@ else:
     print("Stopped: hit the step limit")  # loop guardrail
 \`\`\`
 
-The \`else\` on the \`for\` loop fires only if the loop never broke — meaning the agent never finished on its own and was stopped by the cap. That single line prevents the infinite-loop disaster.
+The \`else\` on the \`for\` loop fires only if the loop never broke, meaning the agent never finished on its own and was stopped by the cap. That single line prevents the infinite-loop disaster.
 
 ## Why it matters
 
@@ -1438,7 +1438,7 @@ Never give an agent unbounded freedom to act. **Cap its steps, cap its spend, ga
 MAX_STEPS = 5
 
 def agent_decide(step):
-    # This buggy agent never says it's done — it loops forever without a cap.
+    # This buggy agent never says it's done, it loops forever without a cap.
     return "keep going"
 
 ran = 0
@@ -1543,7 +1543,7 @@ stopped by cap: True`,
       ],
       challenge_title: "The Guardrailed Agent Loop",
       challenge_description: "Run an agent's action queue under both a step limit and a spend budget, stopping the instant either guardrail trips.",
-      challenge_story: "Your autonomous agent is about to run unattended overnight, and an unguarded loop is a liability: it could spin forever, or burn the entire API budget on a runaway plan. So you wrap its action queue in two guardrails. A **step limit** caps how many actions it may ever take. A **budget** caps total spend, where each action costs a known amount. The agent works through its queued actions in order, paying for each before it runs; the special `done` action signals success. Your loop must stop on the *first* condition met — finishing, hitting the step cap, or being about to blow the budget — and report exactly how it ended, how many steps it ran, and how much it spent.",
+      challenge_story: "Your autonomous agent is about to run unattended overnight, and an unguarded loop is a liability: it could spin forever, or burn the entire API budget on a runaway plan. So you wrap its action queue in two guardrails. A **step limit** caps how many actions it may ever take. A **budget** caps total spend, where each action costs a known amount. The agent works through its queued actions in order, paying for each before it runs; the special `done` action signals success. Your loop must stop on the *first* condition met, finishing, hitting the step cap, or being about to blow the budget, and report exactly how it ended, how many steps it ran, and how much it spent.",
       challenge_statement: "Line 1 gives two integers: `max_steps` and `budget`. Then read **N** queued actions, each a `name` and an integer `cost`.\n\nProcess actions in order. Before running an action:\n\n- If you have already run `max_steps` actions, stop with outcome `STEP_LIMIT`.\n- If running this action would push total spend **above** `budget` (i.e. `spent + cost > budget`), stop with outcome `OVER_BUDGET` (do **not** run it; spend stays as is).\n\nOtherwise pay `cost` (add to spend), count the step, and run it. If the action's name is `done`, stop with outcome `FINISHED`. If the queue runs out before any stop condition triggers, the outcome is `EXHAUSTED` (unless the step count exactly reached the limit on the last action, in which case it is `STEP_LIMIT`).\n\nPrint three lines: the outcome, then `steps <k>`, then `spent <s>`.",
       challenge_input_format: "Line 1: `max_steps budget` (two integers).\nLine 2: integer `N`.\nNext `N` lines: `name cost`.",
       challenge_output_format: "Three lines: the outcome (`FINISHED`, `STEP_LIMIT`, `OVER_BUDGET`, or `EXHAUSTED`), then `steps <k>`, then `spent <s>`.",
@@ -1670,7 +1670,7 @@ print(validate_call("get_weather", {"city": "Tokyo"}))   # OK
 print(validate_call("get_weather", {}))                   # missing city
 \`\`\`
 
-Two rules do most of the work. First, **name and describe by intent**, not implementation: \`search_orders\` beats \`db_query_v2\`, because the model matches the user's goal to the description. Second, **mark required parameters and validate them** before running — the model can and will omit arguments, so your code is the backstop.
+Two rules do most of the work. First, **name and describe by intent**, not implementation: \`search_orders\` beats \`db_query_v2\`, because the model matches the user's goal to the description. Second, **mark required parameters and validate them** before running, the model can and will omit arguments, so your code is the backstop.
 
 ## Why it matters
 
@@ -1956,7 +1956,7 @@ main()
       title: "Planning vs Reacting",
       concept: "Planning",
       xp_reward: 10,
-      explanation: `Two agents get the same job: "research three competitors and write a summary." The first writes a full plan up front — list competitors, research each, then summarize — and marches through it. The second takes one step, looks at the result, decides the next step, and repeats. Both can work. They fail differently, cost differently, and shine on different tasks. This is the central design choice in agent building: **plan-then-execute** versus **reactive** looping.
+      explanation: `Two agents get the same job: "research three competitors and write a summary." The first writes a full plan up front, list competitors, research each, then summarize, and marches through it. The second takes one step, looks at the result, decides the next step, and repeats. Both can work. They fail differently, cost differently, and shine on different tasks. This is the central design choice in agent building: **plan-then-execute** versus **reactive** looping.
 
 ## What it is
 
@@ -1989,7 +1989,7 @@ for name, ok in plan:
 # -> completes 2 of 3 steps
 \`\`\`
 
-The planner is efficient when the world is predictable: it thinks once and executes fast. The reactor is robust when the world surprises it: every step is a fresh decision informed by the latest observation, so it can route around failures the planner would choke on. Many strong agents blend the two — make a rough plan, but re-plan reactively whenever an observation breaks an assumption.
+The planner is efficient when the world is predictable: it thinks once and executes fast. The reactor is robust when the world surprises it: every step is a fresh decision informed by the latest observation, so it can route around failures the planner would choke on. Many strong agents blend the two, make a rough plan, but re-plan reactively whenever an observation breaks an assumption.
 
 ## Why it matters
 
@@ -2001,7 +2001,7 @@ Picking the wrong style is a common, expensive mistake:
 
 ## The mental model to keep
 
-A planner is a chess player who calculates the whole line before touching a piece; a reactor is a boxer reading the opponent punch by punch. **Plan when the path is knowable; react when it is not — and the best agents do a bit of both.**`,
+A planner is a chess player who calculates the whole line before touching a piece; a reactor is a boxer reading the opponent punch by punch. **Plan when the path is knowable; react when it is not, and the best agents do a bit of both.**`,
       key_terms: [
         { term: "Plan-then-execute", definition: "An agent strategy that builds a complete ordered plan first, then carries it out step by step." },
         { term: "Reactive (ReAct) looping", definition: "An agent strategy that decides only the next step, observes the result, then decides again." },
@@ -2179,7 +2179,7 @@ executed in order: 4 of 4`,
       ],
       challenge_title: "Planner vs Reactor",
       challenge_description: "Run the same ordered plan two ways: a rigid plan-then-execute pass that aborts at the first failure, and a reactive pass that skips failures and keeps going.",
-      challenge_story: "You're benchmarking two agent designs on the exact same task so you can pick the right one for production. The task is an ordered list of steps, and each step either **succeeds** or **fails** when attempted. The **plan-then-execute** agent commits to the whole plan up front: it runs steps in order and the instant one fails, the rigid plan aborts — it cannot adapt. The **reactive** agent decides step by step: when a step fails, it observes the failure, skips it, and presses on to the next step, attempting every step in the queue. Your job is to report how each design fares on the same plan so the team can see the trade-off in numbers.",
+      challenge_story: "You're benchmarking two agent designs on the exact same task so you can pick the right one for production. The task is an ordered list of steps, and each step either **succeeds** or **fails** when attempted. The **plan-then-execute** agent commits to the whole plan up front: it runs steps in order and the instant one fails, the rigid plan aborts, it cannot adapt. The **reactive** agent decides step by step: when a step fails, it observes the failure, skips it, and presses on to the next step, attempting every step in the queue. Your job is to report how each design fares on the same plan so the team can see the trade-off in numbers.",
       challenge_statement: "Read **N** steps. Each step is a `name` and an integer `ok` (`1` means the step succeeds when attempted, `0` means it fails).\n\nSimulate both agents over the steps in order:\n\n- **Plan-then-execute:** count the steps completed from the start until the first failure. If a step has `ok = 0`, the plan aborts immediately and does not complete that step or any after it. The result is `DONE <c>` if all `N` steps completed, otherwise `ABORTED <c>`, where `c` is the number completed.\n- **Reactive:** attempt every step in order. Completed steps are those with `ok = 1`; failures are skipped but still attempted. Report `<completed> <attempts>`, where `attempts` is always `N`.\n\nPrint two lines: `PLAN <DONE|ABORTED> <c>` then `REACT <completed> <attempts>`.",
       challenge_input_format: "Line 1: integer `N`.\nNext `N` lines: `name ok` (ok is 0 or 1).",
       challenge_output_format: "Line 1: `PLAN DONE <c>` or `PLAN ABORTED <c>`.\nLine 2: `REACT <completed> <attempts>`.",
@@ -2192,7 +2192,7 @@ executed in order: 4 of 4`,
         { input: "3\nsearch 1\nbook 1\nnotify 1", output: "PLAN DONE 3\nREACT 3 3", explanation: "Every step succeeds, so the rigid plan finishes all 3 and the reactor completes all 3 of 3 attempts." },
         { input: "4\nsearch 1\nreserve 0\nbook 1\nnotify 1", output: "PLAN ABORTED 1\nREACT 3 4", explanation: "The plan aborts at the failed reserve after 1 completed step; the reactor skips reserve and completes the other 3 across 4 attempts." },
       ],
-      challenge_notes: "This is the trade-off in numbers: the rigid plan is efficient but brittle (one failure ends it), while the reactor is robust but does more work (it attempts everything). Real agents often blend the two — plan for direction, react around failures.",
+      challenge_notes: "This is the trade-off in numbers: the rigid plan is efficient but brittle (one failure ends it), while the reactor is robust but does more work (it attempts everything). Real agents often blend the two, plan for direction, react around failures.",
       challenge_hints: [
         "For the planner, loop the steps and break the moment you hit an ok of 0; count completions before the break.",
         "For the reactor, attempts is always N; completed is just the count of steps with ok == 1.",
@@ -2261,13 +2261,13 @@ main()
       title: "Human-in-the-Loop and Approvals",
       concept: "Approvals",
       xp_reward: 10,
-      explanation: `In 2024 an experimental coding agent, told to "clean up the project," confidently ran a command that wiped a developer's uncommitted work. The agent did exactly what it decided was right. The problem was that nobody stood between its decision and the irreversible action. The fix is not a smarter model — it is an **approval gate**: a checkpoint where a human says yes before the agent does anything it cannot take back.
+      explanation: `In 2024 an experimental coding agent, told to "clean up the project," confidently ran a command that wiped a developer's uncommitted work. The agent did exactly what it decided was right. The problem was that nobody stood between its decision and the irreversible action. The fix is not a smarter model, it is an **approval gate**: a checkpoint where a human says yes before the agent does anything it cannot take back.
 
 ## What it is
 
 **Human-in-the-loop** (HITL) means inserting a person's approval into the agent's action loop for high-stakes steps. The agent does not execute a gated action directly. It **proposes** the action, the runtime **pauses**, a human **approves or rejects**, and only an approved action runs.
 
-The key idea is sorting actions by risk. Reading a file, searching the web, doing math — low stakes, run freely. Sending money, deleting data, emailing customers, deploying code — high stakes, gate them. You are drawing a line between actions that are *reversible and cheap* and actions that are *irreversible or expensive*.
+The key idea is sorting actions by risk. Reading a file, searching the web, doing math, low stakes, run freely. Sending money, deleting data, emailing customers, deploying code, high stakes, gate them. You are drawing a line between actions that are *reversible and cheap* and actions that are *irreversible or expensive*.
 
 ## How it works
 
@@ -2286,7 +2286,7 @@ print(run_with_approval("delete_file", False))  # BLOCKED
 print(run_with_approval("delete_file", True))   # RAN: delete_file
 \`\`\`
 
-A safe approval gate has three properties. It **defaults to blocking** — an unrecognized or unapproved risky action does not run. It **shows the human the exact action**, including arguments, so they approve what will really happen, not a vague summary. And it **logs the decision**, so there is a record of who approved what.
+A safe approval gate has three properties. It **defaults to blocking**: an unrecognized or unapproved risky action does not run. It **shows the human the exact action**, including arguments, so they approve what will really happen, not a vague summary. And it **logs the decision**, so there is a record of who approved what.
 
 ## Why it matters
 
@@ -2473,7 +2473,7 @@ RAN: delete_file`,
       ],
       challenge_title: "The Approval Gate",
       challenge_description: "Run a queue of proposed agent actions through an approval gate, executing safe ones freely, gating risky ones on human approval, and tallying the outcome.",
-      challenge_story: "Your agent is getting access to real systems, so an approval gate now sits between its decisions and execution. You hold a list of **risky** tools — the irreversible or expensive ones. For every action the agent proposes, the gate decides: if the tool is not risky, it runs immediately; if it is risky, it runs only when a human **approve**s it, and is **BLOCKED** otherwise (default-deny). You must print what happens to each proposed action in order, then a final summary of how many ran and how many were blocked — the audit trail that proves nothing dangerous slipped through unapproved.",
+      challenge_story: "Your agent is getting access to real systems, so an approval gate now sits between its decisions and execution. You hold a list of **risky** tools, the irreversible or expensive ones. For every action the agent proposes, the gate decides: if the tool is not risky, it runs immediately; if it is risky, it runs only when a human **approve**s it, and is **BLOCKED** otherwise (default-deny). You must print what happens to each proposed action in order, then a final summary of how many ran and how many were blocked, the audit trail that proves nothing dangerous slipped through unapproved.",
       challenge_statement: "First read **M** risky tool names, one per line. Then read **Q** proposed actions, each a tool `name` and a `decision` (`approve` or `deny`; safe tools may also carry `none`).\n\nFor each proposed action, in order:\n\n- If the tool is **not** in the risky set, print `EXECUTE <name>` (it runs regardless of the decision field).\n- If the tool **is** risky and the decision is `approve`, print `EXECUTE <name>`.\n- If the tool **is** risky and the decision is anything other than `approve`, print `BLOCKED <name>` (default-deny).\n\nAfter all actions, print `SUMMARY <e> executed <b> blocked`, where `e` and `b` count the EXECUTE and BLOCKED lines.",
       challenge_input_format: "Line 1: integer `M`, the number of risky tools.\nNext `M` lines: one risky tool name each.\nNext line: integer `Q`.\nNext `Q` lines: `name decision`.",
       challenge_output_format: "`Q` lines (`EXECUTE <name>` or `BLOCKED <name>`), then a final line `SUMMARY <e> executed <b> blocked`.",
@@ -2487,7 +2487,7 @@ RAN: delete_file`,
         { input: "2\ndelete_file\nsend_payment\n4\nread_file none\ndelete_file approve\nsend_payment deny\ndelete_file none", output: "EXECUTE read_file\nEXECUTE delete_file\nBLOCKED send_payment\nBLOCKED delete_file\nSUMMARY 2 executed 2 blocked", explanation: "read_file is safe so it runs; delete_file with approve runs; send_payment denied and delete_file with no approval are blocked." },
         { input: "1\ndrop_table\n2\nsearch none\ndrop_table deny", output: "EXECUTE search\nBLOCKED drop_table\nSUMMARY 1 executed 1 blocked", explanation: "search is not risky and runs; drop_table is risky and was not approved, so it is blocked." },
       ],
-      challenge_notes: "This is the human-in-the-loop pattern as runtime code: safe actions flow through, risky ones need an explicit yes, and the default for a risky action is to block. The summary is the audit trail — proof that every executed risky action was approved.",
+      challenge_notes: "This is the human-in-the-loop pattern as runtime code: safe actions flow through, risky ones need an explicit yes, and the default for a risky action is to block. The summary is the audit trail, proof that every executed risky action was approved.",
       challenge_hints: [
         "Store the risky tools in a set for O(1) membership checks.",
         "An action runs if the tool is not risky, OR it is risky and the decision is exactly 'approve'.",

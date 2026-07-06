@@ -23,7 +23,7 @@ export default {
 
 ## What it is
 
-A **pipeline** is any chain where a model's output feeds the next step automatically: a database insert, an API call, a UI that renders fields. Pipelines need **machine-readable** data — predictable shapes a program can index into. Free text is the opposite: fluent, varied, and unpredictable. The model that's so good at sounding human is, by default, terrible at being a reliable data source.
+A **pipeline** is any chain where a model's output feeds the next step automatically: a database insert, an API call, a UI that renders fields. Pipelines need **machine-readable** data, predictable shapes a program can index into. Free text is the opposite: fluent, varied, and unpredictable. The model that's so good at sounding human is, by default, terrible at being a reliable data source.
 
 The core mismatch: an LLM optimizes for **plausible prose**, but your code needs **rigid structure**. Those two goals fight every single request.
 
@@ -34,7 +34,7 @@ Walk through what breaks when you parse prose:
 1. You ask for data. "Give me the customer's name and order total."
 2. The model answers in a sentence. "The customer is Dana Lee and they owe forty-two fifty."
 3. Your code tries to extract. It hunts for a name and a number, often with brittle string slicing or a regular expression.
-4. The format drifts. Next request says "Total: \\$42.50" — different words, different spacing, and your parser silently grabs the wrong thing.
+4. The format drifts. Next request says "Total: \\$42.50", different words, different spacing, and your parser silently grabs the wrong thing.
 
 Here is the fragile pattern people reach for first:
 
@@ -57,15 +57,15 @@ Brittle parsing is one of the top reasons AI prototypes never ship:
 - **Endless edge cases.** Every phrasing the model invents is a bug you didn't anticipate. The backlog never shrinks.
 - **No type safety.** Free text has no notion of "this field is an integer." You're casting strings and praying.
 
-The fix is not a smarter regex. The fix is to stop receiving prose at all — to make the model emit structured data in the first place, which the rest of this module is about.
+The fix is not a smarter regex. The fix is to stop receiving prose at all, to make the model emit structured data in the first place, which the rest of this module is about.
 
 ## The mental model to keep
 
-**Prose is for humans; structure is for code.** The moment a model's output feeds another program, you want JSON, not sentences. Don't parse English — demand a shape.`,
+**Prose is for humans; structure is for code.** The moment a model's output feeds another program, you want JSON, not sentences. Don't parse English, demand a shape.`,
       key_terms: [
         { term: "Pipeline", definition: "A chain where one step's output is automatically fed into the next, with no human in between." },
         { term: "Machine-readable", definition: "Data in a predictable, rigid shape (like JSON) that a program can index into reliably." },
-        { term: "Parsing", definition: "Extracting structured values out of raw text — brittle and error-prone when the text is free-form prose." }
+        { term: "Parsing", definition: "Extracting structured values out of raw text, brittle and error-prone when the text is free-form prose." }
       ],
       callouts: [
         { type: "analogy", title: "A waiter who never repeats an order the same way", content: "Imagine a waiter who delivers your meal perfectly but reads the bill back differently every time: once a total, once 'about forty bucks,' once itemized. A human shrugs; a cash register can't function. Your code is the register.", position: "before" },
@@ -167,7 +167,7 @@ note: this breaks if the model rewords the sentence`,
           prompt: 'A model replies "The customer is Dana Lee." You need just the name in your database. Why is slicing the string at a fixed position a bad idea?',
           steps: [
             "Fixed-position slicing assumes the sentence always has the exact same wording and length.",
-            'The next reply might be "Customer name: Dana Lee" or "That would be Dana Lee" — different offsets.',
+            'The next reply might be "Customer name: Dana Lee" or "That would be Dana Lee", different offsets.',
             "Any wording change shifts where the name sits, so the slice grabs the wrong characters."
           ],
           output: "Because the wording is not fixed, position-based slicing breaks the moment the model rephrases."
@@ -178,7 +178,7 @@ note: this breaks if the model rewords the sentence`,
           steps: [
             'In testing, replies were tidy ("Total: \\$342.00") so the regex grabbed the right number.',
             'In production the model wrote "Tax \\$3, subtotal \\$339, total \\$342" and the regex matched the first dollar amount, \\$3.',
-            "The parser failed silently — no crash — so the wrong charge went through.",
+            "The parser failed silently, no crash, so the wrong charge went through.",
             "The structural fix is to never parse prose for money: require the model to return JSON like {\"total\": 342.00} so there is exactly one labeled field to read."
           ],
           output: "The regex matched the first of several numbers; the fix is to demand a labeled JSON field instead of parsing a sentence."
@@ -192,7 +192,7 @@ note: this breaks if the model rewords the sentence`,
             { cells: ["Shape", "Varies every request", "Fixed, predictable keys"] },
             { cells: ["Extraction", "Brittle regex / slicing", "Direct key lookup"] },
             { cells: ["Failure mode", "Silent wrong values", "Loud, catchable errors"] },
-            { cells: ["Fit for code", "Poor — meant for humans", "Strong — meant for machines"], highlight: true }
+            { cells: ["Fit for code", "Poor, meant for humans", "Strong, meant for machines"], highlight: true }
           ]
         }
       ],
@@ -216,7 +216,7 @@ note: this breaks if the model rewords the sentence`,
       reflections: [
         {
           prompt: "In your own words: why does a feature that parses model prose often work perfectly in a demo but fail once real users hit it?",
-          sampleAnswer: "In a demo you only see a few replies, and they happen to be worded cleanly, so the parser grabs the right values. Real users trigger far more variety, and the model rewords its answers in ways the parser never anticipated. Because parsing failures are usually silent, the wrong data slips through unnoticed until something visibly breaks downstream — which is exactly when it is hardest to trace back to the prose."
+          sampleAnswer: "In a demo you only see a few replies, and they happen to be worded cleanly, so the parser grabs the right values. Real users trigger far more variety, and the model rewords its answers in ways the parser never anticipated. Because parsing failures are usually silent, the wrong data slips through unnoticed until something visibly breaks downstream, which is exactly when it is hardest to trace back to the prose."
         }
       ],
       hints: [
@@ -226,10 +226,10 @@ note: this breaks if the model rewords the sentence`,
       ],
       challenge_title: "Count the parsing landmines",
       challenge_description: "Audit a batch of model replies and find which ones a naive 'grab the first dollar amount' parser would silently corrupt.",
-      challenge_story: "You run the billing pipeline at an AI customer-support startup. The model answers refund questions in free text, and a regex downstream grabs the **first** dollar amount it sees and charges it. It worked in the demo. Then a reply said `Tax $3.00, subtotal $339.00, total $342.00` — and a customer got refunded **$3.00** instead of $342.00. No crash, no log, just a furious ticket.\n\nBefore you rip out the regex, you need to know how bad it is. Scan every reply in last night's batch and find which ones contain **more than one** dollar amount (the dangerous ones), and which single reply is the worst offender.",
+      challenge_story: "You run the billing pipeline at an AI customer-support startup. The model answers refund questions in free text, and a regex downstream grabs the **first** dollar amount it sees and charges it. It worked in the demo. Then a reply said `Tax $3.00, subtotal $339.00, total $342.00`, and a customer got refunded **$3.00** instead of $342.00. No crash, no log, just a furious ticket.\n\nBefore you rip out the regex, you need to know how bad it is. Scan every reply in last night's batch and find which ones contain **more than one** dollar amount (the dangerous ones), and which single reply is the worst offender.",
       challenge_statement: "You are given a batch of `n` model replies, one per line. A **dollar amount** is a `$` immediately followed by a run of characters made up of digits, `.`, and `,`, where **at least one digit** appears in that run (so a bare `$` or `$.` does not count).\n\nA reply is **risky** if it contains **2 or more** dollar amounts, because a first-match parser could pick the wrong one.\n\nCompute:\n1. The number of risky replies.\n2. The 1-based index of the reply containing the **most** dollar amounts, and that count. If several replies tie for the most, report the one with the **smallest index**.",
       challenge_input_format: "The first line contains an integer `n`, the number of replies. Each of the next `n` lines is one reply (it may contain spaces and punctuation).",
-      challenge_output_format: "Line 1: the number of risky replies (replies with 2+ dollar amounts).\nLine 2: two space-separated integers — the 1-based index of the reply with the most dollar amounts, and that maximum count.",
+      challenge_output_format: "Line 1: the number of risky replies (replies with 2+ dollar amounts).\nLine 2: two space-separated integers, the 1-based index of the reply with the most dollar amounts, and that maximum count.",
       challenge_constraints: [
         "1 <= n <= 1000",
         "Each reply line has length 0 to 500 characters.",
@@ -250,9 +250,9 @@ note: this breaks if the model rewords the sentence`,
       ],
       challenge_notes: "Walk each line character by character. When you hit a `$`, scan the following digits/`.`/`,` and only count it if you saw at least one digit. Track risky replies and the running maximum together in one pass.",
       challenge_hints: [
-        "You do not need regex — a simple left-to-right scan that reacts to `$` is enough and easier to reason about.",
+        "You do not need regex, a simple left-to-right scan that reacts to `$` is enough and easier to reason about.",
         "Keep the max count and its index updated as you go; only replace the max when you find a strictly larger count, so ties keep the smaller index.",
-        "Remember the 'at least one digit' rule — a stray `$` in prose like 'the $ sign' must not be counted."
+        "Remember the 'at least one digit' rule, a stray `$` in prose like 'the $ sign' must not be counted."
       ],
       challenge_difficulty: "intermediate",
       challenge_starter_code: `import sys
@@ -261,7 +261,7 @@ def main():
     data = sys.stdin.read().split("\\n")
     n = int(data[0])
     lines = data[1:1 + n]  # parse done: 'lines' holds the n reply strings
-    # TODO: for each line, count dollar amounts ($ + digits/.,, with >=1 digit).
+    # TODO: for each line, count dollar amounts ($ + digits/., with >=1 digit).
     # Count risky replies (2+ amounts) and track the worst offender.
 
 main()
@@ -316,13 +316,13 @@ main()
       title: "JSON Mode & Schemas",
       concept: "JSON",
       xp_reward: 10,
-      explanation: `Add one parameter to your API call and the model can no longer answer in a chatty sentence. It must return valid **JSON**. That single flag turns the unreliable-prose problem from lesson 1 into a solved one — most of the time. The rest of the work is telling the model exactly what shape you want.
+      explanation: `Add one parameter to your API call and the model can no longer answer in a chatty sentence. It must return valid **JSON**. That single flag turns the unreliable-prose problem from lesson 1 into a solved one, most of the time. The rest of the work is telling the model exactly what shape you want.
 
 ## What it is
 
 **JSON** (JavaScript Object Notation) is a simple, universal format for structured data: keys mapped to values, with strings, numbers, booleans, lists, and nested objects. Every language can parse it in one line. It is the lingua franca between an LLM and your code.
 
-**JSON mode** is a setting on modern model APIs that constrains the output so it is always syntactically valid JSON — no prose wrapper, no trailing commentary, no broken brackets. A **schema** goes further: it specifies the exact keys, their types, and which are required, so you get not just valid JSON but the *right* JSON.
+**JSON mode** is a setting on modern model APIs that constrains the output so it is always syntactically valid JSON, no prose wrapper, no trailing commentary, no broken brackets. A **schema** goes further: it specifies the exact keys, their types, and which are required, so you get not just valid JSON but the *right* JSON.
 
 ## How it works
 
@@ -359,7 +359,7 @@ There's one honest caveat: JSON mode guarantees *syntax*, and a strict schema gu
 
 ## The mental model to keep
 
-**JSON mode fixes the brackets; the schema fixes the shape.** You're handing the model a fill-in-the-blank form instead of a blank page — and forms are easy for code to read.`,
+**JSON mode fixes the brackets; the schema fixes the shape.** You're handing the model a fill-in-the-blank form instead of a blank page, and forms are easy for code to read.`,
       key_terms: [
         { term: "JSON", definition: "A universal text format of keys and values that every programming language can parse in one line." },
         { term: "JSON mode", definition: "An API setting that constrains a model's output so it is always syntactically valid JSON." },
@@ -468,7 +468,7 @@ active: True`,
           steps: [
             "Call json.loads on the string to turn it into a Python dictionary.",
             'Index the dictionary with the key: data["population"].',
-            "Because JSON numbers parse to Python ints/floats, the value is already numeric — no casting needed."
+            "Because JSON numbers parse to Python ints/floats, the value is already numeric, no casting needed."
           ],
           output: 'data = json.loads(reply); data["population"] gives 2100000 as an int.'
         },
@@ -489,8 +489,8 @@ active: True`,
           title: "three levels of output control",
           columns: ["Approach", "Guarantees valid JSON", "Guarantees keys/types", "Best for"],
           rows: [
-            { cells: ["Plain prompt ('reply in JSON')", "No — may add prose", "No", "Quick experiments"] },
-            { cells: ["JSON mode only", "Yes", "No — keys can drift", "Loose, exploratory output"] },
+            { cells: ["Plain prompt ('reply in JSON')", "No, may add prose", "No", "Quick experiments"] },
+            { cells: ["JSON mode only", "Yes", "No, keys can drift", "Loose, exploratory output"] },
             { cells: ["JSON mode + enforced schema", "Yes", "Yes", "Production pipelines"], highlight: true }
           ]
         }
@@ -525,7 +525,7 @@ active: True`,
       ],
       challenge_title: "Validate required keys",
       challenge_description: "Enforce a JSON schema's required keys across a batch of model responses and report exactly what each one is missing.",
-      challenge_story: "Your extraction service asked the model for user records in JSON mode, but JSON mode only guarantees the output is **valid JSON** — not that it has the keys your database needs. Last week a response came back as the perfectly-valid array `[1, 2, 3]`, and a downstream `data['name']` lookup blew up a worker mid-batch.\n\nYou are adding a schema gate in front of the database writer. Given the list of required keys, every incoming record must be checked: is it even a JSON object? If so, does it carry every required key? Anything that fails gets logged precisely so the on-call engineer knows whether to re-prompt or page the model team.",
+      challenge_story: "Your extraction service asked the model for user records in JSON mode, but JSON mode only guarantees the output is **valid JSON**, not that it has the keys your database needs. Last week a response came back as the perfectly-valid array `[1, 2, 3]`, and a downstream `data['name']` lookup blew up a worker mid-batch.\n\nYou are adding a schema gate in front of the database writer. Given the list of required keys, every incoming record must be checked: is it even a JSON object? If so, does it carry every required key? Anything that fails gets logged precisely so the on-call engineer knows whether to re-prompt or page the model team.",
       challenge_statement: "You are given a list of **required keys** and a batch of `n` model responses, one per line.\n\nFor each response, in order, print exactly one verdict:\n- If the line is not valid JSON, **or** the parsed value is not a JSON object (e.g. an array or a number), print `INVALID_JSON`.\n- Otherwise, if the object is missing one or more required keys, print `MISSING ` followed by the missing keys **in the order they appear in the required-keys list**, space-separated.\n- Otherwise (all required keys present) print `OK`.\n\nAfter all `n` verdicts, print the number of responses that printed `OK`.",
       challenge_input_format: "Line 1: the required keys, space-separated (at least one key, no spaces inside a key).\nLine 2: an integer `n`, the number of responses.\nNext `n` lines: one JSON response each.",
       challenge_output_format: "`n` verdict lines (`OK`, `INVALID_JSON`, or `MISSING k1 k2 ...`), followed by one final line with the integer count of `OK` responses.",
@@ -548,10 +548,10 @@ active: True`,
           explanation: "Record 1 fails to parse. Record 2 is missing two keys, listed in required order. Record 3 is complete."
         }
       ],
-      challenge_notes: "Use `json.loads` inside a try/except for `ValueError`. After parsing, check `isinstance(obj, dict)` before looking for keys — JSON mode happily returns arrays and numbers that would crash a key lookup.",
+      challenge_notes: "Use `json.loads` inside a try/except for `ValueError`. After parsing, check `isinstance(obj, dict)` before looking for keys, JSON mode happily returns arrays and numbers that would crash a key lookup.",
       challenge_hints: [
         "Wrap `json.loads(line)` in try/except ValueError; a parse failure means `INVALID_JSON`.",
-        "Even when JSON parses, confirm it is a dict — `[1, 2, 3]` is valid JSON but has no keys.",
+        "Even when JSON parses, confirm it is a dict, `[1, 2, 3]` is valid JSON but has no keys.",
         "Build the missing list by iterating the required-keys list (not the object's keys) so the order is deterministic."
       ],
       challenge_difficulty: "intermediate",
@@ -609,11 +609,11 @@ main()
       title: "Function Calling for Structure",
       concept: "ToolSchema",
       xp_reward: 10,
-      explanation: `Instead of asking a model "please reply in JSON and pretty please use these keys," you hand it a **function** and say: "call this." The model responds not with prose, not even with loose JSON, but with the exact arguments that function expects. Function calling is JSON schemas with a steering wheel attached — and it's how serious AI features get reliable structure.
+      explanation: `Instead of asking a model "please reply in JSON and pretty please use these keys," you hand it a **function** and say: "call this." The model responds not with prose, not even with loose JSON, but with the exact arguments that function expects. Function calling is JSON schemas with a steering wheel attached, and it's how serious AI features get reliable structure.
 
 ## What it is
 
-**Function calling** (also called **tool use**) lets you describe a function to the model — its name, what it does, and a schema for its parameters. The model, instead of answering in text, returns a structured request to call that function with specific arguments. You define the shape; the model fills it.
+**Function calling** (also called **tool use**) lets you describe a function to the model, its name, what it does, and a schema for its parameters. The model, instead of answering in text, returns a structured request to call that function with specific arguments. You define the shape; the model fills it.
 
 The description of that function and its parameters is the **tool schema**. It is a JSON Schema that names each argument, gives its type, and marks which are required. The model treats it as a binding contract for how to respond.
 
@@ -623,7 +623,7 @@ The flow has a clean shape:
 
 1. **You define a tool.** A name, a plain-language description of when to use it, and a parameter schema with typed fields.
 2. **You send it with the prompt.** "Extract the order details from this email" plus the \`record_order\` tool.
-3. **The model returns a tool call.** Not prose — a structured object: the tool name and an arguments object matching your schema.
+3. **The model returns a tool call.** Not prose, a structured object: the tool name and an arguments object matching your schema.
 4. **Your code runs (or just reads) it.** You parse the arguments straight into your function, database, or API.
 
 Here is a tool definition and the structured call it produces:
@@ -657,11 +657,11 @@ Function calling is the backbone of agents and real integrations:
 - **It maps to real actions.** A tool call lines up one-to-one with calling your code: send an email, query a database, charge a card. This is what turns a chatbot into an agent.
 - **Multiple tools, the model picks.** Give it \`record_order\`, \`issue_refund\`, and \`check_status\`; it chooses the right one and fills the right arguments based on the user's request.
 
-The same honest caveat from JSON mode applies: the schema guarantees the *shape* of the arguments, not that the *values* are right. \`total\` will be a number — but it could be the wrong number. Validate before you act on anything that matters.
+The same honest caveat from JSON mode applies: the schema guarantees the *shape* of the arguments, not that the *values* are right. \`total\` will be a number, but it could be the wrong number. Validate before you act on anything that matters.
 
 ## The mental model to keep
 
-**A tool schema is a job application form for the model.** You hand it the form (name, fields, types); it fills in the blanks with structured arguments. You never read prose — you read a completed form your code already knows how to process.`,
+**A tool schema is a job application form for the model.** You hand it the form (name, fields, types); it fills in the blanks with structured arguments. You never read prose, you read a completed form your code already knows how to process.`,
       key_terms: [
         { term: "Function calling", definition: "Describing a function to the model so it responds with structured arguments to call it, instead of prose." },
         { term: "Tool use", definition: "Another name for function calling: giving the model tools it can invoke with structured inputs." },
@@ -669,7 +669,7 @@ The same honest caveat from JSON mode applies: the schema guarantees the *shape*
         { term: "Tool call", definition: "The structured object the model returns: the chosen tool's name plus an arguments object matching the schema." }
       ],
       callouts: [
-        { type: "analogy", title: "A job application form", content: "A tool schema is a form with labeled, typed fields. The model can only fill in the blanks you defined, so what comes back is a completed form your code already knows how to read — never a free-form essay.", position: "before" },
+        { type: "analogy", title: "A job application form", content: "A tool schema is a form with labeled, typed fields. The model can only fill in the blanks you defined, so what comes back is a completed form your code already knows how to read, never a free-form essay.", position: "before" },
         { type: "insight", title: "Tool calls map to real actions", content: "A function call from the model lines up one-to-one with calling your code. That's the leap from a chatbot that talks to an agent that does things.", position: "after" }
       ],
       concept_diagram: {
@@ -762,7 +762,7 @@ total: 42.5`,
             { label: "Define the tool", detail: "You spell out the function name, what it does, and a typed parameter schema with required fields.", code: 'record_order(customer: str, total: number)' },
             { label: "Send it with the email", detail: "The request carries the messy customer email plus the tool definition.", code: '"Hi, Dana Lee here, my order was 42.50" + tool' },
             { label: "Model returns a tool call", detail: "Instead of summarizing in prose, it emits the tool name and arguments shaped to your schema.", code: '{"name": "record_order", "arguments": {...}}' },
-            { label: "Run the function", detail: "Your code reads the arguments directly and performs the real action — a database insert, here.", code: 'db.insert(customer="Dana Lee", total=42.5)' }
+            { label: "Run the function", detail: "Your code reads the arguments directly and performs the real action, a database insert, here.", code: 'db.insert(customer="Dana Lee", total=42.5)' }
           ]
         }
       ],
@@ -822,7 +822,7 @@ total: 42.5`,
       reflections: [
         {
           prompt: "In your own words: why is function calling described as the bridge from a chatbot to an agent?",
-          sampleAnswer: "A chatbot only produces text for a human to read and act on, but a tool call from the model maps one-to-one onto running real code — sending an email, querying a database, issuing a refund. By defining tools and letting the model choose and fill them, you let the model trigger actions directly instead of just describing them, which is exactly what turns a conversational model into an agent that does things in the world."
+          sampleAnswer: "A chatbot only produces text for a human to read and act on, but a tool call from the model maps one-to-one onto running real code, sending an email, querying a database, issuing a refund. By defining tools and letting the model choose and fill them, you let the model trigger actions directly instead of just describing them, which is exactly what turns a conversational model into an agent that does things in the world."
         }
       ],
       hints: [
@@ -831,8 +831,8 @@ total: 42.5`,
         "Print the customer and total by indexing that arguments dictionary."
       ],
       challenge_title: "Route the right tool",
-      challenge_description: "Build the dispatcher that turns a model's function calls into real, allow-listed actions — and refuses anything it doesn't recognize.",
-      challenge_story: "Your support agent finally graduated from a chatbot that *talks* to an agent that *acts*. The model emits **function calls** — structured `{name, arguments}` objects — and your dispatcher runs the matching code. You expose exactly two tools: `issue_refund(order_id, amount_cents)` and `check_status(order_id)`.\n\nBut the model is not always well-behaved: a jailbreak attempt or a hallucination can produce a call to a tool you never defined, like `delete_db`. Your dispatcher is the security boundary. It must execute only the tools on the allow-list, reject everything else, and keep a running tally of how much money it actually refunded — money is in **integer cents** so there is never a float to round.",
+      challenge_description: "Build the dispatcher that turns a model's function calls into real, allow-listed actions, and refuses anything it doesn't recognize.",
+      challenge_story: "Your support agent finally graduated from a chatbot that *talks* to an agent that *acts*. The model emits **function calls**, structured `{name, arguments}` objects, and your dispatcher runs the matching code. You expose exactly two tools: `issue_refund(order_id, amount_cents)` and `check_status(order_id)`.\n\nBut the model is not always well-behaved: a jailbreak attempt or a hallucination can produce a call to a tool you never defined, like `delete_db`. Your dispatcher is the security boundary. It must execute only the tools on the allow-list, reject everything else, and keep a running tally of how much money it actually refunded, money is in **integer cents** so there is never a float to round.",
       challenge_statement: "You are given `n` function calls from the model, one per line, each a JSON object with a `name` and an `arguments` object. Process them in order:\n\n- If `name` is `issue_refund`, execute it: print `REFUND order O amount C` where `O` is `arguments.order_id` and `C` is `arguments.amount_cents`. Add `C` to the running refund total.\n- If `name` is `check_status`, execute it: print `STATUS order O` where `O` is `arguments.order_id`.\n- For any other `name`, reject it: print `REJECT name` (the offending tool name). Do not execute it.\n\nAfter all calls, print two space-separated integers: the number of calls **executed** (refund or status, not rejected) and the **total cents refunded**.",
       challenge_input_format: "Line 1: an integer `n`, the number of function calls.\nNext `n` lines: one JSON object each, with keys `name` (string) and `arguments` (object). `issue_refund` arguments contain integer `order_id` and `amount_cents`; `check_status` arguments contain integer `order_id`.",
       challenge_output_format: "One line per call (`REFUND ...`, `STATUS ...`, or `REJECT ...`), then a final line with two space-separated integers: executed-count and total-cents-refunded.",
@@ -841,7 +841,7 @@ total: 42.5`,
         "0 <= order_id <= 10^9",
         "0 <= amount_cents <= 10^9",
         "Only `issue_refund` and `check_status` are on the allow-list; every other name is rejected and never executed.",
-        "All money is in integer cents — no floating point anywhere."
+        "All money is in integer cents, no floating point anywhere."
       ],
       challenge_examples: [
         {
@@ -855,11 +855,11 @@ total: 42.5`,
           explanation: "The `delete_db` call is not on the allow-list, so it is rejected and not counted. Two refunds executed totaling 349 cents."
         }
       ],
-      challenge_notes: "The allow-list pattern is the whole point of safe tool use: the model proposes, your dispatcher disposes. Never `eval` or dynamically dispatch on a model-supplied name — branch explicitly on the names you trust.",
+      challenge_notes: "The allow-list pattern is the whole point of safe tool use: the model proposes, your dispatcher disposes. Never `eval` or dynamically dispatch on a model-supplied name, branch explicitly on the names you trust.",
       challenge_hints: [
         "Parse each line with `json.loads`, then branch on `call['name']`.",
         "Keep two accumulators: a count of executed calls and a sum of refunded cents.",
-        "Anything not matching your two known names falls through to the REJECT branch — and must not touch the accumulators."
+        "Anything not matching your two known names falls through to the REJECT branch, and must not touch the accumulators."
       ],
       challenge_difficulty: "intermediate",
       challenge_starter_code: `import sys, json
@@ -917,15 +917,15 @@ main()
 
 ## What it is
 
-**Validation** is verifying that structured output satisfies your real-world rules — not just that it parses. Syntax is "is this valid JSON?" Schema is "are the keys and types right?" Validation is "are the *values* actually acceptable?" An age must be positive. An email must contain an "@". A status must be one of a known set.
+**Validation** is verifying that structured output satisfies your real-world rules, not just that it parses. Syntax is "is this valid JSON?" Schema is "are the keys and types right?" Validation is "are the *values* actually acceptable?" An age must be positive. An email must contain an "@". A status must be one of a known set.
 
-When validation fails, you have a choice: **reject** the output, or **repair** it — fix it programmatically, or send it back to the model with the error and ask for a corrected version.
+When validation fails, you have a choice: **reject** the output, or **repair** it, fix it programmatically, or send it back to the model with the error and ask for a corrected version.
 
 ## How it works
 
 A robust structured-output step has layers, each catching what the last can't:
 
-1. **Parse.** \`json.loads\` — does it parse at all? Wrap in try/except.
+1. **Parse.** \`json.loads\`, does it parse at all? Wrap in try/except.
 2. **Check the shape.** Are all required keys present, with the right types?
 3. **Check the values.** Apply business rules: ranges, allowed sets, formats, cross-field logic.
 4. **Repair or reject.** If something fails, either fix it, drop the record, or re-prompt the model with the specific error.
@@ -945,7 +945,7 @@ bad = {"age": -7, "email": "not-an-email"}
 print(validate(bad))  # ['age must be a non-negative integer', 'email looks invalid']
 \`\`\`
 
-The **repair loop** is the powerful part: if \`validate\` returns errors, you send the model a follow-up — "Your last output had these problems: ... Return corrected JSON." Because the model now sees the exact failure, it usually fixes it on the second try. Libraries automate this, but the idea is just: validate, and on failure, feed the error back.
+The **repair loop** is the powerful part: if \`validate\` returns errors, you send the model a follow-up, "Your last output had these problems: ... Return corrected JSON." Because the model now sees the exact failure, it usually fixes it on the second try. Libraries automate this, but the idea is just: validate, and on failure, feed the error back.
 
 ## Why it matters
 
@@ -955,11 +955,11 @@ Validation is the difference between a toy and a system you can trust with real 
 - **It fails loudly and early.** A rejected record raises a clear error at the boundary, instead of silently poisoning a database three steps downstream.
 - **Repair makes it self-healing.** Instead of crashing on a bad response, the pipeline asks the model to try again with feedback, recovering from the occasional miss automatically.
 
-The mindset: **never trust model output, even when it's well-formed.** Treat it like input from a stranger on the internet — because in effect, that's what it is.
+The mindset: **never trust model output, even when it's well-formed.** Treat it like input from a stranger on the internet, because in effect, that's what it is.
 
 ## The mental model to keep
 
-**Syntax, shape, then sense.** JSON mode and schemas handle the first two; only your validation handles the third. Check the values, and when they fail, repair or reject — never blindly act.`,
+**Syntax, shape, then sense.** JSON mode and schemas handle the first two; only your validation handles the third. Check the values, and when they fail, repair or reject, never blindly act.`,
       key_terms: [
         { term: "Validation", definition: "Checking that structured output satisfies real-world value rules, not just that it parses or matches a schema." },
         { term: "Repair loop", definition: "Sending failed output back to the model with the specific error so it can return a corrected version." },
@@ -1078,7 +1078,7 @@ valid: False`,
           prompt: "You extract events with start_date and end_date. A response passes JSON mode and the schema (both are valid date strings), but end_date is before start_date. Why didn't earlier layers catch it, and how do you design the validation and repair?",
           steps: [
             "JSON mode only checked syntax; the schema only checked that both fields are strings of the right type.",
-            "Neither layer understands the cross-field rule that an end must come after a start — that is domain logic.",
+            "Neither layer understands the cross-field rule that an end must come after a start, that is domain logic.",
             "Add a value check that parses both dates and asserts end_date >= start_date.",
             "On failure, re-prompt the model with the specific error: 'end_date precedes start_date; correct the dates.'",
             "If repair still fails after a retry or two, reject the record so bad data never enters the pipeline."
@@ -1126,9 +1126,9 @@ valid: False`,
         "Append a clear message to errors for each rule that fails, then check if the list is empty."
       ],
       challenge_title: "Validate with allowed values",
-      challenge_description: "Catch the orders that parse perfectly but make no sense — wrong totals, made-up statuses — before they poison your database.",
-      challenge_story: "Schema validation got you well-formed JSON, but well-formed is not the same as correct. The model can hand you `{\"total\": 0, \"status\": \"shippd\"}` — valid JSON, right types-ish, and total nonsense. A $0 order and a typo'd status will sail straight past a parser and corrupt your analytics.\n\nYou are writing the **business-rules gate** that runs after parsing. Each order must have a `total` that is a positive number and a `status` drawn from a fixed allow-list. Tricky part: JSON booleans parse to Python `True`/`False`, which are technically integers — `True` must **not** count as a valid total. The gate accepts clean orders, rejects the rest with a precise reason, and reports the acceptance rate.",
-      challenge_statement: "You are given `n` orders, one JSON object per line. For each order, in order, apply two rules:\n1. `total` must be a number (int or float) **greater than 0**. A boolean is **not** a valid number here.\n2. `status` must be exactly one of `pending`, `shipped`, `delivered`.\n\nFor each order print one line:\n- If it passes both rules: `ACCEPT i` (where `i` is the 1-based order index).\n- Otherwise: `REJECT i: ` followed by the failed-rule messages joined by `; `, in this fixed order — first the total message `total must be a positive number` (if total failed), then the status message `status must be one of pending, shipped, delivered` (if status failed).\n\nAfter all orders, print `a/n` where `a` is the number of accepted orders and `n` is the total.",
+      challenge_description: "Catch the orders that parse perfectly but make no sense, wrong totals, made-up statuses, before they poison your database.",
+      challenge_story: "Schema validation got you well-formed JSON, but well-formed is not the same as correct. The model can hand you `{\"total\": 0, \"status\": \"shippd\"}`, valid JSON, right types-ish, and total nonsense. A $0 order and a typo'd status will sail straight past a parser and corrupt your analytics.\n\nYou are writing the **business-rules gate** that runs after parsing. Each order must have a `total` that is a positive number and a `status` drawn from a fixed allow-list. Tricky part: JSON booleans parse to Python `True`/`False`, which are technically integers, `True` must **not** count as a valid total. The gate accepts clean orders, rejects the rest with a precise reason, and reports the acceptance rate.",
+      challenge_statement: "You are given `n` orders, one JSON object per line. For each order, in order, apply two rules:\n1. `total` must be a number (int or float) **greater than 0**. A boolean is **not** a valid number here.\n2. `status` must be exactly one of `pending`, `shipped`, `delivered`.\n\nFor each order print one line:\n- If it passes both rules: `ACCEPT i` (where `i` is the 1-based order index).\n- Otherwise: `REJECT i: ` followed by the failed-rule messages joined by `; `, in this fixed order, first the total message `total must be a positive number` (if total failed), then the status message `status must be one of pending, shipped, delivered` (if status failed).\n\nAfter all orders, print `a/n` where `a` is the number of accepted orders and `n` is the total.",
       challenge_input_format: "Line 1: an integer `n`. Next `n` lines: one JSON object each, with keys `total` and `status` (a key may be present with a wrong-typed or out-of-range value).",
       challenge_output_format: "`n` lines of `ACCEPT i` or `REJECT i: <messages>`, then a final line `a/n` (accepted over total).",
       challenge_constraints: [
@@ -1220,11 +1220,11 @@ main()
       title: "Building an Extraction Pipeline",
       concept: "Extraction",
       xp_reward: 10,
-      explanation: `Now assemble the whole module into one real thing: a pipeline that takes a messy paragraph of customer email and emits a clean, validated record ready for a database. This is **extraction** — pulling structured fields out of unstructured text — and it is the single most common production use of structured outputs.
+      explanation: `Now assemble the whole module into one real thing: a pipeline that takes a messy paragraph of customer email and emits a clean, validated record ready for a database. This is **extraction**, pulling structured fields out of unstructured text, and it is the single most common production use of structured outputs.
 
 ## What it is
 
-An **extraction pipeline** is an end-to-end flow: unstructured input goes in, a validated structured record comes out. The model does the understanding; the surrounding code enforces the contract. You've built every piece in this module — extraction is where they click together into a system you can trust.
+An **extraction pipeline** is an end-to-end flow: unstructured input goes in, a validated structured record comes out. The model does the understanding; the surrounding code enforces the contract. You've built every piece in this module, extraction is where they click together into a system you can trust.
 
 The shape of the data you want is the **target schema**. The pipeline's whole job is to fill that schema from free text and refuse to emit anything that doesn't satisfy it.
 
@@ -1268,7 +1268,7 @@ In production the model call sits where \`model_reply\` comes from, and a failur
 
 Extraction is everywhere once you start looking:
 
-- **Documents to data.** Invoices, resumes, receipts, contracts, support emails — turn human paperwork into database rows.
+- **Documents to data.** Invoices, resumes, receipts, contracts, support emails, turn human paperwork into database rows.
 - **Reliability you can deploy.** Because every record is validated before it's emitted, bad model output is caught at the door, not discovered in your data later.
 - **The same skeleton scales.** Swap the schema and the rules and the same pipeline extracts events, products, or medical fields. The architecture doesn't change.
 
@@ -1391,7 +1391,7 @@ else:
           number: 1, difficulty: "easy",
           prompt: 'The model returns {"name": "Dana Lee", "email": "danashop.com", "order_total": 42.5}. Walk through what your pipeline does.',
           steps: [
-            "json.loads parses it fine — the syntax is valid.",
+            "json.loads parses it fine, the syntax is valid.",
             'The name is non-empty, so that rule passes.',
             'The email "danashop.com" has no "@", so the email rule fails and adds an error.',
             "Because the errors list is non-empty, the pipeline rejects the record (or re-prompts) rather than emitting it."
@@ -1406,7 +1406,7 @@ else:
             "The 15 validation failures get re-prompted once with their specific error string; the model usually returns a corrected record on retry.",
             "Any that still fail after the retry are routed to a manual-review queue, not dropped silently, so a human can fix them.",
             "The 5 non-JSON responses are caught by the try/except around json.loads and also sent to the retry-then-review path.",
-            "Every email ends in exactly one of three buckets: inserted, retried-and-recovered, or queued for review — nothing is acted on blindly and nothing vanishes."
+            "Every email ends in exactly one of three buckets: inserted, retried-and-recovered, or queued for review, nothing is acted on blindly and nothing vanishes."
           ],
           output: "Insert the clean ones, re-prompt the failures with their errors, and queue the stubborn ones for human review so nothing bad lands and nothing is lost."
         }
@@ -1443,7 +1443,7 @@ else:
       reflections: [
         {
           prompt: "In your own words: how does an extraction pipeline let you rely on a model that you know sometimes produces wrong output?",
-          sampleAnswer: "You stop depending on the model being right and instead build a system that assumes it sometimes won't be. The model does the one thing it is genuinely good at — understanding messy text and filling a schema — while the pipeline constrains the output shape, parses defensively, and validates every value against real rules before anything is emitted. Bad output is caught at the door and either repaired by re-prompting or rejected, so the system stays trustworthy even though the individual model calls are not."
+          sampleAnswer: "You stop depending on the model being right and instead build a system that assumes it sometimes won't be. The model does the one thing it is genuinely good at, understanding messy text and filling a schema, while the pipeline constrains the output shape, parses defensively, and validates every value against real rules before anything is emitted. Bad output is caught at the door and either repaired by re-prompting or rejected, so the system stays trustworthy even though the individual model calls are not."
         }
       ],
       hints: [
@@ -1452,8 +1452,8 @@ else:
         "Append an error message for each failed rule, then branch on whether errors is empty."
       ],
       challenge_title: "Full extraction with verdict",
-      challenge_description: "Run a whole batch of messy model replies through the assembly line — enforce JSON, parse, validate — and ship only the clean records, with a total.",
-      challenge_story: "This is the factory floor: raw model replies enter one end, clean database records leave the other. Each reply passes three stations — does it parse as a JSON object? does it carry a non-empty name and a plausible email? is the amount a positive number? A quality gate at the exit rejects anything defective so only trustworthy records reach finance.\n\nYou are wiring the full pipeline plus the end-of-shift report: how many records came out clean, and what dollar total they sum to. Money must be reported to exactly two decimals so the books never show a ragged float. The same bool-isn't-a-number trap from validation still applies — `true` is not an amount.",
+      challenge_description: "Run a whole batch of messy model replies through the assembly line, enforce JSON, parse, validate, and ship only the clean records, with a total.",
+      challenge_story: "This is the factory floor: raw model replies enter one end, clean database records leave the other. Each reply passes three stations, does it parse as a JSON object? does it carry a non-empty name and a plausible email? is the amount a positive number? A quality gate at the exit rejects anything defective so only trustworthy records reach finance.\n\nYou are wiring the full pipeline plus the end-of-shift report: how many records came out clean, and what dollar total they sum to. Money must be reported to exactly two decimals so the books never show a ragged float. The same bool-isn't-a-number trap from validation still applies, `true` is not an amount.",
       challenge_statement: "You are given `n` model replies, one per line. Run each through the pipeline in order and print one verdict line:\n\n1. **Parse:** if the line is not valid JSON, or parses to something that is not an object, the verdict is `FAIL i: bad json`.\n2. **Validate** (only if it parsed to an object), collecting messages in this fixed order:\n   - `name` must be a non-empty string (after stripping whitespace); else `missing name`.\n   - `email` must be a string containing `@`; else `bad email`.\n   - `amount` must be a number (not a bool) and > 0; else `amount must be positive`.\n3. If any validation messages exist, print `FAIL i: ` + the messages joined by `; `. Otherwise print `OK i` and add the record's `amount` to the running total.\n\nAfter all replies print two summary lines:\n- `c/n clean` where `c` is the number of OK records.\n- `total T` where `T` is the sum of accepted amounts, formatted to exactly 2 decimal places.",
       challenge_input_format: "Line 1: an integer `n`. Next `n` lines: one model reply each (intended to be a JSON object with `name`, `email`, `amount`, but may be malformed or wrong-typed).",
       challenge_output_format: "`n` verdict lines (`OK i` or `FAIL i: <reason>`), then `c/n clean`, then `total T` (T to exactly 2 decimals).",
@@ -1569,7 +1569,7 @@ The three levers you control are **types** (string, integer, number, boolean), *
 Walk through tightening a loose field into a safe one:
 
 1. **Pick the narrowest type.** A quantity is an \`integer\`, not a string "5". A price is a \`number\`. A flag is a \`boolean\`, never the string "true".
-2. **Use an enum for known categories.** A \`status\` is not free text — it is one of \`["pending", "shipped", "delivered"]\`. Now "Shipped" and "probably" can't slip in.
+2. **Use an enum for known categories.** A \`status\` is not free text, it is one of \`["pending", "shipped", "delivered"]\`. Now "Shipped" and "probably" can't slip in.
 3. **Decide required vs optional deliberately.** Mark a key required only if your code truly cannot proceed without it. Everything else is optional, with a sensible default in mind.
 
 Here is the difference between a sloppy schema and a tight one:
@@ -1591,7 +1591,7 @@ With the tight version, \`status\` can only ever be one of three known strings, 
 
 A well-designed schema does the work your defensive code would otherwise do:
 
-- **Enums kill branching bugs.** When a status can only be one of three values, you don't write a fallback for the surprise fourth value — it cannot exist.
+- **Enums kill branching bugs.** When a status can only be one of three values, you don't write a fallback for the surprise fourth value, it cannot exist.
 - **Narrow types remove casting.** An \`integer\` field never arrives as "5", so no \`int(...)\` call can throw later.
 - **Honest required lists prevent crashes and over-rejection.** Mark too few required and your code hits missing keys; mark too many and you reject good records that simply lacked an optional field.
 
@@ -1629,9 +1629,9 @@ A well-designed schema does the work your defensive code would otherwise do:
         {
           question: "When should a key be marked required in a schema?",
           options: [
-            "Always — every key should be required for safety",
+            "Always, every key should be required for safety",
             "Only when your downstream code cannot proceed without it",
-            "Never — required fields slow the model down",
+            "Never, required fields slow the model down",
             "Only for string fields"
           ],
           correct_index: 1,
@@ -1709,7 +1709,7 @@ record accepted: True`,
           prompt: 'You need a field for "is the order paid?" Should it be a string or a boolean, and why?',
           steps: [
             'A paid/unpaid flag has exactly two states, which is what a boolean represents.',
-            'A string field would invite "yes", "true", "Paid", "y" — many spellings of the same idea.',
+            'A string field would invite "yes", "true", "Paid", "y", many spellings of the same idea.',
             'A boolean forces true or false, so your code can branch with no normalization.'
           ],
           output: "Use a boolean; it forces exactly true/false and removes string-variant bugs."
@@ -1719,7 +1719,7 @@ record accepted: True`,
           prompt: 'A schema marks every field required, including an optional "discount_code". Real orders often have no discount, so the model returns records without that key and your gate rejects them all. What is the design fix?',
           steps: [
             "Required should mean the code cannot proceed without the field.",
-            'A discount code is genuinely optional — many orders simply do not have one.',
+            'A discount code is genuinely optional, many orders simply do not have one.',
             'Marking it required turns a normal, valid order into a rejected one.',
             'Fix: remove discount_code from the required list, keep it as an optional key, and have code treat its absence as "no discount".'
           ],
@@ -1758,7 +1758,7 @@ record accepted: True`,
       reflections: [
         {
           prompt: "In your own words: why does choosing an enum over a free-text string remove an entire class of bugs from your code?",
-          sampleAnswer: "A free-text string can take infinitely many values, so your code has to anticipate and handle wording, casing, and unexpected categories, and it will still miss some. An enum restricts the field to a fixed, known set, so the surprise values simply cannot occur. That means you no longer need fallback branches for unknown statuses or normalization for casing — the bug class disappears because the bad input is impossible to express."
+          sampleAnswer: "A free-text string can take infinitely many values, so your code has to anticipate and handle wording, casing, and unexpected categories, and it will still miss some. An enum restricts the field to a fixed, known set, so the surprise values simply cannot occur. That means you no longer need fallback branches for unknown statuses or normalization for casing, the bug class disappears because the bad input is impossible to express."
         }
       ],
       hints: [
@@ -1795,7 +1795,7 @@ record accepted: True`,
       challenge_hints: [
         "Wrap json.loads in try/except ValueError and also reject anything that is not a dict.",
         "Use a fixed key order list for both the MISSING and BAD_TYPE scans so output is deterministic.",
-        "For qty, reject if it is a bool, if it is not an int, or if it is an int below 1 — all of these are the qty failure."
+        "For qty, reject if it is a bool, if it is not an int, or if it is an int below 1, all of these are the qty failure."
       ],
       challenge_difficulty: "advanced",
       challenge_starter_code: `import sys, json
@@ -1884,7 +1884,7 @@ main()
       title: "Nested and List Outputs",
       concept: "Nesting",
       xp_reward: 10,
-      explanation: `One field is easy. The real world is shaped like a tree: an invoice has a customer, and that customer has an address, and the invoice has many line items, each with a name, quantity, and price. The moment your output needs **lists of objects** and **objects inside objects**, a flat schema stops being enough — and the new failure modes are about *depth*, not just keys.
+      explanation: `One field is easy. The real world is shaped like a tree: an invoice has a customer, and that customer has an address, and the invoice has many line items, each with a name, quantity, and price. The moment your output needs **lists of objects** and **objects inside objects**, a flat schema stops being enough, and the new failure modes are about *depth*, not just keys.
 
 ## What it is
 
@@ -1898,7 +1898,7 @@ You design and consume nesting with the same discipline as flat fields, applied 
 
 1. **Define the shape at every level.** The outer object has keys; a list key holds items; each item is its own little schema with its own types.
 2. **The model fills the whole tree.** It returns the full nested structure in one response, arrays and sub-objects included.
-3. **Walk it safely.** Loop over lists, and index into nested objects defensively — a missing sub-key or an empty list is a normal case, not a crash.
+3. **Walk it safely.** Loop over lists, and index into nested objects defensively, a missing sub-key or an empty list is a normal case, not a crash.
 
 Here is a nested invoice and the safe way to total it:
 
@@ -1919,7 +1919,7 @@ Note \`data.get("items", [])\`: if the list is missing, you loop over an empty l
 
 Nesting unlocks realistic data, but it multiplies the places things can go wrong:
 
-- **Empty lists are normal.** An order with zero items, a search with zero results — your loop must handle the empty case without special-casing it into a bug.
+- **Empty lists are normal.** An order with zero items, a search with zero results, your loop must handle the empty case without special-casing it into a bug.
 - **Depth invites partial failure.** The top object can be fine while one item three levels down is malformed. Validate each item, not just the wrapper.
 - **Deeply nested schemas confuse the model.** Past two or three levels, models drop fields and lose consistency. Flatten when you can; a list of flat objects beats a five-level tree.
 
@@ -1982,7 +1982,7 @@ Nesting unlocks realistic data, but it multiplies the places things can go wrong
             "Only the outer wrapper object",
             "Each element on its own, since one item can be malformed while the wrapper is fine",
             "Only the first element",
-            "Nothing — arrays are always valid"
+            "Nothing, arrays are always valid"
           ],
           correct_index: 1,
           explanation: "Partial failure is common: validate every item against the per-item schema, not just the container."
@@ -2037,7 +2037,7 @@ item count: 2`,
           prompt: 'A reply is {"results": []} for a search that found nothing. Your code does for r in data["results"]: print(r). What happens, and is it a problem?',
           steps: [
             'data["results"] is an empty list, which is valid JSON and a valid result.',
-            'Looping over an empty list runs the body zero times — nothing prints.',
+            'Looping over an empty list runs the body zero times, nothing prints.',
             'That is correct behavior, not a bug; an empty result set should simply produce no output.'
           ],
           output: "Nothing prints, and that is the correct handling of a zero-result search."
@@ -2086,7 +2086,7 @@ item count: 2`,
       reflections: [
         {
           prompt: "In your own words: why is it safer to validate each element of a list of objects rather than just checking that the outer list exists?",
-          sampleAnswer: "The outer list can be present and well-formed while individual elements inside it are malformed — one item missing a price, another with a quantity as a string. If you only confirm the list exists, those broken items slip straight through into your code and corrupt the aggregate or crash a later step. Validating each element on its own catches the partial failures that a wrapper-only check would miss, which is exactly where nested data tends to break."
+          sampleAnswer: "The outer list can be present and well-formed while individual elements inside it are malformed, one item missing a price, another with a quantity as a string. If you only confirm the list exists, those broken items slip straight through into your code and corrupt the aggregate or crash a later step. Validating each element on its own catches the partial failures that a wrapper-only check would miss, which is exactly where nested data tends to break."
         }
       ],
       hints: [
@@ -2104,7 +2104,7 @@ item count: 2`,
         "1 <= n <= 1000",
         "0 <= qty <= 10000, 0 <= price_cents <= 10^7, both integers.",
         "The items key may be missing or an empty list; either means a total of 0.",
-        "All money is integer cents — no floating point.",
+        "All money is integer cents, no floating point.",
         "On a tie for the largest total, the earliest invoice wins."
       ],
       challenge_examples: [
@@ -2119,7 +2119,7 @@ item count: 2`,
           explanation: "Lee has no items key at all, so the total is 0. Mo: 3*100 = 300. Mo is the top."
         }
       ],
-      challenge_notes: "Use obj.get('items', []) so a missing items key behaves exactly like an empty list — both total to 0. Keep the grand total and the top-spender tracking in the same loop; only replace the top when you find a strictly larger total, so earlier invoices win ties.",
+      challenge_notes: "Use obj.get('items', []) so a missing items key behaves exactly like an empty list, both total to 0. Keep the grand total and the top-spender tracking in the same loop; only replace the top when you find a strictly larger total, so earlier invoices win ties.",
       challenge_hints: [
         "Parse each line with json.loads, then read the name from obj['customer']['name'].",
         "Default the items with obj.get('items', []) and sum qty * price_cents over them.",
@@ -2174,7 +2174,7 @@ main()
       title: "Streaming Structured Output",
       concept: "Streaming",
       xp_reward: 10,
-      explanation: `You want the user to see results the instant they appear, not stare at a spinner for four seconds while the model finishes. So you **stream** the response — tokens arrive a few at a time. But here is the catch: \`{"items": [{"name": "App\` is not valid JSON. \`json.loads\` throws on it. Streaming structured output means rendering a shape that is **not finished yet**, and that is a genuinely different skill from parsing a complete object.
+      explanation: `You want the user to see results the instant they appear, not stare at a spinner for four seconds while the model finishes. So you **stream** the response, tokens arrive a few at a time. But here is the catch: \`{"items": [{"name": "App\` is not valid JSON. \`json.loads\` throws on it. Streaming structured output means rendering a shape that is **not finished yet**, and that is a genuinely different skill from parsing a complete object.
 
 ## What it is
 
@@ -2187,8 +2187,8 @@ The technique is **incremental** or **partial parsing**: as bytes accumulate, yo
 The streaming loop has a clear shape:
 
 1. **Accumulate.** Append each incoming chunk to a growing buffer string.
-2. **Attempt a parse.** Try \`json.loads(buffer)\`. If it succeeds, the object is complete — you are done.
-3. **On failure, extract what is complete.** A full \`json.loads\` fails, but you can still pull out finished sub-pieces — for example, every fully-closed object inside an array — and render those.
+2. **Attempt a parse.** Try \`json.loads(buffer)\`. If it succeeds, the object is complete, you are done.
+3. **On failure, extract what is complete.** A full \`json.loads\` fails, but you can still pull out finished sub-pieces, for example, every fully-closed object inside an array, and render those.
 4. **Repeat until the stream ends and the final parse succeeds.**
 
 Here is the core idea: try the full parse, and only fall back to partial extraction when it is not done yet.
@@ -2200,7 +2200,7 @@ def try_parse(buffer):
     try:
         return json.loads(buffer)   # whole object finished
     except json.JSONDecodeError:
-        return None                 # not complete yet — keep streaming
+        return None                 # not complete yet, keep streaming
 
 buffer = ""
 for chunk in stream:                # chunks arrive over time
@@ -2223,12 +2223,12 @@ Streaming is what makes structured AI features feel fast and alive:
 
 ## The mental model to keep
 
-**A streamed object is invalid until its last brace.** Do not parse the fragment as if it were finished — accumulate, attempt, and only act on the pieces that have genuinely closed.`,
+**A streamed object is invalid until its last brace.** Do not parse the fragment as if it were finished, accumulate, attempt, and only act on the pieces that have genuinely closed.`,
       key_terms: [
         { term: "Streaming", definition: "Delivering model output incrementally, token by token, instead of all at once at the end." },
         { term: "Partial parsing", definition: "Repeatedly trying to extract meaning from an incomplete buffer before the full object has arrived." },
         { term: "Buffer", definition: "The growing string that accumulates streamed chunks until they form valid structure." },
-        { term: "JSONDecodeError", definition: "The error json.loads raises on an incomplete or malformed buffer — the normal state mid-stream." }
+        { term: "JSONDecodeError", definition: "The error json.loads raises on an incomplete or malformed buffer, the normal state mid-stream." }
       ],
       callouts: [
         { type: "analogy", title: "Reading a sentence as it is typed", content: "Watching a stream is like reading over someone's shoulder as they type. Mid-word the text is gibberish, but once a full word lands you can act on it. You wait for complete pieces, not complete thoughts.", position: "before" },
@@ -2256,7 +2256,7 @@ Streaming is what makes structured AI features feel fast and alive:
           question: "What is the main benefit of streaming structured output to a user?",
           options: [
             "It reduces the total tokens used",
-            "It improves perceived speed — the first piece appears far sooner",
+            "It improves perceived speed, the first piece appears far sooner",
             "It guarantees the values are correct",
             "It removes the need for a schema"
           ],
@@ -2267,7 +2267,7 @@ Streaming is what makes structured AI features feel fast and alive:
           question: "During streaming, how should you treat a JSONDecodeError on the partial buffer?",
           options: [
             "As a fatal crash that stops the stream",
-            "As the expected 'not complete yet' signal — keep accumulating",
+            "As the expected 'not complete yet' signal, keep accumulating",
             "As a sign the model is broken",
             "As a reason to restart the request"
           ],
@@ -2342,7 +2342,7 @@ final items: ['Apple', 'Pear']`,
           steps: [
             'The buffer is an incomplete object: the string value is unterminated and there is no closing brace.',
             'json.loads cannot parse invalid JSON, so it raises a JSONDecodeError.',
-            'This is the expected mid-stream state — you catch it and keep accumulating chunks.'
+            'This is the expected mid-stream state, you catch it and keep accumulating chunks.'
           ],
           output: "json.loads raises JSONDecodeError; you treat it as 'not done yet' and append more chunks."
         },
@@ -2374,8 +2374,8 @@ final items: ['Apple', 'Pear']`,
         {
           title: "valid to parse now vs still incomplete",
           bins: [
-            { id: "valid", label: "Complete — json.loads works" },
-            { id: "incomplete", label: "Incomplete — will raise" }
+            { id: "valid", label: "Complete, json.loads works" },
+            { id: "incomplete", label: "Incomplete, will raise" }
           ],
           items: [
             { id: "i1", text: '{"name": "Dana"}', bin: "valid" },
@@ -2400,7 +2400,7 @@ final items: ['Apple', 'Pear']`,
       ],
       challenge_title: "Stream the Buffer",
       challenge_description: "Replay a stream of chunks, attempting a parse after each one, and report when the structured object first becomes complete.",
-      challenge_story: "Your chat UI streams the model's JSON answer so users see content fast, but the rendering layer needs to know the exact moment the buffer becomes valid, parseable JSON — that is when it can stop showing a placeholder and render the real object.\n\nYou are building the test harness for that logic. Given a recorded stream of chunks, replay them in order, concatenating into a buffer, and after each chunk attempt to parse the buffer so far. Report at which chunk the object first parses successfully, and how many parse attempts failed before that.",
+      challenge_story: "Your chat UI streams the model's JSON answer so users see content fast, but the rendering layer needs to know the exact moment the buffer becomes valid, parseable JSON, that is when it can stop showing a placeholder and render the real object.\n\nYou are building the test harness for that logic. Given a recorded stream of chunks, replay them in order, concatenating into a buffer, and after each chunk attempt to parse the buffer so far. Report at which chunk the object first parses successfully, and how many parse attempts failed before that.",
       challenge_statement: "You are given `n` chunks, one per line, in arrival order. Concatenate them into a buffer **in order** (no separators added). After appending each chunk, attempt to parse the **entire buffer so far** with a JSON parser.\n\nProcess the chunks in order and stop at the **first** chunk after which the buffer parses as valid JSON. Then print:\n- Line 1: `COMPLETE k` where `k` is the 1-based index of the chunk after which the buffer first parsed successfully.\n- Line 2: `FAILS f` where `f` is the number of parse attempts that failed **before** that success (that is, `k - 1`).\n\nIf the buffer never parses after any chunk, print `INCOMPLETE` on line 1 and `FAILS n` on line 2 (every attempt failed).",
       challenge_input_format: "Line 1: an integer `n`, the number of chunks. Each of the next `n` lines is one chunk (it may contain spaces and JSON punctuation; it will not contain a newline).",
       challenge_output_format: "Line 1: `COMPLETE k` or `INCOMPLETE`. Line 2: `FAILS f`.",
