@@ -20,17 +20,17 @@ export default {
       concept: "Sampling",
       challenge_difficulty: "beginner",
       xp_reward: 10,
-      explanation: `Ask a model "write me a one-line slogan for a coffee shop" twice and you'll often get two different lines. Same prompt, same model, different answer. That isn't a bug or a hidden mood — it's the model doing exactly what it always does: rolling dice over its own predictions.
+      explanation: `Ask a model "write me a one-line slogan for a coffee shop" twice and you'll often get two different lines. Same prompt, same model, different answer. That isn't a bug or a hidden mood, it's the model doing exactly what it always does: rolling dice over its own predictions.
 
 ## What it is
 
-From an earlier lesson you know a model predicts the next token. But it doesn't predict a *single* token — it predicts a **probability distribution**: a score for every token in its vocabulary, all adding up to 1. For the prompt "The sky is" it might assign \`blue\` a 0.60 chance, \`clear\` 0.15, \`dark\` 0.10, and tiny slivers to thousands of others.
+From an earlier lesson you know a model predicts the next token. But it doesn't predict a *single* token, it predicts a **probability distribution**: a score for every token in its vocabulary, all adding up to 1. For the prompt "The sky is" it might assign \`blue\` a 0.60 chance, \`clear\` 0.15, \`dark\` 0.10, and tiny slivers to thousands of others.
 
-Then comes the step people miss. The model does not have to take the top one. It **samples** — it picks a token *according to those probabilities*, like drawing a weighted ticket from a hat. \`blue\` is the fat favorite, but \`clear\` and \`dark\` are still in the hat. Draw again on a different run and a different ticket can come out.
+Then comes the step people miss. The model does not have to take the top one. It **samples**: it picks a token *according to those probabilities*, like drawing a weighted ticket from a hat. \`blue\` is the fat favorite, but \`clear\` and \`dark\` are still in the hat. Draw again on a different run and a different ticket can come out.
 
 ## How it works
 
-The randomness is deliberate. If a model always took the single highest-probability token (that strict mode is called **greedy decoding**), it would be perfectly repeatable — and often dull, repetitive, and prone to getting stuck in loops. Sampling adds variety so answers feel natural and creative.
+The randomness is deliberate. If a model always took the single highest-probability token (that strict mode is called **greedy decoding**), it would be perfectly repeatable, and often dull, repetitive, and prone to getting stuck in loops. Sampling adds variety so answers feel natural and creative.
 
 Here is the core idea in miniature: a weighted draw from a distribution.
 
@@ -47,26 +47,26 @@ choice = random.choices(tokens, weights=probs, k=1)[0]
 print(choice)
 \`\`\`
 
-Run that with a *different* seed and you can get a different word. The favorite usually wins, but not always — that's the whole point.
+Run that with a *different* seed and you can get a different word. The favorite usually wins, but not always, that's the whole point.
 
 ## Why it matters
 
 Once you see generation as a weighted draw, the day-to-day behavior stops being spooky:
 
 - **Two runs differ** because each run draws fresh from the distribution. Nothing is broken.
-- **A small early difference snowballs.** A different first token changes the context, which changes the next distribution, so answers drift apart — the same compounding you saw with prediction.
+- **A small early difference snowballs.** A different first token changes the context, which changes the next distribution, so answers drift apart, the same compounding you saw with prediction.
 - **You can turn the dial.** How "loose" the dice are is itself a setting (temperature, next lesson). Some tasks want repeatable; some want surprise.
 
 ## The mental model to keep
 
-The model hands you a hat full of weighted tickets, then **draws one at random.** The favorite ticket usually comes out — but not every time. Same prompt, same hat, different draw. That's why your slogan keeps changing.`,
+The model hands you a hat full of weighted tickets, then **draws one at random.** The favorite ticket usually comes out, but not every time. Same prompt, same hat, different draw. That's why your slogan keeps changing.`,
       key_terms: [
         { term: "Probability distribution", definition: "The full set of scores the model assigns to every possible next token, summing to 1." },
         { term: "Sampling", definition: "Picking the next token at random in proportion to its probability, rather than always taking the top one." },
         { term: "Greedy decoding", definition: "Always choosing the single highest-probability token, which makes output repeatable but often dull." }
       ],
       callouts: [
-        { type: "analogy", title: "A hat full of weighted tickets", content: "The model fills a hat with one ticket per token, but the favorite gets way more tickets than the rest. Then it draws one. The favorite usually wins — but a long-shot can still come out, which is why runs differ.", position: "before" },
+        { type: "analogy", title: "A hat full of weighted tickets", content: "The model fills a hat with one ticket per token, but the favorite gets way more tickets than the rest. Then it draws one. The favorite usually wins, but a long-shot can still come out, which is why runs differ.", position: "before" },
         { type: "insight", title: "Variety is on purpose", content: "If the model always grabbed the single top token it would be repeatable but boring and loop-prone. Sampling is what makes answers feel fresh and human.", position: "after" }
       ],
       concept_diagram: {
@@ -96,7 +96,7 @@ The model hands you a hat full of weighted tickets, then **draws one at random.*
             "A yes/no decision"
           ],
           correct_index: 1,
-          explanation: "It outputs a score for every token in its vocabulary, summing to 1 — a distribution it then samples from."
+          explanation: "It outputs a score for every token in its vocabulary, summing to 1, a distribution it then samples from."
         },
         {
           question: "What is greedy decoding?",
@@ -156,10 +156,10 @@ sampled: blue`,
         {
           title: "one token, drawn from the hat",
           steps: [
-            { label: "Predict a distribution", detail: "The model scores every candidate token. The scores add up to 1 — a probability for each.", code: 'P("blue")=0.60, P("clear")=0.25, P("dark")=0.15' },
+            { label: "Predict a distribution", detail: "The model scores every candidate token. The scores add up to 1, a probability for each.", code: 'P("blue")=0.60, P("clear")=0.25, P("dark")=0.15' },
             { label: "Fill the hat", detail: "Each token gets tickets in proportion to its score: 60 'blue' tickets, 25 'clear', 15 'dark'.", code: "hat = 60×blue + 25×clear + 15×dark" },
             { label: "Draw one ticket", detail: "A weighted random draw pulls a single ticket. 'blue' is most likely, but not certain.", code: "draw -> usually 'blue', sometimes 'clear'/'dark'" },
-            { label: "Repeat next run", detail: "On a new run the model rebuilds the same hat and draws again — possibly a different token.", code: "run 2 -> draw -> maybe 'clear'" }
+            { label: "Repeat next run", detail: "On a new run the model rebuilds the same hat and draws again, possibly a different token.", code: "run 2 -> draw -> maybe 'clear'" }
           ]
         }
       ],
@@ -218,7 +218,7 @@ sampled: blue`,
       reflections: [
         {
           prompt: "In your own words: if a model only ever predicts probabilities, why do its answers feel non-deterministic when you use it?",
-          sampleAnswer: "The probabilities themselves are fixed for a given context, but the model then samples — it draws a token at random weighted by those probabilities. Because the draw is random, different runs can pull different tokens, and once an early token differs the whole answer can drift. So the randomness lives in the draw, not in the predictions."
+          sampleAnswer: "The probabilities themselves are fixed for a given context, but the model then samples, it draws a token at random weighted by those probabilities. Because the draw is random, different runs can pull different tokens, and once an early token differs the whole answer can drift. So the randomness lives in the draw, not in the predictions."
         }
       ],
       hints: [
@@ -228,9 +228,9 @@ sampled: blue`,
       ],
       challenge_title: "The Weighted Draw",
       challenge_description: "Implement the core of weighted sampling: given a token distribution and a random number handed in by the sampler, walk the cumulative weights and report exactly which token that number selects.",
-      challenge_story: "Your inference team is reviewing how the sampler turns a random number into a chosen token. The random part already happened upstream — a number generator produced an integer \`r\` somewhere between 0 and the total weight. Your job is the **selection step**: given the model's next-token weights and that \`r\`, decide which token gets picked. This is the heart of a weighted draw, exactly like \`random.choices\` does internally: lay the tokens end to end in input order, each taking up a slice of the number line as wide as its weight, and see which slice \`r\` lands in. Get this right and the empirical counts will track the weights perfectly.",
+      challenge_story: "Your inference team is reviewing how the sampler turns a random number into a chosen token. The random part already happened upstream, a number generator produced an integer \`r\` somewhere between 0 and the total weight. Your job is the **selection step**: given the model's next-token weights and that \`r\`, decide which token gets picked. This is the heart of a weighted draw, exactly like \`random.choices\` does internally: lay the tokens end to end in input order, each taking up a slice of the number line as wide as its weight, and see which slice \`r\` lands in. Get this right and the empirical counts will track the weights perfectly.",
       challenge_statement: "You are given \`n\` tokens, each with an integer **weight**, and a single random integer \`r\` with \`0 <= r < total\`, where \`total\` is the sum of all weights. Perform one weighted draw:\n\n1. Walk the tokens **in input order**, accumulating their weights into a running prefix sum.\n2. The drawn token is the **first** one whose prefix sum is **strictly greater than** \`r\`.\n\nPrint that single token.\n\nThis is the weighted draw from Lesson 1 with the random number already handed in: each token owns a slice of the \`0 .. total-1\` number line as wide as its weight, and \`r\` lands in exactly one slice.",
-      challenge_input_format: "The first line has two integers: `n r` — the number of tokens and the random integer the sampler drew.\n\nEach of the next `n` lines has a token (no spaces) and its integer `weight`.",
+      challenge_input_format: "The first line has two integers: `n r`, the number of tokens and the random integer the sampler drew.\n\nEach of the next `n` lines has a token (no spaces) and its integer `weight`.",
       challenge_output_format: "One line: the single token that `r` selects.",
       challenge_constraints: [
         "1 ≤ n ≤ 1000",
@@ -238,13 +238,13 @@ sampled: blue`,
         "0 ≤ r < total, where total is the sum of all weights",
       ],
       challenge_examples: [
-        { input: "3 5\na 70\nb 20\nc 10", output: "a", explanation: "Prefix sums are 70, 90, 100. `r = 5` is below 70, so it lands in `a`'s slice (0..69) — the first prefix sum strictly greater than 5 is 70." },
+        { input: "3 5\na 70\nb 20\nc 10", output: "a", explanation: "Prefix sums are 70, 90, 100. `r = 5` is below 70, so it lands in `a`'s slice (0..69), the first prefix sum strictly greater than 5 is 70." },
         { input: "3 85\na 70\nb 20\nc 10", output: "b", explanation: "`b` owns the slice 70..89 (prefix sum 90). `r = 85` falls there: 70 is not > 85, but 90 is, so `b` is drawn." },
       ],
-      challenge_notes: "This is exactly the 'weighted draw' idea from the lesson — only the random number is given to you instead of rolled here. Each token occupies a contiguous slice of the number line whose width is its weight, and the strict greater-than comparison maps every valid `r` to exactly one token. Because `r` ranges over `0 .. total-1`, the last token's prefix sum equals `total`, so there is always a winner.",
+      challenge_notes: "This is exactly the 'weighted draw' idea from the lesson, only the random number is given to you instead of rolled here. Each token occupies a contiguous slice of the number line whose width is its weight, and the strict greater-than comparison maps every valid `r` to exactly one token. Because `r` ranges over `0 .. total-1`, the last token's prefix sum equals `total`, so there is always a winner.",
       challenge_hints: [
         "Keep a running total of weights; after adding each token's weight, check whether the running total is strictly greater than `r`.",
-        "Return the first token whose running prefix sum exceeds `r`, then stop — don't keep scanning.",
+        "Return the first token whose running prefix sum exceeds `r`, then stop, don't keep scanning.",
         "Since 0 <= r < total, you are guaranteed to find a token before running off the end of the list.",
       ],
       challenge_starter_code: `import sys
@@ -303,14 +303,14 @@ main()
       concept: "Temperature",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `If sampling is drawing weighted tickets from a hat, **temperature** is the knob that decides how lopsided the hat is. Crank it down and the favorite gets almost every ticket — the model becomes focused and repeatable. Crank it up and the long shots get a real chance — the model gets wild and inventive.
+      explanation: `If sampling is drawing weighted tickets from a hat, **temperature** is the knob that decides how lopsided the hat is. Crank it down and the favorite gets almost every ticket, the model becomes focused and repeatable. Crank it up and the long shots get a real chance, the model gets wild and inventive.
 
 ## What it is
 
 **Temperature** is a single number (commonly 0 to 2) that *reshapes* the probability distribution before sampling. It doesn't change what the model thinks is likely; it changes how strongly it favors the likely options.
 
-- **Low temperature (→ 0):** sharpen the distribution. The top token's lead grows; everything else shrinks toward zero. At 0 it's effectively greedy — deterministic and focused.
-- **High temperature (> 1):** flatten the distribution. Gaps between tokens narrow, so unlikely tokens become genuinely reachable. Output gets creative — and at extremes, incoherent.
+- **Low temperature (→ 0):** sharpen the distribution. The top token's lead grows; everything else shrinks toward zero. At 0 it's effectively greedy, deterministic and focused.
+- **High temperature (> 1):** flatten the distribution. Gaps between tokens narrow, so unlikely tokens become genuinely reachable. Output gets creative, and at extremes, incoherent.
 
 ## How it works
 
@@ -337,14 +337,14 @@ print("T=1.0 (base): ", softmax_with_temp(logits, 1.0))
 print("T=2.0 (flat): ", softmax_with_temp(logits, 2.0))
 \`\`\`
 
-Watch the top token: its probability is highest at low \`T\` and lowest at high \`T\`. Same model, same logits — only the *shape* changed.
+Watch the top token: its probability is highest at low \`T\` and lowest at high \`T\`. Same model, same logits, only the *shape* changed.
 
 ## Why it matters
 
 Temperature is the cheapest, most direct lever you have over a model's "personality":
 
 - **Need the same answer twice?** Drop temperature to 0. Great for extraction, classification, and code where you want determinism.
-- **Need ten fresh ideas?** Raise it toward 1.0–1.3. The model explores more of the distribution.
+- **Need ten fresh ideas?** Raise it toward 1.0, 1.3. The model explores more of the distribution.
 - **Going too high backfires.** Past ~1.5 the distribution is so flat the model picks nonsense tokens and coherence falls apart. Higher is not "smarter," just looser.
 
 ## The mental model to keep
@@ -356,8 +356,8 @@ Temperature is the cheapest, most direct lever you have over a model's "personal
         { term: "Softmax", definition: "The function that turns raw logits into probabilities that sum to 1." }
       ],
       callouts: [
-        { type: "analogy", title: "A volume knob on randomness", content: "Low temperature is the favorite shouting over everyone else — focused and repeatable. High temperature is the whole room talking at once — creative, surprising, sometimes nonsense.", position: "before" },
-        { type: "warning", title: "Higher isn't smarter", content: "Cranking temperature past ~1.5 doesn't make the model more clever — it flattens the odds so much that it starts grabbing nonsense tokens. More heat means more chaos, not more intelligence.", position: "after" }
+        { type: "analogy", title: "A volume knob on randomness", content: "Low temperature is the favorite shouting over everyone else, focused and repeatable. High temperature is the whole room talking at once, creative, surprising, sometimes nonsense.", position: "before" },
+        { type: "warning", title: "Higher isn't smarter", content: "Cranking temperature past ~1.5 doesn't make the model more clever, it flattens the odds so much that it starts grabbing nonsense tokens. More heat means more chaos, not more intelligence.", position: "after" }
       ],
       concept_diagram: {
         title: "How temperature reshapes the odds",
@@ -373,20 +373,20 @@ Temperature is the cheapest, most direct lever you have over a model's "personal
           question: "What does LOW temperature do to the distribution?",
           options: ["Flattens it so all tokens are equally likely", "Sharpens it so the top token dominates", "Adds new tokens to the vocabulary"],
           correct_index: 1,
-          explanation: "Low temperature sharpens the distribution, making the highest-probability token dominate — focused and near-deterministic."
+          explanation: "Low temperature sharpens the distribution, making the highest-probability token dominate, focused and near-deterministic."
         }
       ],
       quiz_questions: [
         {
           question: "Setting temperature to 0 makes a model behave like what?",
           options: [
-            "Greedy decoding — deterministic, always the top token",
+            "Greedy decoding, deterministic, always the top token",
             "Pure random choice",
             "It refuses to answer",
             "It outputs every token at once"
           ],
           correct_index: 0,
-          explanation: "At temperature 0 the distribution is maximally sharp, so the model effectively always takes the top token — greedy and repeatable."
+          explanation: "At temperature 0 the distribution is maximally sharp, so the model effectively always takes the top token, greedy and repeatable."
         },
         {
           question: "Mechanically, what does temperature do to the raw logits?",
@@ -458,9 +458,9 @@ flat T=2.0: [0.506, 0.307, 0.186]`,
           title: "the same logits at three temperatures",
           steps: [
             { label: "Start with logits", detail: "The model assigns raw scores. The first token leads, but not by a landslide.", code: "logits = [2.0, 1.0, 0.0]" },
-            { label: "Low T sharpens", detail: "Dividing by 0.5 doubles the gaps. After softmax the leader balloons toward ~0.87 — focused.", code: "T=0.5 -> [0.867, 0.117, 0.016]" },
-            { label: "Base T", detail: "Dividing by 1.0 leaves scores as-is. The leader sits around 0.665 — the default shape.", code: "T=1.0 -> [0.665, 0.245, 0.09]" },
-            { label: "High T flattens", detail: "Dividing by 2.0 halves the gaps. The leader drops to ~0.51 while the long shots climb — creative/chaotic.", code: "T=2.0 -> [0.506, 0.307, 0.186]" }
+            { label: "Low T sharpens", detail: "Dividing by 0.5 doubles the gaps. After softmax the leader balloons toward ~0.87, focused.", code: "T=0.5 -> [0.867, 0.117, 0.016]" },
+            { label: "Base T", detail: "Dividing by 1.0 leaves scores as-is. The leader sits around 0.665, the default shape.", code: "T=1.0 -> [0.665, 0.245, 0.09]" },
+            { label: "High T flattens", detail: "Dividing by 2.0 halves the gaps. The leader drops to ~0.51 while the long shots climb, creative/chaotic.", code: "T=2.0 -> [0.506, 0.307, 0.186]" }
           ]
         }
       ],
@@ -470,18 +470,18 @@ flat T=2.0: [0.506, 0.307, 0.186]`,
           prompt: "You need a model to extract a date from text and you must get the exact same result every time you run it. What temperature should you use?",
           steps: [
             "Determinism means the distribution must be as sharp as possible.",
-            "Temperature 0 makes the model effectively greedy — it always takes the top token.",
+            "Temperature 0 makes the model effectively greedy, it always takes the top token.",
             "So the same input yields the same extracted date on every run."
           ],
-          output: "Temperature 0 — deterministic and repeatable."
+          output: "Temperature 0, deterministic and repeatable."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "Two tokens have logits 3.0 and 2.0. Explain, without exact numbers, how the gap between their probabilities changes as you go from T=0.5 to T=2.0.",
           steps: [
-            "At T=0.5 the logits are scaled to 6.0 and 4.0 — a gap of 2.0, which is wider than the original 1.0.",
+            "At T=0.5 the logits are scaled to 6.0 and 4.0, a gap of 2.0, which is wider than the original 1.0.",
             "A wider logit gap means softmax pushes the leader's probability much higher: sharp.",
-            "At T=2.0 the logits scale to 1.5 and 1.0 — a gap of only 0.5, narrower than the original.",
+            "At T=2.0 the logits scale to 1.5 and 1.0, a gap of only 0.5, narrower than the original.",
             "A narrower gap means the two probabilities move closer together: flat. So lower T widens the probability gap, higher T shrinks it."
           ],
           output: "Lower T widens the probability gap (leader dominates); higher T shrinks it (more even)."
@@ -519,13 +519,13 @@ flat T=2.0: [0.506, 0.307, 0.186]`,
       reflections: [
         {
           prompt: "In your own words: why does dividing the logits by a small temperature make the model more focused?",
-          sampleAnswer: "Dividing by a small number spreads the logits further apart, so the gap between the top token and the rest grows. When softmax turns those into probabilities, a bigger gap means the leader gets an even larger share and the others shrink toward zero. The distribution becomes sharply peaked, so sampling almost always picks the favorite — focused and nearly deterministic."
+          sampleAnswer: "Dividing by a small number spreads the logits further apart, so the gap between the top token and the rest grows. When softmax turns those into probabilities, a bigger gap means the leader gets an even larger share and the others shrink toward zero. The distribution becomes sharply peaked, so sampling almost always picks the favorite, focused and nearly deterministic."
         }
       ],
       hints: [
         "Pass a different T to softmax_with_temp for each line you print.",
         "Smaller T (0.5) should make the first probability bigger; larger T (2.0) smaller.",
-        "The function already handles the math — you just call it with T=0.5 and T=2.0."
+        "The function already handles the math, you just call it with T=0.5 and T=2.0."
       ],
       challenge_title: "The Temperature Dial",
       challenge_description: "Implement the exact softmax-with-temperature the sampler runs, then report, at each requested temperature, which token leads and how confident the model is in it.",
@@ -543,7 +543,7 @@ flat T=2.0: [0.506, 0.307, 0.186]`,
         { input: "3 3\nblue 1.5\nclear 0.5\ndark 0.5\n0.5\n1.0\n2.0", output: "blue 0.7870\nblue 0.5761\nblue 0.4519", explanation: "`blue` always leads, but its probability melts from 0.79 (decisive, T=0.5) toward 0.45 (T=2.0) as temperature flattens the distribution." },
         { input: "4 2\nthe 3.0\na 2.0\nan 2.0\nzebra 0.0\n0.7\n1.5", output: "the 0.6698\nthe 0.4625", explanation: "`the` wins both; higher temperature lets `a` and `an` close the gap, so the leader's share drops." },
       ],
-      challenge_notes: "Subtracting the max before `exp` never changes the result — it just keeps the exponents small so they don't overflow to `inf`. This is the standard 'stable softmax' trick every production inference stack uses. Notice T appears only as `logit / T`: shrinking T magnifies differences (sharp), growing T shrinks them (flat).",
+      challenge_notes: "Subtracting the max before `exp` never changes the result, it just keeps the exponents small so they don't overflow to `inf`. This is the standard 'stable softmax' trick every production inference stack uses. Notice T appears only as `logit / T`: shrinking T magnifies differences (sharp), growing T shrinks them (flat).",
       challenge_hints: [
         "Write one helper `softmax_temp(logits, T)` and call it once per temperature.",
         "Find the argmax by tracking the best probability so far; break exact ties by comparing token strings.",
@@ -619,7 +619,7 @@ main()
 
 ## What they are
 
-Both are **truncation** methods — they shrink the pool of tokens you're allowed to sample from.
+Both are **truncation** methods, they shrink the pool of tokens you're allowed to sample from.
 
 - **Top-k:** keep only the \`k\` highest-probability tokens; discard the rest. With \`k=3\`, only the top three are eligible, no matter how the rest look.
 - **Top-p (nucleus sampling):** keep the smallest set of top tokens whose probabilities *add up to* \`p\`. With \`p=0.9\`, you keep tokens from the top down until their cumulative probability hits 0.9, then stop.
@@ -628,7 +628,7 @@ The key difference: top-k keeps a **fixed count**; top-p keeps a **variable coun
 
 ## How it works
 
-After keeping the chosen tokens, you **renormalize** — rescale the survivors so they sum to 1 again — then sample. Here's top-p in code:
+After keeping the chosen tokens, you **renormalize**: rescale the survivors so they sum to 1 again, then sample. Here's top-p in code:
 
 \`\`\`python
 def top_p(tokens, probs, p):
@@ -647,7 +647,7 @@ probs  = [0.55,   0.25,    0.12,   0.05,    0.03]
 print(top_p(tokens, probs, 0.9))
 \`\`\`
 
-Why top-p adapts: if the model is **very sure** (one token at 0.95), top-p keeps just that one — tight. If the model is **unsure** (probabilities spread thin), top-p keeps many tokens — exploratory. It automatically widens or narrows the net based on confidence. Top-k can't do that; \`k=3\` is always three, whether the model is certain or clueless.
+Why top-p adapts: if the model is **very sure** (one token at 0.95), top-p keeps just that one, tight. If the model is **unsure** (probabilities spread thin), top-p keeps many tokens, exploratory. It automatically widens or narrows the net based on confidence. Top-k can't do that; \`k=3\` is always three, whether the model is certain or clueless.
 
 ## Why it matters
 
@@ -659,14 +659,14 @@ These run *alongside* temperature, not instead of it. A common recipe is "temper
 
 ## The mental model to keep
 
-Temperature decides how loose the dice are; **top-k/top-p decide which dice are even on the table.** Top-k keeps a fixed number of options; top-p keeps just enough to cover most of the probability — wide when the model is unsure, narrow when it's confident.`,
+Temperature decides how loose the dice are; **top-k/top-p decide which dice are even on the table.** Top-k keeps a fixed number of options; top-p keeps just enough to cover most of the probability, wide when the model is unsure, narrow when it's confident.`,
       key_terms: [
         { term: "Top-k", definition: "Keep only the k highest-probability tokens, then sample from those." },
         { term: "Top-p (nucleus sampling)", definition: "Keep the smallest set of top tokens whose probabilities sum to at least p, then sample from those." },
         { term: "Renormalize", definition: "Rescale the kept tokens' probabilities so they sum to 1 again before sampling." }
       ],
       callouts: [
-        { type: "analogy", title: "Deciding which dice are on the table", content: "Temperature sets how loose the dice are. Top-k/top-p decide which dice are even allowed in the game — top-k keeps a fixed number, top-p keeps just enough to cover most of the odds.", position: "before" },
+        { type: "analogy", title: "Deciding which dice are on the table", content: "Temperature sets how loose the dice are. Top-k/top-p decide which dice are even allowed in the game, top-k keeps a fixed number, top-p keeps just enough to cover most of the odds.", position: "before" },
         { type: "tip", title: "top-p ≈ 0.9 is a safe default", content: "Keeping the top tokens until their probability adds up to ~0.9 trims the long tail of junk while leaving plenty of room for variety. It's a common, sensible starting point.", position: "after" }
       ],
       concept_diagram: {
@@ -696,7 +696,7 @@ Temperature decides how loose the dice are; **top-k/top-p decide which dice are 
             "Removes the top k tokens"
           ],
           correct_index: 0,
-          explanation: "Top-k keeps a fixed count — the k most probable tokens — and samples only from those."
+          explanation: "Top-k keeps a fixed count, the k most probable tokens, and samples only from those."
         },
         {
           question: "Why does top-p adapt to the model's confidence?",
@@ -759,7 +759,7 @@ kept top-k: [('blue', 0.598), ('clear', 0.272), ('dark', 0.13)]`,
           steps: [
             { label: "Sort high to low", detail: "Order tokens by probability so we can accumulate from the most likely down.", code: "blue 0.55, clear 0.25, dark 0.12, green 0.05, loud 0.03" },
             { label: "Accumulate to p", detail: "Add from the top: 0.55, then 0.80, then 0.92. We hit 0.9 after 'dark', so we stop there.", code: "0.55 -> 0.80 -> 0.92 >= 0.9  stop" },
-            { label: "Cut the tail", detail: "'green' and 'loud' fall below the cutoff and are discarded — that's the junk-tail trim.", code: "kept = [blue, clear, dark]; dropped = [green, loud]" },
+            { label: "Cut the tail", detail: "'green' and 'loud' fall below the cutoff and are discarded, that's the junk-tail trim.", code: "kept = [blue, clear, dark]; dropped = [green, loud]" },
             { label: "Renormalize + sample", detail: "The three survivors (summing to 0.92) are rescaled to sum to 1, then sampled.", code: "blue 0.598, clear 0.272, dark 0.130 -> draw" }
           ]
         }
@@ -779,12 +779,12 @@ kept top-k: [('blue', 0.598), ('clear', 0.272), ('dark', 0.13)]`,
           number: 2, difficulty: "medium",
           prompt: "The model is extremely confident: one token has probability 0.97. Compare what top-k=5 versus top-p=0.9 keep.",
           steps: [
-            "Top-k=5 keeps five tokens no matter what — so four near-zero junk tokens stay in the pool.",
+            "Top-k=5 keeps five tokens no matter what, so four near-zero junk tokens stay in the pool.",
             "Top-p=0.9 accumulates from the top: the 0.97 token alone already exceeds 0.9.",
             "So top-p stops immediately and keeps just that one token.",
             "Result: top-p adapts to the confidence (keeps 1), while top-k blindly keeps 5."
           ],
-          output: "Top-k=5 keeps 5 tokens; top-p=0.9 keeps only the single 0.97 token — top-p adapts, top-k doesn't."
+          output: "Top-k=5 keeps 5 tokens; top-p=0.9 keeps only the single 0.97 token, top-p adapts, top-k doesn't."
         }
       ],
       comparison_tables: [
@@ -793,8 +793,8 @@ kept top-k: [('blue', 0.598), ('clear', 0.272), ('dark', 0.13)]`,
           columns: ["Aspect", "Top-k", "Top-p (nucleus)"],
           rows: [
             { cells: ["What it keeps", "A fixed count of k tokens", "Smallest set summing to p"] },
-            { cells: ["Adapts to confidence?", "No — always k", "Yes — fewer when sure, more when unsure"] },
-            { cells: ["Typical value", "k = 20–50", "p = 0.9"] },
+            { cells: ["Adapts to confidence?", "No, always k", "Yes, fewer when sure, more when unsure"] },
+            { cells: ["Typical value", "k = 20, 50", "p = 0.9"] },
             { cells: ["Main strength", "Simple, predictable cap", "Confidence-aware trimming"], highlight: true }
           ]
         }
@@ -829,7 +829,7 @@ kept top-k: [('blue', 0.598), ('clear', 0.272), ('dark', 0.13)]`,
       ],
       challenge_title: "The Nucleus Filter",
       challenge_description: "Build the nucleus (top-p) filter a sampler runs before it draws: keep the smallest set of leading tokens whose probability covers p, drop the long tail, and renormalize what's left.",
-      challenge_story: "Your generation service keeps emitting the occasional bizarre word — a token from the deep tail of the distribution that should almost never have been picked. The fix the team agreed on is **nucleus sampling (top-p)**: before sampling, throw away the unlikely tail and only sample from the smallest group of top tokens that together cover a probability mass of \`p\`. You're implementing the filter stage. Given the model's next-token distribution, return exactly which tokens survive and their renormalized probabilities, so the downstream sampler only ever sees plausible options.",
+      challenge_story: "Your generation service keeps emitting the occasional bizarre word, a token from the deep tail of the distribution that should almost never have been picked. The fix the team agreed on is **nucleus sampling (top-p)**: before sampling, throw away the unlikely tail and only sample from the smallest group of top tokens that together cover a probability mass of \`p\`. You're implementing the filter stage. Given the model's next-token distribution, return exactly which tokens survive and their renormalized probabilities, so the downstream sampler only ever sees plausible options.",
       challenge_statement: "You are given \`n\` tokens, each with a probability, and a threshold \`p\`. Apply top-p filtering:\n\n1. Sort tokens by probability **descending**. Break ties by **lexicographically smallest** token first.\n2. Walk the sorted list, adding tokens to the kept set and accumulating their probability, until the accumulated mass is **at least \`p\`**. Include the token that crosses the threshold, then stop.\n3. **Renormalize** the kept tokens: divide each kept probability by the sum of the kept probabilities so they total 1.\n\nPrint the number of kept tokens, then each kept token (in the sorted order) with its renormalized probability to exactly **4 decimal places**.",
       challenge_input_format: "The first line has an integer `n` and a float `p`: `n p`.\n\nEach of the next `n` lines has a token (no spaces) and its float `probability`. The probabilities sum to 1.",
       challenge_output_format: "First line: the count of kept tokens. Then one line per kept token (in descending-probability order): the `token` and its renormalized probability to exactly 4 decimal places.",
@@ -843,7 +843,7 @@ kept top-k: [('blue', 0.598), ('clear', 0.272), ('dark', 0.13)]`,
         { input: "4 0.75\na 0.5\nb 0.3\nc 0.15\nd 0.05", output: "2\na 0.6250\nb 0.3750", explanation: "Cumulative mass: 0.5 (a), then 0.8 (b) which crosses 0.75, so keep {a, b}. Renormalized over 0.8: a → 0.625, b → 0.375. The tail c and d are dropped." },
         { input: "5 0.9\nthe 0.4\nquick 0.25\nbrown 0.2\nfox 0.1\njumps 0.05", output: "4\nthe 0.4211\nquick 0.2632\nbrown 0.2105\nfox 0.1053", explanation: "0.4, 0.65, 0.85, then 0.95 crosses 0.9, so keep the top four. `jumps`, the unlikely tail token, is filtered out." },
       ],
-      challenge_notes: "Top-p adapts the candidate pool to the distribution: when the model is confident, one or two tokens cover p and the pool is tiny; when it's unsure, the pool grows. That's the advantage over fixed top-k. Renormalizing matters — after dropping the tail the survivors no longer sum to 1, so you rescale before sampling.",
+      challenge_notes: "Top-p adapts the candidate pool to the distribution: when the model is confident, one or two tokens cover p and the pool is tiny; when it's unsure, the pool grows. That's the advantage over fixed top-k. Renormalizing matters, after dropping the tail the survivors no longer sum to 1, so you rescale before sampling.",
       challenge_hints: [
         "Sort with a key like `(-prob, token)` so ties fall back to lexicographic order automatically.",
         "Accumulate into the kept list first, then compute the kept sum once at the end for renormalization.",
@@ -909,14 +909,14 @@ main()
       concept: "Settings strategy",
       challenge_difficulty: "beginner",
       xp_reward: 10,
-      explanation: `You now have three dials — temperature, top-p, top-k. The beginner mistake is fiddling with all of them at once. The pro move is simpler: **start from what the task needs, change one thing, and usually leave top-p alone.** This lesson is the cheat sheet.
+      explanation: `You now have three dials, temperature, top-p, top-k. The beginner mistake is fiddling with all of them at once. The pro move is simpler: **start from what the task needs, change one thing, and usually leave top-p alone.** This lesson is the cheat sheet.
 
 ## What it is
 
 Picking settings is just matching randomness to the goal. Two questions sort almost every task:
 
 1. **Is there one right answer, or many good ones?** One right answer (extract a date, classify sentiment, fix a bug) wants *low* randomness. Many good ones (slogans, story ideas, alt phrasings) wants *higher* randomness.
-2. **Do you need the same output every time?** If yes — for tests, caching, reproducibility — push toward determinism.
+2. **Do you need the same output every time?** If yes, for tests, caching, reproducibility, push toward determinism.
 
 ## How it works
 
@@ -927,23 +927,23 @@ TASK                         temperature   notes
 --------------------------   -----------   --------------------------
 Data extraction / parsing       0.0        exact, repeatable
 Classification / labeling       0.0        one correct bucket
-Code generation / fixes      0.0 – 0.3     correctness over flair
-Factual Q&A / summarizing    0.2 – 0.4     grounded, low drift
-Everyday chat / explaining   0.6 – 0.8     natural but on-track
-Brainstorming / ideas        0.8 – 1.1     many distinct options
-Poetry / wild creative       1.0 – 1.3     surprise welcome
+Code generation / fixes      0.0, 0.3     correctness over flair
+Factual Q&A / summarizing    0.2, 0.4     grounded, low drift
+Everyday chat / explaining   0.6, 0.8     natural but on-track
+Brainstorming / ideas        0.8, 1.1     many distinct options
+Poetry / wild creative       1.0, 1.3     surprise welcome
 \`\`\`
 
 A few rules that keep you out of trouble:
 
 - **Move temperature first.** It's the biggest, most intuitive lever. Only touch top-p/top-k if you specifically want to cap the candidate pool.
 - **Don't crank both temperature and top-p high together.** That stacks looseness on looseness and tips into incoherence. If temperature is high, a tighter top-p (~0.9) keeps it grounded.
-- **For anything verifiable, default low.** Facts, code, and extraction punish randomness — a "creative" date is just a wrong date.
+- **For anything verifiable, default low.** Facts, code, and extraction punish randomness, a "creative" date is just a wrong date.
 - **For ideation, raise temperature and ask for several options** in one call (e.g., "give me 8 distinct taglines"), which surfaces variety without re-running.
 
 ## Why it matters
 
-The single most common cause of "the AI keeps making stuff up" or "the AI is so boring" is a temperature mismatch. A factual task at temperature 1.2 invites hallucination; a brainstorm at temperature 0 returns the same tired idea every time. Matching the dial to the job fixes both — for free, instantly, no prompt rewriting.
+The single most common cause of "the AI keeps making stuff up" or "the AI is so boring" is a temperature mismatch. A factual task at temperature 1.2 invites hallucination; a brainstorm at temperature 0 returns the same tired idea every time. Matching the dial to the job fixes both, for free, instantly, no prompt rewriting.
 
 ## The mental model to keep
 
@@ -1006,7 +1006,7 @@ The single most common cause of "the AI keeps making stuff up" or "the AI is so 
             "It disables top-p automatically"
           ],
           correct_index: 1,
-          explanation: "On verifiable tasks, high temperature increases the chance of plausible-but-wrong output — a 'creative' fact is just a wrong fact."
+          explanation: "On verifiable tasks, high temperature increases the chance of plausible-but-wrong output, a 'creative' fact is just a wrong fact."
         }
       ],
       participation_activities: [
@@ -1044,7 +1044,7 @@ brainstorm -> 0.9`,
           title: "choosing settings for a real task",
           steps: [
             { label: "Name the task", detail: "You need to pull the due date out of an invoice and get it right every time.", code: 'task = "extract due date"' },
-            { label: "One answer or many?", detail: "There is exactly one correct date. This is a convergent task — randomness can only hurt.", code: "answers = exactly one correct" },
+            { label: "One answer or many?", detail: "There is exactly one correct date. This is a convergent task, randomness can only hurt.", code: "answers = exactly one correct" },
             { label: "Set temperature low", detail: "Convergent + needs to be repeatable → temperature 0 for deterministic, exact output.", code: "temperature = 0.0" },
             { label: "Leave top-p default", detail: "No need to widen the pool; keep top-p ~0.9 and don't touch top-k. Done.", code: "top_p = 0.9  # unchanged" }
           ]
@@ -1055,22 +1055,22 @@ brainstorm -> 0.9`,
           number: 1, difficulty: "easy",
           prompt: "You want the model to label customer reviews as positive, negative, or neutral. What temperature and why?",
           steps: [
-            "Each review has one correct label — this is a convergent classification task.",
+            "Each review has one correct label, this is a convergent classification task.",
             "Randomness could flip a clear 'positive' into 'neutral' on a re-run.",
             "Use temperature 0 so the label is consistent and repeatable."
           ],
-          output: "Temperature 0 — classification is a one-right-answer task."
+          output: "Temperature 0, classification is a one-right-answer task."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "A user complains: 'I ask for blog title ideas and it gives me the same three every time.' What settings change fixes this, and what's the risk if you overdo it?",
           steps: [
-            "Generating title ideas is a divergent task — many good answers exist.",
+            "Generating title ideas is a divergent task, many good answers exist.",
             "The repetition means temperature is too low, so the model keeps picking the same favorites.",
-            "Raise temperature toward 0.9–1.1 to surface more variety, and ask for several titles in one call.",
-            "Risk of overdoing it: push past ~1.5 and the titles become incoherent word salad — higher isn't smarter, just looser."
+            "Raise temperature toward 0.9, 1.1 to surface more variety, and ask for several titles in one call.",
+            "Risk of overdoing it: push past ~1.5 and the titles become incoherent word salad, higher isn't smarter, just looser."
           ],
-          output: "Raise temperature to ~0.9–1.1 for variety; going past ~1.5 risks incoherent output."
+          output: "Raise temperature to ~0.9, 1.1 for variety; going past ~1.5 risks incoherent output."
         }
       ],
       comparison_tables: [
@@ -1079,9 +1079,9 @@ brainstorm -> 0.9`,
           columns: ["Task", "Temperature", "Why"],
           rows: [
             { cells: ["Data extraction", "0.0", "Exact, repeatable, one right answer"] },
-            { cells: ["Code generation", "0.0–0.3", "Correctness matters more than flair"] },
-            { cells: ["Everyday chat", "0.6–0.8", "Natural but stays on track"] },
-            { cells: ["Brainstorming", "0.8–1.1", "Many distinct options wanted"], highlight: true }
+            { cells: ["Code generation", "0.0, 0.3", "Correctness matters more than flair"] },
+            { cells: ["Everyday chat", "0.6, 0.8", "Natural but stays on track"] },
+            { cells: ["Brainstorming", "0.8, 1.1", "Many distinct options wanted"], highlight: true }
           ]
         }
       ],
@@ -1105,17 +1105,17 @@ brainstorm -> 0.9`,
       reflections: [
         {
           prompt: "In your own words: why does matching temperature to the task fix both 'the model keeps making stuff up' and 'the model is so boring' complaints?",
-          sampleAnswer: "Both complaints are temperature mismatches. 'Making stuff up' usually means temperature is too high for a factual task — the model is sampling less-likely, sometimes wrong tokens. 'So boring' usually means temperature is too low for a creative task — the model keeps grabbing the same favorites. Lowering it for factual work makes answers exact and grounded; raising it for creative work surfaces variety. The same dial fixes opposite problems by aligning randomness with what the task actually needs."
+          sampleAnswer: "Both complaints are temperature mismatches. 'Making stuff up' usually means temperature is too high for a factual task, the model is sampling less-likely, sometimes wrong tokens. 'So boring' usually means temperature is too low for a creative task, the model keeps grabbing the same favorites. Lowering it for factual work makes answers exact and grounded; raising it for creative work surfaces variety. The same dial fixes opposite problems by aligning randomness with what the task actually needs."
         }
       ],
       hints: [
         "Define a set of convergent task names that should get temperature 0.",
         "If the task is in that set, return 0.0; otherwise return a higher value like 0.9.",
-        "Call recommend_temp twice — once with 'extraction', once with 'brainstorm'."
+        "Call recommend_temp twice, once with 'extraction', once with 'brainstorm'."
       ],
       challenge_title: "The Settings Advisor",
       challenge_description: "Build the rules engine that picks temperature and top-p for each job a model is asked to do, downgrading risky high-stakes tasks to safe, near-deterministic settings.",
-      challenge_story: "Your platform runs dozens of AI features — extraction, summarization, chat, brainstorming — and engineers keep guessing at sampling settings, sometimes shipping a customer-facing tool at temperature 1.0 (chaos) or a poetry toy at temperature 0 (boring). You're writing the **settings advisor**: a single rules engine that maps each task's category and risk level to a sane \`temperature\` and \`top_p\`. Convergent, single-right-answer tasks get pinned near 0; creative ones get room to roam — but anything flagged **high-risk** gets clamped down hard, because a wrong-but-confident extraction costs more than a dull one.",
+      challenge_story: "Your platform runs dozens of AI features, extraction, summarization, chat, brainstorming, and engineers keep guessing at sampling settings, sometimes shipping a customer-facing tool at temperature 1.0 (chaos) or a poetry toy at temperature 0 (boring). You're writing the **settings advisor**: a single rules engine that maps each task's category and risk level to a sane \`temperature\` and \`top_p\`. Convergent, single-right-answer tasks get pinned near 0; creative ones get room to roam, but anything flagged **high-risk** gets clamped down hard, because a wrong-but-confident extraction costs more than a dull one.",
       challenge_statement: "You are given \`n\` tasks. Each task has a **category** and an integer **risk** from 0 to 10. For each task, compute a recommendation:\n\n1. The base temperature comes from the category:\n   - \`extraction\`, \`classification\`, \`code\`, \`math\` → **0.0**\n   - \`summary\` → **0.3**\n   - \`chat\` → **0.7**\n   - \`brainstorm\` → **1.0**\n   - \`poetry\` → **1.2**\n   - any **other** category → **0.7**\n2. **Risk clamp:** if \`risk ≥ 7\` and the base temperature is above 0.2, lower it to **0.2**.\n3. Set \`top_p\`: if the resulting temperature is exactly **0.0**, use **1.0** (sampling is off anyway); otherwise use **0.9**.\n\nPrint one line per task: \`temp=<t>, top_p=<tp>\`, each value to exactly **one decimal place**.",
       challenge_input_format: "The first line has an integer `n`: the number of tasks.\n\nEach of the next `n` lines has a category (no spaces) and an integer `risk`.",
       challenge_output_format: "`n` lines. Each: `temp=<t>, top_p=<tp>` with both numbers formatted to exactly one decimal place (e.g. `temp=0.0, top_p=1.0`).",
@@ -1197,11 +1197,11 @@ main()
       concept: "Softmax",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `You've used the word "probability" a lot — \`blue\` has 0.60, \`clear\` has 0.15. But the model never produces those numbers directly. Inside, it emits raw scores that can be any size: 8.2, -3.7, 0.0, even 50. The function that turns that messy pile of scores into clean probabilities that sum to 1 is **softmax**, and it's the exact spot where temperature does its work.
+      explanation: `You've used the word "probability" a lot, \`blue\` has 0.60, \`clear\` has 0.15. But the model never produces those numbers directly. Inside, it emits raw scores that can be any size: 8.2, -3.7, 0.0, even 50. The function that turns that messy pile of scores into clean probabilities that sum to 1 is **softmax**, and it's the exact spot where temperature does its work.
 
 ## What it is
 
-A model's final layer outputs one **logit** per token — an unnormalized score. Logits aren't probabilities: they can be negative, they don't sum to anything tidy, and a logit of 4 isn't "twice as likely" as a logit of 2. **Softmax** is the rule that converts logits into a real probability distribution. It does two jobs at once: it makes every value positive (via \`exp\`), and it makes them sum to exactly 1 (by dividing by the total).
+A model's final layer outputs one **logit** per token, an unnormalized score. Logits aren't probabilities: they can be negative, they don't sum to anything tidy, and a logit of 4 isn't "twice as likely" as a logit of 2. **Softmax** is the rule that converts logits into a real probability distribution. It does two jobs at once: it makes every value positive (via \`exp\`), and it makes them sum to exactly 1 (by dividing by the total).
 
 The headline property: softmax is *relative*. Only the **gaps between logits** matter, not their absolute size. Logits \`[2, 1, 0]\` and \`[12, 11, 10]\` produce the identical distribution, because the differences are the same.
 
@@ -1237,7 +1237,7 @@ Softmax is the hinge the whole sampling story turns on:
 
 ## The mental model to keep
 
-**Logits are raw scores; softmax is the converter that turns them into odds that sum to 1.** Temperature reaches in *before* the conversion and stretches or squeezes the gaps — and because softmax exponentiates, those gaps decide everything.`,
+**Logits are raw scores; softmax is the converter that turns them into odds that sum to 1.** Temperature reaches in *before* the conversion and stretches or squeezes the gaps, and because softmax exponentiates, those gaps decide everything.`,
       key_terms: [
         { term: "Logit", definition: "A raw, unnormalized score the model assigns to a token before it becomes a probability; can be any real number." },
         { term: "Softmax", definition: "The function that exponentiates logits and divides by their sum, producing probabilities that total 1." },
@@ -1245,7 +1245,7 @@ Softmax is the hinge the whole sampling story turns on:
         { term: "Temperature scaling", definition: "Dividing every logit by T before softmax; small T sharpens the distribution, large T flattens it." }
       ],
       callouts: [
-        { type: "insight", title: "Only the gaps matter", content: "Softmax cares about differences between logits, not their size. [2,1,0] and [102,101,100] give the exact same probabilities — shifting every logit by a constant cancels out in the division.", position: "before" },
+        { type: "insight", title: "Only the gaps matter", content: "Softmax cares about differences between logits, not their size. [2,1,0] and [102,101,100] give the exact same probabilities, shifting every logit by a constant cancels out in the division.", position: "before" },
         { type: "tip", title: "Subtract the max, always", content: "Before calling exp, subtract the largest scaled logit from each. The result is identical math but the exponents stay small, so you never get inf. It is the standard 'stable softmax' every inference engine uses.", position: "after" }
       ],
       concept_diagram: {
@@ -1345,10 +1345,10 @@ sum: 1.0`,
         {
           title: "softmax on [2.0, 1.0, 0.5] step by step",
           steps: [
-            { label: "Start with logits", detail: "Three raw scores. They are not probabilities yet — they do not sum to 1.", code: "logits = [2.0, 1.0, 0.5]" },
+            { label: "Start with logits", detail: "Three raw scores. They are not probabilities yet, they do not sum to 1.", code: "logits = [2.0, 1.0, 0.5]" },
             { label: "Subtract the max", detail: "Subtract 2.0 from each so the largest becomes 0; this keeps exp safe and changes nothing.", code: "shifted = [0.0, -1.0, -1.5]" },
             { label: "Exponentiate", detail: "Apply exp to each. The exp step amplifies the gaps between scores.", code: "exps = [1.0, 0.368, 0.223]" },
-            { label: "Normalize", detail: "Divide each by the sum (1.591) so they total 1 — now they are probabilities.", code: "probs = [0.629, 0.231, 0.140]" }
+            { label: "Normalize", detail: "Divide each by the sum (1.591) so they total 1, now they are probabilities.", code: "probs = [0.629, 0.231, 0.140]" }
           ]
         }
       ],
@@ -1369,10 +1369,10 @@ sum: 1.0`,
           steps: [
             "Softmax does not use the ratio of logits; it uses the gap, which is 3 - 1 = 2.",
             "It exponentiates: exp(0) = 1 for the leader (after subtracting the max) and exp(-2) ~ 0.135 for the other.",
-            "Normalizing gives roughly 0.88 and 0.12 — the exp step amplifies the gap far beyond a 3:1 ratio.",
+            "Normalizing gives roughly 0.88 and 0.12, the exp step amplifies the gap far beyond a 3:1 ratio.",
             "So a logit lead of 2 turns into a probability lead near 0.88 vs 0.12, not 0.75 vs 0.25."
           ],
-          output: "About 0.88 vs 0.12 — exponentiation amplifies the logit gap well past the raw ratio."
+          output: "About 0.88 vs 0.12, exponentiation amplifies the logit gap well past the raw ratio."
         }
       ],
       comparison_tables: [
@@ -1407,13 +1407,13 @@ sum: 1.0`,
       reflections: [
         {
           prompt: "In your own words: how does softmax connect the abstract idea of 'temperature reshaping the distribution' to actual arithmetic?",
-          sampleAnswer: "Temperature reshaping is not magic — it is one division. Each logit gets divided by T before softmax runs. A small T spreads the logits further apart, and because softmax exponentiates, that wider gap turns into a much larger probability lead for the top token (sharper). A large T squeezes the logits together, so after exp the probabilities end up closer (flatter). Softmax is the converter that makes scaling the logits change the shape of the final odds."
+          sampleAnswer: "Temperature reshaping is not magic, it is one division. Each logit gets divided by T before softmax runs. A small T spreads the logits further apart, and because softmax exponentiates, that wider gap turns into a much larger probability lead for the top token (sharper). A large T squeezes the logits together, so after exp the probabilities end up closer (flatter). Softmax is the converter that makes scaling the logits change the shape of the final odds."
         }
       ],
       hints: [
         "Subtract max(logits) from each logit before calling math.exp to stay numerically safe.",
         "exp turns scores into positive numbers; divide each by their sum to normalize.",
-        "The probabilities should sum to 1.0 (within rounding) — print the sum to check."
+        "The probabilities should sum to 1.0 (within rounding), print the sum to check."
       ],
       challenge_title: "The Probability Oracle",
       challenge_description: "Implement the temperature-aware softmax the sampler uses, then answer queries: at a given temperature, what is the probability of a specific named token?",
@@ -1432,7 +1432,7 @@ sum: 1.0`,
         { input: "3 3\nblue 2.0\nclear 1.0\ndark 0.0\n0.5 blue\n1.0 clear\n2.0 dark", output: "0.8668\n0.2447\n0.1863", explanation: "Same logits, three temperatures. `blue` is decisive at T=0.5 (0.8668). At higher T the distribution flattens, so `dark` climbs from near-nothing toward 0.1863." },
         { input: "2 2\nhot 1.0\ncold 0.0\n0.5 hot\n2.0 cold", output: "0.8808\n0.3775", explanation: "Low T sharpens `hot` to 0.8808; high T flattens the gap, lifting `cold` to 0.3775." },
       ],
-      challenge_notes: "This is the literal mechanism behind 'temperature reshapes the odds': scale the logits by 1/T, then softmax. Subtracting the max before exp is the stable-softmax trick — it never changes the probability, it only stops large logits from overflowing. Notice T only ever appears as `logit / T`.",
+      challenge_notes: "This is the literal mechanism behind 'temperature reshapes the odds': scale the logits by 1/T, then softmax. Subtracting the max before exp is the stable-softmax trick, it never changes the probability, it only stops large logits from overflowing. Notice T only ever appears as `logit / T`.",
       challenge_hints: [
         "Write one helper `softmax_temp(logits, T)` returning the full probability list, then index it by the query token's position.",
         "Build a dict mapping token name to its index once, so each query is an O(1) lookup.",
@@ -1509,14 +1509,14 @@ main()
 
 **Decoding** is the rule that turns a probability distribution into a chosen token at each step.
 
-- **Greedy decoding:** take the **argmax** — the token with the highest probability — every single time. No randomness. Same input, same output, forever.
+- **Greedy decoding:** take the **argmax**: the token with the highest probability, every single time. No randomness. Same input, same output, forever.
 - **Sampled decoding:** draw a token at random *in proportion to* its probability (this is the sampling from Lesson 1, with temperature and top-p shaping the odds first). Different runs can pick different tokens.
 
 Greedy is the special case you get when temperature hits 0: the distribution becomes so sharp that the top token has effectively all the mass, so "sample" and "take the max" become the same move.
 
 ## How it works
 
-The two strategies diverge in one line of code — argmax versus a weighted draw:
+The two strategies diverge in one line of code, argmax versus a weighted draw:
 
 \`\`\`python
 import random
@@ -1535,14 +1535,14 @@ print("greedy: ", greedy)    # always "blue"
 print("sampled:", sampled)   # usually "blue", sometimes not
 \`\`\`
 
-Greedy looks attractive — always pick the best! — but "best at each step" is not "best overall." By locking onto the local favorite every time, greedy tends to produce flat, generic text and can fall into **repetition loops** ("I think that I think that I think that..."), because the same high-probability continuation keeps winning. Sampling escapes those ruts by occasionally taking the road less traveled.
+Greedy looks attractive, always pick the best!, but "best at each step" is not "best overall." By locking onto the local favorite every time, greedy tends to produce flat, generic text and can fall into **repetition loops** ("I think that I think that I think that..."), because the same high-probability continuation keeps winning. Sampling escapes those ruts by occasionally taking the road less traveled.
 
 ## Why it matters
 
 The right choice is entirely about the task:
 
-- **Greedy wins when there's one correct answer.** Extraction, classification, math, structured output — you want the same exact result every run, and creativity is a liability.
-- **Sampling wins when you want variety or naturalness.** Chat, brainstorming, stories — flat greedy text feels robotic and loops; sampled text feels alive.
+- **Greedy wins when there's one correct answer.** Extraction, classification, math, structured output, you want the same exact result every run, and creativity is a liability.
+- **Sampling wins when you want variety or naturalness.** Chat, brainstorming, stories, flat greedy text feels robotic and loops; sampled text feels alive.
 - **Greedy can be subtly worse even on "best" grounds.** Locking onto each local maximum can paint the model into a corner, where a slightly-less-likely early token would have led somewhere far better. This is why pure greedy is rarely used for long-form generation.
 
 ## The mental model to keep
@@ -1550,19 +1550,19 @@ The right choice is entirely about the task:
 **Greedy = always the favorite, perfectly repeatable, can loop and feel flat. Sampled = a weighted dice roll, varied and natural, not reproducible.** Reach for greedy when one right answer must come back every time; reach for sampling when you want range.`,
       key_terms: [
         { term: "Decoding", definition: "The rule that selects one token from the probability distribution at each generation step." },
-        { term: "Greedy decoding", definition: "Always choosing the argmax — the single highest-probability token — making output deterministic." },
+        { term: "Greedy decoding", definition: "Always choosing the argmax, the single highest-probability token, making output deterministic." },
         { term: "Argmax", definition: "The position (token) holding the maximum value in a list; the choice greedy decoding always makes." },
         { term: "Repetition loop", definition: "A failure where greedy decoding keeps picking the same high-probability continuation, repeating a phrase endlessly." }
       ],
       callouts: [
-        { type: "insight", title: "Greedy is just temperature 0", content: "Greedy decoding is not a separate machine — it is what sampling becomes when temperature drops to 0. The distribution gets so sharp the top token owns nearly all the mass, so drawing from it always returns the favorite.", position: "before" },
-        { type: "warning", title: "Best at each step isn't best overall", content: "Greedy picks the local favorite every step, but a chain of locally-best choices can dead-end. A slightly less likely early token sometimes leads to a far better full answer — which is why pure greedy is rare for long generation.", position: "after" }
+        { type: "insight", title: "Greedy is just temperature 0", content: "Greedy decoding is not a separate machine, it is what sampling becomes when temperature drops to 0. The distribution gets so sharp the top token owns nearly all the mass, so drawing from it always returns the favorite.", position: "before" },
+        { type: "warning", title: "Best at each step isn't best overall", content: "Greedy picks the local favorite every step, but a chain of locally-best choices can dead-end. A slightly less likely early token sometimes leads to a far better full answer, which is why pure greedy is rare for long generation.", position: "after" }
       ],
       concept_diagram: {
         title: "Two ways to choose a token",
         steps: [
           { label: "Get the distribution", desc: "Softmax produces a probability for every candidate token." },
-          { label: "Greedy path", desc: "Take the argmax — the single highest-probability token." },
+          { label: "Greedy path", desc: "Take the argmax, the single highest-probability token." },
           { label: "Sampled path", desc: "Draw a token at random, weighted by its probability." },
           { label: "Outcome", desc: "Greedy is identical every run; sampled varies across runs." }
         ]
@@ -1580,7 +1580,7 @@ The right choice is entirely about the task:
           question: "Which property is unique to greedy decoding?",
           options: [
             "It produces different output on every run",
-            "It is deterministic — same input always gives same output",
+            "It is deterministic, same input always gives same output",
             "It requires a high temperature",
             "It cannot be used for classification"
           ],
@@ -1661,7 +1661,7 @@ sampled: blue`,
           number: 1, difficulty: "easy",
           prompt: "A distribution is [yes:0.7, no:0.3]. What does greedy decoding return, and is it ever 'no'?",
           steps: [
-            "Greedy always takes the argmax — the highest-probability token.",
+            "Greedy always takes the argmax, the highest-probability token.",
             "'yes' has 0.7, the maximum, so greedy returns 'yes'.",
             "Greedy never picks 'no' here, because 'no' is never the maximum."
           ],
@@ -1720,9 +1720,9 @@ sampled: blue`,
         "Keep random.seed(3) so the sampled output is reproducible for this exercise."
       ],
       challenge_title: "The Greedy Decoder",
-      challenge_description: "Build a greedy decoder: at each generation step, given the token logits, always emit the argmax — and break ties the exact way the spec requires.",
-      challenge_story: "Your team ships a structured-extraction feature that must return byte-for-byte identical output every run, so QA can diff it against golden files. Sampling is out — any randomness breaks the tests. You're implementing the **greedy decoder**: at each step the model produces a row of logits, and you emit the single highest-scoring token, deterministically. The only subtlety is ties: when two tokens share the top logit you must pick the lexicographically smallest, so the output is reproducible across machines and library versions.",
-      challenge_statement: "You are given a sequence of \`s\` decoding **steps**. At each step there are \`m\` candidate tokens, each with a floating-point **logit**. Apply greedy decoding:\n\n1. For each step, find the token with the **highest logit**.\n2. If two or more tokens tie for the highest logit, choose the **lexicographically smallest** token name.\n3. Emit that token.\n\nAfter processing all steps, print the decoded tokens joined by single spaces on one line. Greedy decoding never looks at probabilities — comparing logits directly gives the same argmax, since softmax preserves order.",
+      challenge_description: "Build a greedy decoder: at each generation step, given the token logits, always emit the argmax, and break ties the exact way the spec requires.",
+      challenge_story: "Your team ships a structured-extraction feature that must return byte-for-byte identical output every run, so QA can diff it against golden files. Sampling is out, any randomness breaks the tests. You're implementing the **greedy decoder**: at each step the model produces a row of logits, and you emit the single highest-scoring token, deterministically. The only subtlety is ties: when two tokens share the top logit you must pick the lexicographically smallest, so the output is reproducible across machines and library versions.",
+      challenge_statement: "You are given a sequence of \`s\` decoding **steps**. At each step there are \`m\` candidate tokens, each with a floating-point **logit**. Apply greedy decoding:\n\n1. For each step, find the token with the **highest logit**.\n2. If two or more tokens tie for the highest logit, choose the **lexicographically smallest** token name.\n3. Emit that token.\n\nAfter processing all steps, print the decoded tokens joined by single spaces on one line. Greedy decoding never looks at probabilities, comparing logits directly gives the same argmax, since softmax preserves order.",
       challenge_input_format: "The first line has one integer `s`: the number of steps.\n\nEach step is given on the next lines: a line with one integer `m` (the candidate count for that step), then `m` lines each with a token (no spaces) and its floating-point `logit`.",
       challenge_output_format: "One line: the `s` greedily-decoded tokens in step order, separated by single spaces.",
       challenge_constraints: [
@@ -1735,7 +1735,7 @@ sampled: blue`,
         { input: "2\n3\nblue 2.0\nclear 1.0\ndark 0.5\n2\nsky 0.3\nsea 0.9", output: "blue sea", explanation: "Step 1: `blue` has the top logit (2.0). Step 2: `sea` (0.9) beats `sky` (0.3). Greedy emits the argmax at each step." },
         { input: "1\n3\nzebra 1.0\napple 1.0\nmango 0.5", output: "apple", explanation: "`zebra` and `apple` tie at logit 1.0; the lexicographic tie-break picks `apple`." },
       ],
-      challenge_notes: "Greedy decoding compares logits, not probabilities — that is fine, because softmax is monotonic: the largest logit is always the largest probability. The lexicographic tie-break is what makes the decoder fully deterministic; without a fixed rule, two equal logits could resolve differently across runs and break reproducibility.",
+      challenge_notes: "Greedy decoding compares logits, not probabilities, that is fine, because softmax is monotonic: the largest logit is always the largest probability. The lexicographic tie-break is what makes the decoder fully deterministic; without a fixed rule, two equal logits could resolve differently across runs and break reproducibility.",
       challenge_hints: [
         "For each step, track the best (logit, token) seen so far; update when you find a strictly larger logit.",
         "On an exact logit tie, update only if the new token string is lexicographically smaller than the current best.",
@@ -1805,10 +1805,10 @@ main()
 
 ## What it is
 
-A penalty is a number subtracted from a token's logit based on its **history** — how it has already been used in this generation.
+A penalty is a number subtracted from a token's logit based on its **history**: how it has already been used in this generation.
 
 - **Presence penalty:** a **flat** subtraction applied once to any token that has appeared *at all*, no matter how many times. It nudges the model toward bringing in *new* topics and words.
-- **Frequency penalty:** a subtraction that **scales with the count** — the more often a token has appeared, the harder it gets pushed down. It specifically punishes *overusing* the same token.
+- **Frequency penalty:** a subtraction that **scales with the count**: the more often a token has appeared, the harder it gets pushed down. It specifically punishes *overusing* the same token.
 
 Both leave never-seen tokens untouched. They only reshape the odds for words already on the page.
 
@@ -1835,11 +1835,11 @@ for tok, lg in zip(tokens, logits):
 # the -> 1.5 (3.0 - 0.5*3), now BELOW "a" (2.5): the loop is broken
 \`\`\`
 
-With a frequency penalty of 0.5 and a count of 3, \`the\` loses 1.5 from its logit, dropping it below \`a\`. The model is now steered toward a fresh word — without that nudge it would have happily said \`the\` a fourth time.
+With a frequency penalty of 0.5 and a count of 3, \`the\` loses 1.5 from its logit, dropping it below \`a\`. The model is now steered toward a fresh word, without that nudge it would have happily said \`the\` a fourth time.
 
 ## Why it matters
 
-- **Presence vs frequency is "any vs how much."** Presence penalizes a token the same whether it appeared once or ten times — good for encouraging topic variety. Frequency ramps up with each reuse — good for stopping a single word from dominating.
+- **Presence vs frequency is "any vs how much."** Presence penalizes a token the same whether it appeared once or ten times, good for encouraging topic variety. Frequency ramps up with each reuse, good for stopping a single word from dominating.
 - **They usually run together.** A small presence penalty plus a small frequency penalty is a common recipe to keep long outputs fresh.
 - **Too high backfires.** Crank the penalties up and the model avoids common, necessary words (like \`the\` or \`is\`), producing stilted or broken text. They are a nudge, not a hammer.
 
@@ -1956,7 +1956,7 @@ cat 2.0`,
         {
           title: "a frequency penalty breaks a loop",
           steps: [
-            { label: "Before penalty", detail: "'the' has the top logit (3.0) and was already used 3 times — greedy/sampling would likely pick it again.", code: "the 3.0, a 2.5, cat 2.0; count(the)=3" },
+            { label: "Before penalty", detail: "'the' has the top logit (3.0) and was already used 3 times, greedy/sampling would likely pick it again.", code: "the 3.0, a 2.5, cat 2.0; count(the)=3" },
             { label: "Compute the toll", detail: "Frequency penalty 0.5 times count 3 equals a 1.5 subtraction aimed only at 'the'.", code: "penalty(the) = 0.5 * 3 = 1.5" },
             { label: "Apply it", detail: "'the' drops to 1.5, now below both 'a' (2.5) and 'cat' (2.0). Fresh words moved ahead.", code: "the 1.5, a 2.5, cat 2.0" },
             { label: "Sample fresh", detail: "After softmax, 'a' is now the favorite. The model picks a new word instead of repeating 'the'.", code: "new leader -> 'a'" }
@@ -1981,7 +1981,7 @@ cat 2.0`,
             "X has appeared (count 1), so the presence penalty applies once: 4.0 - 1.5 = 2.5.",
             "Frequency penalty is 0, so no count-scaled subtraction happens for X.",
             "Y never appeared (count 0), so no penalty applies: it stays at 3.0.",
-            "Compare: X is now 2.5 and Y is 3.0, so Y is higher — the presence penalty flipped the order toward the fresh token."
+            "Compare: X is now 2.5 and Y is 3.0, so Y is higher, the presence penalty flipped the order toward the fresh token."
           ],
           output: "Y is now higher (3.0 vs 2.5); the presence penalty pushed the already-seen X below the fresh Y."
         }
@@ -1992,7 +1992,7 @@ cat 2.0`,
           columns: ["Aspect", "Presence penalty", "Frequency penalty"],
           rows: [
             { cells: ["When it applies", "If the token appeared at all", "Every time, scaled by count"] },
-            { cells: ["Scales with count?", "No — flat", "Yes — count times penalty"] },
+            { cells: ["Scales with count?", "No, flat", "Yes, count times penalty"] },
             { cells: ["Encourages", "New topics and words", "Not overusing one token"] },
             { cells: ["Best at", "Topic variety", "Stopping a word from dominating"], highlight: true }
           ]
@@ -2028,7 +2028,7 @@ cat 2.0`,
       ],
       challenge_title: "The Penalty Engine",
       challenge_description: "Implement the repetition-penalty stage of a sampler: given a token history plus presence and frequency penalties, adjust the logits and report the new winning token.",
-      challenge_story: "Your long-form writing assistant keeps looping — paragraphs that say the same phrase three times, lists that repeat a word into the ground. The fix is a **penalty engine** that sits just before sampling: it reads the tokens generated so far, docks the logit of anything overused, and lets fresh words rise. You're building it. Given the model's next-token logits and a count of how often each token has already appeared, apply a presence penalty (flat, once per seen token) and a frequency penalty (scaled by count), then report which token now wins. Tune it right and the loops disappear without the prose going haywire.",
+      challenge_story: "Your long-form writing assistant keeps looping, paragraphs that say the same phrase three times, lists that repeat a word into the ground. The fix is a **penalty engine** that sits just before sampling: it reads the tokens generated so far, docks the logit of anything overused, and lets fresh words rise. You're building it. Given the model's next-token logits and a count of how often each token has already appeared, apply a presence penalty (flat, once per seen token) and a frequency penalty (scaled by count), then report which token now wins. Tune it right and the loops disappear without the prose going haywire.",
       challenge_statement: "You are given \`n\` candidate tokens, each with a floating-point **logit** and an integer **count** of how many times it has already appeared. You are also given a **presence** penalty \`P\` and a **frequency** penalty \`F\` (both floats). For each token compute its penalized logit:\n\n1. Start from the raw logit.\n2. If the token's count is **greater than 0**, subtract \`P\` once.\n3. Subtract \`F\` multiplied by the token's count.\n\nThen find the token with the **highest penalized logit**. If two or more tie, choose the **lexicographically smallest** token name. Print that token and its penalized logit, formatted to exactly **2 decimal places**, separated by one space.",
       challenge_input_format: "The first line has an integer `n` and two floats `P F`: the token count, the presence penalty, and the frequency penalty.\n\nEach of the next `n` lines has a token (no spaces), its floating-point `logit`, and an integer `count`.",
       challenge_output_format: "One line: the winning `token` and its penalized logit to exactly 2 decimal places, separated by one space (e.g. `a 2.50`).",
@@ -2040,10 +2040,10 @@ cat 2.0`,
         "Ties on the penalized logit are broken by lexicographically smallest token.",
       ],
       challenge_examples: [
-        { input: "3 0.0 0.5\nthe 3.0 3\na 2.5 0\ncat 2.0 0", output: "a 2.50", explanation: "`the` had the top raw logit but its frequency penalty is 0.5 * 3 = 1.5, dropping it to 1.5. `a` (untouched at 2.5) now wins — the loop on `the` is broken." },
+        { input: "3 0.0 0.5\nthe 3.0 3\na 2.5 0\ncat 2.0 0", output: "a 2.50", explanation: "`the` had the top raw logit but its frequency penalty is 0.5 * 3 = 1.5, dropping it to 1.5. `a` (untouched at 2.5) now wins, the loop on `the` is broken." },
         { input: "2 2.0 0.0\nthe 4.0 1\nfox 3.0 0", output: "fox 3.00", explanation: "`the` appeared once, so the flat presence penalty of 2.0 drops it to 2.0. `fox` is fresh and stays at 3.0, taking the lead." },
       ],
-      challenge_notes: "Presence and frequency answer different questions: presence asks 'has this appeared at all?' and charges a flat toll; frequency asks 'how many times?' and charges per use. Applying both on the logits (before softmax) is exactly where temperature also acts, so penalties compose cleanly with the rest of the sampler. Keep them small in practice — large penalties push the model off necessary common words.",
+      challenge_notes: "Presence and frequency answer different questions: presence asks 'has this appeared at all?' and charges a flat toll; frequency asks 'how many times?' and charges per use. Applying both on the logits (before softmax) is exactly where temperature also acts, so penalties compose cleanly with the rest of the sampler. Keep them small in practice, large penalties push the model off necessary common words.",
       challenge_hints: [
         "For each token, start from its logit, subtract P only if count > 0, then subtract F * count.",
         "Track the best (penalized logit, token) so far; on an exact tie prefer the lexicographically smaller token.",
@@ -2114,11 +2114,11 @@ main()
       concept: "Seeds",
       challenge_difficulty: "beginner",
       xp_reward: 10,
-      explanation: `Sampling is random — that's the whole point. But "random" and "untestable" are not the same thing. If you've ever needed a sampled model to give the *exact same* output twice (to write a unit test, reproduce a bug, or compare two prompts fairly), the tool you reach for is the **seed**. A seed makes randomness *replayable*: same seed, same dice rolls, same output, every time.
+      explanation: `Sampling is random, that's the whole point. But "random" and "untestable" are not the same thing. If you've ever needed a sampled model to give the *exact same* output twice (to write a unit test, reproduce a bug, or compare two prompts fairly), the tool you reach for is the **seed**. A seed makes randomness *replayable*: same seed, same dice rolls, same output, every time.
 
 ## What it is
 
-Computers don't produce true randomness; they run a **pseudo-random number generator (PRNG)** — a deterministic formula that spits out a stream of numbers that *look* random. The **seed** is the starting point of that stream. Give the PRNG the same seed and it produces the identical sequence of "random" numbers, which means the sampler makes the identical draws, which means you get the identical generated text.
+Computers don't produce true randomness; they run a **pseudo-random number generator (PRNG)**: a deterministic formula that spits out a stream of numbers that *look* random. The **seed** is the starting point of that stream. Give the PRNG the same seed and it produces the identical sequence of "random" numbers, which means the sampler makes the identical draws, which means you get the identical generated text.
 
 So a seed doesn't turn off randomness. It *pins* it. Temperature and top-p still shape the distribution exactly as before; the seed just guarantees the weighted draws come out the same way on a re-run.
 
@@ -2137,7 +2137,7 @@ def run(seed):
     return [random.choices(tokens, weights=probs)[0] for _ in range(5)]
 
 print(run(7))    # e.g. ['a', 'c', 'b', 'a', 'a']
-print(run(7))    # identical — same seed, same draws
+print(run(7))    # identical, same seed, same draws
 print(run(8))    # different seed -> different sequence
 \`\`\`
 
@@ -2150,11 +2150,11 @@ Reproducibility is what makes a random system *engineerable*:
 - **Testing.** You can't assert on output that changes every run. Fix the seed and a sampled generation becomes a stable value a test can check.
 - **Debugging.** A user reports a bad output. With the seed (and the same prompt and settings), you can reproduce the exact failure instead of chasing a ghost.
 - **Fair comparison.** Comparing two prompts or two models? Use the same seed so any difference comes from what you changed, not from luck.
-- **A caveat:** reproducibility usually requires the *same everything* — same model version, settings, and often the same hardware. Seeds pin the randomness, but other moving parts can still shift results.
+- **A caveat:** reproducibility usually requires the *same everything*, same model version, settings, and often the same hardware. Seeds pin the randomness, but other moving parts can still shift results.
 
 ## The mental model to keep
 
-**A seed is the starting line of the random number stream.** Same seed, same sequence of draws, same output — randomness you can replay on demand. It doesn't remove the randomness; it makes it reproducible for tests, debugging, and fair comparisons.`,
+**A seed is the starting line of the random number stream.** Same seed, same sequence of draws, same output, randomness you can replay on demand. It doesn't remove the randomness; it makes it reproducible for tests, debugging, and fair comparisons.`,
       key_terms: [
         { term: "Seed", definition: "The starting value of a pseudo-random generator; the same seed reproduces the same sequence of random draws." },
         { term: "Pseudo-random number generator (PRNG)", definition: "A deterministic formula that produces numbers that look random; its output is fully determined by its seed." },
@@ -2267,7 +2267,7 @@ seed 8 differs? True`,
             { label: "Seed the generator", detail: "random.seed(7) drops the PRNG onto a fixed point in its number stream.", code: "random.seed(7)" },
             { label: "Draw a sequence", detail: "Five weighted draws consume numbers from that stream, producing a specific token list.", code: "run(7) -> ['a','a','b','a','b']" },
             { label: "Re-seed identically", detail: "Calling random.seed(7) again rewinds to the same starting point in the stream.", code: "random.seed(7)  # rewind" },
-            { label: "Get the same draws", detail: "The same stream yields the same five draws — reproducible output for tests.", code: "run(7) -> ['a','a','b','a','b']  (identical)" }
+            { label: "Get the same draws", detail: "The same stream yields the same five draws, reproducible output for tests.", code: "run(7) -> ['a','a','b','a','b']  (identical)" }
           ]
         }
       ],
@@ -2289,7 +2289,7 @@ seed 8 differs? True`,
             "A seed only pins the randomness if everything else is held constant.",
             "Reason one: the model version or settings (temperature, top-p, penalties) changed between runs, so the distribution itself differs.",
             "Reason two: reproducibility can depend on hardware and library versions; different GPUs or math libraries can produce slightly different results.",
-            "So a seed is necessary but not always sufficient — the full environment has to match."
+            "So a seed is necessary but not always sufficient, the full environment has to match."
           ],
           output: "Changed model/settings, or different hardware/library versions; a seed pins randomness but not the rest of the environment."
         }
@@ -2336,9 +2336,9 @@ seed 8 differs? True`,
       ],
       challenge_title: "The Reproducibility Checker",
       challenge_description: "Decide whether a generation endpoint is reproducible: given the token sequences several runs produced, report whether every run came out identical.",
-      challenge_story: "Your QA team needs to certify that the generation endpoint is reproducible: same seed in, same tokens out. The runs have already been executed upstream — each one sampled a sequence of tokens and logged it. You're building the **reproducibility checker** they'll run in CI. It doesn't generate anything; it just compares the logged runs. If every run produced the exact same token sequence, the endpoint is reproducible and the check passes. If even one run diverged, something is leaking nondeterminism — a stray unseeded RNG, a hardware difference — and the check must fail loudly so engineers can investigate.",
+      challenge_story: "Your QA team needs to certify that the generation endpoint is reproducible: same seed in, same tokens out. The runs have already been executed upstream, each one sampled a sequence of tokens and logged it. You're building the **reproducibility checker** they'll run in CI. It doesn't generate anything; it just compares the logged runs. If every run produced the exact same token sequence, the endpoint is reproducible and the check passes. If even one run diverged, something is leaking nondeterminism, a stray unseeded RNG, a hardware difference, and the check must fail loudly so engineers can investigate.",
       challenge_statement: "You are given \`runs\` token sequences, one per run, each \`length\` tokens long. They are the outputs logged from running the same seeded prompt several times. Determine reproducibility:\n\n1. Compare every run's token sequence against the first run's sequence.\n2. If **all** runs are identical, the endpoint is reproducible.\n3. If **any** run differs, it is not.\n\nPrint \`REPRODUCIBLE\` if every run matches, otherwise print \`NONDETERMINISTIC\`.",
-      challenge_input_format: "The first line has two integers: `runs length` — the number of runs and the number of tokens in each run.\n\nEach of the next `runs` lines has that run's `length` tokens (no spaces within a token), separated by single spaces.",
+      challenge_input_format: "The first line has two integers: `runs length`, the number of runs and the number of tokens in each run.\n\nEach of the next `runs` lines has that run's `length` tokens (no spaces within a token), separated by single spaces.",
       challenge_output_format: "One line: `REPRODUCIBLE` if all runs produced the identical token sequence, otherwise `NONDETERMINISTIC`.",
       challenge_constraints: [
         "1 ≤ runs ≤ 1000",
@@ -2346,10 +2346,10 @@ seed 8 differs? True`,
         "Each run has exactly `length` tokens.",
       ],
       challenge_examples: [
-        { input: "3 4\nrock rock paper paper\nrock rock paper paper\nrock rock paper paper", output: "REPRODUCIBLE", explanation: "All three runs produced `rock rock paper paper`, so the same seed gave the same output every time — reproducible." },
-        { input: "2 4\nrock rock paper paper\npaper scissors scissors paper", output: "NONDETERMINISTIC", explanation: "The two runs disagree at the very first token, so the endpoint is not reproducible — something other than the seed is varying." },
+        { input: "3 4\nrock rock paper paper\nrock rock paper paper\nrock rock paper paper", output: "REPRODUCIBLE", explanation: "All three runs produced `rock rock paper paper`, so the same seed gave the same output every time, reproducible." },
+        { input: "2 4\nrock rock paper paper\npaper scissors scissors paper", output: "NONDETERMINISTIC", explanation: "The two runs disagree at the very first token, so the endpoint is not reproducible, something other than the seed is varying." },
       ],
-      challenge_notes: "Reproducibility is just an equality check on the logged outputs: same seed (and same everything else) should mean same tokens. A single differing run means nondeterminism leaked in — often an unseeded RNG, a changed setting, or hardware/library differences. Note a single run is trivially reproducible: there is nothing to disagree with.",
+      challenge_notes: "Reproducibility is just an equality check on the logged outputs: same seed (and same everything else) should mean same tokens. A single differing run means nondeterminism leaked in, often an unseeded RNG, a changed setting, or hardware/library differences. Note a single run is trivially reproducible: there is nothing to disagree with.",
       challenge_hints: [
         "Compare each run's token list against the first run's list with `==`.",
         "`all(seq == sequences[0] for seq in sequences)` is true exactly when every run matches.",
@@ -2387,7 +2387,7 @@ def main():
 main()
 `,
       challenge_test_cases: [
-        { input: "3 4\nrock rock paper paper\nrock rock paper paper\nrock rock paper paper", expected_output: "REPRODUCIBLE", description: "All three runs identical — reproducible." },
+        { input: "3 4\nrock rock paper paper\nrock rock paper paper\nrock rock paper paper", expected_output: "REPRODUCIBLE", description: "All three runs identical, reproducible." },
         { input: "2 4\nrock rock paper paper\npaper scissors scissors paper", expected_output: "NONDETERMINISTIC", description: "The two runs diverge, so nondeterminism leaked in." },
         { input: "1 3\na b c", expected_output: "REPRODUCIBLE", description: "A single run has nothing to disagree with." },
         { input: "3 2\nyes no\nyes no\nyes yes", expected_output: "NONDETERMINISTIC", description: "The third run differs on the last token." }

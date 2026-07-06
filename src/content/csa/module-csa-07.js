@@ -7,7 +7,7 @@ export default {
     "category": "apcsa",
     "order": 207,
     "track": "apcsa",
-    "unit": "Unit 7 — ArrayList",
+    "unit": "Unit 7, ArrayList",
     "tags": [
       "arraylist",
       "java",

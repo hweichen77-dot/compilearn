@@ -1,6 +1,6 @@
 export default {
   "ai-01": {
-    tagline: "Demystify the math and magic behind modern AI.",
+    tagline: "Build a working mental model of how modern AI does math and prediction.",
     overview:
       "This project builds the foundational mental model for how neural networks and large language models actually work, from tokens and weights to next-token prediction. You will leave able to reason about why models behave the way they do instead of treating them as black boxes.",
     whatYouBuild: [
@@ -48,7 +48,7 @@ export default {
   },
 
   "ai-03": {
-    tagline: "Get dramatically better outputs by writing better prompts.",
+    tagline: "Get better outputs by writing better prompts.",
     overview:
       "This project teaches the core levers of prompt design: clear instructions, role and context, examples, and output formatting. You will learn to systematically improve model quality without touching any model internals.",
     whatYouBuild: [
@@ -336,9 +336,9 @@ export default {
   },
 
   "ai-15": {
-    tagline: "Unlock harder tasks with chain-of-thought and beyond.",
+    tagline: "Handle harder tasks with chain-of-thought and related patterns.",
     overview:
-      "This project covers advanced prompting patterns: chain-of-thought, self-consistency, ReAct, and decomposition. You will learn techniques that meaningfully boost reasoning quality on complex, multi-step problems.",
+      "This project covers advanced prompting patterns: chain-of-thought, self-consistency, ReAct, and decomposition. You will learn techniques that improve reasoning quality on complex, multi-step problems.",
     whatYouBuild: [
       "A chain-of-thought prompt that improves multi-step reasoning",
       "A self-consistency setup that samples and votes on answers",
@@ -386,7 +386,7 @@ export default {
   "ai-17": {
     tagline: "See chat for what it really is: an ordered list of role-tagged messages.",
     overview:
-      "This project reveals the structure behind every chat interface: a request is not a paragraph but an ordered list of messages, each tagged with a role (system, user, or assistant) and content. You will learn how system prompts set behavior, how multi-turn memory is really the app resending the full history each turn, and how to assemble the message array in code — the exact pattern every chatbot is built on.",
+      "This project reveals the structure behind every chat interface: a request is not a paragraph but an ordered list of messages, each tagged with a role (system, user, or assistant) and content. You will learn how system prompts set behavior, how multi-turn memory is really the app resending the full history each turn, and how to assemble the message array in code, the pattern every chatbot is built on.",
     whatYouBuild: [
       "A transcript printer that walks a list of role-tagged message dicts and labels each speaker",
       "Two system prompts that visibly reshape the same assistant's persona and output format",
@@ -409,7 +409,7 @@ export default {
   },
 
   "ai-18": {
-    tagline: "Master the model's working memory — the token budget behind every request.",
+    tagline: "Understand the model's working memory: the token budget behind every request.",
     overview:
       "This project builds a precise mental model of the context window: the fixed token budget a model can consider in one request, shared between your input and its output. You will learn exactly what consumes that budget, what happens when you exceed it, and the strategies for keeping the right information in view so your AI features stay coherent, cheap, and reliable.",
     whatYouBuild: [
@@ -435,7 +435,7 @@ export default {
   "ai-19": {
     tagline: "Dial a model from precise to playful by controlling how it samples.",
     overview:
-      "This project demystifies why the same prompt gives different answers and teaches the three levers that govern an LLM's randomness: temperature, top-p, and top-k. You will leave able to deliberately choose settings that make a model deterministic for facts and code, or creative for brainstorming and writing, instead of accepting whatever defaults you're handed.",
+      "This project explains why the same prompt gives different answers and teaches the settings that govern an LLM's randomness: temperature, top-p, and top-k. You will leave able to deliberately choose settings that make a model deterministic for facts and code, or more varied for brainstorming and writing, instead of accepting whatever defaults you're handed.",
     whatYouBuild: [
       "A weighted-sampling simulator that draws next tokens from a probability distribution",
       "A temperature-scaled softmax that visibly sharpens or flattens the same logits",
@@ -458,7 +458,7 @@ export default {
   },
 
   "ai-20": {
-    tagline: "Crack open an API response and read what the model actually handed back.",
+    tagline: "Read an API response and understand what the model handed back.",
     overview:
       "This project teaches you to parse a model API's response object end to end: where the generated text is nested, why generation stopped, and how many tokens the call spent. You will leave able to pull the answer out cleanly, detect truncated or blocked output, track cost from the usage block, and bound generation with stop sequences.",
     whatYouBuild: [
@@ -485,7 +485,7 @@ export default {
   "ai-21": {
     tagline: "Estimate, predict, and slash the cost of every LLM call.",
     overview:
-      "This project builds a working intuition for how language model billing actually works — per-token pricing with input and output charged separately, why output dominates, and how chat history compounds cost by being resent every turn. You will move from being surprised by an invoice to estimating any feature's cost before you ship it and knowing exactly which levers cut the bill.",
+      "This project builds a working intuition for how language model billing actually works, per-token pricing with input and output charged separately, why output dominates, and how chat history compounds cost by being resent every turn. You will move from being surprised by an invoice to estimating any feature's cost before you ship it and knowing exactly which levers cut the bill.",
     whatYouBuild: [
       "A per-call cost calculator that prices input and output tokens separately",
       "A pre-launch estimator that turns a prompt into expected tokens, dollars, and a daily bill at scale",

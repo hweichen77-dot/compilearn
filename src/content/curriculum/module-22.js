@@ -19,16 +19,16 @@ export default {
       title: "Models Aren't One Thing",
       concept: "Model families",
       xp_reward: 10,
-      explanation: `You don't drive a moving truck to pick up a coffee. But when people first reach for an AI model, they grab the biggest, newest, most expensive one for every job — including jobs a tiny model would nail in a fraction of the time and cost.
+      explanation: `You don't drive a moving truck to pick up a coffee. But when people first reach for an AI model, they grab the biggest, newest, most expensive one for every job, including jobs a tiny model would handle in a fraction of the time and cost.
 
 ## What it is
 
-There is no single "the AI." Every provider ships a **family** of models, and within that family several **tiers** — usually something like small, medium, and large. They share a lineage but differ wildly in size, speed, price, and how hard a problem they can chew through.
+There is no single "the AI." Every provider ships a **family** of models, and within that family several tiers, usually something like small, medium, and large. They share a lineage but differ in size, speed, price, and how hard a problem they can handle.
 
 A useful mental split:
 
-- **Small / fast models** — cheap, quick, great at simple, well-defined work.
-- **Large / smart models** — pricier, slower, but far stronger on hard reasoning and long, messy tasks.
+- **Small / fast models**: cheap, quick, good at simple, well-defined work.
+- **Large / smart models**: pricier, slower, but stronger on hard reasoning and long, messy tasks.
 
 The key idea: a tier is just a labeled point on a spectrum. You aren't choosing "good vs bad." You're choosing *which trade-offs you want* for *this* task.
 
@@ -42,39 +42,39 @@ tiers = {
     "medium": {"smarts": 6, "speed": 6, "price": 4},
     "large":  {"smarts": 9, "speed": 3, "price": 12},
 }
-# Same code, same call — you just hand it a different tier name.
+# Same code, same call, you just hand it a different tier name.
 choice = "small"
 print("using:", choice, tiers[choice])
 \`\`\`
 
-Each tier is the *same kind of thing* — text in, text out — so your code barely changes between them. You swap a label, and the cost/speed/smarts profile changes underneath.
+Each tier is the same kind of thing, text in and text out, so your code barely changes between them. You swap a label, and the cost/speed/smarts profile changes underneath.
 
 ## Why it matters
 
 Treating "the AI" as one fixed object leads to expensive, slow apps:
 
 - **Newer isn't automatically right.** A brand-new flagship may be overkill for tagging support tickets. Bigger and newer mostly means *more capable on hard problems*, not *better at everything*.
-- **One size fits nothing.** A chat app that labels spam, drafts emails, and reasons over contracts probably wants different tiers for each — not one giant model doing it all.
+- **One size fits nothing.** A chat app that labels spam, drafts emails, and reasons over contracts probably wants different tiers for each, not one giant model doing it all.
 - **The cheap tier is often plenty.** A huge fraction of real tasks are simple. Reaching for the flagship every time is like trucking your coffee.
 
 ## The mental model to keep
 
-Stop thinking "the AI." Think **a menu of tiers**, small to large, each a different bundle of speed, cost, and capability — and your job is to order the right one for the task in front of you.`,
+Stop thinking "the AI." Think **a menu of tiers**, small to large, each a different bundle of speed, cost, and capability, and your job is to order the right one for the task in front of you.`,
       key_terms: [
         { term: "Model family", definition: "A set of related models from one provider that share a lineage but come in different sizes." },
-        { term: "Tier", definition: "A size/capability level within a family — commonly small, medium, and large." },
+        { term: "Tier", definition: "A size/capability level within a family, commonly small, medium, and large." },
         { term: "Capability", definition: "How hard a problem a model can reliably handle; larger tiers are generally more capable." }
       ],
       callouts: [
-        { type: "analogy", title: "A menu, not a single dish", content: "A provider isn't 'the AI' — it's a menu. Small, medium, large tiers are different dishes for different appetites. You order what the task needs, not the most expensive item every time.", position: "before" },
-        { type: "insight", title: "Swapping tiers is swapping a label", content: "Because every tier is text-in, text-out, changing tiers usually means changing one string in your code. That makes experimenting cheap — try a smaller one and see if quality holds.", position: "after" }
+        { type: "analogy", title: "A menu, not a single dish", content: "A provider isn't 'the AI'; it's a menu. Small, medium, and large tiers are different dishes for different appetites. You order what the task needs, not the most expensive item every time.", position: "before" },
+        { type: "insight", title: "Swapping tiers is swapping a label", content: "Because every tier is text-in, text-out, changing tiers usually means changing one string in your code. That makes experimenting cheap: try a smaller one and see if quality holds.", position: "after" }
       ],
       concept_diagram: {
         title: "From 'the AI' to a menu of tiers",
         steps: [
           { label: "One provider", desc: "A company that trains and serves models." },
           { label: "A family", desc: "Related models sharing a lineage and interface." },
-          { label: "Several tiers", desc: "Small, medium, large — different size and price." },
+          { label: "Several tiers", desc: "Small, medium, and large, differing in size and price." },
           { label: "You pick one", desc: "Choose the tier whose trade-offs fit the task." }
         ]
       },
@@ -83,7 +83,7 @@ Stop thinking "the AI." Think **a menu of tiers**, small to large, each a differ
           question: "What does a 'tier' within a model family describe?",
           options: ["A different company's product", "A size/capability level like small, medium, or large", "The programming language the model is written in"],
           correct_index: 1,
-          explanation: "Tiers are size/capability levels within one family — usually small, medium, and large."
+          explanation: "Tiers are size/capability levels within one family, usually small, medium, and large."
         }
       ],
       quiz_questions: [
@@ -91,7 +91,7 @@ Stop thinking "the AI." Think **a menu of tiers**, small to large, each a differ
           question: "Why is reaching for the biggest, newest model for every task a mistake?",
           options: [
             "Big models can only answer one question per day",
-            "Bigger mostly means stronger on hard problems, not better at everything — and it costs more and runs slower",
+            "Bigger mostly means stronger on hard problems, not better at everything, and it costs more and runs slower",
             "Newer models forget how to do simple tasks",
             "Small models are always more accurate"
           ],
@@ -113,7 +113,7 @@ Stop thinking "the AI." Think **a menu of tiers**, small to large, each a differ
           question: "How much does your code usually change when you switch from one tier to another in the same family?",
           options: [
             "You must rewrite the whole program",
-            "Very little — often just the model/tier name you pass in",
+            "Very little, often just the model/tier name you pass in",
             "You need a different programming language",
             "You can never switch once you start"
           ],
@@ -158,7 +158,7 @@ large: smarts=9 speed=3 price=12`,
         {
           title: "narrowing from 'the AI' to one tier",
           steps: [
-            { label: "Start with a provider", detail: "A company trains and hosts models. This is not a single product — it's a lineup.", code: 'provider = "ExampleAI"' },
+            { label: "Start with a provider", detail: "A company trains and hosts models. This is not a single product; it's a lineup.", code: 'provider = "ExampleAI"' },
             { label: "Open the family", detail: "Inside the family are several related models sharing one interface.", code: 'family = ["small", "medium", "large"]' },
             { label: "Compare the tiers", detail: "Each tier bundles a different mix of smarts, speed, and price.", code: 'tiers["small"]  # {"smarts": 3, "speed": 9, "price": 1}' },
             { label: "Pick for the task", detail: "Choose the tier whose trade-offs match what the task needs.", code: 'choice = "small"  # simple task -> cheap, fast tier' }
@@ -168,24 +168,24 @@ large: smarts=9 speed=3 price=12`,
       worked_examples: [
         {
           number: 1, difficulty: "easy",
-          prompt: "You need to label incoming emails as 'spam' or 'not spam' — a simple, well-defined task. Which tier is the natural first pick?",
+          prompt: "You need to label incoming emails as 'spam' or 'not spam', a simple, well-defined task. Which tier is the natural first pick?",
           steps: [
             "Spam labeling is simple classification with a clear right answer.",
             "Simple, well-defined work is exactly what small / fast tiers are good at.",
             "Choosing the small tier saves cost and latency with little quality loss."
           ],
-          output: "The small tier — cheap and fast is plenty for simple classification."
+          output: "The small tier: cheap and fast is plenty for simple classification."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "An app does three jobs: (a) tag support tickets, (b) draft reply emails, (c) reason over a 30-page legal contract. Should one model do all three?",
           steps: [
-            "Tagging tickets is simple classification — a small tier fits.",
-            "Drafting emails is moderate generation — a medium tier balances quality and cost.",
-            "Reasoning over a long contract is hard, long-context work — that wants a large tier.",
+            "Tagging tickets is simple classification, so a small tier fits.",
+            "Drafting emails is moderate generation, so a medium tier balances quality and cost.",
+            "Reasoning over a long contract is hard, long-context work that wants a large tier.",
             "Forcing one tier on all three either overpays on the easy jobs or underperforms on the hard one."
           ],
-          output: "No — route each job to the tier that matches its difficulty (small, medium, large)."
+          output: "No: route each job to the tier that matches its difficulty (small, medium, large)."
         }
       ],
       comparison_tables: [
@@ -225,13 +225,13 @@ large: smarts=9 speed=3 price=12`,
       ],
       hints: [
         "tiers.items() gives you each name and its property dict together.",
-        "Inside the loop, props is a dict — read props['smarts'], props['speed'], props['price'].",
+        "Inside the loop, props is a dict; read props['smarts'], props['speed'], props['price'].",
         "An f-string makes it easy to print the name and all three numbers on one line."
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Tier Selector",
-      challenge_description: "Pick the cheapest model tier that is still good enough and fast enough for a production endpoint — the exact decision a routing layer makes on every request.",
-      challenge_story: "You run the inference platform behind a customer-support assistant. A provider exposes several **model tiers**, each with a known **quality** score, typical **latency** in milliseconds, and a **cost** in cents per call. Product set two hard rules for this endpoint: the reply must clear a **minimum quality** bar (anything dumber frustrates users) and must come back **within a latency budget** (anything slower breaks the live chat). Among every tier that satisfies *both* rules, finance wants the **cheapest** one — there's no reason to pay for a smarter model than the job needs. Build the selector.",
+      challenge_description: "Pick the cheapest model tier that is still good enough and fast enough for a production endpoint. This is the decision a routing layer makes on every request.",
+      challenge_story: "You run the inference platform behind a customer-support assistant. A provider exposes several **model tiers**, each with a known **quality** score, typical **latency** in milliseconds, and a **cost** in cents per call. Product set two hard rules for this endpoint: the reply must clear a **minimum quality** bar (anything dumber frustrates users) and must come back **within a latency budget** (anything slower breaks the live chat). Among every tier that satisfies *both* rules, finance wants the **cheapest** one, because there's no reason to pay for a smarter model than the job needs. Build the selector.",
       challenge_statement: "You are given a quality floor, a latency budget, and a list of tiers. Choose the tier to deploy:\n\n1. A tier is **eligible** if its `quality` is **at least** `min_quality` **and** its `latency` is **at most** `max_latency`.\n2. Among eligible tiers, pick the one with the **lowest cost**. If two eligible tiers tie on cost, pick the one whose name is **lexicographically smallest**.\n3. If no tier is eligible, the endpoint can't be served.\n\nPrint the chosen tier's name and its cost, or `NO TIER` if none qualify.",
       challenge_input_format: "The first line has three integers `n min_quality max_latency`: the number of tiers, the quality floor, and the latency budget.\n\nEach of the next `n` lines describes one tier: a name (no spaces) followed by three integers `quality latency cost`.",
       challenge_output_format: "If at least one tier is eligible, print one line: the chosen tier's name, a space, then its cost (e.g. `medium 4`). Otherwise print `NO TIER`.",
@@ -307,15 +307,15 @@ main()
       title: "The Three Tradeoffs",
       concept: "Cost, latency, quality",
       xp_reward: 10,
-      explanation: `Fast, cheap, good — pick two. Engineers have joked about this triangle for decades, and it describes model selection almost perfectly. With AI models you're balancing three things at once: **cost**, **latency**, and **quality**. Push on any one and at least one other pushes back.
+      explanation: `Fast, cheap, good, pick two. Engineers have joked about this triangle for decades, and it describes model selection almost perfectly. With AI models you're balancing three things at once: **cost**, **latency**, and **quality**. Push on any one and at least one other pushes back.
 
 ## What it is
 
 The three levers:
 
-- **Cost** — how much money each call burns (driven mostly by tokens and tier).
-- **Latency** — how long the user waits for the answer.
-- **Quality** — how good and correct the output is.
+- **Cost**: how much money each call burns (driven mostly by tokens and tier).
+- **Latency**: how long the user waits for the answer.
+- **Quality**: how good and correct the output is.
 
 You rarely get to max all three. A big model gives top quality but costs more and runs slower. A tiny model is cheap and fast but weaker on hard problems. **You usually optimize two at the expense of the third.**
 
@@ -334,7 +334,7 @@ print("quality gap:", large["quality"] - small["quality"])
 print("cost gap:", large["cost"] - small["cost"])
 \`\`\`
 
-There's no universally "best" row — only the best *for your priorities*. A live chat UI may weight latency heavily; an overnight batch job may not care about latency at all and lean on quality or cost.
+There's no universally "best" row, only the best *for your priorities*. A live chat UI may weight latency heavily; an overnight batch job may not care about latency at all and lean on quality or cost.
 
 ## Why it matters
 
@@ -346,22 +346,22 @@ Naming the trade-off keeps you honest:
 
 ## The mental model to keep
 
-There is no free lunch. **Every model choice spends from a budget of cost, latency, and quality — pick the two that matter most for this task and accept the trade on the third.**`,
+There is no free lunch. **Every model choice spends from a budget of cost, latency, and quality, pick the two that matter most for this task and accept the trade on the third.**`,
       key_terms: [
         { term: "Cost", definition: "How much money a call consumes, driven mostly by token count and the tier used." },
         { term: "Latency", definition: "How long the user waits between sending a request and getting the answer." },
         { term: "Quality", definition: "How correct, complete, and useful the model's output is for the task." }
       ],
       callouts: [
-        { type: "analogy", title: "Fast, cheap, good — pick two", content: "The classic engineering triangle fits models perfectly. Want the fastest, cheapest call? Quality gives a little. Want top quality fast? You'll pay for it. Something always gives.", position: "before" },
-        { type: "tip", title: "Let the use case set the weights", content: "Live chat? Latency rules. Overnight batch? Cost rules. Legal review? Quality rules. Decide which lever matters most before you compare models — otherwise every option looks fine.", position: "after" }
+        { type: "analogy", title: "Fast, cheap, good, pick two", content: "The classic engineering triangle fits models perfectly. Want the fastest, cheapest call? Quality gives a little. Want top quality fast? You'll pay for it. Something always gives.", position: "before" },
+        { type: "tip", title: "Let the use case set the weights", content: "Live chat? Latency rules. Overnight batch? Cost rules. Legal review? Quality rules. Decide which lever matters most before you compare models, otherwise every option looks fine.", position: "after" }
       ],
       concept_diagram: {
         title: "The trade-off triangle",
         steps: [
-          { label: "Cost", desc: "Money per call — push it down and quality often follows." },
-          { label: "Latency", desc: "Wait time — fast tiers help, big tiers hurt." },
-          { label: "Quality", desc: "How good the output is — usually rises with size." },
+          { label: "Cost", desc: "Money per call, push it down and quality often follows." },
+          { label: "Latency", desc: "Wait time, fast tiers help, big tiers hurt." },
+          { label: "Quality", desc: "How good the output is, usually rises with size." },
           { label: "Pick two", desc: "Optimize the two that matter; accept the third gives." }
         ]
       },
@@ -370,14 +370,14 @@ There is no free lunch. **Every model choice spends from a budget of cost, laten
           question: "What are the three levers you trade off when choosing a model?",
           options: ["Color, sound, and speed", "Cost, latency, and quality", "Tokens, weights, and prompts"],
           correct_index: 1,
-          explanation: "Model selection balances cost, latency, and quality — improving one often costs another."
+          explanation: "Model selection balances cost, latency, and quality, improving one often costs another."
         }
       ],
       quiz_questions: [
         {
           question: "A large model gives the best quality. What do you typically give up to get it?",
           options: [
-            "Nothing — bigger is free and instant",
+            "Nothing, bigger is free and instant",
             "Higher cost and slower latency",
             "The ability to send any prompt",
             "Access to the small tier forever"
@@ -388,9 +388,9 @@ There is no free lunch. **Every model choice spends from a budget of cost, laten
         {
           question: "For a real-time typing assistant that suggests words as you type, which lever matters MOST?",
           options: [
-            "Cost — it must be free",
-            "Latency — it must respond almost instantly",
-            "Quality — it must write award-winning prose",
+            "Cost, it must be free",
+            "Latency, it must respond almost instantly",
+            "Quality, it must write award-winning prose",
             "None of them matter"
           ],
           correct_index: 1,
@@ -400,7 +400,7 @@ There is no free lunch. **Every model choice spends from a budget of cost, laten
           question: "Why is 'just make it better' an incomplete instruction for model choice?",
           options: [
             "Models cannot be improved at all",
-            "'Better' is ambiguous — cheaper, faster, and higher-quality pull against each other",
+            "'Better' is ambiguous, cheaper, faster, and higher-quality pull against each other",
             "Better always means slower",
             "Only the provider can decide"
           ],
@@ -413,7 +413,7 @@ There is no free lunch. **Every model choice spends from a budget of cost, laten
           activity_title: "Trade-off check",
           questions: [
             { question: "You can always maximize cost-savings, speed, and quality at the same time.", type: "true_false", correct_answer: "false", explanation: "The three levers trade against each other; you typically optimize two and accept the third gives." },
-            { question: "How long a user waits for a model's answer is called ______.", type: "fill_in", correct_answer: "latency", explanation: "Latency is the response delay — critical for interactive apps." }
+            { question: "How long a user waits for a model's answer is called ______.", type: "fill_in", correct_answer: "latency", explanation: "Latency is the response delay, critical for interactive apps." }
           ]
         }
       ],
@@ -455,7 +455,7 @@ cost gap (large - small): 11`,
           steps: [
             "It runs overnight with no user waiting, so latency barely matters.",
             "With 10,000 calls, cost per call multiplies fast, so cost matters a lot.",
-            "Pick a cheaper tier and tolerate slower responses — nobody is watching the clock."
+            "Pick a cheaper tier and tolerate slower responses, nobody is watching the clock."
           ],
           output: "Ignore latency; optimize cost (and keep quality acceptable)."
         },
@@ -468,7 +468,7 @@ cost gap (large - small): 11`,
             "Cost also favors the small tier (1 vs 12), reinforcing the choice.",
             "Start with small; only escalate specific hard messages to large if quality proves insufficient."
           ],
-          output: "Choose small — latency and cost both favor it, and quality 6 is enough for chat."
+          output: "Choose small, latency and cost both favor it, and quality 6 is enough for chat."
         }
       ],
       comparison_tables: [
@@ -513,9 +513,9 @@ cost gap (large - small): 11`,
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Trade-off Scorer",
-      challenge_description: "Turn the fuzzy 'fast, cheap, good — pick two' debate into one number per model, then let the weights of the day decide which model your app ships with.",
+      challenge_description: "Turn the fuzzy 'fast, cheap, good, pick two' debate into one number per model, then let the weights of the day decide which model your app ships with.",
       challenge_story: "Every model is a different point on the **quality / latency / cost** triangle, and which point is 'best' depends entirely on the app. A live voice assistant weighs latency heavily; an overnight batch job weighs cost; a legal-review tool weighs quality. Rather than argue, your team agreed on a **weighted score**: reward quality, penalize latency and cost, each by a configurable weight. Plug in the weights for the current use case and the score ranks every candidate model objectively. Build the scorer that the model-selection config calls.",
-      challenge_statement: "You are given three integer weights `wq wl wc` (for quality, latency, and cost) and a list of candidate models. For each model compute its score:\n\n```\nscore = wq * quality - wl * latency - wc * cost\n```\n\nHigher quality raises the score; higher latency and cost lower it. Then:\n\n1. Print every model and its score in input order.\n2. Print the **best** model — the one with the **highest score**. If two models tie on score, choose the one whose name is **lexicographically smallest**.",
+      challenge_statement: "You are given three integer weights `wq wl wc` (for quality, latency, and cost) and a list of candidate models. For each model compute its score:\n\n```\nscore = wq * quality - wl * latency - wc * cost\n```\n\nHigher quality raises the score; higher latency and cost lower it. Then:\n\n1. Print every model and its score in input order.\n2. Print the **best** model, the one with the **highest score**. If two models tie on score, choose the one whose name is **lexicographically smallest**.",
       challenge_input_format: "The first line has three integers `wq wl wc`: the quality, latency, and cost weights.\n\nThe second line has one integer `n`: the number of models.\n\nEach of the next `n` lines describes one model: a name (no spaces) followed by three integers `quality latency cost`.",
       challenge_output_format: "First, `n` lines, one per model in input order: the model name, a space, then its score (e.g. `small 27`). Then a final line `best <name>` naming the highest-scoring model.",
       challenge_constraints: [
@@ -528,7 +528,7 @@ cost gap (large - small): 11`,
         { input: "10 1 2\n3\nsmall 3 1 1\nmedium 6 3 4\nlarge 9 9 12", output: "small 27\nmedium 49\nlarge 57\nbest large", explanation: "With quality weighted 10×, the smart `large` model wins despite its latency and cost penalties: 10·9 − 1·9 − 2·12 = 57." },
         { input: "1 5 1\n2\nfast 5 1 8\nslow 7 6 2", output: "fast -8\nslow -25\nbest fast", explanation: "Latency is weighted heavily (5×), so the snappy `fast` model (−8) beats the slower but smarter `slow` model (−25)." },
       ],
-      challenge_notes: "All weights and fields are integers on purpose, so every score is an exact integer — no float rounding to argue about. Changing the use case is just changing three numbers: crank `wl` for real-time apps, crank `wc` for batch jobs, crank `wq` for high-stakes work. The lexicographic tie-break makes the winner deterministic when two models score the same.",
+      challenge_notes: "All weights and fields are integers on purpose, so every score is an exact integer, no float rounding to argue about. Changing the use case is just changing three numbers: crank `wl` for real-time apps, crank `wc` for batch jobs, crank `wq` for high-stakes work. The lexicographic tie-break makes the winner deterministic when two models score the same.",
       challenge_hints: [
         "Read the three weights first, then `n`, then loop over the model lines.",
         "Compute `wq*quality - wl*latency - wc*cost` and print it right away, while you scan.",
@@ -591,7 +591,7 @@ main()
       title: "Matching Model to Task",
       concept: "Task routing",
       xp_reward: 10,
-      explanation: `A hospital triage nurse doesn't send every patient to the trauma surgeon. A sniffle gets a quick check; a car crash gets the full team. Good AI systems do the same thing — they **triage tasks to tiers**, sending easy work to cheap fast models and hard work to the heavy hitters.
+      explanation: `A hospital triage nurse doesn't send every patient to the trauma surgeon. A sniffle gets a quick check; a car crash gets the full team. Good AI systems do the same thing, they **triage tasks to tiers**, sending easy work to cheap fast models and hard work to the heavy hitters.
 
 ## What it is
 
@@ -620,7 +620,7 @@ print(route("classify"))   # small
 print(route("synthesize")) # large
 \`\`\`
 
-Notice the router doesn't call any model — it just *decides which one to call*. That separation keeps the logic testable and the cost predictable.
+Notice the router doesn't call any model, it just *decides which one to call*. That separation keeps the logic testable and the cost predictable.
 
 ## Why it matters
 
@@ -635,11 +635,11 @@ Routing is where the cost-and-quality savings actually land:
 Be the triage nurse. **Look at the task, judge its difficulty, and send it to the cheapest tier that can still do it well.** Easy to small, hard to large, unsure to the middle.`,
       key_terms: [
         { term: "Task routing", definition: "Choosing the model tier per task based on how hard the task is." },
-        { term: "Classification", definition: "Sorting an input into one of a few categories — a simple task small tiers handle well." },
-        { term: "Synthesis", definition: "Combining lots of information into something new and coherent — hard work that favors large tiers." }
+        { term: "Classification", definition: "Sorting an input into one of a few categories, a simple task small tiers handle well." },
+        { term: "Synthesis", definition: "Combining lots of information into something new and coherent, hard work that favors large tiers." }
       ],
       callouts: [
-        { type: "analogy", title: "Triage, not one-size-fits-all", content: "A triage nurse sends sniffles to a quick check and crashes to the trauma team. Route easy tasks to the small tier and hard tasks to the large tier the same way — match the response to the severity.", position: "before" },
+        { type: "analogy", title: "Triage, not one-size-fits-all", content: "A triage nurse sends sniffles to a quick check and crashes to the trauma team. Route easy tasks to the small tier and hard tasks to the large tier the same way, match the response to the severity.", position: "before" },
         { type: "tip", title: "Route the edges, default the middle", content: "You don't need a perfect rule for every task. Send the clearly-easy ones to small, the clearly-hard ones to large, and let everything in between fall to a sensible medium default.", position: "after" }
       ],
       concept_diagram: {
@@ -669,7 +669,7 @@ Be the triage nurse. **Look at the task, judge its difficulty, and send it to th
             "Reasoning step-by-step through a hard math proof"
           ],
           correct_index: 1,
-          explanation: "Extraction from a short, clear input is simple, well-defined work — ideal for a small tier."
+          explanation: "Extraction from a short, clear input is simple, well-defined work, ideal for a small tier."
         },
         {
           question: "What does a 'router' function actually do?",
@@ -735,9 +735,9 @@ medium`,
           title: "routing one request to a tier",
           steps: [
             { label: "A task comes in", detail: "The system receives a request and knows its type or content.", code: 'task_type = "extract"' },
-            { label: "Check the easy set", detail: "Extraction is simple, well-defined work — it lands in the easy bucket.", code: 'task_type in {"classify", "extract", "format"}  # True' },
+            { label: "Check the easy set", detail: "Extraction is simple, well-defined work, it lands in the easy bucket.", code: 'task_type in {"classify", "extract", "format"}  # True' },
             { label: "Map to a tier", detail: "Easy tasks route to the small, cheap, fast tier.", code: 'tier = "small"' },
-            { label: "Call that tier", detail: "Downstream code calls the model using the chosen tier — same interface, different id.", code: 'response = call_model(tier, prompt)' }
+            { label: "Call that tier", detail: "Downstream code calls the model using the chosen tier, same interface, different id.", code: 'response = call_model(tier, prompt)' }
           ]
         }
       ],
@@ -746,11 +746,11 @@ medium`,
           number: 1, difficulty: "easy",
           prompt: "A request asks the system to pull the phone number out of a one-line message. Which tier should the router pick, and why?",
           steps: [
-            "Pulling a phone number is extraction — a simple, narrow task.",
+            "Pulling a phone number is extraction, a simple, narrow task.",
             "Extraction needs no deep reasoning, just pattern recognition on a short input.",
             "The router maps it to the small tier, which is cheap and fast."
           ],
-          output: "Small tier — extraction is simple, well-defined work."
+          output: "Small tier, extraction is simple, well-defined work."
         },
         {
           number: 2, difficulty: "medium",
@@ -761,7 +761,7 @@ medium`,
             "Analyze + recommend (50) is hard reasoning over long text -> large tier.",
             "Routing means 85% of traffic uses the cheapest tier, while the hard 5% still gets full quality."
           ],
-          output: "Route 850 to small, 100 to medium, 50 to large — cheap on the bulk, high quality where it matters."
+          output: "Route 850 to small, 100 to medium, 50 to large, cheap on the bulk, high quality where it matters."
         }
       ],
       comparison_tables: [
@@ -796,7 +796,7 @@ medium`,
       reflections: [
         {
           prompt: "In your own words: why is it worth building a router instead of just sending every request to the large tier 'to be safe'?",
-          sampleAnswer: "Sending everything to the large tier means paying flagship prices and accepting slower responses for tasks that a small tier handles perfectly. A router lets the cheap tier soak up the bulk of easy traffic while the hard, high-stakes minority still gets the large tier. You keep quality where it matters and cut cost and latency everywhere else — for the price of one small decision function."
+          sampleAnswer: "Sending everything to the large tier means paying flagship prices and accepting slower responses for tasks that a small tier handles perfectly. A router lets the cheap tier soak up the bulk of easy traffic while the hard, high-stakes minority still gets the large tier. You keep quality where it matters and cut cost and latency everywhere else, for the price of one small decision function."
         }
       ],
       hints: [
@@ -806,8 +806,8 @@ medium`,
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Routing Engine",
-      challenge_description: "Stand up the dispatcher that sends each incoming request to the right model tier, then report the per-tier load and the total bill it ran up — the heart of a cost-aware AI gateway.",
-      challenge_story: "Your AI gateway sees a flood of mixed requests: quick classifications, data extractions, heavy reasoning, long syntheses, and plenty of in-between work. Sending everything to the big model is accurate but ruinously expensive; sending everything to the small one is cheap but dumb. So you triage. Tasks on the **easy list** go to the **small** tier, tasks on the **hard list** go to the **large** tier, and anything unrecognized falls to a sensible **medium** default. Each tier charges a fixed cost per call. Process the day's request log, route every request, and report the load on each tier plus the total cost — the numbers your dashboard and finance both need.",
+      challenge_description: "Stand up the dispatcher that sends each incoming request to the right model tier, then report the per-tier load and the total bill it ran up, the heart of a cost-aware AI gateway.",
+      challenge_story: "Your AI gateway sees a flood of mixed requests: quick classifications, data extractions, heavy reasoning, long syntheses, and plenty of in-between work. Sending everything to the big model is accurate but ruinously expensive; sending everything to the small one is cheap but dumb. So you triage. Tasks on the **easy list** go to the **small** tier, tasks on the **hard list** go to the **large** tier, and anything unrecognized falls to a sensible **medium** default. Each tier charges a fixed cost per call. Process the day's request log, route every request, and report the load on each tier plus the total cost, the numbers your dashboard and finance both need.",
       challenge_statement: "You are given the per-call cost of each tier, an easy-task list, a hard-task list, and a stream of requests. Route each request:\n\n1. If the task name is on the **easy list**, route to `small`.\n2. Otherwise, if it is on the **hard list**, route to `large`.\n3. Otherwise, route to `medium`.\n\nFor each request, print the routing decision. After the log, print how many requests each tier handled, then the total cost (sum of the per-call cost of the chosen tier across all requests).",
       challenge_input_format: "The first line has three integers `cs cm cl`: the per-call cost of the small, medium, and large tiers.\n\nThe next line has an integer `e`, followed by `e` lines, each one easy-task name.\n\nThen a line with an integer `h`, followed by `h` lines, each one hard-task name.\n\nThen a line with an integer `q`, followed by `q` lines, each one request's task name.",
       challenge_output_format: "First, `q` lines in input order, each `<task> -> <tier>`. Then a line `small <a> medium <b> large <c>` giving how many requests each tier handled. Then a final line `total <T>` giving the summed cost.",
@@ -839,7 +839,7 @@ def main():
     hard = set(data[idx + i].strip() for i in range(h)); idx += h
     q = int(data[idx]); idx += 1
     requests = [data[idx + i].strip() for i in range(q)]; idx += q
-    # TODO: route each request — easy -> small, hard -> large, else medium.
+    # TODO: route each request, easy -> small, hard -> large, else medium.
     #       Print each "task -> tier", then "small <a> medium <b> large <c>",
     #       then "total <T>" (summed per-call cost cs/cm/cl).
 
@@ -901,7 +901,7 @@ main()
       title: "Testing & Switching Models",
       concept: "Evaluation",
       xp_reward: 10,
-      explanation: `Here's the question that ends most model debates: "Did you actually test it?" Opinions about which model is best are cheap. A tiny **eval set** — a handful of real tasks with known good answers — turns the argument into a measurement. Run your candidates, compare the numbers, pick the winner. Then switching is just changing one model id.
+      explanation: `Here's the question that ends most model debates: "Did you actually test it?" Opinions about which model is best are cheap. A tiny **eval set**: a handful of real tasks with known good answers, turns the argument into a measurement. Run your candidates, compare the numbers, pick the winner. Then switching is just changing one model id.
 
 ## What it is
 
@@ -929,7 +929,7 @@ for model_id in ["small", "large"]:
     print(model_id, "scored", correct, "/", len(eval_set))
 \`\`\`
 
-The crucial detail: \`model_id\` is a *parameter*. To try a new model you add it to the list — you never rewrite \`run_model\`. That's model-agnostic code in action.
+The crucial detail: \`model_id\` is a *parameter*. To try a new model you add it to the list, you never rewrite \`run_model\`. That's model-agnostic code in action.
 
 ## Why it matters
 
@@ -937,20 +937,20 @@ Evals turn model choice from faith into evidence:
 
 - **You can defend the decision.** "Small scored 9/10 at one-tenth the cost" beats "the big one feels smarter."
 - **Switching becomes safe.** A new tier drops? Add it to the eval, run, compare. If it wins on your metrics, change the id and ship.
-- **You catch silent regressions.** Re-running the eval after a change tells you if quality slipped — before your users do.
+- **You catch silent regressions.** Re-running the eval after a change tells you if quality slipped, before your users do.
 - **You avoid lock-in.** Model-agnostic code means no single provider can trap you; the id is just a string you control.
 
 ## The mental model to keep
 
-Don't argue about models — **measure them**. Build a tiny eval, run the candidates, compare quality vs cost vs latency, and keep your code so model-agnostic that switching is one line.`,
+Don't argue about models, **measure them**. Build a tiny eval, run the candidates, compare quality vs cost vs latency, and keep your code so model-agnostic that switching is one line.`,
       key_terms: [
         { term: "Eval set", definition: "A small collection of test cases with known good answers used to score candidate models." },
         { term: "Model-agnostic code", definition: "Code that keeps the model id in one place so swapping models is a one-line change." },
-        { term: "Regression", definition: "A quality drop introduced by a change — caught by re-running the eval and comparing scores." }
+        { term: "Regression", definition: "A quality drop introduced by a change, caught by re-running the eval and comparing scores." }
       ],
       callouts: [
         { type: "analogy", title: "A taste test, not a debate", content: "Instead of arguing which model is best, run a blind taste test: feed each one the same handful of tasks with known answers and count the wins. Numbers settle what opinions can't.", position: "before" },
-        { type: "tip", title: "Keep the model id in one place", content: "If switching models means editing fifty files, you'll never switch. Store the id in one variable or config value so trying a new tier is a single-line change — and you're never locked to one provider.", position: "after" }
+        { type: "tip", title: "Keep the model id in one place", content: "If switching models means editing fifty files, you'll never switch. Store the id in one variable or config value so trying a new tier is a single-line change, and you're never locked to one provider.", position: "after" }
       ],
       concept_diagram: {
         title: "Pick a model by measuring",
@@ -1062,14 +1062,14 @@ large scored 2 / 2`,
             "Small costs one-twelfth as much per run, which dominates at high volume.",
             "For low-stakes work, the tiny quality gap isn't worth 12x the cost."
           ],
-          output: "Pick small — 9/10 at one-twelfth the cost is the better trade here."
+          output: "Pick small, 9/10 at one-twelfth the cost is the better trade here."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "Your app hardcodes the model name inside five different functions. A better, cheaper tier comes out. Why is this a problem, and how do you fix it before testing it?",
           steps: [
             "With the name hardcoded in five places, switching means editing all five and risking a missed one.",
-            "That friction means you'll avoid testing new tiers at all — exactly the wrong incentive.",
+            "That friction means you'll avoid testing new tiers at all, exactly the wrong incentive.",
             "Fix: pull the model id into a single variable or config value the functions read.",
             "Now you add the new tier to your eval, run it, and if it wins, flip the one id to ship the switch."
           ],
@@ -1108,7 +1108,7 @@ large scored 2 / 2`,
       reflections: [
         {
           prompt: "In your own words: how do a tiny eval set and model-agnostic code work together to make switching models painless?",
-          sampleAnswer: "The eval set gives you evidence — run each candidate on the same known tasks and you can see which one wins on quality, cost, and latency. Model-agnostic code gives you the lever — because the model id lives in one place, acting on that evidence is a single-line change. Together they turn switching from a risky rewrite into a quick measure-then-flip, so you can adopt better or cheaper tiers as they appear."
+          sampleAnswer: "The eval set gives you evidence, run each candidate on the same known tasks and you can see which one wins on quality, cost, and latency. Model-agnostic code gives you the lever, because the model id lives in one place, acting on that evidence is a single-line change. Together they turn switching from a risky rewrite into a quick measure-then-flip, so you can adopt better or cheaper tiers as they appear."
         }
       ],
       hints: [
@@ -1118,10 +1118,10 @@ large scored 2 / 2`,
       ],
       challenge_difficulty: "intermediate",
       challenge_title: "Eval Harness",
-      challenge_description: "Run the blind taste test that decides which model ships: score every candidate against a graded answer key, then pick the winner on accuracy first and cost second — never on vibes.",
-      challenge_story: "A new model tier just dropped and three people on Slack swear it's smarter. You don't switch on rumors — you switch on an **eval**. You keep a small set of test cases, each with a known correct answer, and you run every candidate model over all of them. The model that answers the most cases correctly wins. When two models are equally accurate, you take the **cheaper** one, because there's no reason to pay more for the same quality. Build the harness that grades the candidates and names the model to deploy.",
+      challenge_description: "Run the blind taste test that decides which model ships: score every candidate against a graded answer key, then pick the winner on accuracy first and cost second, never on vibes.",
+      challenge_story: "A new model tier just dropped and three people on Slack swear it's smarter. You don't switch on rumors, you switch on an **eval**. You keep a small set of test cases, each with a known correct answer, and you run every candidate model over all of them. The model that answers the most cases correctly wins. When two models are equally accurate, you take the **cheaper** one, because there's no reason to pay more for the same quality. Build the harness that grades the candidates and names the model to deploy.",
       challenge_statement: "You are given several candidate models (each with a per-call cost), an eval set (each case is an input and its expected answer), and, for each model, the answer it produced on every case in order. Grade and rank them:\n\n1. A model's **score** is the number of cases where its answer **exactly matches** the expected answer.\n2. Print each model's score in input order.\n3. Print the **winner**: the model with the **highest score**. Break ties by **lowest cost**; if cost also ties, break by **lexicographically smallest name**.",
-      challenge_input_format: "The first line has an integer `m`: the number of models. Each of the next `m` lines has a model name (no spaces) and an integer `cost`.\n\nThe next line has an integer `k`: the number of eval cases. Each of the next `k` lines has two tokens `input expected` (no spaces).\n\nThen `m` lines, one per model in the same order as the model list: the model name followed by `k` tokens — that model's answer to each case, in case order.",
+      challenge_input_format: "The first line has an integer `m`: the number of models. Each of the next `m` lines has a model name (no spaces) and an integer `cost`.\n\nThe next line has an integer `k`: the number of eval cases. Each of the next `k` lines has two tokens `input expected` (no spaces).\n\nThen `m` lines, one per model in the same order as the model list: the model name followed by `k` tokens, that model's answer to each case, in case order.",
       challenge_output_format: "First, `m` lines in input order, each `<name>: <score>/<k>`. Then a final line `winner: <name>`.",
       challenge_constraints: [
         "1 ≤ m ≤ 100",
@@ -1133,11 +1133,11 @@ large scored 2 / 2`,
         { input: "2\nsmall 1\nlarge 12\n3\nping pong\nhi hello\nyo sup\nsmall pong hello sup\nlarge pong hello sup", output: "small: 3/3\nlarge: 3/3\nwinner: small", explanation: "Both models answer all 3 cases correctly, so the tie breaks to `small` because it costs less (1 < 12)." },
         { input: "2\nsmall 1\nlarge 12\n3\nping pong\nhi hello\nyo sup\nsmall pong WRONG sup\nlarge pong hello sup", output: "small: 2/3\nlarge: 3/3\nwinner: large", explanation: "`small` misses the second case (2/3) while `large` is perfect (3/3). Accuracy beats cost, so the pricier but more accurate `large` wins." },
       ],
-      challenge_notes: "This is the whole argument for evals: decisions come from a graded scoreboard, not from who posted most confidently. Accuracy is the primary key and cost is only the tie-break, so you never trade quality for a cheaper bill — you only save money when quality is genuinely equal. Comparing answers with exact string equality keeps grading deterministic and unambiguous.",
+      challenge_notes: "This is the whole argument for evals: decisions come from a graded scoreboard, not from who posted most confidently. Accuracy is the primary key and cost is only the tie-break, so you never trade quality for a cheaper bill, you only save money when quality is genuinely equal. Comparing answers with exact string equality keeps grading deterministic and unambiguous.",
       challenge_hints: [
         "Read the models and their costs first, then the `k` eval cases (keep each expected answer), then each model's `k` answers.",
         "Score a model by counting positions where its answer equals the expected answer for that case.",
-        "Rank with a tuple key like `(-score, cost, name)` and take the minimum — that gives highest score, then lowest cost, then smallest name.",
+        "Rank with a tuple key like `(-score, cost, name)` and take the minimum, that gives highest score, then lowest cost, then smallest name.",
       ],
       challenge_starter_code: `import sys
 
@@ -1217,17 +1217,17 @@ main()
       title: "Reading Benchmarks Critically",
       concept: "Benchmarks",
       xp_reward: 10,
-      explanation: `A model tops the leaderboard at 92% on a famous reasoning benchmark. You deploy it. On your actual tickets it does worse than the cheap tier you replaced. The benchmark wasn't lying — you just read it like a final grade instead of what it is: one noisy clue, on someone else's tasks, that may already be baked into the model's training data.
+      explanation: `A model tops the leaderboard at 92% on a famous reasoning benchmark. You deploy it. On your actual tickets it does worse than the cheap tier you replaced. The benchmark wasn't lying, you just read it like a final grade instead of what it is: one noisy clue, on someone else's tasks, that may already be baked into the model's training data.
 
 ## What it is
 
-A **benchmark** is a fixed set of test questions with known answers used to score a model. A **leaderboard** ranks many models by their benchmark scores. They're genuinely useful — they let you compare models on *something* instead of vibes. But a score is a measurement of one specific test, not a promise about *your* workload.
+A **benchmark** is a fixed set of test questions with known answers used to score a model. A **leaderboard** ranks many models by their benchmark scores. They're genuinely useful, they let you compare models on *something* instead of vibes. But a score is a measurement of one specific test, not a promise about *your* workload.
 
 The trap that bites everyone is **data contamination**: if the benchmark's questions (or near-copies) leaked into the model's training data, the model may have effectively *memorized* the answers. A high score then measures recall of seen examples, not real ability.
 
 ## How it works
 
-Treat a leaderboard score the way a scientist treats a single experiment — adjust it for what could be inflating it:
+Treat a leaderboard score the way a scientist treats a single experiment, adjust it for what could be inflating it:
 
 \`\`\`python
 # Raw score can be misleading. Discount benchmarks you can't trust.
@@ -1239,7 +1239,7 @@ def trusted_score(benchmarks):
     return sum(clean) / len(clean)
 
 model = [(95, True), (80, False), (70, False)]
-print(trusted_score(model))  # 75.0 -- the contaminated 95 is dropped
+print(trusted_score(model))  # 75.0, the contaminated 95 is dropped
 \`\`\`
 
 A clean benchmark on tasks *like yours* is worth more than a famous one that doesn't resemble your work at all. And a one-point gap between two models is almost always noise, not a real difference.
@@ -1251,11 +1251,11 @@ Overtrusting leaderboards leads to bad, expensive picks:
 - **Contamination inflates scores.** Public benchmarks get scraped into training sets, so yesterday's hard test is today's memorized answer key.
 - **The benchmark isn't your task.** A model that aces math olympiad problems may still fumble your support tickets. Relevance beats fame.
 - **Tiny gaps are noise.** 89.4 vs 89.1 tells you nothing actionable; treat near-ties as ties.
-- **The fix is your own eval.** Your tiny eval set from lesson 4 is contamination-proof by construction — the model never saw it.
+- **The fix is your own eval.** Your tiny eval set from lesson 4 is contamination-proof by construction, the model never saw it.
 
 ## The mental model to keep
 
-A benchmark is a **clue, not a verdict.** Read it skeptically: ask if the test resembles your task, whether the data could be contaminated, and whether the gap is bigger than the noise — then confirm with your own eval.`,
+A benchmark is a **clue, not a verdict.** Read it skeptically: ask if the test resembles your task, whether the data could be contaminated, and whether the gap is bigger than the noise, then confirm with your own eval.`,
       key_terms: [
         { term: "Benchmark", definition: "A fixed set of questions with known answers used to score a model's ability on some skill." },
         { term: "Leaderboard", definition: "A public ranking of models by their benchmark scores." },
@@ -1298,7 +1298,7 @@ A benchmark is a **clue, not a verdict.** Read it skeptically: ask if the test r
           question: "Two models score 89.4 and 89.1 on the same benchmark. How should you treat that gap?",
           options: [
             "The 89.4 model is clearly and reliably better",
-            "As noise — a fraction of a point is almost certainly not a real difference",
+            "As noise, a fraction of a point is almost certainly not a real difference",
             "The 89.1 model should be banned",
             "You must always pick the higher number"
           ],
@@ -1372,13 +1372,13 @@ trusted score: 75.0`,
             "A difference that small does not reliably predict which model wins on real work.",
             "Treat it as a tie and decide on cost, latency, or your own eval instead."
           ],
-          output: "No — a 0.2-point gap is noise; treat them as equal and break the tie another way."
+          output: "No, a 0.2-point gap is noise; treat them as equal and break the tie another way."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "A model scores 96% on a famous public coding benchmark from 2021 but only 71% on a brand-new private benchmark of similar problems. What does the gap most likely indicate?",
           steps: [
-            "The 2021 public benchmark has had years to leak into training data — high contamination risk.",
+            "The 2021 public benchmark has had years to leak into training data, high contamination risk.",
             "The private benchmark is new and unseen, so its score reflects genuine ability.",
             "A large drop from the public to the private test is a classic contamination signature.",
             "Trust the 71% as the realistic estimate, and confirm with your own task-specific eval."
@@ -1429,7 +1429,7 @@ trusted score: 75.0`,
       challenge_difficulty: "intermediate",
       challenge_title: "Contamination-Aware Ranker",
       challenge_description: "Rank models the way a careful engineer reads a leaderboard: throw out the benchmarks that might be contaminated, average only what's trustworthy, and refuse to rank a model with nothing clean left.",
-      challenge_story: "Your team is choosing a model and three people keep pasting leaderboard screenshots. You insist on reading them critically. Each model was run on several **benchmarks**, and for each benchmark you've flagged whether it's \`clean\` or \`contaminated\` (its questions may have leaked into training data, inflating the score). The rule: a model's **trustworthy score** is the average of its **clean** benchmark scores only — contaminated ones are dropped entirely. A model with **no** clean benchmarks can't be ranked at all. Build the ranker that turns a wall of leaderboard numbers into one honest score per model and names the best pick.",
+      challenge_story: "Your team is choosing a model and three people keep pasting leaderboard screenshots. You insist on reading them critically. Each model was run on several **benchmarks**, and for each benchmark you've flagged whether it's \`clean\` or \`contaminated\` (its questions may have leaked into training data, inflating the score). The rule: a model's **trustworthy score** is the average of its **clean** benchmark scores only, contaminated ones are dropped entirely. A model with **no** clean benchmarks can't be ranked at all. Build the ranker that turns a wall of leaderboard numbers into one honest score per model and names the best pick.",
       challenge_statement: "You are given several models. For each model you have a list of benchmark results, each a score and a flag (\`clean\` or \`contaminated\`). For every model:\n\n1. Keep only the scores from benchmarks flagged \`clean\`.\n2. If at least one clean benchmark exists, the model's **trusted score** is the **integer average** (floor) of those clean scores. Print \`<name> <trusted_score>\`.\n3. If a model has **no** clean benchmarks, print \`<name> NONE\` and exclude it from ranking.\n\nAfter all models, print \`best <name>\`: the model with the **highest** trusted score. Break ties by **lexicographically smallest name**. If no model has any clean benchmark, print \`NO TRUSTED MODEL\` instead.",
       challenge_input_format: "The first line is an integer `n`: the number of models.\n\nEach of the next `n` lines describes one model: a name (no spaces), then an integer `b` (its number of benchmarks), then `b` pairs `score flag`, where `score` is an integer and `flag` is either `clean` or `contaminated`. All tokens are space-separated.",
       challenge_output_format: "For each model in input order, a line `<name> <trusted_score>` (floor of the clean-score average), or `<name> NONE` if it has no clean benchmarks. Then a final line `best <name>`, or `NO TRUSTED MODEL` if no model has a clean benchmark.",
@@ -1443,7 +1443,7 @@ trusted score: 75.0`,
         { input: "2\nmodelA 3 90 contaminated 80 clean 70 clean\nmodelB 2 60 clean 50 clean", output: "modelA 75\nmodelB 55\nbest modelA", explanation: "modelA drops the contaminated 90 and averages 80 and 70 to 75. modelB averages 60 and 50 to 55. modelA's 75 wins." },
         { input: "1\nsolo 1 99 contaminated", output: "solo NONE\nNO TRUSTED MODEL", explanation: "solo's only benchmark is contaminated, so it has no trustworthy score and cannot be ranked." },
       ],
-      challenge_notes: "Dropping contaminated benchmarks on purpose models real skepticism: a memorized answer key shouldn't count toward a model's credit. Integer floor division keeps the output deterministic with no rounding debate. The `NO TRUSTED MODEL` case mirrors a real outcome — sometimes the honest answer is that the leaderboard gives you nothing you can trust, and you must run your own clean eval.",
+      challenge_notes: "Dropping contaminated benchmarks on purpose models real skepticism: a memorized answer key shouldn't count toward a model's credit. Integer floor division keeps the output deterministic with no rounding debate. The `NO TRUSTED MODEL` case mirrors a real outcome, sometimes the honest answer is that the leaderboard gives you nothing you can trust, and you must run your own clean eval.",
       challenge_hints: [
         "Walk each model's benchmark pairs two tokens at a time: read the score, then the flag.",
         "Collect only the scores whose flag is `clean`; if that list is empty, the model is NONE.",
@@ -1520,7 +1520,7 @@ main()
       title: "Open vs Closed Models",
       concept: "OpenClosed",
       xp_reward: 10,
-      explanation: `Two teams build the same feature. One calls a **closed** model over an API and ships in a day. The other downloads an **open-weight** model and runs it on their own servers — slower to set up, but they own it. Neither is wrong. They made opposite bets on control, cost, and privacy, and the right bet depends entirely on the situation.
+      explanation: `Two teams build the same feature. One calls a **closed** model over an API and ships in a day. The other downloads an **open-weight** model and runs it on their own servers, slower to set up, but they own it. Neither is wrong. They made opposite bets on control, cost, and privacy, and the right bet depends entirely on the situation.
 
 ## What it is
 
@@ -1555,7 +1555,7 @@ There's a **crossover point**: below it, hosted is cheaper because you skip the 
 Each side wins on different axes:
 
 - **Control.** Open lets you pin a version forever and tune serving; closed can change or deprecate a model under you.
-- **Cost shape.** Closed is low fixed, high marginal — great until volume explodes. Open is high fixed, low marginal — great at scale.
+- **Cost shape.** Closed is low fixed, high marginal, great until volume explodes. Open is high fixed, low marginal, great at scale.
 - **Privacy.** Open keeps data on hardware you control, which can be decisive for regulated or sensitive data; closed sends prompts to a third party.
 - **Effort.** Closed is a one-line API call; open means you run, scale, patch, and monitor the infrastructure yourself.
 
@@ -1569,7 +1569,7 @@ Closed is **renting** capability; open is **owning** it. Rent when you want spee
       ],
       callouts: [
         { type: "analogy", title: "Renting vs owning", content: "Closed models are a rental car: walk up, drive off, pay per trip, zero maintenance. Open models are buying the car: a big upfront cost, then cheap per mile, and every repair is yours. Volume and control decide which makes sense.", position: "before" },
-        { type: "insight", title: "Watch for the crossover", content: "Closed is cheap at low volume but its per-call cost never stops. Open has a fixed cost that, once paid, makes each call tiny. There's a request volume where they cross — below it rent, above it own.", position: "after" }
+        { type: "insight", title: "Watch for the crossover", content: "Closed is cheap at low volume but its per-call cost never stops. Open has a fixed cost that, once paid, makes each call tiny. There's a request volume where they cross, below it rent, above it own.", position: "after" }
       ],
       concept_diagram: {
         title: "Choosing open vs closed",
@@ -1594,7 +1594,7 @@ Closed is **renting** capability; open is **owning** it. Rent when you want spee
           options: [
             "A closed model, since it's easier to set up",
             "An open-weight model you host yourself, so the data never leaves your hardware",
-            "Either one — privacy doesn't depend on hosting",
+            "Either one, privacy doesn't depend on hosting",
             "Whichever has the highest benchmark score"
           ],
           correct_index: 1,
@@ -1604,12 +1604,12 @@ Closed is **renting** capability; open is **owning** it. Rent when you want spee
           question: "You expect very LOW request volume and want to ship tomorrow with no servers to manage. Which is the better bet?",
           options: [
             "Open-weight self-hosting, to avoid per-call fees",
-            "A closed hosted model — low fixed cost and a one-line API call",
+            "A closed hosted model, low fixed cost and a one-line API call",
             "Whichever is newest",
             "Always self-host regardless of volume"
           ],
           correct_index: 1,
-          explanation: "At low volume the closed model's per-call cost stays small, and you skip all the infrastructure work — ideal for shipping fast."
+          explanation: "At low volume the closed model's per-call cost stays small, and you skip all the infrastructure work, ideal for shipping fast."
         },
         {
           question: "Why does self-hosting an open model get cheaper than a closed model only at high volume?",
@@ -1664,7 +1664,7 @@ cheaper: open`,
         {
           title: "deciding open vs closed for one app",
           steps: [
-            { label: "Estimate your volume", detail: "Project the monthly call count — it drives the whole cost comparison.", code: 'volume = 50000  # calls/month' },
+            { label: "Estimate your volume", detail: "Project the monthly call count, it drives the whole cost comparison.", code: 'volume = 50000  # calls/month' },
             { label: "Price the closed option", detail: "Pure pay-per-use: no fixed cost, but every call costs.", code: 'closed = 5 * volume  # 250000' },
             { label: "Price the open option", detail: "A fixed server cost plus a small per-call compute cost.", code: 'open_ = 20000 + 1 * volume  # 70000' },
             { label: "Factor in privacy and ops", detail: "If data must stay in-house or you want version control, that can tip the choice even when costs are close.", code: 'choice = "open"  # cheaper here, and data stays in-house' }
@@ -1677,10 +1677,10 @@ cheaper: open`,
           prompt: "A weekend prototype will make maybe 200 model calls total, and you want to ship it tonight. Closed or open?",
           steps: [
             "200 calls is tiny volume, so per-call fees barely add up.",
-            "Self-hosting means buying and configuring a server for almost no traffic — wasted effort.",
+            "Self-hosting means buying and configuring a server for almost no traffic, wasted effort.",
             "A closed hosted API is a one-line call with no infrastructure, perfect for shipping tonight."
           ],
-          output: "Closed — at trivial volume the hosted API is cheaper in effort and money."
+          output: "Closed, at trivial volume the hosted API is cheaper in effort and money."
         },
         {
           number: 2, difficulty: "medium",
@@ -1730,14 +1730,14 @@ cheaper: open`,
         }
       ],
       hints: [
-        "Closed total is just per_call * volume — there's no fixed cost.",
+        "Closed total is just per_call * volume, there's no fixed cost.",
         "Open total is the fixed monthly cost plus per_call * volume.",
         "Compare the two totals and print 'open' or 'closed' for whichever is smaller."
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Hosting Cost Crossover",
-      challenge_description: "Run the build-vs-buy math at a given request volume: price every hosting option, closed and open, and name the cheapest one — the call a platform team makes before committing to a model.",
-      challenge_story: "Your platform team is choosing how to serve a model, and the debate is the classic one: rent a **closed** hosted model and pay per call, or self-host an **open-weight** model with a fixed monthly server bill plus a small per-call compute cost. The answer depends entirely on your projected **monthly volume**. At low volume the hosted API wins because you skip the fixed cost; at high volume self-hosting wins because that fixed cost amortizes across millions of calls. You've gathered the pricing for every candidate option. Compute each option's total monthly cost at your volume and report the cheapest — the number finance needs to sign off.",
+      challenge_description: "Run the build-vs-buy math at a given request volume: price every hosting option, closed and open, and name the cheapest one, the call a platform team makes before committing to a model.",
+      challenge_story: "Your platform team is choosing how to serve a model, and the debate is the classic one: rent a **closed** hosted model and pay per call, or self-host an **open-weight** model with a fixed monthly server bill plus a small per-call compute cost. The answer depends entirely on your projected **monthly volume**. At low volume the hosted API wins because you skip the fixed cost; at high volume self-hosting wins because that fixed cost amortizes across millions of calls. You've gathered the pricing for every candidate option. Compute each option's total monthly cost at your volume and report the cheapest, the number finance needs to sign off.",
       challenge_statement: "You are given a monthly request `volume` and a list of hosting options. Each option is either:\n\n- \`closed\`, with a per-call cost: total = \`per_call * volume\`.\n- \`open\`, with a fixed monthly cost and a per-call cost: total = \`fixed + per_call * volume\`.\n\nFor each option, print its name and its total monthly cost in input order. Then print the **cheapest** option: \`cheapest <name>\`. If two options tie on total cost, choose the one whose name is **lexicographically smallest**.",
       challenge_input_format: "The first line is an integer `volume`: the monthly number of calls.\n\nThe second line is an integer `n`: the number of options.\n\nEach of the next `n` lines describes one option. A `closed` option is `name closed per_call`. An `open` option is `name open fixed per_call`. All tokens are space-separated; names contain no spaces.",
       challenge_output_format: "For each option in input order, a line `<name> <total>`. Then a final line `cheapest <name>`.",
@@ -1751,7 +1751,7 @@ cheaper: open`,
         { input: "1000\n2\nhosted closed 5\nselfhost open 20000 1", output: "hosted 5000\nselfhost 21000\ncheapest hosted", explanation: "At 1000 calls, hosted costs 5*1000=5000; selfhost costs 20000+1*1000=21000. The fixed cost hasn't amortized yet, so hosted wins." },
         { input: "10000\n2\nhosted closed 5\nselfhost open 20000 1", output: "hosted 50000\nselfhost 30000\ncheapest selfhost", explanation: "At 10000 calls, hosted costs 50000 while selfhost costs 30000. Past the crossover, self-hosting is cheaper." },
       ],
-      challenge_notes: "This is the build-vs-buy crossover in one calculation: closed cost grows purely with volume, while open cost starts high and then grows slowly. Cost isn't the only factor in reality — privacy and control can override it — but it's the number that anchors the decision. The lexicographic tie-break keeps the winner deterministic when two options cost exactly the same.",
+      challenge_notes: "This is the build-vs-buy crossover in one calculation: closed cost grows purely with volume, while open cost starts high and then grows slowly. Cost isn't the only factor in reality, privacy and control can override it, but it's the number that anchors the decision. The lexicographic tie-break keeps the winner deterministic when two options cost exactly the same.",
       challenge_hints: [
         "Read the option's type token first; `closed` lines have one cost number, `open` lines have two.",
         "Closed total is `per_call * volume`; open total is `fixed + per_call * volume`.",
@@ -1770,8 +1770,8 @@ def main():
         name, kind = parts[0], parts[1]
         nums = [int(x) for x in parts[2:]]
         options.append((name, kind, nums))
-    # TODO: for each option compute its total — closed: per_call*volume;
-    #       open: fixed + per_call*volume — and print "<name> <total>".
+    # TODO: for each option compute its total, closed: per_call*volume;
+    #       open: fixed + per_call*volume, and print "<name> <total>".
     #       Then print "cheapest <name>" (lowest total, ties by smallest name).
 
 main()
@@ -1820,11 +1820,11 @@ main()
       title: "Routing Between Models",
       concept: "Routing",
       xp_reward: 10,
-      explanation: `Most support emails are easy: "What are your hours?" A cheap, fast model nails them. Every so often a gnarly multi-part complaint arrives that the cheap model fumbles. Instead of sending *every* email to an expensive model just in case, smart systems try the cheap one first and **escalate** only the hard cases to a stronger model. That's a cascade — and it can cut costs dramatically.
+      explanation: `Most support emails are easy: "What are your hours?" A cheap, fast model nails them. Every so often a gnarly multi-part complaint arrives that the cheap model fumbles. Instead of sending *every* email to an expensive model just in case, smart systems try the cheap one first and **escalate** only the hard cases to a stronger model. That's a cascade, and it can cut costs dramatically.
 
 ## What it is
 
-A **cascade** (or escalation routing) sends a request to a **cheap-fast model first**. If that model handles it confidently, you're done — cheap and quick. If the input looks too hard, or the cheap model's answer fails a confidence check, you **escalate**: re-run the request on a **stronger, pricier model**.
+A **cascade** (or escalation routing) sends a request to a **cheap-fast model first**. If that model handles it confidently, you're done, cheap and quick. If the input looks too hard, or the cheap model's answer fails a confidence check, you **escalate**: re-run the request on a **stronger, pricier model**.
 
 This builds on lesson 3's task routing, but with a twist. Static routing decides the tier *upfront* by task type. A cascade decides *dynamically*, often after the cheap model has already taken a swing.
 
@@ -1846,7 +1846,7 @@ print(cascade(3, 5, 1, 10))  # ('cheap', 1)      -> handled cheaply
 print(cascade(8, 5, 1, 10))  # ('escalated', 11) -> cheap try + strong call
 \`\`\`
 
-Notice the cost of an escalated request is the cheap call **plus** the strong call — you pay twice when you escalate. The math only works because *most* requests stay cheap, so the rare double-charge averages out tiny.
+Notice the cost of an escalated request is the cheap call **plus** the strong call, you pay twice when you escalate. The math only works because *most* requests stay cheap, so the rare double-charge averages out tiny.
 
 ## Why it matters
 
@@ -1858,7 +1858,7 @@ Cascades shine when difficulty is uneven:
 
 ## The mental model to keep
 
-Try cheap first, escalate the hard ones. **A cascade bets that most inputs are easy** — when that bet holds, you get big-model quality on the hard cases at small-model cost on average.`,
+Try cheap first, escalate the hard ones. **A cascade bets that most inputs are easy**: when that bet holds, you get big-model quality on the hard cases at small-model cost on average.`,
       key_terms: [
         { term: "Cascade", definition: "A routing pattern that tries a cheap model first and escalates hard inputs to a stronger one." },
         { term: "Escalation", definition: "Re-running a request on a stronger, pricier model when the cheap model can't handle it." },
@@ -1866,14 +1866,14 @@ Try cheap first, escalate the hard ones. **A cascade bets that most inputs are e
       ],
       callouts: [
         { type: "analogy", title: "Front-desk triage, then the specialist", content: "A front-desk clerk handles most questions instantly. Only the tricky ones get bumped to the expensive specialist. A cascade does the same: the cheap model takes everything first, and only the hard cases reach the big model.", position: "before" },
-        { type: "warning", title: "Escalating costs you twice", content: "An escalated request pays for the cheap attempt AND the strong call. A cascade only saves money when easy requests dominate. If most inputs are hard, the double-charges pile up — route straight to the strong model instead.", position: "after" }
+        { type: "warning", title: "Escalating costs you twice", content: "An escalated request pays for the cheap attempt AND the strong call. A cascade only saves money when easy requests dominate. If most inputs are hard, the double-charges pile up, route straight to the strong model instead.", position: "after" }
       ],
       concept_diagram: {
         title: "How a cascade routes a request",
         steps: [
           { label: "Request arrives", desc: "Send it to the cheap, fast model first." },
           { label: "Check difficulty", desc: "Is it within the cheap model's ability?" },
-          { label: "Easy: done", desc: "Cheap model's answer is good enough — stop here." },
+          { label: "Easy: done", desc: "Cheap model's answer is good enough, stop here." },
           { label: "Hard: escalate", desc: "Re-run on the strong model; pay for both calls." }
         ]
       },
@@ -1969,7 +1969,7 @@ total cost: 24`,
         {
           title: "one request flowing through a cascade",
           steps: [
-            { label: "Send to the cheap model", detail: "Every request hits the cheap-fast model first — you always pay this small cost.", code: 'cost = cheap_cost  # 1' },
+            { label: "Send to the cheap model", detail: "Every request hits the cheap-fast model first, you always pay this small cost.", code: 'cost = cheap_cost  # 1' },
             { label: "Judge the difficulty", detail: "Compare the input's difficulty to the escalation threshold.", code: 'difficulty = 8; threshold = 5  # 8 > 5 -> too hard' },
             { label: "Escalate the hard one", detail: "It exceeds the threshold, so re-run on the strong model and add its cost.", code: 'cost += strong_cost  # 1 + 10 = 11' },
             { label: "Return the answer", detail: "The strong model's answer goes back to the user. Easy requests would have stopped at step 1 for cost 1.", code: 'return "escalated", 11' }
@@ -1996,7 +1996,7 @@ total cost: 24`,
             "Cascade total = 100 + 100 = 200.",
             "Sending all 100 straight to strong = 100 * 10 = 1000, so the cascade costs one-fifth as much."
           ],
-          output: "Cascade total 200 vs 1000 for all-strong — about 5x cheaper because easy requests dominate."
+          output: "Cascade total 200 vs 1000 for all-strong, about 5x cheaper because easy requests dominate."
         }
       ],
       comparison_tables: [
@@ -2031,18 +2031,18 @@ total cost: 24`,
       reflections: [
         {
           prompt: "In your own words: why does a cascade only save money when most requests are easy?",
-          sampleAnswer: "In a cascade, every request pays the cheap model first, and the hard ones pay the strong model on top of that — so an escalated request costs more than going straight to the strong model. The savings come entirely from the easy requests that stop at the cheap model. If most requests are easy, the bulk of traffic runs cheaply and the rare double-charges barely matter. But if most requests escalate, you're paying for two models nearly every time, and it would be cheaper to skip the cheap step."
+          sampleAnswer: "In a cascade, every request pays the cheap model first, and the hard ones pay the strong model on top of that, so an escalated request costs more than going straight to the strong model. The savings come entirely from the easy requests that stop at the cheap model. If most requests are easy, the bulk of traffic runs cheaply and the rare double-charges barely matter. But if most requests escalate, you're paying for two models nearly every time, and it would be cheaper to skip the cheap step."
         }
       ],
       hints: [
-        "Start each request's cost at cheap_cost — the cheap model always runs first.",
+        "Start each request's cost at cheap_cost, the cheap model always runs first.",
         "If difficulty > threshold, add strong_cost and label it 'escalated'.",
         "Accumulate each request's cost into total, and print the running label per request."
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Cascade Router",
-      challenge_description: "Run a two-stage cascade over a request stream: try the cheap model on everything, escalate only the hard inputs to the strong model, and report the load split and total bill — then prove the cascade beat going all-strong.",
-      challenge_story: "Your gateway fronts two models: a **cheap-fast** one and a **strong-expensive** one. Rather than route by task type upfront, you run a **cascade**: every request hits the cheap model first, and only requests whose **difficulty** exceeds an **escalation threshold** get re-run on the strong model. An escalated request pays for *both* calls; an easy one pays only the cheap call. Process the day's request stream, decide cheap-vs-escalate for each, and report how many escalated and what it all cost — plus what it *would* have cost to send everything straight to the strong model, so the team can see the savings.",
+      challenge_description: "Run a two-stage cascade over a request stream: try the cheap model on everything, escalate only the hard inputs to the strong model, and report the load split and total bill, then prove the cascade beat going all-strong.",
+      challenge_story: "Your gateway fronts two models: a **cheap-fast** one and a **strong-expensive** one. Rather than route by task type upfront, you run a **cascade**: every request hits the cheap model first, and only requests whose **difficulty** exceeds an **escalation threshold** get re-run on the strong model. An escalated request pays for *both* calls; an easy one pays only the cheap call. Process the day's request stream, decide cheap-vs-escalate for each, and report how many escalated and what it all cost, plus what it *would* have cost to send everything straight to the strong model, so the team can see the savings.",
       challenge_statement: "You are given the cheap call cost, the strong call cost, an escalation threshold, and a stream of requests (each a name and a difficulty). For each request:\n\n1. It always pays the **cheap** cost first.\n2. If its difficulty is **strictly greater than** the threshold, it **escalates**: it also pays the strong cost, and you print \`<name> escalated\`.\n3. Otherwise it stays on the cheap model: print \`<name> cheap\`.\n\nAfter the stream, print \`escalations <count>\` (how many requests escalated), then \`total <T>\` (the cascade's total cost), then \`allstrong <S>\` (what it would have cost to send every request straight to the strong model: strong cost times the number of requests).",
       challenge_input_format: "The first line has three integers `cheap strong threshold`: the cheap call cost, the strong call cost, and the escalation threshold.\n\nThe second line has an integer `q`: the number of requests.\n\nEach of the next `q` lines has a request name (no spaces) and an integer difficulty.",
       challenge_output_format: "For each request in input order, a line `<name> cheap` or `<name> escalated`. Then `escalations <count>`, then `total <T>` (cascade cost), then `allstrong <S>` (all-strong cost).",
@@ -2056,11 +2056,11 @@ total cost: 24`,
         { input: "1 10 5\n3\nr1 3\nr2 8\nr3 5", output: "r1 cheap\nr2 escalated\nr3 cheap\nescalations 1\ntotal 13\nallstrong 30", explanation: "r1 (3 ≤ 5) and r3 (5 ≤ 5) stay cheap at 1 each. r2 (8 > 5) escalates: 1 + 10 = 11. Cascade total 1+11+1=13. All-strong would be 3*10=30." },
         { input: "2 20 4\n2\na 9\nb 1", output: "a escalated\nb cheap\nescalations 1\ntotal 24\nallstrong 40", explanation: "a (9 > 4) escalates: 2 + 20 = 22. b (1 ≤ 4) stays cheap at 2. Total 24. All-strong would be 2*20=40." },
       ],
-      challenge_notes: "The threshold is exclusive (`>`), so a request sitting exactly on the threshold stays on the cheap model — only strictly-harder inputs escalate. The `allstrong` figure is the whole point: comparing it to `total` shows how much the cascade saved by keeping easy traffic cheap. When most requests are hard, you'll notice `total` creeping toward (or past) the all-strong cost — the signal to drop the cheap step.",
+      challenge_notes: "The threshold is exclusive (`>`), so a request sitting exactly on the threshold stays on the cheap model, only strictly-harder inputs escalate. The `allstrong` figure is the whole point: comparing it to `total` shows how much the cascade saved by keeping easy traffic cheap. When most requests are hard, you'll notice `total` creeping toward (or past) the all-strong cost, the signal to drop the cheap step.",
       challenge_hints: [
         "Start every request's cost at `cheap`; add `strong` only when difficulty `>` threshold.",
         "Count escalations and accumulate the cascade total as you scan the stream.",
-        "The all-strong cost is simply `strong * q` — the strong cost paid on every request.",
+        "The all-strong cost is simply `strong * q`, the strong cost paid on every request.",
       ],
       challenge_starter_code: `import sys
 
@@ -2114,7 +2114,7 @@ main()
       challenge_test_cases: [
         { input: "1 10 5\n3\nr1 3\nr2 8\nr3 5", expected_output: "r1 cheap\nr2 escalated\nr3 cheap\nescalations 1\ntotal 13\nallstrong 30", description: "Only the difficulty-8 request escalates; cascade is far cheaper than all-strong." },
         { input: "2 20 4\n2\na 9\nb 1", expected_output: "a escalated\nb cheap\nescalations 1\ntotal 24\nallstrong 40", description: "Mixed traffic: one escalation, cascade total below all-strong." },
-        { input: "1 5 3\n3\nx 10\ny 9\nz 8", expected_output: "x escalated\ny escalated\nz escalated\nescalations 3\ntotal 18\nallstrong 15", description: "When everything escalates, the cascade total (18) exceeds all-strong (15) — the signal to skip the cheap step." }
+        { input: "1 5 3\n3\nx 10\ny 9\nz 8", expected_output: "x escalated\ny escalated\nz escalated\nescalations 3\ntotal 18\nallstrong 15", description: "When everything escalates, the cascade total (18) exceeds all-strong (15), the signal to skip the cheap step." }
       ]
     },
     {
@@ -2124,11 +2124,11 @@ main()
       title: "Staying Swap-Ready",
       concept: "Abstraction",
       xp_reward: 10,
-      explanation: `Models improve every few months. A cheaper, smarter tier drops, and the teams that win are the ones who can adopt it in an afternoon instead of a quarter. The difference isn't luck — it's an **abstraction**: a thin layer between your app and whichever model it uses, so swapping providers is a config change, not a rewrite. This is the payoff of everything in this module.
+      explanation: `Models improve every few months. A cheaper, smarter tier drops, and the teams that win are the ones who can adopt it in an afternoon instead of a quarter. The difference isn't luck, it's an **abstraction**: a thin layer between your app and whichever model it uses, so swapping providers is a config change, not a rewrite. This is the payoff of everything in this module.
 
 ## What it is
 
-A **provider abstraction** is a single interface your whole app talks to — something like \`generate(prompt)\` — instead of calling a specific provider's SDK directly all over the codebase. Behind that interface lives an **adapter** that translates your generic call into whatever the active provider expects.
+A **provider abstraction** is a single interface your whole app talks to, something like \`generate(prompt)\`, instead of calling a specific provider's SDK directly all over the codebase. Behind that interface lives an **adapter** that translates your generic call into whatever the active provider expects.
 
 Combine that with a **registry**: a lookup of available providers, plus one **active** provider id you can change in one place. Your app calls the interface; the registry decides which real model runs.
 
@@ -2152,7 +2152,7 @@ active = "smart"        # one-line swap, zero other changes
 print(generate("hi"))  # [smart] answered: hi
 \`\`\`
 
-The application code calling \`generate\` never changes. To switch models, you flip \`active\`. To add a brand-new provider, you write one adapter and register it — the rest of the app doesn't notice.
+The application code calling \`generate\` never changes. To switch models, you flip \`active\`. To add a brand-new provider, you write one adapter and register it, the rest of the app doesn't notice.
 
 ## Why it matters
 
@@ -2161,11 +2161,11 @@ This is what makes lessons 1-7 actually usable:
 - **Swapping is one line.** Tiering, routing, and eval-driven switches all become trivial when the model id lives behind an interface.
 - **No vendor lock-in.** Because nothing hardcodes a provider, no single company can trap you. The id is just a string you own.
 - **New providers slot in.** Adding a model means writing one adapter, not touching every call site.
-- **Routing lives here too.** A cascade or task router is just code that picks which registered provider to call — clean because the interface is uniform.
+- **Routing lives here too.** A cascade or task router is just code that picks which registered provider to call, clean because the interface is uniform.
 
 ## The mental model to keep
 
-Talk to an **interface, not a model.** Put one thin layer between your app and the provider, keep the active id in one place, and you stay swap-ready — free to adopt whatever's best, whenever it ships.`,
+Talk to an **interface, not a model.** Put one thin layer between your app and the provider, keep the active id in one place, and you stay swap-ready, free to adopt whatever's best, whenever it ships.`,
       key_terms: [
         { term: "Provider abstraction", definition: "A single interface your app calls (like generate(prompt)) instead of any specific provider's SDK directly." },
         { term: "Adapter", definition: "A small piece of code that translates your generic call into what one specific provider expects." },
@@ -2173,7 +2173,7 @@ Talk to an **interface, not a model.** Put one thin layer between your app and t
       ],
       callouts: [
         { type: "analogy", title: "A universal power outlet", content: "An abstraction is like a wall socket: your laptop plugs into the same outlet anywhere, and the wiring behind it handles the differences. Your app plugs into one generate() call; the adapter behind it deals with each provider's quirks.", position: "before" },
-        { type: "tip", title: "One id, one place", content: "Keep the active provider id in a single variable or config value. Then switching models, running an eval, or rolling back is one edit — not a hunt through fifty files. That single line is what keeps you swap-ready.", position: "after" }
+        { type: "tip", title: "One id, one place", content: "Keep the active provider id in a single variable or config value. Then switching models, running an eval, or rolling back is one edit, not a hunt through fifty files. That single line is what keeps you swap-ready.", position: "after" }
       ],
       concept_diagram: {
         title: "How an abstraction keeps you swap-ready",
@@ -2196,13 +2196,13 @@ Talk to an **interface, not a model.** Put one thin layer between your app and t
         {
           question: "Your app calls a specific provider's SDK directly in 40 different functions. A better model launches. What's the problem?",
           options: [
-            "Nothing — that's the recommended design",
+            "Nothing, that's the recommended design",
             "Switching means editing all 40 call sites and risking a missed one, so you'll avoid switching at all",
             "The new model won't work with Python",
             "You can never have more than one provider"
           ],
           correct_index: 1,
-          explanation: "Hardcoding a provider everywhere makes switching a risky, tedious chore — exactly the friction an abstraction removes."
+          explanation: "Hardcoding a provider everywhere makes switching a risky, tedious chore, exactly the friction an abstraction removes."
         },
         {
           question: "With a provider abstraction and a registry, how do you switch the whole app to a new model?",
@@ -2231,7 +2231,7 @@ Talk to an **interface, not a model.** Put one thin layer between your app and t
         {
           activity_title: "Abstraction check",
           questions: [
-            { question: "Hardcoding one provider's SDK directly across many functions makes switching models easier.", type: "true_false", correct_answer: "false", explanation: "It makes switching harder — you'd have to edit every call site. An abstraction centralizes the choice." },
+            { question: "Hardcoding one provider's SDK directly across many functions makes switching models easier.", type: "true_false", correct_answer: "false", explanation: "It makes switching harder, you'd have to edit every call site. An abstraction centralizes the choice." },
             { question: "Keeping the model choice behind one interface so you can switch providers easily is called provider ______.", type: "fill_in", correct_answer: "abstraction", explanation: "A provider abstraction lets your app stay swap-ready." }
           ]
         }
@@ -2285,7 +2285,7 @@ print(generate("hello"))
             "The only place the provider is named is the single active id variable.",
             "Switching is changing that one variable to the new provider's id."
           ],
-          output: "One line — flip the active provider id; the rest of the app is untouched."
+          output: "One line, flip the active provider id; the rest of the app is untouched."
         },
         {
           number: 2, difficulty: "medium",
@@ -2293,10 +2293,10 @@ print(generate("hello"))
           steps: [
             "Write one adapter for the new provider that implements the same generate() interface.",
             "Register it in the registry under a new id so it's available to select.",
-            "Update your router so easy tasks pick the new provider's id — that's just choosing which registered provider to call.",
+            "Update your router so easy tasks pick the new provider's id, that's just choosing which registered provider to call.",
             "Because every call site talks to the uniform interface, none of them needs to know a new provider exists."
           ],
-          output: "Add one adapter, register it, and point the router at its id — the interface keeps the rest of the app unchanged."
+          output: "Add one adapter, register it, and point the router at its id, the interface keeps the rest of the app unchanged."
         }
       ],
       comparison_tables: [
@@ -2306,7 +2306,7 @@ print(generate("hello"))
           rows: [
             { cells: ["Switching models", "Edit every call site", "Change one active id"] },
             { cells: ["Adding a provider", "Touch many functions", "Write one adapter, register it"] },
-            { cells: ["Vendor lock-in", "High — provider is baked in", "Low — id is a string you own"] },
+            { cells: ["Vendor lock-in", "High, provider is baked in", "Low, id is a string you own"] },
             { cells: ["Risk of a missed edit", "High", "Near zero"], highlight: true }
           ]
         }
@@ -2331,7 +2331,7 @@ print(generate("hello"))
       reflections: [
         {
           prompt: "In your own words: how does a provider abstraction turn every idea from this module (tiering, routing, eval-driven switching) from theory into something you can actually do?",
-          sampleAnswer: "All of this module's advice — pick the right tier, route by difficulty, switch when an eval says a model wins — assumes you can change which model runs cheaply. A provider abstraction makes that true: the app talks to one interface, and the active provider lives in one place, so swapping or routing is just choosing an id. Without it, every smart decision would require rewriting scattered call sites, so you'd avoid making them. With it, adopting a better or cheaper model is an afternoon's work, and you're never locked to one vendor."
+          sampleAnswer: "All of this module's advice, pick the right tier, route by difficulty, switch when an eval says a model wins, assumes you can change which model runs cheaply. A provider abstraction makes that true: the app talks to one interface, and the active provider lives in one place, so swapping or routing is just choosing an id. Without it, every smart decision would require rewriting scattered call sites, so you'd avoid making them. With it, adopting a better or cheaper model is an afternoon's work, and you're never locked to one vendor."
         }
       ],
       hints: [
@@ -2341,8 +2341,8 @@ print(generate("hello"))
       ],
       challenge_difficulty: "beginner",
       challenge_title: "Provider Registry",
-      challenge_description: "Build the swap-ready core of a model gateway: a registry of providers behind one interface, where calls always hit the active provider and switching is a single command — the abstraction that makes everything else in this module usable.",
-      challenge_story: "You're building the thin layer that keeps your app **swap-ready**. A **registry** holds every available provider and its per-call cost, and one **active** provider handles all traffic. Your app issues two kinds of operations: a **call** (run the active provider on a request, paying its cost) and a **switch** (change the active provider — the one-line swap that, in a real app, redirects the entire system). If someone tries to switch to a provider that isn't registered, you reject it and keep the current one. Process the operation log, report each step, and total the bill — proving the interface let you swap models mid-stream without touching call logic.",
+      challenge_description: "Build the swap-ready core of a model gateway: a registry of providers behind one interface, where calls always hit the active provider and switching is a single command, the abstraction that makes everything else in this module usable.",
+      challenge_story: "You're building the thin layer that keeps your app **swap-ready**. A **registry** holds every available provider and its per-call cost, and one **active** provider handles all traffic. Your app issues two kinds of operations: a **call** (run the active provider on a request, paying its cost) and a **switch** (change the active provider, the one-line swap that, in a real app, redirects the entire system). If someone tries to switch to a provider that isn't registered, you reject it and keep the current one. Process the operation log, report each step, and total the bill, proving the interface let you swap models mid-stream without touching call logic.",
       challenge_statement: "You are given a registry of providers (each a name and a per-call cost), a default **active** provider, and a sequence of operations. Process each operation in order:\n\n- \`call\`: the active provider handles a request. Add its cost to the running total and print \`call <active> <cost>\`.\n- \`switch <name>\`: if \`<name>\` is a registered provider, make it active and print \`switched to <name>\`. If it is **not** registered, print \`unknown <name>\` and leave the active provider unchanged.\n\nAfter all operations, print \`calls <count>\` (how many \`call\` operations ran) and \`total <T>\` (the summed cost of those calls).",
       challenge_input_format: "The first line is an integer `p`: the number of providers. Each of the next `p` lines has a provider name (no spaces) and an integer cost.\n\nThe next line is the default active provider's name.\n\nThe next line is an integer `n`: the number of operations. Each of the next `n` lines is either `call` or `switch <name>`.",
       challenge_output_format: "For each operation in order: `call <active> <cost>`, `switched to <name>`, or `unknown <name>`. Then a line `calls <count>`, then a line `total <T>`.",
@@ -2356,7 +2356,7 @@ print(generate("hello"))
         { input: "2\ngpt 5\nclaude 4\ngpt\n4\ncall\nswitch claude\ncall\ncall", output: "call gpt 5\nswitched to claude\ncall claude 4\ncall claude 4\ncalls 3\ntotal 13", explanation: "First call uses the default gpt (5). After switching to claude, the next two calls each cost 4. Three calls total 5+4+4=13." },
         { input: "2\na 3\nb 7\na\n3\ncall\nswitch zzz\ncall", output: "call a 3\nunknown zzz\ncall a 3\ncalls 2\ntotal 6", explanation: "`zzz` isn't registered, so the switch is rejected and `a` stays active. Both calls use a (3) for a total of 6." },
       ],
-      challenge_notes: "This is the whole point of an abstraction: the `call` operations never name a provider — they just hit whatever is active, exactly like an app that talks to one `generate()` interface. Rejecting an unknown `switch` instead of crashing mirrors real safety: a bad config shouldn't take the system down, it should keep serving with the current provider. Storing providers in a dict keeps every lookup O(1), which matters when `n` reaches 100000 operations.",
+      challenge_notes: "This is the whole point of an abstraction: the `call` operations never name a provider, they just hit whatever is active, exactly like an app that talks to one `generate()` interface. Rejecting an unknown `switch` instead of crashing mirrors real safety: a bad config shouldn't take the system down, it should keep serving with the current provider. Storing providers in a dict keeps every lookup O(1), which matters when `n` reaches 100000 operations.",
       challenge_hints: [
         "Store the providers in a dict mapping name to cost so lookups and membership checks are fast.",
         "Track the active provider in a variable; a `switch` only updates it if the target name is in the dict.",
@@ -2375,7 +2375,7 @@ def main():
     active = data[idx].strip(); idx += 1
     n = int(data[idx].strip()); idx += 1
     ops = [data[idx + i].split() for i in range(n)]; idx += n
-    # TODO: process each op — "call" pays the active provider's cost and prints
+    # TODO: process each op, "call" pays the active provider's cost and prints
     #       "call <active> <cost>"; "switch <name>" sets active if registered
     #       (print "switched to <name>") else prints "unknown <name>".
     #       Finally print "calls <count>" and "total <T>".

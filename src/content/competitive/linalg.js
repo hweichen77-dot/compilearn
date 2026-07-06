@@ -15,7 +15,7 @@ export default [
     statement:
       "You are given two integer vectors `a` and `b`, each of length `n`. Compute their **dot product**:\n\n```\na · b = a[0]*b[0] + a[1]*b[1] + ... + a[n-1]*b[n-1]\n```\n\nPrint the single integer result.",
     input_format:
-      "Line 1: an integer `n` — the length of each vector.\nLine 2: `n` integers — `a[0..n-1]`.\nLine 3: `n` integers — `b[0..n-1]`.",
+      "Line 1: an integer `n`, the length of each vector.\nLine 2: `n` integers, `a[0..n-1]`.\nLine 3: `n` integers, `b[0..n-1]`.",
     output_format: "Print one integer: the dot product `a · b`.",
     constraints: [
       "1 ≤ n ≤ 100000",
@@ -35,7 +35,7 @@ export default [
       },
     ],
     notes:
-      "Each product can reach 10^12 and there are up to 10^5 of them, so the accumulator can reach ~10^17 — well within `long long` (64-bit) but far beyond 32-bit `int`. Accumulate in `long long` to avoid overflow.",
+      "Each product can reach 10^12 and there are up to 10^5 of them, so the accumulator can reach ~10^17, well within `long long` (64-bit) but far beyond 32-bit `int`. Accumulate in `long long` to avoid overflow.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    // TODO: read a[0..n-1] and b[0..n-1].\n    // Accumulate sum of a[i]*b[i] in a 64-bit integer and print it.\n\n    return 0;\n}\n",
     solution_cpp:
@@ -62,7 +62,7 @@ export default [
     statement:
       "You are given an integer weight matrix `W` with `M` rows and `N` columns, and an integer input vector `x` of length `N`. Compute the output vector `y` of length `M`, where\n\n```\ny[i] = sum over j of W[i][j] * x[j]   for i = 0..M-1\n```\n\nPrint the `M` entries of `y`.",
     input_format:
-      "Line 1: two integers `M N`.\nNext `M` lines: row `i` contains `N` integers — `W[i][0..N-1]`.\nNext line: `N` integers — `x[0..N-1]`.",
+      "Line 1: two integers `M N`.\nNext `M` lines: row `i` contains `N` integers, `W[i][0..N-1]`.\nNext line: `N` integers, `x[0..N-1]`.",
     output_format:
       "Print the `M` entries of `y` on a single line, separated by single spaces, followed by a newline. (`y[0]` first, `y[M-1]` last.)",
     constraints: [
@@ -79,7 +79,7 @@ export default [
       },
     ],
     notes:
-      "This is just `M` independent dot products — reuse the dot-product idea once per row. Keep each row's accumulator in `long long`: a product can reach 10^12 and a row sums up to 1000 of them (~10^15). Print outputs space-separated with no trailing space (a newline after the last value is fine).",
+      "This is just `M` independent dot products, reuse the dot-product idea once per row. Keep each row's accumulator in `long long`: a product can reach 10^12 and a row sums up to 1000 of them (~10^15). Print outputs space-separated with no trailing space (a newline after the last value is fine).",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int M, N;\n    cin >> M >> N;\n    // TODO: read the M*N weight matrix W and the length-N vector x.\n    // For each row i, output the dot product of W[i] with x.\n\n    return 0;\n}\n",
     solution_cpp:
@@ -90,7 +90,7 @@ export default [
       { input: "1 4\n2 2 2 2\n1 -1 1 -1", expected_output: "0" },
     ],
     editorial:
-      "Matrix-vector multiplication `y = W·x` is the forward pass of a linear layer: row `i` of `W` is the weight vector of output neuron `i`, and `y[i]` is that neuron's pre-activation. The identity matrix example shows why it's called 'linear': multiplying by `I` returns the input unchanged. Complexity is O(M·N) — one multiply-add per weight — which is why GPUs and BLAS `gemv` kernels exist to parallelize it. Stacking these multiplies with nonlinear activations between them is, quite literally, a neural network. As before, the only correctness hazard is integer overflow, handled by 64-bit accumulation.",
+      "Matrix-vector multiplication `y = W·x` is the forward pass of a linear layer: row `i` of `W` is the weight vector of output neuron `i`, and `y[i]` is that neuron's pre-activation. The identity matrix example shows why it's called 'linear': multiplying by `I` returns the input unchanged. Complexity is O(M·N), one multiply-add per weight, which is why GPUs and BLAS `gemv` kernels exist to parallelize it. Stacking these multiplies with nonlinear activations between them is, quite literally, a neural network. As before, the only correctness hazard is integer overflow, handled by 64-bit accumulation.",
   },
   {
     id: "cp-linalg-3",
@@ -103,11 +103,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["linear-algebra", "cosine-similarity", "vector-search", "int128", "embeddings"],
     story:
-      "A vector database answers 'which stored embedding is most like this query?' The standard metric is **cosine similarity** — the angle between vectors, which ignores their length. The textbook formula `cos = (a·q) / (||a|| · ||q||)` drags in square roots and floating point, and floats lie just often enough to flip a tie. This problem demands the **exact** answer over integer vectors: rank candidates by cosine similarity using only integer (and 128-bit) arithmetic, never touching a `double`.",
+      "A vector database answers 'which stored embedding is most like this query?' The standard metric is **cosine similarity**: the angle between vectors, which ignores their length. The textbook formula `cos = (a·q) / (||a|| · ||q||)` drags in square roots and floating point, and floats lie just often enough to flip a tie. This problem demands the **exact** answer over integer vectors: rank candidates by cosine similarity using only integer (and 128-bit) arithmetic, never touching a `double`.",
     statement:
       "You are given `N` candidate integer vectors, each of dimension `D`, and one query vector `q` of dimension `D`. The cosine similarity between a candidate `a` and the query is\n\n```\ncos(a, q) = (a · q) / ( ||a|| * ||q|| )\n```\n\nwhere `a · q` is the dot product and `||v|| = sqrt(v · v)`. Output the **index** (0-based) of the candidate with the **highest** cosine similarity to `q`.\n\nDo **not** use floating point. Because `||q||` is a common positive factor, comparing two candidates `A` and `B` reduces to comparing `(A·q)/||A||` against `(B·q)/||B||`. The norms are non-negative, so:\n\n- The **sign** of a candidate's cosine equals the sign of its dot product `a · q`. A candidate with a positive dot beats any candidate with a zero or negative dot, regardless of magnitude; a zero dot beats any negative dot.\n- When two candidates share the same sign, compare the **squares** of their cosines by cross-multiplication. Candidate `A` has strictly larger `|cos|` than `B` iff\n\n  ```\n  (A·q)^2 * (||B||^2) * (||q||^2)  >  (B·q)^2 * (||A||^2) * (||q||^2)\n  ```\n\n  (the `||q||^2` factor is shown for clarity and cancels). For two **positive**-dot candidates the one with the larger `|cos|` wins; for two **negative**-dot candidates the one with the **smaller** `|cos|` (closer to zero) wins.\n\nIf several candidates tie exactly in cosine similarity, output the one with the **smallest index**. It is guaranteed that at least one candidate has a non-zero norm; assume `||q|| > 0`.",
     input_format:
-      "Line 1: two integers `N D`.\nNext `N` lines: line `i` contains `D` integers — candidate vector `i`.\nNext line: `D` integers — the query vector `q`.",
+      "Line 1: two integers `N D`.\nNext `N` lines: line `i` contains `D` integers, candidate vector `i`.\nNext line: `D` integers, the query vector `q`.",
     output_format: "Print one integer: the 0-based index of the candidate with the highest cosine similarity to `q`.",
     constraints: [
       "1 ≤ N ≤ 100000",
@@ -144,6 +144,6 @@ export default [
       { input: "2 2\n2 0\n1 1\n1 1", expected_output: "1" },
     ],
     editorial:
-      "This is exact cosine-similarity vector search — the retrieval step of a RAG pipeline or a recommendation engine — done without a single float. Two ideas make it exact. First, since `||a||` and `||q||` are non-negative, the sign of `cos` is the sign of the dot product, so a positive dot always beats a non-positive one before magnitudes even matter. Second, comparing `(A·q)/||A||` to `(B·q)/||B||` for same-sign candidates is, after squaring and cross-multiplying, the integer comparison `(A·q)^2·||B||^2` vs `(B·q)^2·||A||^2`; the shared `||q||^2` cancels. Those products can reach ~10^42, so 64-bit overflows and you promote the multiplications to `__int128`. The negative-dot case flips the comparison: among dissimilar candidates you want the one nearest zero, i.e. the smaller squared cosine. Real systems normalize once and use floats with HNSW indexes, but the exact integer version shows precisely what the metric is comparing — and never loses a tie to rounding.",
+      "This is exact cosine-similarity vector search, the retrieval step of a RAG pipeline or a recommendation engine, done without a single float. Two ideas make it exact. First, since `||a||` and `||q||` are non-negative, the sign of `cos` is the sign of the dot product, so a positive dot always beats a non-positive one before magnitudes even matter. Second, comparing `(A·q)/||A||` to `(B·q)/||B||` for same-sign candidates is, after squaring and cross-multiplying, the integer comparison `(A·q)^2·||B||^2` vs `(B·q)^2·||A||^2`; the shared `||q||^2` cancels. Those products can reach ~10^42, so 64-bit overflows and you promote the multiplications to `__int128`. The negative-dot case flips the comparison: among dissimilar candidates you want the one nearest zero, i.e. the smaller squared cosine. Real systems normalize once and use floats with HNSW indexes, but the exact integer version shows precisely what the metric is comparing, and never loses a tie to rounding.",
   },
 ];

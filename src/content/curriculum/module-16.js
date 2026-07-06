@@ -62,7 +62,7 @@ The gap between "works in a notebook" and "works in production" is where most LL
 
 ## The mental model to keep
 
-A notebook is a conversation with yourself; production is a contract with strangers. **Ship the wrapper, not the cell** — the model is the small, easy part, and the boring code around it is what keeps the lights on.`,
+A notebook is a conversation with yourself; production is a contract with strangers. Ship the wrapper, not just the cell. The model is the small, easy part, and the code around it is what keeps the service running.`,
       key_terms: [
         { term: "Deployment", definition: "Turning a script into a continuously running service that handles requests from real users." },
         { term: "Environment variable", definition: "A configuration value (like an API key) read from the environment at runtime instead of hardcoded in source." },
@@ -179,7 +179,7 @@ print(handle_request("   "))
             { label: "Read config", detail: "The handler pulls the API key from the environment. If it is missing, the service fails fast instead of calling the model with no credentials.", code: 'api_key = os.environ["LLM_API_KEY"]' },
             { label: "Validate input", detail: "An empty or whitespace-only prompt is rejected before any expensive work. Bad input fails cheaply and clearly.", code: 'if not prompt.strip(): return error("empty prompt")' },
             { label: "Call the model safely", detail: "The model call sits inside try/except so an upstream failure becomes a clean 502, not a process crash that drops other users.", code: "try:\n    answer = call_model(prompt, api_key)\nexcept Exception:\n    return error(\"model error\")" },
-            { label: "Return structured output", detail: "The handler always returns a predictable shape — a JSON object with answer or error — so callers never have to parse a stack trace.", code: 'return {"answer": answer}' }
+            { label: "Return structured output", detail: "The handler always returns a predictable shape (a JSON object with answer or error), so callers never have to parse a stack trace.", code: 'return {"answer": answer}' }
           ]
         }
       ],
@@ -200,7 +200,7 @@ print(handle_request("   "))
           steps: [
             "Without a timeout, a slow model call can hold a worker for 30-plus seconds doing nothing.",
             "Your server has a fixed pool of workers; each stuck call removes one from circulation.",
-            "As more slow calls arrive, every worker ends up blocked, so new requests queue and eventually time out at the edge — the whole service appears down.",
+            "As more slow calls arrive, every worker ends up blocked, so new requests queue and eventually time out at the edge, and the whole service appears down.",
             "Fix: set a per-call timeout (for example 10s) so a stalled model call is abandoned and the worker returns to the pool, plus a fallback or error for the affected request only."
           ],
           output: "Untimed calls exhaust the worker pool under load; add per-call timeouts so one slow call cannot starve the service."
@@ -238,7 +238,7 @@ print(handle_request("   "))
       reflections: [
         {
           prompt: "In your own words: if the model call is only about 10 percent of the work, what is the other 90 percent and why does it matter?",
-          sampleAnswer: "The other 90 percent is the wrapper around the model: reading secrets from the environment, validating incoming requests, catching and logging failures, enforcing timeouts, and returning a predictable response shape. It matters because production runs for many strangers under uncontrolled load, so the failure modes the notebook never hit — leaked keys, crashing workers, hung calls — are exactly what determine whether the service stays up."
+          sampleAnswer: "The other 90 percent is the wrapper around the model: reading secrets from the environment, validating incoming requests, catching and logging failures, enforcing timeouts, and returning a predictable response shape. It matters because production runs for many strangers under uncontrolled load, so the failure modes the notebook never hit, such as leaked keys, crashing workers, and hung calls, are exactly what determine whether the service stays up."
         }
       ],
       hints: [
@@ -249,8 +249,8 @@ print(handle_request("   "))
       challenge_title: "The Production Gate",
       challenge_description: "Run a batch of incoming requests through a validation gate and report how many pass, how many are rejected, and why.",
       challenge_difficulty: "beginner",
-      challenge_story: "Your team is promoting a notebook prototype to a real \`/chat\` endpoint. Before any request reaches the model, it must clear the **validation gate** — the boring wrapper code that keeps one bad request from taking down the worker serving everyone else. Overnight, a replay of production traffic is queued against your new gate. Build the gate, run the batch, and hand ops a clean tally of accepted vs. rejected requests so they can sign off on the deploy.",
-      challenge_statement: "Process \`N\` requests in order. Each request carries three integers: whether an API key is present, the prompt length, and the requested timeout in milliseconds.\n\nApply the gate's rules **in this exact priority order** and reject on the first rule that fails (a request fails for at most one reason):\n\n1. **missing_key** — the key is absent (\`key_present == 0\`).\n2. **empty_prompt** — the prompt has zero length (\`prompt_len == 0\`).\n3. **timeout_too_long** — the requested timeout exceeds **30000** ms.\n\nA request that clears all three rules is **accepted**. Report the accepted and rejected totals, then the count of rejections for each reason.",
+      challenge_story: "Your team is promoting a notebook prototype to a real \`/chat\` endpoint. Before any request reaches the model, it must clear the **validation gate**, the wrapper code that keeps one bad request from taking down the worker serving everyone else. Overnight, a replay of production traffic is queued against your new gate. Build the gate, run the batch, and hand ops a clean tally of accepted vs. rejected requests so they can sign off on the deploy.",
+      challenge_statement: "Process \`N\` requests in order. Each request carries three integers: whether an API key is present, the prompt length, and the requested timeout in milliseconds.\n\nApply the gate's rules **in this exact priority order** and reject on the first rule that fails (a request fails for at most one reason):\n\n1. **missing_key**: the key is absent (\`key_present == 0\`).\n2. **empty_prompt**: the prompt has zero length (\`prompt_len == 0\`).\n3. **timeout_too_long**: the requested timeout exceeds 30000 ms.\n\nA request that clears all three rules is **accepted**. Report the accepted and rejected totals, then the count of rejections for each reason.",
       challenge_input_format: "The first line contains a single integer `N`, the number of requests.\nEach of the next `N` lines contains three space-separated integers: `key_present prompt_len timeout_ms` (`key_present` is 0 or 1).",
       challenge_output_format: "Five lines:\n- `accepted <count>`\n- `rejected <count>`\n- `missing_key <count>`\n- `empty_prompt <count>`\n- `timeout_too_long <count>`",
       challenge_constraints: [
@@ -368,7 +368,7 @@ def traced_call(prompt, model="default"):
     return output, trace_id
 \`\`\`
 
-Two details make this useful. First, the record is **structured** (JSON), so you can search and aggregate it — "show me all calls over 5 seconds" — instead of grepping prose. Second, the **trace_id** is returned to the caller and shown to the user, so a bug report can name the exact request.
+Two details make this useful. First, the record is **structured** (JSON), so you can search and aggregate it, "show me all calls over 5 seconds", instead of grepping prose. Second, the **trace_id** is returned to the caller and shown to the user, so a bug report can name the exact request.
 
 ## Why it matters
 
@@ -379,11 +379,11 @@ Tracing is the foundation every other production practice stands on:
 - **Evals and improvement.** You cannot measure quality on traffic you never recorded. Real production traces are the raw material for the evals in the next lesson.
 - **Cost and abuse.** Token counts per call feed cost monitoring and expose the one user sending novel-length prompts.
 
-One caution: prompts and outputs can contain personal data. Mask or redact sensitive fields before logging, and set a retention window — observability is not an excuse to hoard private text forever.
+One caution: prompts and outputs can contain personal data. Mask or redact sensitive fields before logging, and set a retention window, observability is not an excuse to hoard private text forever.
 
 ## The mental model to keep
 
-If a request happened and you didn't record it, **it might as well not have happened** — you can neither debug it nor learn from it. Trace first; you can always sample down later, but you can never recover what you never wrote.`,
+If a request happened and you didn't record it, **it might as well not have happened**: you can neither debug it nor learn from it. Trace first; you can always sample down later, but you can never recover what you never wrote.`,
       key_terms: [
         { term: "Tracing", definition: "Recording enough detail about each request to reconstruct what happened later." },
         { term: "Trace ID", definition: "A unique identifier attached to one request so all its logs and steps can be tied together." },
@@ -391,7 +391,7 @@ If a request happened and you didn't record it, **it might as well not have happ
         { term: "Latency", definition: "How long a call took, usually measured in milliseconds, recorded per request." }
       ],
       callouts: [
-        { type: "analogy", title: "A flight recorder for every call", content: "A black box on a plane records everything so investigators can reconstruct a flight after the fact. A trace does the same for one request: prompt, output, timing, IDs — so any complaint becomes a replay, not a guess.", position: "before" },
+        { type: "analogy", title: "A flight recorder for every call", content: "A black box on a plane records everything so investigators can reconstruct a flight after the fact. A trace does the same for one request: prompt, output, timing, IDs, so any complaint becomes a replay, not a guess.", position: "before" },
         { type: "warning", title: "Logs can leak private data", content: "Prompts and outputs often contain personal information. Redact or mask sensitive fields and set a retention window before you start logging full text.", position: "after" }
       ],
       concept_diagram: {
@@ -569,8 +569,8 @@ print(sorted(traced_call("hi").keys()))
       challenge_title: "The Trace Digest",
       challenge_description: "Roll up a morning of request traces into the five numbers an on-call engineer actually needs: volume, average and tail latency, token spend, and error rate.",
       challenge_difficulty: "intermediate",
-      challenge_story: "A user reports a garbage answer 'sometime this morning.' Right now your logs say \`INFO: request handled\` and nothing else — useless. You wire up real **tracing**: every request now emits a record with its latency, token count, and status. The first batch of traces just landed. Turn that raw stream into a digest the dashboard can show, including the **p95 latency** that the average always hides.",
-      challenge_statement: "Given \`N\` trace records, each with a latency (ms), a token count, and a status (\`0\` = ok, \`1\` = error), compute the digest:\n\n- **requests** — the total count `N`.\n- **avg_latency_ms** — mean latency, rounded to **1 decimal place**.\n- **p95_latency_ms** — the 95th-percentile latency using the **nearest-rank** method: sort latencies ascending, take the value at rank `ceil(0.95 * N)` (1-indexed).\n- **total_tokens** — sum of all token counts.\n- **error_rate_pct** — percentage of records with status `1`, rounded to **1 decimal place**.",
+      challenge_story: "A user reports a garbage answer 'sometime this morning.' Right now your logs say \`INFO: request handled\` and nothing else, useless. You wire up real **tracing**: every request now emits a record with its latency, token count, and status. The first batch of traces just landed. Turn that raw stream into a digest the dashboard can show, including the **p95 latency** that the average always hides.",
+      challenge_statement: "Given \`N\` trace records, each with a latency (ms), a token count, and a status (\`0\` = ok, \`1\` = error), compute the digest:\n\n- **requests**: the total count `N`.\n- **avg_latency_ms**: mean latency, rounded to **1 decimal place**.\n- **p95_latency_ms**: the 95th-percentile latency using the **nearest-rank** method: sort latencies ascending, take the value at rank `ceil(0.95 * N)` (1-indexed).\n- **total_tokens**: sum of all token counts.\n- **error_rate_pct**: percentage of records with status `1`, rounded to **1 decimal place**.",
       challenge_input_format: "The first line contains a single integer `N`.\nEach of the next `N` lines contains three space-separated integers: `latency_ms tokens status`.",
       challenge_output_format: "Five lines:\n- `requests <N>`\n- `avg_latency_ms <avg to 1 decimal>`\n- `p95_latency_ms <integer>`\n- `total_tokens <sum>`\n- `error_rate_pct <rate to 1 decimal>`",
       challenge_constraints: [
@@ -584,7 +584,7 @@ print(sorted(traced_call("hi").keys()))
         { input: "4\n100 50 0\n300 80 1\n200 60 0\n400 70 0", output: "requests 4\navg_latency_ms 250.0\np95_latency_ms 400\ntotal_tokens 260\nerror_rate_pct 25.0", explanation: "Average = (100+300+200+400)/4 = 250.0. Sorted = [100,200,300,400]; rank = ceil(0.95×4) = 4, so p95 = 400. Tokens sum to 260. One of four is an error = 25.0%." },
         { input: "1\n250 100 1", output: "requests 1\navg_latency_ms 250.0\np95_latency_ms 250\ntotal_tokens 100\nerror_rate_pct 100.0", explanation: "A single trace: it is its own average and p95, and being an error makes the error rate 100.0%." }
       ],
-      challenge_notes: "p95 is the number you page on, not the average — one slow request hides in a healthy-looking mean but jumps out at the tail. Nearest-rank avoids floating-point interpolation: rank `ceil(0.95 × N)` always lands on a real data point, so the output is an exact integer.",
+      challenge_notes: "p95 is the number you page on, not the average, one slow request hides in a healthy-looking mean but jumps out at the tail. Nearest-rank avoids floating-point interpolation: rank `ceil(0.95 × N)` always lands on a real data point, so the output is an exact integer.",
       challenge_hints: [
         "Collect latencies in a list, sum tokens, and count statuses equal to 1 in one pass.",
         "For p95: `s = sorted(latencies)` then `p95 = s[math.ceil(0.95 * n) - 1]` (subtract 1 for 0-indexing).",
@@ -662,11 +662,11 @@ main()
       title: "Evals in CI",
       concept: "CIEvals",
       xp_reward: 10,
-      explanation: `You tweak one line of your prompt to fix a formatting bug. It ships. Two days later you discover the tweak quietly broke 12 percent of answers on a different task that you never thought to re-test. With normal code, a unit test would have caught the regression in seconds. With prompts, most teams have no test at all — they ship on vibes. **Evals** are how you stop doing that.
+      explanation: `You tweak one line of your prompt to fix a formatting bug. It ships. Two days later you discover the tweak quietly broke 12 percent of answers on a different task that you never thought to re-test. With normal code, a unit test would have caught the regression in seconds. With prompts, most teams have no test at all, they ship on vibes. **Evals** are how you stop doing that.
 
 ## What it is
 
-An **eval** is an automated test for an LLM's behavior. Instead of asserting \`add(2,3) == 5\`, you run the model on a fixed set of example inputs, score each output against a rule or expected answer, and compute a pass rate. Run that whole suite automatically on every change — in **CI**, your continuous integration pipeline — and a prompt change that drops the score below a threshold fails the build before it reaches users.
+An **eval** is an automated test for an LLM's behavior. Instead of asserting \`add(2,3) == 5\`, you run the model on a fixed set of example inputs, score each output against a rule or expected answer, and compute a pass rate. Run that whole suite automatically on every change, in **CI**, your continuous integration pipeline, and a prompt change that drops the score below a threshold fails the build before it reaches users.
 
 The hard part is that LLM output is not exactly equal to a golden string. So evals use **graders**: checks like "does the output contain the required field," "is it valid JSON," "does it match this regex," or even "does a second model judge it as correct."
 
@@ -701,7 +701,7 @@ Evals turn prompt engineering from guesswork into engineering:
 - **Compare models and prompts objectively.** Swapping to a cheaper model is a one-number decision: did the eval score hold?
 - **Make quality a gate, not a hope.** "Don't merge if the score drops" is enforceable in CI; "please test your prompt" is not.
 
-Two pitfalls to respect. Evals are only as good as their cases, so build them from **real production traces** (the previous lesson), not toy inputs. And a single flaky example can make a green suite go red randomly — keep graders deterministic where you can, and treat model-as-judge graders as noisier than rule-based ones.
+Two pitfalls to respect. Evals are only as good as their cases, so build them from **real production traces** (the previous lesson), not toy inputs. And a single flaky example can make a green suite go red randomly, keep graders deterministic where you can, and treat model-as-judge graders as noisier than rule-based ones.
 
 ## The mental model to keep
 
@@ -713,7 +713,7 @@ A prompt is code, and **code without tests rots silently.** An eval suite in CI 
         { term: "Threshold", definition: "The minimum pass rate a suite must hit; falling below it fails the build." }
       ],
       callouts: [
-        { type: "analogy", title: "Unit tests for behavior", content: "A unit test pins down what a function should return. An eval pins down what a prompt should produce — same safety net, applied to fuzzy text output instead of exact return values.", position: "before" },
+        { type: "analogy", title: "Unit tests for behavior", content: "A unit test pins down what a function should return. An eval pins down what a prompt should produce, same safety net, applied to fuzzy text output instead of exact return values.", position: "before" },
         { type: "tip", title: "Build cases from real traces", content: "The strongest eval cases are real prompts your users actually sent, pulled from your traces. Toy inputs pass while real traffic quietly fails.", position: "after" }
       ],
       concept_diagram: {
@@ -821,7 +821,7 @@ print(run_evals(cases))
           steps: [
             { label: "Load the cases", detail: "Each case pairs an input with an expected result or rule. The best cases come from real production traces, not invented examples.", code: 'cases = [{"input": "2+2", "expect": "4"}, ...]' },
             { label: "Run the model on each", detail: "Generate an output for every input. This is the same model and settings you run in production, so the test reflects reality.", code: "output = call_model(case[\"input\"])" },
-            { label: "Grade each output", detail: "Apply a grader — here a case-insensitive contains check — to turn each fuzzy output into a pass or fail boolean.", code: 'passed = expect.lower() in output.lower()' },
+            { label: "Grade each output", detail: "Apply a grader, here a case-insensitive contains check, to turn each fuzzy output into a pass or fail boolean.", code: 'passed = expect.lower() in output.lower()' },
             { label: "Score and gate", detail: "Divide passes by total to get a rate, then compare to the threshold. Below it, raise SystemExit so CI turns red and the merge is blocked.", code: 'if score < 0.8: raise SystemExit("FAIL")' }
           ]
         }
@@ -842,7 +842,7 @@ print(run_evals(cases))
           prompt: "Your extraction eval uses an exact-match grader and is stuck at 60 percent, even though humans say most outputs are actually correct. The model returns valid JSON but with keys in a different order and extra whitespace. Diagnose and fix the eval design.",
           steps: [
             "Exact string match treats {\"a\":1,\"b\":2} and {\"b\":2, \"a\":1} as different, even though they are the same object.",
-            "So the grader is failing correct answers on cosmetic differences — the eval is measuring formatting, not correctness.",
+            "So the grader is failing correct answers on cosmetic differences, the eval is measuring formatting, not correctness.",
             "Fix: parse both the output and the expected answer as JSON and compare the resulting objects, which ignores key order and whitespace.",
             "If outputs are sometimes near-misses, add a stricter schema/field-level grader rather than relying on string equality."
           ],
@@ -892,7 +892,7 @@ print(run_evals(cases))
       challenge_title: "The CI Eval Gate",
       challenge_description: "Run a prompt's eval suite in CI: grade every case with a substring check, compute the pass rate, and gate the deploy against a threshold.",
       challenge_difficulty: "beginner",
-      challenge_story: "You changed one line of a prompt to fix a formatting bug. With normal code a unit test would catch any regression — with prompts, most teams ship on vibes. Not yours. You've built an **eval suite**: a frozen set of cases, each with an expected answer fragment, run automatically in **CI** on every change. A run just kicked off. Grade each case, compute the pass rate, and decide whether this build is allowed to merge.",
+      challenge_story: "You changed one line of a prompt to fix a formatting bug. With normal code a unit test would catch any regression, with prompts, most teams ship on vibes. Not yours. You've built an **eval suite**: a frozen set of cases, each with an expected answer fragment, run automatically in **CI** on every change. A run just kicked off. Grade each case, compute the pass rate, and decide whether this build is allowed to merge.",
       challenge_statement: "An eval run has \`N\` cases and a pass-rate \`threshold\` (an integer percent). Each case provides an **expected** fragment and the model's **actual** output, separated by the literal delimiter \`|||\`.\n\nGrade each case with a **case-insensitive substring** check: the case **passes** if the expected fragment appears anywhere in the actual output, ignoring letter case. Then:\n\n- count how many cases passed,\n- compute the pass rate as a percentage, rounded to **1 decimal place**,\n- output \`PASS\` if the pass rate is **at least** the threshold, otherwise \`FAIL\`.",
       challenge_input_format: "The first line contains two space-separated integers: `N threshold`.\nEach of the next `N` lines is one case formatted as `expected|||actual` (the delimiter is three literal pipe characters). Either side may contain spaces; neither side contains `|||`.",
       challenge_output_format: "Three lines:\n- `passed <p>/<N>`\n- `pass_rate <rate to 1 decimal>`\n- `PASS` or `FAIL`",
@@ -906,7 +906,7 @@ print(run_evals(cases))
         { input: "4 75\nparis|||The capital is Paris.\n4|||2 plus 2 equals 4\nyes|||Absolutely, yes!\nblue|||The sky is gray today", output: "passed 3/4\npass_rate 75.0\nPASS", explanation: "'paris' matches 'Paris' case-insensitively, '4' and 'yes' match too; only 'blue' is absent. 3/4 = 75.0%, which meets the 75 threshold." },
         { input: "5 80\njson|||valid json output\nok|||status ok\nrefund|||processing your refund now\nyes|||no\ndone|||all done here", output: "passed 4/5\npass_rate 80.0\nPASS", explanation: "Four of five fragments appear; only 'yes' is missing from 'no'. 4/5 = 80.0%, exactly the threshold, so it passes." }
       ],
-      challenge_notes: "The gate is **inclusive**: a pass rate exactly equal to the threshold still passes — CI should not block a build that meets the bar. Case-insensitive matching mirrors real graders, where 'Paris' and 'paris' are the same correct answer.",
+      challenge_notes: "The gate is **inclusive**: a pass rate exactly equal to the threshold still passes, CI should not block a build that meets the bar. Case-insensitive matching mirrors real graders, where 'Paris' and 'paris' are the same correct answer.",
       challenge_hints: [
         "Split the first line into N and threshold with `map(int, ...)`.",
         "For each case, `expected, actual = line.split('|||')`, then test `expected.lower() in actual.lower()`.",
@@ -965,13 +965,13 @@ main()
       title: "Cost Monitoring",
       concept: "CostMonitor",
       xp_reward: 10,
-      explanation: `A startup launched a free AI feature on a Friday. It went mildly viral over the weekend. On Monday they opened a five-figure model bill — one script in a retry loop had hammered the API thousands of times, and nobody was watching. The model did exactly what it was told. There was simply no **cost monitoring** to catch it, and no limit to stop it.
+      explanation: `A startup launched a free AI feature on a Friday. It went mildly viral over the weekend. On Monday they opened a five-figure model bill, one script in a retry loop had hammered the API thousands of times, and nobody was watching. The model did exactly what it was told. There was simply no **cost monitoring** to catch it, and no limit to stop it.
 
 ## What it is
 
 **Cost monitoring** is tracking what your LLM usage is spending, in real time, and alerting or cutting it off before a surprise becomes a disaster. Because APIs bill **per token**, cost is fully computable from data you already trace: input tokens times the input price, plus output tokens times the output price. The trick is to compute it continuously, attribute it (per user, per feature), and put a ceiling on it.
 
-A useful cost record for each call is just \`input_tokens\`, \`output_tokens\`, and the prices — multiply and you have the exact spend.
+A useful cost record for each call is just \`input_tokens\`, \`output_tokens\`, and the prices, multiply and you have the exact spend.
 
 ## How it works
 
@@ -1009,7 +1009,7 @@ A caution: do not optimize cost blind to quality. Cutting to the cheapest model 
 
 ## The mental model to keep
 
-Every token is a coin. **Count the coins as you spend them and set a ceiling** — because an LLM will happily spend at machine speed until something tells it to stop.`,
+Every token is a coin. **Count the coins as you spend them and set a ceiling**: because an LLM will happily spend at machine speed until something tells it to stop.`,
       key_terms: [
         { term: "Cost monitoring", definition: "Continuously tracking LLM spend and alerting or stopping before it overruns." },
         { term: "Per-token pricing", definition: "APIs charge per input and output token, so cost is computable from token counts." },
@@ -1109,7 +1109,7 @@ print(round(call_cost("big", 1000, 500), 6))
         {
           title: "from a call to an enforced budget",
           steps: [
-            { label: "Read token counts", detail: "The traced call already recorded input and output token counts. Cost monitoring reuses exactly those numbers — no new measurement needed.", code: "in_tokens, out_tokens = record[\"in\"], record[\"out\"]" },
+            { label: "Read token counts", detail: "The traced call already recorded input and output token counts. Cost monitoring reuses exactly those numbers, no new measurement needed.", code: "in_tokens, out_tokens = record[\"in\"], record[\"out\"]" },
             { label: "Compute the cost", detail: "Multiply each token count by its per-token price and divide by a million. Output is priced higher, so it dominates the total.", code: "cost = (in_t * p_in + out_t * p_out) / 1_000_000" },
             { label: "Attribute it", detail: "Add the cost to the spending tally for this user or feature, so you can see who is consuming the budget.", code: 'budgets[user]["spent"] += cost' },
             { label: "Enforce the cap", detail: "Before the next call, check the tally against the limit. Once exceeded, refuse the request so a runaway loop cannot keep spending.", code: 'if spent + cost > limit: raise RuntimeError("budget exceeded")' }
@@ -1134,7 +1134,7 @@ print(round(call_cost("big", 1000, 500), 6))
             "Per call on big = (800*3 + 400*15) / 1,000,000 = (2400 + 6000)/1e6 = $0.0084.",
             "Monthly on big = 0.0084 * 2,000,000 = $16,800.",
             "Per call on small = (800*0.15 + 400*0.60) / 1,000,000 = (120 + 240)/1e6 = $0.00036.",
-            "Monthly on small = 0.00036 * 2,000,000 = $720, a savings of $16,080 — but only worth it if the small model still passes your evals."
+            "Monthly on small = 0.00036 * 2,000,000 = $720, a savings of $16,080, but only worth it if the small model still passes your evals."
           ],
           output: "Big costs $16,800/mo, small costs $720/mo: about $16,080 saved, if quality holds on evals."
         }
@@ -1182,8 +1182,8 @@ print(round(call_cost("big", 1000, 500), 6))
       challenge_title: "The Budget Throttle",
       challenge_description: "Meter a live stream of model calls against a hard spend cap: serve each request only if it keeps you under budget, and report the final ledger.",
       challenge_difficulty: "intermediate",
-      challenge_story: "A free AI feature went viral over a weekend and a retry loop quietly rang up a five-figure bill — because nobody was watching the meter. Never again. You add a **budget throttle** in front of the model: every request's cost is computed up front, and a request is only served if it keeps cumulative spend at or under the day's cap. The throttle never blocks the whole stream — a request that would bust the budget is skipped, but a cheaper one later can still slip through. Run today's traffic and produce the ledger.",
-      challenge_statement: "You are given \`N\` requests, a \`budget\`, and two prices — all amounts in **micro-dollars** (millionths of a dollar) to keep the math exact. The prices are **per 1000 tokens**:\n\n- \`in_price\` — micro-dollars per 1000 input tokens.\n- \`out_price\` — micro-dollars per 1000 output tokens.\n\nFor each request with \`in_tok\` input tokens and \`out_tok\` output tokens, its cost in micro-dollars is:\n\n\`cost = in_tok * in_price // 1000 + out_tok * out_price // 1000\`  (integer floor division per term).\n\nProcess requests in order. Serve a request only if **cumulative spent + cost ≤ budget**; otherwise reject it (do not add its cost) and keep going. Report the totals and the spend converted to dollars.",
+      challenge_story: "A free AI feature went viral over a weekend and a retry loop quietly rang up a five-figure bill, because nobody was watching the meter. Never again. You add a **budget throttle** in front of the model: every request's cost is computed up front, and a request is only served if it keeps cumulative spend at or under the day's cap. The throttle never blocks the whole stream, a request that would bust the budget is skipped, but a cheaper one later can still slip through. Run today's traffic and produce the ledger.",
+      challenge_statement: "You are given \`N\` requests, a \`budget\`, and two prices, all amounts in **micro-dollars** (millionths of a dollar) to keep the math exact. The prices are **per 1000 tokens**:\n\n- \`in_price\`, micro-dollars per 1000 input tokens.\n- \`out_price\`, micro-dollars per 1000 output tokens.\n\nFor each request with \`in_tok\` input tokens and \`out_tok\` output tokens, its cost in micro-dollars is:\n\n\`cost = in_tok * in_price // 1000 + out_tok * out_price // 1000\`  (integer floor division per term).\n\nProcess requests in order. Serve a request only if **cumulative spent + cost ≤ budget**; otherwise reject it (do not add its cost) and keep going. Report the totals and the spend converted to dollars.",
       challenge_input_format: "The first line contains four space-separated integers: `N budget in_price out_price` (budget and prices in micro-dollars).\nEach of the next `N` lines contains two space-separated integers: `in_tok out_tok`.",
       challenge_output_format: "Four lines:\n- `served <count>`\n- `rejected <count>`\n- `spent $<dollars to 6 decimals>`\n- `remaining $<dollars to 6 decimals>`\nwhere dollars = micro-dollars / 1,000,000, formatted to exactly 6 decimal places.",
       challenge_constraints: [
@@ -1197,7 +1197,7 @@ print(round(call_cost("big", 1000, 500), 6))
         { input: "4 50000 3000 15000\n1000 500\n2000 1000\n500 200\n100 800", output: "served 4\nrejected 0\nspent $0.048300\nremaining $0.001700", explanation: "Costs (micro-$): 3000+7500=10500, 6000+15000=21000, 1500+3000=4500, 300+12000=12300. Running total 48300 ≤ 50000 at every step, so all four serve. Spent = $0.048300, remaining $0.001700." },
         { input: "4 40000 3000 15000\n1000 500\n5000 2000\n200 100\n1000 1000", output: "served 3\nrejected 1\nspent $0.030600\nremaining $0.009400", explanation: "Request 1 costs 10500 (total 10500). Request 2 costs 45000 → 55500 > 40000, rejected. Request 3 costs 2100 → 12600, served. Request 4 costs 18000 → 30600, served. The throttle skipped the expensive call but still let later cheap calls through." }
       ],
-      challenge_notes: "Working in integer micro-dollars sidesteps floating-point drift entirely — you only convert to dollars at the very end. Note the throttle is per-request, not stop-on-first-overflow: a single huge request can be skipped while smaller ones after it still succeed.",
+      challenge_notes: "Working in integer micro-dollars sidesteps floating-point drift entirely, you only convert to dollars at the very end. Note the throttle is per-request, not stop-on-first-overflow: a single huge request can be skipped while smaller ones after it still succeed.",
       challenge_hints: [
         "Keep `spent` as an integer in micro-dollars; only divide by 1,000,000 when printing.",
         "Compute each cost as `in_tok * in_price // 1000 + out_tok * out_price // 1000`.",
@@ -1269,7 +1269,7 @@ main()
       title: "Failures & Fallbacks",
       concept: "Fallbacks",
       xp_reward: 10,
-      explanation: `Your app worked perfectly for a month. Then the model provider had a 40-minute outage, and because every request called that one API with no plan B, your entire product showed a spinning wheel and then an error to every single user. The outage was theirs. The total failure was yours — you depended on something that will, eventually, fail, and you had no **fallback**.
+      explanation: `Your app worked perfectly for a month. Then the model provider had a 40-minute outage, and because every request called that one API with no plan B, your entire product showed a spinning wheel and then an error to every single user. The outage was theirs. The total failure was yours, you depended on something that will, eventually, fail, and you had no **fallback**.
 
 ## What it is
 
@@ -1297,7 +1297,7 @@ def robust_call(prompt, retries=2):
     return call_backup(prompt)         # fallback model or cached answer
 \`\`\`
 
-Notice the decisions. A **rate limit** gets **exponential backoff** — wait longer each try — because hammering a throttled API makes it worse. A **timeout** is retried because it is often transient. A hard error breaks out immediately rather than wasting retries. When the primary path is exhausted, the **fallback** runs: a cheaper backup model, a cached response, or an honest "service is busy, try again."
+Notice the decisions. A **rate limit** gets **exponential backoff**: wait longer each try, because hammering a throttled API makes it worse. A **timeout** is retried because it is often transient. A hard error breaks out immediately rather than wasting retries. When the primary path is exhausted, the **fallback** runs: a cheaper backup model, a cached response, or an honest "service is busy, try again."
 
 ## Why it matters
 
@@ -1312,7 +1312,7 @@ One caution: retries multiply cost and latency, and infinite retries can turn a 
 
 ## The mental model to keep
 
-Production is not "make it work." Production is **decide what happens when it breaks** — because it will. Layer retries for transient faults, fallbacks for the rest, and always leave the user with a working, if humbler, answer.`,
+Production is not "make it work." Production is **decide what happens when it breaks**: because it will. Layer retries for transient faults, fallbacks for the rest, and always leave the user with a working, if humbler, answer.`,
       key_terms: [
         { term: "Fallback", definition: "A backup path (cheaper model, cache, or honest message) used when the primary call fails." },
         { term: "Retry", definition: "Trying a failed call again, useful when the failure is transient like a timeout." },
@@ -1420,7 +1420,7 @@ False`,
           number: 1, difficulty: "easy",
           prompt: "A call fails with 'invalid_api_key'. Your retry logic retries it 3 times anyway. What happens, and what should the logic do instead?",
           steps: [
-            "An invalid API key is not transient — the key is wrong on every attempt.",
+            "An invalid API key is not transient, the key is wrong on every attempt.",
             "So all 3 retries fail identically, wasting time and adding latency for no benefit.",
             "The logic should recognize this as non-retryable, stop immediately, and surface a clear configuration error."
           ],
@@ -1431,7 +1431,7 @@ False`,
           prompt: "During a provider hiccup, 10,000 clients all hit a rate limit and instantly retry in lockstep every 100ms. The provider stays overloaded and never recovers. Explain the failure pattern and the fix.",
           steps: [
             "All clients fail at the same instant and retry at the same instant, so every retry wave is as large as the original load.",
-            "The provider, already struggling, is hit by synchronized bursts and can never catch up — a 'thundering herd'.",
+            "The provider, already struggling, is hit by synchronized bursts and can never catch up, a 'thundering herd'.",
             "Fix 1: exponential backoff so each client waits longer (2s, 4s, 8s) between attempts, shrinking the wave size over time.",
             "Fix 2: add random jitter to each delay so clients spread out instead of retrying in lockstep, letting the provider drain the backlog and recover."
           ],
@@ -1470,7 +1470,7 @@ False`,
       reflections: [
         {
           prompt: "In your own words: why does production design mean 'deciding what happens when it breaks' rather than just 'making it work'?",
-          sampleAnswer: "Making it work covers the happy path, but in production the model provider will eventually have outages, requests will time out, and rate limits will trigger — failure is not exceptional, it is guaranteed over time. So the real engineering is in the failure path: classifying each failure, retrying the transient ones with backoff, falling back to a backup model or cached answer for the rest, and capping retries so resilience doesn't multiply cost. A system designed only to work on a good day fails totally on a bad one."
+          sampleAnswer: "Making it work covers the happy path, but in production the model provider will eventually have outages, requests will time out, and rate limits will trigger, failure is not exceptional, it is guaranteed over time. So the real engineering is in the failure path: classifying each failure, retrying the transient ones with backoff, falling back to a backup model or cached answer for the rest, and capping retries so resilience doesn't multiply cost. A system designed only to work on a good day fails totally on a bad one."
         }
       ],
       hints: [
@@ -1496,7 +1496,7 @@ False`,
         { input: "3 3\n2\n0\n1", output: "succeeded 2\nfell_back 1\ntotal_attempts 6", explanation: "Request 1 succeeds on attempt 2 (2 attempts). Request 2 never succeeds, so it uses all 3 attempts then falls back. Request 3 succeeds on attempt 1 (1 attempt). Total = 2+3+1 = 6, with 2 successes and 1 fallback." },
         { input: "1 2\n5", output: "succeeded 0\nfell_back 1\ntotal_attempts 2", explanation: "succeed_on is 5 but only 2 attempts are allowed, so the request exhausts both attempts and falls back." }
       ],
-      challenge_notes: "A retry that exhausts its budget still costs you every attempt — retries trade latency and load for reliability, so unbounded retries are their own outage. Counting attempts exactly is how you'd later size a circuit breaker or a per-request timeout budget.",
+      challenge_notes: "A retry that exhausts its budget still costs you every attempt, retries trade latency and load for reliability, so unbounded retries are their own outage. Counting attempts exactly is how you'd later size a circuit breaker or a per-request timeout budget.",
       challenge_hints: [
         "For each request loop `for a in range(1, max_attempts + 1)` and count `total_attempts` on every iteration.",
         "If `succeed_on != 0 and a == succeed_on`, mark success and break out of the loop.",
@@ -1567,7 +1567,7 @@ main()
 
 ## What it is
 
-**Versioning** means recording exactly which prompt and which model produced every response, so any behavior is reproducible. A prompt is not a loose string you tweak in a text box; it is an artifact with a **version** — a hash or a tag — that you can name, diff, and roll back to. The model is the same: \`gpt-4o\` is a moving target, but \`gpt-4o-2024-08-06\` is a frozen one. Pin both, log both, and "why did the answer change?" becomes answerable.
+**Versioning** means recording exactly which prompt and which model produced every response, so any behavior is reproducible. A prompt is not a loose string you tweak in a text box; it is an artifact with a **version**: a hash or a tag, that you can name, diff, and roll back to. The model is the same: \`gpt-4o\` is a moving target, but \`gpt-4o-2024-08-06\` is a frozen one. Pin both, log both, and "why did the answer change?" becomes answerable.
 
 The rule is blunt: if you cannot say which prompt version and which model version generated a given output, you are running an experiment you cannot repeat.
 
@@ -1607,7 +1607,7 @@ One caution: a floating alias like \`gpt-4o\` is a convenience that quietly brea
 
 ## The mental model to keep
 
-Treat a prompt like a commit, not a sticky note. **If it shipped, it has a version** — and so does the model — because the only behavior you can fix is the behavior you can name and reproduce.`,
+Treat a prompt like a commit, not a sticky note. **If it shipped, it has a version**: and so does the model, because the only behavior you can fix is the behavior you can name and reproduce.`,
       key_terms: [
         { term: "Prompt version", definition: "A stable identifier (often a content hash or tag) for an exact prompt, so changes are tracked and reproducible." },
         { term: "Model pinning", definition: "Using a fixed dated snapshot (gpt-4o-2024-08-06) instead of a floating alias (gpt-4o) so the model cannot change underneath you." },
@@ -1783,7 +1783,7 @@ False`,
       challenge_title: "Release Fingerprints",
       challenge_description: "Fingerprint every release by content-hashing its prompt and model, then detect which deploys are unchanged redeploys (duplicates) versus genuinely new versions.",
       challenge_difficulty: "beginner",
-      challenge_story: "Quality dropped overnight and nobody admits to a change, because the prompt was edited live and there was no record of what actually shipped. You fix the blindness with **release fingerprints**: every deploy is reduced to a short content hash of its prompt template and pinned model. Identical text and model produce the identical fingerprint, so an unchanged redeploy is obvious — and any edit, even one character, produces a brand-new fingerprint. Run today's deploy log through the fingerprinter and tell ops which releases were real changes and which were just the same thing shipped again.",
+      challenge_story: "Quality dropped overnight and nobody admits to a change, because the prompt was edited live and there was no record of what actually shipped. You fix the blindness with **release fingerprints**: every deploy is reduced to a short content hash of its prompt template and pinned model. Identical text and model produce the identical fingerprint, so an unchanged redeploy is obvious, and any edit, even one character, produces a brand-new fingerprint. Run today's deploy log through the fingerprinter and tell ops which releases were real changes and which were just the same thing shipped again.",
       challenge_statement: "You are given \`N\` releases, processed in order. Each release is one line: a \`model\` token (no spaces), then a single space, then the prompt \`template\` (the rest of the line, which may itself contain spaces).\n\nFor each release, compute its **version fingerprint** as the first 8 hex characters of the SHA-256 hash of the canonical string \`model + \"|\" + template\` (the model, a literal pipe, then the template).\n\nA release is a **duplicate** (an unchanged redeploy) if its fingerprint has already appeared in an earlier release; otherwise it is **new**. For each release in order, print \`NEW <hash>\` or \`DUP <hash>\`. Then print one summary line with the count of distinct versions and the count of duplicate redeploys.",
       challenge_input_format: "The first line contains a single integer `N`, the number of releases.\nEach of the next `N` lines is one release: `model template`, where `model` is the first space-separated token and `template` is everything after the first space (it may contain spaces).",
       challenge_output_format: "N + 1 lines:\n- For each release in order: `NEW <hash>` if its fingerprint is seen for the first time, otherwise `DUP <hash>` (`<hash>` is the 8-char hex fingerprint).\n- A final summary line: `distinct <d> duplicates <r>`, where `d` is the number of distinct fingerprints and `r` is the number of duplicate redeploys.",
@@ -1798,7 +1798,7 @@ False`,
         { input: "3\ngpt-4o-2024-08-06 You are a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 You are a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 You are a support agent. Answer in two sentences.", output: "NEW 928cbea1\nDUP 928cbea1\nNEW e5a72c01\ndistinct 2 duplicates 1", explanation: "Releases 1 and 2 have the identical model and template, so they share fingerprint 928cbea1; release 2 is an unchanged redeploy (DUP). Release 3 changes 'one' to 'two', producing a different fingerprint (NEW). Two distinct versions, one duplicate." },
         { input: "4\nsmall-v1 Summarize the text.\nbig-v2 Summarize the text.\nsmall-v1 Summarize the text.\nsmall-v1 Translate to French.", output: "NEW a14cef42\nNEW d7541545\nDUP a14cef42\nNEW 44e0bcec\ndistinct 3 duplicates 1", explanation: "Release 1 and 3 share the same model AND template, so release 3 is a DUP of a14cef42. Release 2 uses a different model (big-v2) so it hashes differently even with the same template. Release 4 changes the template. Three distinct fingerprints, one duplicate." }
       ],
-      challenge_notes: "Because the fingerprint is a content hash, the same text and model always map to the same 8 hex characters, while any edit — even one character — flips it to a new value. That is exactly what makes an unchanged redeploy detectable: same bytes in, same fingerprint out. Including the model in the canonical string means swapping the pinned snapshot counts as a new version even if the prompt text is unchanged.",
+      challenge_notes: "Because the fingerprint is a content hash, the same text and model always map to the same 8 hex characters, while any edit, even one character, flips it to a new value. That is exactly what makes an unchanged redeploy detectable: same bytes in, same fingerprint out. Including the model in the canonical string means swapping the pinned snapshot counts as a new version even if the prompt text is unchanged.",
       challenge_hints: [
         "Split each line once with `line.split(' ', 1)`: the first part is the model, the second is the template.",
         "Build the canonical string `model + '|' + template`, then `hashlib.sha256(canonical.encode()).hexdigest()[:8]`.",
@@ -1875,11 +1875,11 @@ main()
       title: "A/B Testing LLM Changes",
       concept: "ABTest",
       xp_reward: 10,
-      explanation: `A team was certain their new prompt was better. The eval suite agreed, the demo looked sharper, everyone shipped it to 100 percent of traffic. A week later the thumbs-up rate had quietly fallen and support tickets ticked up. Offline scores said one thing; real users said another. The fix is not a better opinion — it is an **A/B test** that lets live traffic decide.
+      explanation: `A team was certain their new prompt was better. The eval suite agreed, the demo looked sharper, everyone shipped it to 100 percent of traffic. A week later the thumbs-up rate had quietly fallen and support tickets ticked up. Offline scores said one thing; real users said another. The fix is not a better opinion, it is an **A/B test** that lets live traffic decide.
 
 ## What it is
 
-An **A/B test** splits live traffic between two versions — a **control** (A, the current prompt or model) and a **variant** (B, the proposed change) — and compares them on a real metric. Instead of arguing about which is better, you measure: send half the users to A, half to B, and watch a number that matters, like the rate of helpful answers, successful task completions, or thumbs-up.
+An **A/B test** splits live traffic between two versions, a **control** (A, the current prompt or model) and a **variant** (B, the proposed change), and compares them on a real metric. Instead of arguing about which is better, you measure: send half the users to A, half to B, and watch a number that matters, like the rate of helpful answers, successful task completions, or thumbs-up.
 
 The key word is **live**. An eval (lesson 3) measures quality on a frozen set of cases; an A/B test measures it on the messy distribution of real requests, including the ones you never thought to put in your eval. The two are complementary: evals gate the merge, A/B tests gate the rollout.
 
@@ -2098,7 +2098,7 @@ B 100.0`,
       challenge_title: "The Experiment Readout",
       challenge_description: "Roll up a stream of A/B outcomes into a readout: each arm's success rate, and a verdict that respects minimum sample size and a decision margin.",
       challenge_difficulty: "intermediate",
-      challenge_story: "Your team was sure the new prompt was better — the demo sparkled, the offline eval agreed — so they shipped it to everyone, and a week later real engagement had quietly slipped. Never decide on vibes again. You stand up an **A/B test**: live traffic is split between control A and variant B, and each request logs whether it succeeded. The experiment just closed. Compute each arm's success rate and produce an honest verdict that refuses to crown a winner on too little data or too thin a margin.",
+      challenge_story: "Your team was sure the new prompt was better, the demo sparkled, the offline eval agreed, so they shipped it to everyone, and a week later real engagement had quietly slipped. Never decide on vibes again. You stand up an **A/B test**: live traffic is split between control A and variant B, and each request logs whether it succeeded. The experiment just closed. Compute each arm's success rate and produce an honest verdict that refuses to crown a winner on too little data or too thin a margin.",
       challenge_statement: "You are given \`N\` outcome events and a \`min_samples\` requirement. Each event names a variant (\`A\` or \`B\`) and an outcome (\`1\` = success, \`0\` = failure).\n\nFor each variant compute its success rate as a percentage, rounded to **1 decimal place** (a variant with zero events has a rate of \`0.0\`). Then decide the verdict:\n\n- If **either** arm has fewer than \`min_samples\` events, output \`INCONCLUSIVE\`.\n- Otherwise, if the absolute difference between the two rates is **less than 1.0** percentage points, output \`INCONCLUSIVE\`.\n- Otherwise output \`WINNER A\` or \`WINNER B\` for whichever arm has the higher rate.",
       challenge_input_format: "The first line contains two space-separated integers: `N min_samples`.\nEach of the next `N` lines contains a variant token (`A` or `B`) and an outcome (`0` or `1`), space-separated.",
       challenge_output_format: "Three lines:\n- `A <successes>/<total> <rate to 1 decimal>`\n- `B <successes>/<total> <rate to 1 decimal>`\n- one of `WINNER A`, `WINNER B`, or `INCONCLUSIVE`",
@@ -2192,7 +2192,7 @@ main()
 
 ## What it is
 
-**Incident response** is the prepared, repeatable process for when your LLM app misbehaves in production: detect it, mitigate it fast, then learn from it. It rests on three pillars. **Rollback** is the fastest mitigation — return to the last known-good version (the versioning from lesson 6 is what makes this possible). **On-call** is the human who is paged and the playbook they follow. The **postmortem** is the blameless write-up afterward that turns one painful night into a permanent fix.
+**Incident response** is the prepared, repeatable process for when your LLM app misbehaves in production: detect it, mitigate it fast, then learn from it. It rests on three pillars. **Rollback** is the fastest mitigation, return to the last known-good version (the versioning from lesson 6 is what makes this possible). **On-call** is the human who is paged and the playbook they follow. The **postmortem** is the blameless write-up afterward that turns one painful night into a permanent fix.
 
 The guiding instinct: during an incident, **stop the bleeding first, understand it later.** Roll back now; root-cause in daylight.
 
@@ -2213,22 +2213,22 @@ def rollback_to_last_good():
     deploy(previous_version_id)             # seconds, by id
 \`\`\`
 
-The sequence matters. You page, you mitigate (usually by rolling back to the previous version id), and only then do you diagnose. Trying to root-cause a live outage while users suffer is how a ten-minute incident becomes an hour. After recovery, you write a **postmortem**: a timeline, the root cause, and concrete action items, with no finger-pointing — the goal is a system that cannot fail the same way twice.
+The sequence matters. You page, you mitigate (usually by rolling back to the previous version id), and only then do you diagnose. Trying to root-cause a live outage while users suffer is how a ten-minute incident becomes an hour. After recovery, you write a **postmortem**: a timeline, the root cause, and concrete action items, with no finger-pointing, the goal is a system that cannot fail the same way twice.
 
 ## Why it matters
 
 How you handle the bad night is what separates a hobby project from a service:
 
 - **Time to detect and recover is the real metric.** Everything fails eventually (lesson 5); the question is how long until you notice and how fast you recover. Alerts shrink the first; rollback shrinks the second.
-- **Rollback beats a hotfix under fire.** Patching a live bug at 2 a.m. is slow and risky. Returning to a known-good version is fast and safe — fix forward later, calmly.
+- **Rollback beats a hotfix under fire.** Patching a live bug at 2 a.m. is slow and risky. Returning to a known-good version is fast and safe, fix forward later, calmly.
 - **Blameless postmortems make you better.** Blaming a person hides the systemic gap (no alert, no rollback button) that actually caused the slow response. Blameless write-ups surface those gaps.
 - **Practice before the fire.** Teams that rehearse rollback and run game-days respond in minutes; teams seeing the runbook for the first time at 2 a.m. flail.
 
-A caution: an LLM incident is not always a crash. A subtle quality regression — politer but wrong answers, a creeping refusal rate — can do real damage while every server returns 200 OK. Alert on quality signals, not just errors.
+A caution: an LLM incident is not always a crash. A subtle quality regression, politer but wrong answers, a creeping refusal rate, can do real damage while every server returns 200 OK. Alert on quality signals, not just errors.
 
 ## The mental model to keep
 
-You will have a bad night; the only choice is whether you have a plan for it. **Detect fast, roll back first, postmortem without blame** — turn each incident into the reason the next one is shorter.`,
+You will have a bad night; the only choice is whether you have a plan for it. **Detect fast, roll back first, postmortem without blame**: turn each incident into the reason the next one is shorter.`,
       key_terms: [
         { term: "Incident response", definition: "The prepared process to detect, mitigate, and learn from a production failure." },
         { term: "Rollback", definition: "Returning to the last known-good version as the fastest way to stop an active incident." },
@@ -2396,7 +2396,7 @@ ok`,
       challenge_description: "Replay a minute-by-minute error stream through an alert-and-rollback policy: detect when the error rate crosses the threshold, then measure how long the incident lasted before recovery.",
       challenge_difficulty: "intermediate",
       challenge_story: "A bad deploy once poisoned a third of answers overnight, and the on-call engineer burned forty minutes guessing before someone said 'just roll back.' Now you have a plan. Your monitoring reports the error rate every minute, and an alert fires the moment it crosses the threshold, triggering a rollback. You want to measure the incident the way a postmortem does: when did it start, how many minutes did the degradation last, and did it recover. Replay the minute stream through the policy and produce that timeline.",
-      challenge_statement: "You are given \`N\` minutes of monitoring and an integer error-rate \`threshold\` (a percent). Each minute reports \`errors\` and \`total\` requests; that minute's error rate is \`errors / total * 100\` (a minute with zero total requests has a rate of \`0.0\`).\n\nFind the **first** minute (0-indexed) whose error rate is **at or above** the threshold — that is when the incident is detected. From that minute onward, count the **consecutive** minutes that stay at or above the threshold; that is the downtime. The incident **recovers** if a later minute drops below the threshold.\n\nIf no minute ever reaches the threshold, report no incident.",
+      challenge_statement: "You are given \`N\` minutes of monitoring and an integer error-rate \`threshold\` (a percent). Each minute reports \`errors\` and \`total\` requests; that minute's error rate is \`errors / total * 100\` (a minute with zero total requests has a rate of \`0.0\`).\n\nFind the **first** minute (0-indexed) whose error rate is **at or above** the threshold, that is when the incident is detected. From that minute onward, count the **consecutive** minutes that stay at or above the threshold; that is the downtime. The incident **recovers** if a later minute drops below the threshold.\n\nIf no minute ever reaches the threshold, report no incident.",
       challenge_input_format: "The first line contains two space-separated integers: `N threshold`.\nEach of the next `N` lines contains two space-separated integers: `errors total`.",
       challenge_output_format: "Three lines:\n- `detected <minute index, or -1 if none>`\n- `downtime <consecutive minutes at or above threshold from detection, 0 if none>`\n- `recovered <1 if a later minute dropped below threshold, else 0>`",
       challenge_constraints: [

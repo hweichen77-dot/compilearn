@@ -11,12 +11,12 @@ export default [
     memory_limit_mb: 256,
     tags: ["dynamic-programming", "strings", "alignment", "diff"],
     story:
-      "Your model just rewrote a user's sentence. To highlight what changed — and to score how close the rewrite is to a reference — you need the minimum number of single-character edits that turn one string into the other. This is **edit distance**, the same DP that powers diff tools, spell-checkers, and sequence alignment in NLP.",
+      "Your model just rewrote a user's sentence. To highlight what changed, and to score how close the rewrite is to a reference, you need the minimum number of single-character edits that turn one string into the other. This is **edit distance**, the same DP that powers diff tools, spell-checkers, and sequence alignment in NLP.",
     statement:
       "Given two strings `A` and `B`, compute the **Levenshtein edit distance**: the minimum number of single-character **insertions**, **deletions**, or **substitutions** needed to transform `A` into `B`.\n\nLet `dp[i][j]` be the edit distance between the first `i` characters of `A` and the first `j` characters of `B`. Then:\n\n```\ndp[i][0] = i\ndp[0][j] = j\ndp[i][j] = min(\n    dp[i-1][j] + 1,        // delete A[i-1]\n    dp[i][j-1] + 1,        // insert B[j-1]\n    dp[i-1][j-1] + cost    // match/substitute (cost 0 if equal else 1)\n)\n```",
     input_format:
       "The first line contains string `A`.\nThe second line contains string `B`.\nEither string may be empty (a blank line).",
-    output_format: "Print a single integer — the edit distance between `A` and `B`.",
+    output_format: "Print a single integer, the edit distance between `A` and `B`.",
     constraints: [
       "0 ≤ |A|, |B| ≤ 2000",
       "strings contain printable ASCII characters without leading/trailing spaces",
@@ -35,7 +35,7 @@ export default [
       },
     ],
     notes:
-      "The classic table is O(|A|·|B|) time and space — fine for these limits. Read lines with `getline` so empty strings are handled correctly.",
+      "The classic table is O(|A|·|B|) time and space, fine for these limits. Read lines with `getline` so empty strings are handled correctly.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    string a, b;\n    getline(cin, a);\n    getline(cin, b);\n    // TODO: build the (|a|+1) x (|b|+1) DP table and print dp[|a|][|b|].\n\n    return 0;\n}\n",
     solution_cpp:
@@ -46,7 +46,7 @@ export default [
       { input: "abc\nabc", expected_output: "0" },
     ],
     editorial:
-      "Edit distance is the textbook example of 2D dynamic programming over two sequences. The same recurrence, with a max instead of a min and a similarity score instead of an edit cost, becomes Needleman–Wunsch alignment used in bioinformatics and in evaluating model rewrites. Memory can be reduced to O(min(|A|,|B|)) by keeping only two rows — a useful optimization once the strings get long.",
+      "Edit distance is the textbook example of 2D dynamic programming over two sequences. The same recurrence, with a max instead of a min and a similarity score instead of an edit cost, becomes Needleman, Wunsch alignment used in bioinformatics and in evaluating model rewrites. Memory can be reduced to O(min(|A|,|B|)) by keeping only two rows, a useful optimization once the strings get long.",
   },
   {
     id: "cp-dp-2",
@@ -59,13 +59,13 @@ export default [
     memory_limit_mb: 256,
     tags: ["dynamic-programming", "sequences", "lcs", "evaluation"],
     story:
-      "To score how well your model's output overlaps a reference answer, you tokenize both and measure how much of the reference appears **in order** inside the output — gaps allowed, reordering not. That ordered overlap is the **Longest Common Subsequence**, the metric behind ROUGE-L and the workhorse of diff tools.",
+      "To score how well your model's output overlaps a reference answer, you tokenize both and measure how much of the reference appears **in order** inside the output, gaps allowed, reordering not. That ordered overlap is the **Longest Common Subsequence**, the metric behind ROUGE-L and the workhorse of diff tools.",
     statement:
       "You are given two token sequences `A` (the model output) and `B` (the reference), each a list of integer token ids. A **subsequence** is obtained by deleting zero or more tokens without changing the order of the rest. Compute the **length of the longest sequence that is a subsequence of both** `A` and `B`.\n\nLet `dp[i][j]` be the LCS length of the first `i` tokens of `A` and the first `j` tokens of `B`. Then:\n\n```\ndp[i][0] = dp[0][j] = 0\nif A[i-1] == B[j-1]: dp[i][j] = dp[i-1][j-1] + 1\nelse:                 dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n```",
     input_format:
-      "Line 1: two integers `n m` — the lengths of `A` and `B`.\nLine 2: `n` integers — the tokens of `A`.\nLine 3: `m` integers — the tokens of `B`.\nIf a sequence is empty its line is blank, but the counts on line 1 always tell you how many to read.",
+      "Line 1: two integers `n m`, the lengths of `A` and `B`.\nLine 2: `n` integers, the tokens of `A`.\nLine 3: `m` integers, the tokens of `B`.\nIf a sequence is empty its line is blank, but the counts on line 1 always tell you how many to read.",
     output_format:
-      "Print a single integer — the length of the longest common subsequence of `A` and `B`.",
+      "Print a single integer, the length of the longest common subsequence of `A` and `B`.",
     constraints: [
       "0 ≤ n, m ≤ 2000",
       "0 ≤ each token id ≤ 10^9",
@@ -85,7 +85,7 @@ export default [
       },
     ],
     notes:
-      "Standard LCS is O(n·m) time and space, comfortable inside the limits. Always read exactly `n` then `m` integers based on line 1 — never infer the count from the data.",
+      "Standard LCS is O(n·m) time and space, comfortable inside the limits. Always read exactly `n` then `m` integers based on line 1, never infer the count from the data.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n, m;\n    cin >> n >> m;\n    vector<int> a(n), b(m);\n    for (auto &x : a) cin >> x;\n    for (auto &x : b) cin >> x;\n    // TODO: build the (n+1) x (m+1) LCS table and print dp[n][m].\n\n    return 0;\n}\n",
     solution_cpp:
@@ -110,13 +110,13 @@ export default [
     memory_limit_mb: 256,
     tags: ["dynamic-programming", "knapsack", "optimization", "context-window"],
     story:
-      "You are assembling the context for a single LLM call. You have `N` candidate snippets — retrieved passages, tool results, memories — and a hard **token budget** `B` for the prompt. Each snippet costs some tokens and carries an integer **relevance** value. You can include a snippet whole or not at all. Pack the context to maximize total relevance without blowing the budget: classic **0/1 knapsack**.",
+      "You are assembling the context for a single LLM call. You have `N` candidate snippets, retrieved passages, tool results, memories, and a hard **token budget** `B` for the prompt. Each snippet costs some tokens and carries an integer **relevance** value. You can include a snippet whole or not at all. Pack the context to maximize total relevance without blowing the budget: classic **0/1 knapsack**.",
     statement:
       "You are given a token budget `B` and `N` snippets. Snippet `i` has a token cost `c[i]` and an integer relevance value `v[i]`. Choose a subset `S` of snippets so that the total cost does not exceed the budget:\n\n```\nsum of c[i] for i in S  ≤  B\n```\n\nand the total relevance `sum of v[i] for i in S` is **maximized**. Output that maximum total value.\n\nLet `dp[w]` be the best achievable value using a budget of at most `w` tokens. Processing each snippet and iterating `w` from `B` down to `c[i]`:\n\n```\ndp[w] = max(dp[w], dp[w - c[i]] + v[i])\n```\n\nensures each snippet is used at most once.",
     input_format:
-      "Line 1: two integers `N B` — the number of snippets and the token budget.\nNext `N` lines: snippet `i` is given as two integers `c[i] v[i]` — its token cost and relevance value.",
+      "Line 1: two integers `N B`, the number of snippets and the token budget.\nNext `N` lines: snippet `i` is given as two integers `c[i] v[i]`, its token cost and relevance value.",
     output_format:
-      "Print a single integer — the maximum total relevance of a subset whose total cost is at most `B`.",
+      "Print a single integer, the maximum total relevance of a subset whose total cost is at most `B`.",
     constraints: [
       "1 ≤ N ≤ 2000",
       "0 ≤ B ≤ 20000",
@@ -138,7 +138,7 @@ export default [
       },
     ],
     notes:
-      "Use a 1D `dp` array of size `B+1` and iterate the budget **downward** for each snippet so it is counted at most once — iterating upward would allow reusing a snippet (unbounded knapsack). Values can reach 2000·10^6 = 2·10^9, so accumulate in `long long`.",
+      "Use a 1D `dp` array of size `B+1` and iterate the budget **downward** for each snippet so it is counted at most once, iterating upward would allow reusing a snippet (unbounded knapsack). Values can reach 2000·10^6 = 2·10^9, so accumulate in `long long`.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    long long B;\n    cin >> n >> B;\n    vector<long long> cost(n), val(n);\n    for (int i = 0; i < n; i++) cin >> cost[i] >> val[i];\n    // TODO: 1D 0/1 knapsack over the budget; print the max total value.\n\n    return 0;\n}\n",
     solution_cpp:

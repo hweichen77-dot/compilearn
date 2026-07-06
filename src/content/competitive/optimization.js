@@ -11,11 +11,11 @@ export default [
     memory_limit_mb: 256,
     tags: ["optimization", "grid-search", "argmin", "linear-scan"],
     story:
-      "Before training the real model you run a **grid search**: a fixed list of candidate hyperparameter settings, each trained briefly and scored by its validation **loss**. Lower loss is better. Your job is to pick the winner — the candidate with the smallest loss — and report which one it is.\n\nThis is the simplest optimizer there is: no gradients, no momentum, just evaluate every option and keep the best. To keep scoring exact, the losses are given as integers (think micro-loss units).",
+      "Before training the real model you run a **grid search**: a fixed list of candidate hyperparameter settings, each trained briefly and scored by its validation **loss**. Lower loss is better. Your job is to pick the winner, the candidate with the smallest loss, and report which one it is.\n\nThis is the simplest optimizer there is: no gradients, no momentum, just evaluate every option and keep the best. To keep scoring exact, the losses are given as integers (think micro-loss units).",
     statement:
       "You are given `N` candidate hyperparameter settings, indexed `0..N-1`. Setting `i` produced an integer validation loss `loss[i]`.\n\nFind the index of the setting with the **minimum** loss. If several settings tie for the minimum loss, choose the one with the **smallest index** (it was discovered first in the sweep).\n\nOutput both the chosen index and its loss value.",
     input_format:
-      "Line 1: a single integer `N` — the number of candidate settings.\nLine 2: `N` integers — `loss[0], loss[1], …, loss[N-1]`, space-separated.",
+      "Line 1: a single integer `N`, the number of candidate settings.\nLine 2: `N` integers, `loss[0], loss[1], …, loss[N-1]`, space-separated.",
     output_format:
       "Print two integers separated by a single space: the index of the minimum-loss setting and the loss value at that index.",
     constraints: [
@@ -49,7 +49,7 @@ export default [
       { input: "6\n10 10 10 2 2 5", expected_output: "3 2" },
     ],
     editorial:
-      "Grid search is the baseline of all hyperparameter optimization: you discretize the search space, evaluate every point, and take the argmin of the objective. The whole problem reduces to a single argmin pass in O(N) time and O(1) extra memory. The only subtlety is the tie-break — updating only on a strict improvement preserves the first (smallest) index. Real systems replace this exhaustive scan with smarter optimizers (random search, Bayesian optimization, Hyperband) once the grid grows too large to evaluate fully, but they all answer the same question this problem does: which configuration minimizes the loss.",
+      "Grid search is the baseline of all hyperparameter optimization: you discretize the search space, evaluate every point, and take the argmin of the objective. The whole problem reduces to a single argmin pass in O(N) time and O(1) extra memory. The only subtlety is the tie-break, updating only on a strict improvement preserves the first (smallest) index. Real systems replace this exhaustive scan with smarter optimizers (random search, Bayesian optimization, Hyperband) once the grid grows too large to evaluate fully, but they all answer the same question this problem does: which configuration minimizes the loss.",
   },
   {
     id: "cp-opt-2",
@@ -62,7 +62,7 @@ export default [
     memory_limit_mb: 256,
     tags: ["optimization", "ternary-search", "convex", "unimodal"],
     story:
-      "Tuning a learning rate is a one-dimensional convex optimization. Too small and training crawls; too large and it diverges. The validation cost as a function of the (integer-encoded) learning-rate setting `x` is a **bowl-shaped convex parabola** with a single minimum. Because it is unimodal you do not need to evaluate every point — **ternary search** narrows the bracket by a third each step, finding the minimizer in O(log range) evaluations.\n\nTo stay exact, the cost is the integer parabola `f(x) = a·(x − h)² + c`.",
+      "Tuning a learning rate is a one-dimensional convex optimization. Too small and training crawls; too large and it diverges. The validation cost as a function of the (integer-encoded) learning-rate setting `x` is a **bowl-shaped convex parabola** with a single minimum. Because it is unimodal you do not need to evaluate every point, **ternary search** narrows the bracket by a third each step, finding the minimizer in O(log range) evaluations.\n\nTo stay exact, the cost is the integer parabola `f(x) = a·(x − h)² + c`.",
     statement:
       "The cost function is `f(x) = a·(x − h)² + c`, where `a`, `h`, and `c` are integers and `a ≥ 1` (so `f` is strictly convex). You may only choose **integer** values of `x` within the inclusive range `[lo, hi]`.\n\nFind the integer `x` in `[lo, hi]` that **minimizes** `f(x)`. If two integers achieve the same minimal cost, output the **smaller** `x`. Output that `x` together with its cost `f(x)`.",
     input_format:
@@ -90,7 +90,7 @@ export default [
       },
     ],
     notes:
-      "Keep a bracket `[lo, hi]` and shrink it while its width is greater than 2. Probe `m1 = lo + (hi−lo)/3` and `m2 = hi − (hi−lo)/3`; if `f(m1) <= f(m2)` the minimizer cannot be above `m2`, so set `hi = m2 − 1`, otherwise set `lo = m1 + 1`. When at most three candidates remain, evaluate them directly and pick the smallest cost (and on a tie the smallest `x`). Use 64-bit integers — `a·(x−h)²` can be large.",
+      "Keep a bracket `[lo, hi]` and shrink it while its width is greater than 2. Probe `m1 = lo + (hi−lo)/3` and `m2 = hi − (hi−lo)/3`; if `f(m1) <= f(m2)` the minimizer cannot be above `m2`, so set `hi = m2 − 1`, otherwise set `lo = m1 + 1`. When at most three candidates remain, evaluate them directly and pick the smallest cost (and on a tie the smallest `x`). Use 64-bit integers, `a·(x−h)²` can be large.",
     starter_cpp:
       "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long a, h, c;\nlong long f(long long x) {\n    // TODO: return a*(x-h)*(x-h) + c\n    return 0;\n}\n\nint main() {\n    long long lo, hi;\n    cin >> a >> h >> c >> lo >> hi;\n    // TODO: ternary search on [lo, hi] for the integer minimizer; print: x f(x)\n\n    return 0;\n}\n",
     solution_cpp:
@@ -116,12 +116,12 @@ export default [
     memory_limit_mb: 256,
     tags: ["optimization", "assignment", "bitmask-dp", "scheduling"],
     story:
-      "You serve `N` incoming **tasks** and have exactly `N` **model tiers** (e.g. a fast small model, a balanced one, a heavyweight one, …). Routing task `i` to tier `j` costs `cost[i][j]` — a blend of latency, GPU time, and quality penalty. Each task must go to a distinct tier and each tier handles exactly one task (a one-to-one **assignment**).\n\nYou want the routing plan with **minimum total cost**. With `N ≤ 8`, the number of tiers is small, so a **bitmask DP over the set of already-used tiers** solves it exactly in O(2^N · N).",
+      "You serve `N` incoming **tasks** and have exactly `N` **model tiers** (e.g. a fast small model, a balanced one, a heavyweight one, …). Routing task `i` to tier `j` costs `cost[i][j]`, a blend of latency, GPU time, and quality penalty. Each task must go to a distinct tier and each tier handles exactly one task (a one-to-one **assignment**).\n\nYou want the routing plan with **minimum total cost**. With `N ≤ 8`, the number of tiers is small, so a **bitmask DP over the set of already-used tiers** solves it exactly in O(2^N · N).",
     statement:
-      "You are given an `N × N` integer cost matrix `cost`, where `cost[i][j]` is the cost of assigning task `i` to tier `j`.\n\nFind a **perfect matching** — a bijection assigning each task to a distinct tier — that **minimizes** the sum of the chosen costs. Output that minimum total cost.\n\nLet `dp[mask]` be the minimum cost to have assigned the first `popcount(mask)` tasks using exactly the set of tiers in `mask`. Tasks are assigned in index order; the next task to place is `task = popcount(mask)`, and you may route it to any tier not yet in `mask`.",
+      "You are given an `N × N` integer cost matrix `cost`, where `cost[i][j]` is the cost of assigning task `i` to tier `j`.\n\nFind a **perfect matching**: a bijection assigning each task to a distinct tier, that **minimizes** the sum of the chosen costs. Output that minimum total cost.\n\nLet `dp[mask]` be the minimum cost to have assigned the first `popcount(mask)` tasks using exactly the set of tiers in `mask`. Tasks are assigned in index order; the next task to place is `task = popcount(mask)`, and you may route it to any tier not yet in `mask`.",
     input_format:
-      "Line 1: a single integer `N`.\nNext `N` lines: row `i` contains `N` integers — `cost[i][0], …, cost[i][N-1]`.",
-    output_format: "Print a single integer — the minimum total assignment cost.",
+      "Line 1: a single integer `N`.\nNext `N` lines: row `i` contains `N` integers, `cost[i][0], …, cost[i][N-1]`.",
+    output_format: "Print a single integer, the minimum total assignment cost.",
     constraints: [
       "1 ≤ N ≤ 8",
       "0 ≤ cost[i][j] ≤ 10^9",
@@ -162,6 +162,6 @@ export default [
       },
     ],
     editorial:
-      "Minimum-cost assignment is the classic bipartite matching problem solved in general by the Hungarian algorithm in O(N³). For small N, a **bitmask DP over subsets of used tiers** is simpler and just as exact: `dp[mask]` is the cheapest way to assign the first `popcount(mask)` tasks using precisely the tiers in `mask`, and the next task index is determined by how many bits are already set, so you never double-count an assignment. The transition relaxes each free tier, giving O(2^N · N) time and O(2^N) memory — trivial at N ≤ 8. The 64-bit accumulator matters because eight near-10^9 costs overflow 32 bits. This is the resource-allocation / scheduling core behind routing requests to model tiers, packing jobs onto GPUs, or matching workers to tasks; when N grows beyond ~20 you switch to the Hungarian algorithm or a min-cost-max-flow formulation, but the objective is identical.",
+      "Minimum-cost assignment is the classic bipartite matching problem solved in general by the Hungarian algorithm in O(N³). For small N, a **bitmask DP over subsets of used tiers** is simpler and just as exact: `dp[mask]` is the cheapest way to assign the first `popcount(mask)` tasks using precisely the tiers in `mask`, and the next task index is determined by how many bits are already set, so you never double-count an assignment. The transition relaxes each free tier, giving O(2^N · N) time and O(2^N) memory, trivial at N ≤ 8. The 64-bit accumulator matters because eight near-10^9 costs overflow 32 bits. This is the resource-allocation / scheduling core behind routing requests to model tiers, packing jobs onto GPUs, or matching workers to tasks; when N grows beyond ~20 you switch to the Hungarian algorithm or a min-cost-max-flow formulation, but the objective is identical.",
   },
 ];

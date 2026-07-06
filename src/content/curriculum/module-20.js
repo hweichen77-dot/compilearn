@@ -19,11 +19,11 @@ export default {
       title: "The Response Object",
       concept: "Response anatomy",
       xp_reward: 10,
-      explanation: `You call a model API, expecting it to hand you a sentence. Instead it hands you a box inside a box inside a box. The text you want is in there — buried under \`choices\`, then \`message\`, then \`content\`. Once you know the shape of that box, fishing out the answer is a one-liner. Until you do, it's a frustrating treasure hunt.
+      explanation: `A model API does not hand you a bare sentence. It hands you a structured object, and the text you want sits several layers down, under \`choices\`, then \`message\`, then \`content\`. Once you know that shape, pulling the answer out is a one-liner. Until you do, it is easy to reach for the wrong key.
 
 ## What it is
 
-A model API doesn't return a bare string. It returns a **response object** — a structured bundle (JSON over the wire, a dict in your code) that carries the generated text *plus* metadata about the call. The metadata is the point: it tells you why generation stopped, how many tokens you spent, which model answered, and more.
+A model API does not return a bare string. It returns a **response object**: a structured bundle (JSON over the wire, a dict in your code) that carries the generated text along with metadata about the call. The metadata tells you why generation stopped, how many tokens you spent, and which model answered.
 
 The generated text itself lives in a predictable nested path. For a chat-style API it's: the response has a list called **choices**, each choice has a **message**, and the message has the **content** string. That nesting exists because the API can return more than one candidate answer, and each answer is a structured message, not just raw text.
 
@@ -46,7 +46,7 @@ print(text)   # Paris.
 
 Read that path left to right: \`choices\` (the list of answers) → \`[0]\` (the first answer) → \`message\` (the structured reply) → \`content\` (the actual string). Almost every chat API you'll touch follows this exact shape, so the access pattern \`resp["choices"][0]["message"]["content"]\` becomes muscle memory.
 
-The sibling fields matter too. \`finish_reason\` sits next to \`message\` and explains *why* it stopped. \`usage\` sits at the top level and reports token counts. You'll dig into both in later lessons — for now, just know they ride along in the same box.
+The sibling fields matter too. \`finish_reason\` sits next to \`message\` and explains *why* it stopped. \`usage\` sits at the top level and reports token counts. You'll dig into both in later lessons, for now, just know they ride along in the same box.
 
 ## Why it matters
 
@@ -66,7 +66,7 @@ The response is **a wrapper, not a string.** The words you want are real, but th
       ],
       callouts: [
         { type: "analogy", title: "Boxes inside boxes", content: "The answer is a gift wrapped in three layers: choices, then message, then content. Open them in order and the text falls out. Skip a layer and you grab packaging instead of the gift.", position: "before" },
-        { type: "insight", title: "It's a list, so index it", content: "choices is a list because the API can return several candidate answers. That's why you almost always write choices[0] — grab the first answer before reaching for its message.", position: "after" }
+        { type: "insight", title: "It's a list, so index it", content: "choices is a list because the API can return several candidate answers. That's why you almost always write choices[0], grab the first answer before reaching for its message.", position: "after" }
       ],
       concept_diagram: {
         title: "Reaching the text inside a response",
@@ -106,7 +106,7 @@ The response is **a wrapper, not a string.** The words you want are real, but th
             "The full training data of the model"
           ],
           correct_index: 1,
-          explanation: "Fields like finish_reason and usage tell you why it stopped and what it cost — essential for correctness and budget."
+          explanation: "Fields like finish_reason and usage tell you why it stopped and what it cost, essential for correctness and budget."
         },
         {
           question: "You write resp[\"choices\"][\"message\"] and get an error. What's the fix?",
@@ -157,7 +157,7 @@ print(text)
         {
           title: "opening the response, one layer at a time",
           steps: [
-            { label: "Start with the response", detail: "The whole object is a dict. The text you want is not at the top level — it's nested deeper.", code: 'resp = {"choices": [...], "usage": {...}}' },
+            { label: "Start with the response", detail: "The whole object is a dict. The text you want is not at the top level, it's nested deeper.", code: 'resp = {"choices": [...], "usage": {...}}' },
             { label: "Index choices[0]", detail: "choices is a list of candidate answers. Take the first one with [0] to get a single choice dict.", code: 'choice = resp["choices"][0]' },
             { label: "Open the message", detail: "Each choice holds a message dict with a role ('assistant') and the content string.", code: 'msg = choice["message"]' },
             { label: "Read the content", detail: "The content key holds the actual generated text. That's your answer.", code: 'text = msg["content"]  # "The capital of France is Paris."' }
@@ -223,15 +223,15 @@ print(text)
         }
       ],
       hints: [
-        "choices is a list — start by indexing it with [0].",
+        "choices is a list, start by indexing it with [0].",
         "After choices[0], reach into the message dict, then its content key.",
         "Chain the keys: resp[\"choices\"][0][\"message\"][\"content\"]."
       ],
       challenge_difficulty: "intermediate",
       challenge_title: "Best-Candidate Response Router",
       challenge_description: "Walk the choices array of every API response, throw out anything that didn't finish cleanly, and route each request to its highest-scoring usable answer.",
-      challenge_story: "Your inference service is configured to return **several candidate answers per request** (the model samples \`n\` completions and your reranker scores each one). The raw payload comes back as a response object with a \`choices\` array — but not every choice is shippable. A choice whose \`finish_reason\` isn't \`stop\` either got truncated, got filtered, or otherwise can't be trusted, so it must be discarded before scoring. Your job: write the **router** that opens each response, ignores the unusable choices, and forwards the best remaining candidate to the user.",
-      challenge_statement: "You are given a batch of API responses. Each response has a request id and a list of **choices**; each choice carries an integer rerank **score**, a **finish_reason**, and the answer **text**.\n\nFor each response, in input order:\n\n1. Consider only choices whose \`finish_reason\` is exactly \`stop\` — every other finish_reason marks the choice unusable.\n2. Among the usable choices, pick the one with the **highest score**. If two usable choices tie on score, pick the one with the **smaller choice index** (the earlier one in the list).\n3. If a usable choice exists, print \`<id>: [<index>] <text>\`. If no choice is usable, print \`<id>: NO_VALID_CHOICE\`.\n\nAfter all responses, print \`VALID <v>/<n>\` where \`v\` is how many responses produced a usable answer and \`n\` is the total number of responses.",
+      challenge_story: "Your inference service is configured to return **several candidate answers per request** (the model samples \`n\` completions and your reranker scores each one). The raw payload comes back as a response object with a \`choices\` array, but not every choice is shippable. A choice whose \`finish_reason\` isn't \`stop\` either got truncated, got filtered, or otherwise can't be trusted, so it must be discarded before scoring. Your job: write the **router** that opens each response, ignores the unusable choices, and forwards the best remaining candidate to the user.",
+      challenge_statement: "You are given a batch of API responses. Each response has a request id and a list of **choices**; each choice carries an integer rerank **score**, a **finish_reason**, and the answer **text**.\n\nFor each response, in input order:\n\n1. Consider only choices whose \`finish_reason\` is exactly \`stop\`, every other finish_reason marks the choice unusable.\n2. Among the usable choices, pick the one with the **highest score**. If two usable choices tie on score, pick the one with the **smaller choice index** (the earlier one in the list).\n3. If a usable choice exists, print \`<id>: [<index>] <text>\`. If no choice is usable, print \`<id>: NO_VALID_CHOICE\`.\n\nAfter all responses, print \`VALID <v>/<n>\` where \`v\` is how many responses produced a usable answer and \`n\` is the total number of responses.",
       challenge_input_format: "The first line is the integer `n`: the number of responses.\n\nEach response starts with a line `<id> <k>` (a request id with no spaces, and `k`, the number of choices). The next `k` lines each describe one choice: an integer `score`, a `finish_reason` token, then the answer text (which may contain spaces), all space-separated.",
       challenge_output_format: "One line per response, in input order, as described above. Then a final line `VALID <v>/<n>`.",
       challenge_constraints: [
@@ -313,18 +313,18 @@ main()
       title: "Finish Reasons",
       concept: "Finish reason",
       xp_reward: 10,
-      explanation: `Your model spits out a beautiful answer that ends mid-sentence: "...and the three main causes are first," — then nothing. Nobody hit a key. The model didn't crash. It hit a wall called the token limit, and a single field in the response told you exactly that. That field is the **finish_reason**, and reading it turns "why is my output broken?" into "oh, it got cut off."
+      explanation: `Your model spits out a beautiful answer that ends mid-sentence: "...and the three main causes are first,", then nothing. Nobody hit a key. The model didn't crash. It hit a wall called the token limit, and a single field in the response told you exactly that. That field is the **finish_reason**, and reading it turns "why is my output broken?" into "oh, it got cut off."
 
 ## What it is
 
-Every response carries a **finish_reason** — a short string explaining *why* generation stopped. The model produces tokens one at a time and needs a reason to quit. There are a handful of standard reasons, and each one means something different for how you should treat the output.
+Every response carries a **finish_reason**: a short string explaining *why* generation stopped. The model produces tokens one at a time and needs a reason to quit. There are a handful of standard reasons, and each one means something different for how you should treat the output.
 
 The common values:
 
-- **stop** — the model finished naturally. It decided the answer was complete and emitted its end signal. This is the happy path.
-- **length** — generation hit the maximum-length cap (the \`max_tokens\` limit). The answer is **cut off** mid-thought. Nothing is wrong with the model; you simply didn't give it enough room.
-- **stop_sequence** — the model produced a string you told it to stop on (covered in lesson 4). It halted on purpose, at a boundary you defined.
-- **content_filter** — the output was blocked by a safety filter. The text was withheld, not finished.
+- **stop**: the model finished naturally. It decided the answer was complete and emitted its end signal. This is the happy path.
+- **length**: generation hit the maximum-length cap (the \`max_tokens\` limit). The answer is **cut off** mid-thought. Nothing is wrong with the model; you simply didn't give it enough room.
+- **stop_sequence**: the model produced a string you told it to stop on (covered in lesson 4). It halted on purpose, at a boundary you defined.
+- **content_filter**: the output was blocked by a safety filter. The text was withheld, not finished.
 
 ## How it works
 
@@ -340,7 +340,7 @@ resp = {
 
 reason = resp["choices"][0]["finish_reason"]
 if reason == "length":
-    print("WARNING: answer was cut off — raise max_tokens")
+    print("WARNING: answer was cut off, raise max_tokens")
 else:
     print("OK:", reason)
 \`\`\`
@@ -354,19 +354,19 @@ Contrast that with **stop**: the model chose to end. The answer is whole. You ca
 The finish_reason is your early-warning system:
 
 - **It catches truncation silently.** A "length" answer often *looks* fine until the last line trails off. Checking the reason catches it before a user does.
-- **It tells stop from blocked.** "content_filter" means there's no usable answer to show — handle it differently from a normal stop.
+- **It tells stop from blocked.** "content_filter" means there's no usable answer to show, handle it differently from a normal stop.
 - **It guides retries.** "length" → give more room and retry. "stop" → you're done. The reason tells you which branch to take.
 
 ## The mental model to keep
 
-The text tells you *what* the model said. The finish_reason tells you *whether to trust that it finished saying it.* Always read it. **"length" is not success — it's a cliff.**`,
+The text tells you *what* the model said. The finish_reason tells you *whether to trust that it finished saying it.* Always read it. **"length" is not success, it's a cliff.**`,
       key_terms: [
         { term: "finish_reason", definition: "A short string in the response explaining why the model stopped generating." },
-        { term: "stop", definition: "The model finished naturally and the answer is complete — the happy path." },
+        { term: "stop", definition: "The model finished naturally and the answer is complete, the happy path." },
         { term: "length", definition: "Generation hit the max-token cap, so the answer is cut off mid-thought." }
       ],
       callouts: [
-        { type: "analogy", title: "Did it finish, or run out of paper?", content: "Imagine someone writing on a fixed sheet. 'stop' means they finished and put the pen down. 'length' means they ran out of paper mid-sentence. Same handwriting — totally different completeness.", position: "before" },
+        { type: "analogy", title: "Did it finish, or run out of paper?", content: "Imagine someone writing on a fixed sheet. 'stop' means they finished and put the pen down. 'length' means they ran out of paper mid-sentence. Same handwriting, totally different completeness.", position: "before" },
         { type: "warning", title: "length means truncated", content: "A finish_reason of 'length' is NOT success. The model was still talking when it ran out of room. Raise max_tokens and retry, or you'll ship a chopped-off answer.", position: "after" }
       ],
       concept_diagram: {
@@ -391,7 +391,7 @@ The text tells you *what* the model said. The finish_reason tells you *whether t
           question: "Which finish_reason means the model decided the answer was complete?",
           options: ["length", "stop", "content_filter", "stop_sequence"],
           correct_index: 1,
-          explanation: "\"stop\" is the natural completion — the model emitted its end signal on its own."
+          explanation: "\"stop\" is the natural completion, the model emitted its end signal on its own."
         },
         {
           question: "You see finish_reason == \"length\". What's the right response?",
@@ -459,7 +459,7 @@ cut off`,
           steps: [
             { label: "Generation stops", detail: "The model has stopped producing tokens. You don't yet know if it finished or was interrupted.", code: 'content = "...the main causes are first,"' },
             { label: "Read the reason", detail: "Pull finish_reason from the choice. It sits next to the message.", code: 'reason = resp["choices"][0]["finish_reason"]  # "length"' },
-            { label: "Interpret it", detail: "'length' means the token cap stopped it, so the answer is truncated — not a real ending.", code: 'reason == "length"  # answer was cut off' },
+            { label: "Interpret it", detail: "'length' means the token cap stopped it, so the answer is truncated, not a real ending.", code: 'reason == "length"  # answer was cut off' },
             { label: "Take action", detail: "Raise max_tokens and call again (or ask to continue) instead of shipping the partial text.", code: 'retry(max_tokens=512)  # give it more room' }
           ]
         }
@@ -471,7 +471,7 @@ cut off`,
           steps: [
             '"stop" is the natural-completion signal.',
             "The model decided on its own that the answer was finished and emitted its end token.",
-            "So yes — the text is a complete thought you can trust."
+            "So yes, the text is a complete thought you can trust."
           ],
           output: "Yes, the answer finished naturally and is complete."
         },
@@ -493,9 +493,9 @@ cut off`,
           columns: ["finish_reason", "Meaning", "Is the answer complete?", "What to do"],
           rows: [
             { cells: ["stop", "Model ended naturally", "Yes", "Use the answer"] },
-            { cells: ["length", "Hit the max-token cap", "No — truncated", "Raise max_tokens, retry"] },
+            { cells: ["length", "Hit the max-token cap", "No, truncated", "Raise max_tokens, retry"] },
             { cells: ["stop_sequence", "Hit a stop string you set", "Yes, at your boundary", "Use it; trim the stop string if needed"] },
-            { cells: ["content_filter", "Blocked by safety filter", "No — withheld", "Handle as a refusal, don't show partial"], highlight: true }
+            { cells: ["content_filter", "Blocked by safety filter", "No, withheld", "Handle as a refusal, don't show partial"], highlight: true }
           ]
         }
       ],
@@ -519,7 +519,7 @@ cut off`,
       reflections: [
         {
           prompt: "In your own words: why is a 'length' finish_reason a more dangerous failure than an outright error?",
-          sampleAnswer: "An error stops you cold and demands attention, but a 'length' truncation produces text that often looks complete — fluent sentences, a confident tone — right up until the last line trails off. If you don't check the finish_reason, you can silently ship a half-finished answer that the user only discovers when the important part is missing. It fails quietly, which is exactly why you have to look."
+          sampleAnswer: "An error stops you cold and demands attention, but a 'length' truncation produces text that often looks complete, fluent sentences, a confident tone, right up until the last line trails off. If you don't check the finish_reason, you can silently ship a half-finished answer that the user only discovers when the important part is missing. It fails quietly, which is exactly why you have to look."
         }
       ],
       hints: [
@@ -530,7 +530,7 @@ cut off`,
       challenge_difficulty: "intermediate",
       challenge_title: "Continuation Retry Engine",
       challenge_description: "Simulate the retry loop that turns a truncated answer into a finished one: keep issuing continuation calls while finish_reason stays 'length', stop the moment it finishes, give up filtered or budget-blown requests, and tally the call count.",
-      challenge_story: "When the model hits its output cap, the API hands back \`finish_reason == \"length\"\` — a half-written answer. Production systems don't surface that to the user; they fire a **continuation call** to resume generation, and repeat until the model emits a real \`stop\`. But continuations cost money, so you cap them at \`max_retries\`. Your team also learned to **bail immediately** on \`content_filter\` (retrying a blocked completion just wastes calls). Build the retry engine that replays a recorded sequence of finish_reasons for each request and reports the outcome.",
+      challenge_story: "When the model hits its output cap, the API hands back \`finish_reason == \"length\"\`, a half-written answer. Production systems don't surface that to the user; they fire a **continuation call** to resume generation, and repeat until the model emits a real \`stop\`. But continuations cost money, so you cap them at \`max_retries\`. Your team also learned to **bail immediately** on \`content_filter\` (retrying a blocked completion just wastes calls). Build the retry engine that replays a recorded sequence of finish_reasons for each request and reports the outcome.",
       challenge_statement: "You are given a retry budget \`max_retries\` and a list of requests. Each request records the **sequence of finish_reasons** its calls returned, in order: the first is the initial call, each later one is a continuation call.\n\nProcess each request's finish_reasons left to right, counting calls as you go:\n\n1. On \`stop\` or \`stop_sequence\`: the answer is complete → outcome \`DELIVERED\`. Stop.\n2. On \`content_filter\`: the content was blocked → outcome \`BLOCKED\`. Stop.\n3. On \`length\`: the answer was truncated. If you have already used \`max_retries\` continuation calls (i.e. the number of continuation calls made so far equals \`max_retries\`), give up with outcome \`TRUNCATED\` and stop. Otherwise issue the next continuation call and read the next finish_reason.\n4. If the recorded sequence runs out while still \`length\`, the outcome is \`TRUNCATED\`.\n\nFor each request print \`<id> <OUTCOME> <calls>\` where \`calls\` is how many calls were actually made. Then print three summary lines: \`DELIVERED <d>\`, \`FAILED <f>\` (everything not delivered), and \`CALLS <c>\` (total calls across all requests).",
       challenge_input_format: "The first line has two integers `n max_retries`. Each of the next `n` lines describes one request: its id (no spaces) followed by one or more finish_reason tokens, all space-separated.",
       challenge_output_format: "One line per request: `<id> <OUTCOME> <calls>`. Then `DELIVERED <d>`, `FAILED <f>`, and `CALLS <c>`.",
@@ -545,7 +545,7 @@ cut off`,
         { input: "2 2\nA stop\nB length length stop", output: "A DELIVERED 1\nB DELIVERED 3\nDELIVERED 2\nFAILED 0\nCALLS 4", explanation: "A finishes on its first call. B truncates twice (2 continuations, within the cap of 2) then finally returns stop on call 3." },
         { input: "2 1\nC length length length\nD length content_filter", output: "C TRUNCATED 2\nD BLOCKED 2\nDELIVERED 0\nFAILED 2\nCALLS 4", explanation: "C truncates on call 1, retries once (the cap), truncates again on call 2 and is abandoned. D truncates then gets blocked on its continuation, so it bails immediately." },
       ],
-      challenge_notes: "The retry cap counts *continuation* calls, not the initial one: with \`max_retries = 0\` a single \`length\` means instant \`TRUNCATED\` after one call. Bailing on \`content_filter\` instead of retrying is a real cost optimization — a filtered completion will just get filtered again. Notice that \`FAILED\` lumps together \`TRUNCATED\` and \`BLOCKED\`: from the user's perspective, both mean no answer.",
+      challenge_notes: "The retry cap counts *continuation* calls, not the initial one: with \`max_retries = 0\` a single \`length\` means instant \`TRUNCATED\` after one call. Bailing on \`content_filter\` instead of retrying is a real cost optimization, a filtered completion will just get filtered again. Notice that \`FAILED\` lumps together \`TRUNCATED\` and \`BLOCKED\`: from the user's perspective, both mean no answer.",
       challenge_hints: [
         "Track `calls` per request. After reading a `length`, the number of continuations used so far is `calls - 1`; compare that to `max_retries`.",
         "Break out of the loop on `stop`/`stop_sequence` (DELIVERED) and on `content_filter` (BLOCKED).",
@@ -618,17 +618,17 @@ main()
       title: "Token Usage",
       concept: "Token usage",
       xp_reward: 10,
-      explanation: `You build a chatbot, ship it, and at the end of the month get a bill that makes your stomach drop. Where did the money go? It went into tokens — and the response told you the count of every single one, every call, in a block you probably never read. That block is **usage**, and it's the difference between flying blind and knowing exactly what each request costs.
+      explanation: `You build a chatbot, ship it, and at the end of the month get a bill that makes your stomach drop. Where did the money go? It went into tokens, and the response told you the count of every single one, every call, in a block you probably never read. That block is **usage**, and it's the difference between flying blind and knowing exactly what each request costs.
 
 ## What it is
 
 Every response carries a top-level **usage** block: a small dict of token counts for that one call. Three numbers:
 
-- **prompt_tokens** — the **input**: everything you sent (your prompt, system message, and any prior conversation re-fed in).
-- **completion_tokens** — the **output**: everything the model generated in reply.
-- **total_tokens** — the sum of the two. It should always equal prompt_tokens + completion_tokens.
+- **prompt_tokens**: the **input**: everything you sent (your prompt, system message, and any prior conversation re-fed in).
+- **completion_tokens**: the **output**: everything the model generated in reply.
+- **total_tokens**: the sum of the two. It should always equal prompt_tokens + completion_tokens.
 
-These counts are the *real, exact* token usage for the call — not an estimate. They are the basis for two things you care about: **cost** (APIs bill per token) and **limits** (the input plus output must fit inside the context window).
+These counts are the *real, exact* token usage for the call, not an estimate. They are the basis for two things you care about: **cost** (APIs bill per token) and **limits** (the input plus output must fit inside the context window).
 
 ## How it works
 
@@ -651,7 +651,7 @@ cost = usage["prompt_tokens"] / 1_000_000 * 3 \
 print(f"cost: \${cost:.6f}")
 \`\`\`
 
-Notice the split rates: input and output are billed at **different prices**, and output is usually several times more expensive than input. That's why the breakdown matters — a long answer can cost far more than a long question. Tracking \`completion_tokens\` is often where the real money hides.
+Notice the split rates: input and output are billed at **different prices**, and output is usually several times more expensive than input. That's why the breakdown matters, a long answer can cost far more than a long question. Tracking \`completion_tokens\` is often where the real money hides.
 
 ## Why it matters
 
@@ -663,14 +663,14 @@ The usage block is your meter:
 
 ## The mental model to keep
 
-usage is the **receipt** for each call: input tokens, output tokens, total. Output costs more than input, so the answer — not the question — usually drives the bill. **Read the receipt every call and you'll never be surprised by it.**`,
+usage is the **receipt** for each call: input tokens, output tokens, total. Output costs more than input, so the answer, not the question, usually drives the bill. **Read the receipt every call and you'll never be surprised by it.**`,
       key_terms: [
         { term: "usage", definition: "A top-level block in the response reporting exact token counts for the call." },
         { term: "prompt_tokens", definition: "Input tokens: everything you sent the model, including re-fed conversation history." },
         { term: "completion_tokens", definition: "Output tokens: everything the model generated in its reply." }
       ],
       callouts: [
-        { type: "analogy", title: "It's an itemized receipt", content: "usage is the receipt for one call: a line for input, a line for output, and a total. You wouldn't ignore the receipt at a store — don't ignore it on an API call either.", position: "before" },
+        { type: "analogy", title: "It's an itemized receipt", content: "usage is the receipt for one call: a line for input, a line for output, and a total. You wouldn't ignore the receipt at a store, don't ignore it on an API call either.", position: "before" },
         { type: "tip", title: "Output usually costs more", content: "Input and output are billed at different rates, and output is often 3-5x pricier per token. A short prompt with a long answer can cost more than a long prompt with a short answer.", position: "after" }
       ],
       concept_diagram: {
@@ -687,7 +687,7 @@ usage is the **receipt** for each call: input tokens, output tokens, total. Outp
           question: "What does completion_tokens count?",
           options: ["The tokens you sent in your prompt", "The tokens the model generated in its reply", "The size of the context window"],
           correct_index: 1,
-          explanation: "completion_tokens is the output — everything the model produced in response."
+          explanation: "completion_tokens is the output, everything the model produced in response."
         }
       ],
       quiz_questions: [
@@ -730,7 +730,7 @@ usage is the **receipt** for each call: input tokens, output tokens, total. Outp
           activity_title: "Usage block check",
           questions: [
             { question: "total_tokens should equal prompt_tokens plus completion_tokens.", type: "true_false", correct_answer: "true", explanation: "total is just the sum of the input and output token counts." },
-            { question: "The input side of the usage block — everything you sent — is reported as ______ tokens.", type: "fill_in", correct_answer: "prompt", explanation: "prompt_tokens reports the input you sent to the model." }
+            { question: "The input side of the usage block, everything you sent, is reported as ______ tokens.", type: "fill_in", correct_answer: "prompt", explanation: "prompt_tokens reports the input you sent to the model." }
           ]
         }
       ],
@@ -822,7 +822,7 @@ total tokens: 30`,
       reflections: [
         {
           prompt: "In your own words: in a long multi-turn chatbot, why does prompt_tokens tend to grow every turn, and why should that worry you?",
-          sampleAnswer: "Each new turn usually re-sends the whole conversation so far as context, so the input grows with every message — prompt_tokens climbs steadily even if your new message is short. That should worry you because you're paying for that entire history on every single call, so cost per turn keeps rising and the total can eventually bump against the context window. Watching prompt_tokens tells you when to trim or summarize old messages."
+          sampleAnswer: "Each new turn usually re-sends the whole conversation so far as context, so the input grows with every message, prompt_tokens climbs steadily even if your new message is short. That should worry you because you're paying for that entire history on every single call, so cost per turn keeps rising and the total can eventually bump against the context window. Watching prompt_tokens tells you when to trim or summarize old messages."
         }
       ],
       hints: [
@@ -833,7 +833,7 @@ total tokens: 30`,
       challenge_difficulty: "intermediate",
       challenge_title: "Multi-Turn Budget Meter",
       challenge_description: "Bill a whole chatbot conversation turn by turn, watching prompt_tokens balloon as the history re-feeds, and pull the plug the instant the next turn would blow the budget.",
-      challenge_story: "Your support bot re-sends the entire conversation as context on every turn, so the \`prompt_tokens\` in each \`usage\` block grows as the chat goes on — and finance handed you a hard cost ceiling per session. You need a **budget meter**: replay the conversation, compute each turn's cost from its usage, and stop accepting turns the moment the running total would cross the ceiling. Input tokens bill at **\$3 per 1,000,000**, output tokens at **\$15 per 1,000,000**.",
+      challenge_story: "Your support bot re-sends the entire conversation as context on every turn, so the \`prompt_tokens\` in each \`usage\` block grows as the chat goes on, and finance handed you a hard cost ceiling per session. You need a **budget meter**: replay the conversation, compute each turn's cost from its usage, and stop accepting turns the moment the running total would cross the ceiling. Input tokens bill at **\$3 per 1,000,000**, output tokens at **\$15 per 1,000,000**.",
       challenge_statement: "A session has a system prompt of \`system\` tokens that is always part of the context. Then \`t\` turns happen in order; turn \`i\` adds \`user_i\` new input tokens and produces \`out_i\` output tokens.\n\nThe **prompt tokens** billed for a turn are the entire context fed in: the system prompt, every prior turn's user *and* assistant tokens, plus this turn's new user tokens. After a turn completes, both its user tokens and its output tokens become part of the context for later turns.\n\nA turn's cost in **micro-dollars** (millionths of a dollar) is \`prompt_tokens * 3 + out_tokens * 15\`. You are given a \`budget\` in micro-dollars. Process turns in order; **before** committing each turn, check whether the running total plus this turn's cost would exceed \`budget\`. If it would, halt without running that turn or any later one.\n\nFor each turn you actually run, print \`turn <i>: prompt=<p> completion=<c> cost=$<x>\` where \`<x>\` is that turn's cost in dollars to exactly 6 decimals. Then print \`DELIVERED <count>\`, \`TOTAL $<sum>\` (the committed total to 6 decimals), and either \`WITHIN_BUDGET\` or \`HALTED turn <i>\` for the first turn that was refused.",
       challenge_input_format: "The first line has two integers `t budget` (the turn count and the budget in micro-dollars). The second line is the integer `system` (system-prompt tokens). Each of the next `t` lines has two integers `user_i out_i`.",
       challenge_output_format: "One line per delivered turn, then `DELIVERED <count>`, `TOTAL $<sum>`, and a final status line.",
@@ -848,7 +848,7 @@ total tokens: 30`,
         { input: "2 1000000\n10\n5 20\n8 30", output: "turn 1: prompt=15 completion=20 cost=$0.000345\nturn 2: prompt=43 completion=30 cost=$0.000579\nDELIVERED 2\nTOTAL $0.000924\nWITHIN_BUDGET", explanation: "Turn 1 prompt = system(10)+user(5) = 15; cost = 15*3 + 20*15 = 345 micro = $0.000345. Context grows to 15+20 = 35, so turn 2 prompt = 35+8 = 43. Both fit the budget." },
         { input: "3 1000\n10\n5 20\n100 200\n50 50", output: "turn 1: prompt=15 completion=20 cost=$0.000345\nDELIVERED 1\nTOTAL $0.000345\nHALTED turn 2", explanation: "Turn 1 costs 345 micro. Turn 2 would cost 135*3 + 200*15 = 3405 micro, pushing the total to 3750 > budget 1000, so the meter halts before running turn 2." },
       ],
-      challenge_notes: "Keep all money in integer micro-dollars and only divide by 1,000,000 when you print — that avoids float drift and makes the budget boundary exact. The reason \`prompt_tokens\` climbs every turn is that the assistant's own previous replies get re-fed as context, so you pay for the whole transcript again and again. That is exactly why long chats get expensive and why summarizing old turns is a real cost lever.",
+      challenge_notes: "Keep all money in integer micro-dollars and only divide by 1,000,000 when you print, that avoids float drift and makes the budget boundary exact. The reason \`prompt_tokens\` climbs every turn is that the assistant's own previous replies get re-fed as context, so you pay for the whole transcript again and again. That is exactly why long chats get expensive and why summarizing old turns is a real cost lever.",
       challenge_hints: [
         "Carry a running `history` token count starting at `system`; a turn's prompt is `history + user_i`.",
         "After committing a turn, set `history = prompt_tokens + out_tokens` so both sides of the exchange persist.",
@@ -914,17 +914,17 @@ main()
       title: "Stop Sequences",
       concept: "Stop sequence",
       xp_reward: 10,
-      explanation: `You ask a model to fill in one Q&A pair, but it cheerfully rolls right past it — inventing a second question, a third, a whole imaginary interview. You only wanted the first answer. The clean fix isn't a longer prompt; it's a tripwire. Tell the API: the moment you generate the string "Q:", stop. That tripwire is a **stop sequence**, and it gives you surgical control over where output ends.
+      explanation: `You ask a model to fill in one Q&A pair, but it cheerfully rolls right past it, inventing a second question, a third, a whole imaginary interview. You only wanted the first answer. The clean fix isn't a longer prompt; it's a tripwire. Tell the API: the moment you generate the string "Q:", stop. That tripwire is a **stop sequence**, and it gives you surgical control over where output ends.
 
 ## What it is
 
-A **stop sequence** is a string you hand the API that says: "if you're about to produce this, halt immediately." The moment the model generates that string, generation stops — and (on most APIs) the stop string itself is *not* included in the returned content. You get everything up to it, cleanly cut.
+A **stop sequence** is a string you hand the API that says: "if you're about to produce this, halt immediately." The moment the model generates that string, generation stops, and (on most APIs) the stop string itself is *not* included in the returned content. You get everything up to it, cleanly cut.
 
 You can supply one or several. They're a deliberate boundary you define, as opposed to the model's own natural ending. When a stop sequence fires, the response's finish_reason becomes \`stop_sequence\` (or similar), telling you the halt was triggered by your tripwire rather than a natural stop or the length cap.
 
 ## How it works
 
-Here's the idea simulated in plain Python — split the model's would-be output at the first stop string:
+Here's the idea simulated in plain Python, split the model's would-be output at the first stop string:
 
 \`\`\`python
 def generate_with_stop(full_output, stop):
@@ -953,21 +953,21 @@ Stop sequences buy you precision without post-processing:
 
 - **No runaway generation.** They prevent the model from continuing past the part you actually want.
 - **Cleaner parsing.** Output ends exactly at a known marker, so you don't have to strip trailing junk yourself.
-- **Cheaper calls.** Stopping early means fewer completion_tokens — you don't pay for text you'd throw away.
+- **Cheaper calls.** Stopping early means fewer completion_tokens, you don't pay for text you'd throw away.
 
 The catch: choose a stop string that *won't* appear in the legitimate answer, or you'll cut the output short by accident.
 
 ## The mental model to keep
 
-A stop sequence is a **tripwire you plant in the output stream.** The model walks forward generating tokens; the instant it steps on your wire, it halts and hands you everything up to that point. **You decide where the answer ends — not the model.**`,
+A stop sequence is a **tripwire you plant in the output stream.** The model walks forward generating tokens; the instant it steps on your wire, it halts and hands you everything up to that point. **You decide where the answer ends, not the model.**`,
       key_terms: [
         { term: "Stop sequence", definition: "A string that, when the model is about to generate it, forces generation to halt immediately." },
         { term: "stop_sequence (finish_reason)", definition: "The finish_reason value indicating a stop string you defined triggered the halt." },
         { term: "Structured response", definition: "Output carved into a known shape, often by stopping generation at a defined boundary." }
       ],
       callouts: [
-        { type: "analogy", title: "A tripwire in the output", content: "Picture a tripwire stretched across the model's path. It keeps generating tokens until it steps on the wire — then it halts instantly and hands you everything before it. You chose where to plant the wire.", position: "before" },
-        { type: "warning", title: "Don't pick a string that appears in the answer", content: "If your stop sequence shows up inside a legitimate answer, generation halts there and chops the output short. Choose a marker the real content won't contain — like a label such as '\\nQ:'.", position: "after" }
+        { type: "analogy", title: "A tripwire in the output", content: "Picture a tripwire stretched across the model's path. It keeps generating tokens until it steps on the wire, then it halts instantly and hands you everything before it. You chose where to plant the wire.", position: "before" },
+        { type: "warning", title: "Don't pick a string that appears in the answer", content: "If your stop sequence shows up inside a legitimate answer, generation halts there and chops the output short. Choose a marker the real content won't contain, like a label such as '\\nQ:'.", position: "after" }
       ],
       concept_diagram: {
         title: "How a stop sequence cuts output",
@@ -1074,7 +1074,7 @@ print(generate_with_stop(raw, "\\nQ:"))
           steps: [
             'Generation stops the first time "\\n- " is about to be produced.',
             'That occurs right after "- Apple", before the second item.',
-            'So you get "- Apple" — exactly the first item, with the rest trimmed.',
+            'So you get "- Apple", exactly the first item, with the rest trimmed.',
             'Subtle bug: if an item itself contained "\\n- " (e.g. a multi-line entry), the stop would fire early inside a legitimate item and cut it short.'
           ],
           output: '"- Apple"; a stop string that can appear inside real content risks truncating it.'
@@ -1112,7 +1112,7 @@ print(generate_with_stop(raw, "\\nQ:"))
       reflections: [
         {
           prompt: "In your own words: how do a stop sequence and the max-token (length) limit differ as ways to end generation?",
-          sampleAnswer: "A stop sequence ends generation at a meaningful boundary you define — when a specific string appears — so the output is cut cleanly at a known marker and the answer is complete up to that point. The max-token limit ends generation when the model runs out of allowance regardless of where it is, which usually chops the answer off mid-thought. One is a precise, intentional cut; the other is a blunt cap that often truncates."
+          sampleAnswer: "A stop sequence ends generation at a meaningful boundary you define, when a specific string appears, so the output is cut cleanly at a known marker and the answer is complete up to that point. The max-token limit ends generation when the model runs out of allowance regardless of where it is, which usually chops the answer off mid-thought. One is a precise, intentional cut; the other is a blunt cap that often truncates."
         }
       ],
       hints: [
@@ -1123,8 +1123,8 @@ print(generate_with_stop(raw, "\\nQ:"))
       challenge_difficulty: "beginner",
       challenge_title: "Earliest-Wins Stop Sequence Cutter",
       challenge_description: "Cut a generated line at the first place any of several plain marker strings appears, and report whether a stop sequence fired or the text ran to the end.",
-      challenge_story: "You configured your API call with **several stop sequences** — a Q&A turn marker like \`Q:\`, a section divider like \`###\`, a custom \`<<<END>>>\` sentinel — because any of them should end generation. The model handed back a line of text; now you post-process it exactly like the API does: scan for **every** configured marker and cut the text at whichever one appears **first**. If none appears, the model never hit a tripwire, so you treat it as having run to the length cap.",
-      challenge_statement: "You are given \`k\` stop sequences (plain marker strings) and one generated \`text\` line. All of them are ordinary strings with no special escaping — a marker is matched literally.\n\nFind, among all stop sequences, the one whose **first occurrence** in the text starts at the smallest index. If two stop sequences first appear at the same index, prefer the **shorter** one (it ends generation sooner). Keep only the text **before** that index.\n\n- If some stop sequence is found, the finish reason is \`stop_sequence\` and the kept text is everything before the match.\n- If no stop sequence appears anywhere, the finish reason is \`length\` and the kept text is the whole line.\n\nPrint three lines: the kept text, then \`FINISH <reason>\`, then \`KEPT <n>\` where \`n\` is the number of characters kept.",
+      challenge_story: "You configured your API call with **several stop sequences**: a Q&A turn marker like \`Q:\`, a section divider like \`###\`, a custom \`<<<END>>>\` sentinel, because any of them should end generation. The model handed back a line of text; now you post-process it exactly like the API does: scan for **every** configured marker and cut the text at whichever one appears **first**. If none appears, the model never hit a tripwire, so you treat it as having run to the length cap.",
+      challenge_statement: "You are given \`k\` stop sequences (plain marker strings) and one generated \`text\` line. All of them are ordinary strings with no special escaping, a marker is matched literally.\n\nFind, among all stop sequences, the one whose **first occurrence** in the text starts at the smallest index. If two stop sequences first appear at the same index, prefer the **shorter** one (it ends generation sooner). Keep only the text **before** that index.\n\n- If some stop sequence is found, the finish reason is \`stop_sequence\` and the kept text is everything before the match.\n- If no stop sequence appears anywhere, the finish reason is \`length\` and the kept text is the whole line.\n\nPrint three lines: the kept text, then \`FINISH <reason>\`, then \`KEPT <n>\` where \`n\` is the number of characters kept.",
       challenge_input_format: "The first line is the integer `k`. The next `k` lines are the stop sequences (one per line). The line after that is the generated text.",
       challenge_output_format: "Three lines: the kept text, `FINISH stop_sequence` or `FINISH length`, and `KEPT <n>`.",
       challenge_constraints: [
@@ -1135,10 +1135,10 @@ print(generate_with_stop(raw, "\\nQ:"))
         "Position ties are broken by the shorter stop sequence.",
       ],
       challenge_examples: [
-        { input: "2\nQ:\nEND\nParis. Q: next question", output: "Paris. \nFINISH stop_sequence\nKEPT 7", explanation: "`Q:` first appears at index 7 (the marker `END` never appears), so everything before it — `Paris. ` (7 chars, including the trailing space) — is kept." },
+        { input: "2\nQ:\nEND\nParis. Q: next question", output: "Paris. \nFINISH stop_sequence\nKEPT 7", explanation: "`Q:` first appears at index 7 (the marker `END` never appears), so everything before it, `Paris. ` (7 chars, including the trailing space), is kept." },
         { input: "1\n###\nplain text no marker", output: "plain text no marker\nFINISH length\nKEPT 20", explanation: "The stop sequence `###` never appears, so nothing is cut: the whole 20-character line is kept and the finish reason is `length`." },
       ],
-      challenge_notes: "Real APIs apply all your stop sequences simultaneously and cut at the earliest hit — that's why a too-common stop string (like a single space) can chop answers off almost immediately. The shorter-on-tie rule keeps the cut deterministic when one stop sequence is a prefix of another at the same spot.",
+      challenge_notes: "Real APIs apply all your stop sequences simultaneously and cut at the earliest hit, that's why a too-common stop string (like a single space) can chop answers off almost immediately. The shorter-on-tie rule keeps the cut deterministic when one stop sequence is a prefix of another at the same spot.",
       challenge_hints: [
         "Use `text.find(stop)`; it returns the first index of the marker or -1 if it never appears.",
         "Track the smallest non-negative index across all markers, breaking ties by the shorter marker length.",
@@ -1208,7 +1208,7 @@ main()
       title: "Streaming Chunks and Deltas",
       concept: "Streaming",
       xp_reward: 10,
-      explanation: `Watch ChatGPT answer and the text appears word by word, like someone typing live. That isn't a UI animation faked on top of a finished answer — the model really is sending the text out in pieces as it generates them. Each piece is called a **delta**, and if you want that live feel in your own app, you have to learn to catch the pieces and glue them back together yourself.
+      explanation: `Watch ChatGPT answer and the text appears word by word, like someone typing live. That isn't a UI animation faked on top of a finished answer, the model really is sending the text out in pieces as it generates them. Each piece is called a **delta**, and if you want that live feel in your own app, you have to learn to catch the pieces and glue them back together yourself.
 
 ## What it is
 
@@ -1235,26 +1235,26 @@ for chunk in chunks:
 print(text)   # The sky is blue.
 \`\`\`
 
-Two details matter. First, **order is sacred** — deltas must be joined in the exact sequence they arrive, or the words scramble. Second, **some chunks carry no text at all.** The final chunk often has an empty delta and instead reports the \`finish_reason\`, signaling the stream is done. That is why you use \`delta.get("content", "")\` rather than indexing directly: a missing content key is normal, not an error.
+Two details matter. First, **order is sacred**: deltas must be joined in the exact sequence they arrive, or the words scramble. Second, **some chunks carry no text at all.** The final chunk often has an empty delta and instead reports the \`finish_reason\`, signaling the stream is done. That is why you use \`delta.get("content", "")\` rather than indexing directly: a missing content key is normal, not an error.
 
 ## Why it matters
 
 Streaming changes how you write the receiving code:
 
 - **Perceived speed.** Users see the first words in a fraction of a second instead of waiting for the whole answer. The total time is the same; the *wait* feels far shorter.
-- **You own the assembly.** The API will not hand you a finished string — partial-message handling is your job. Forget to concatenate and you display only the last fragment.
+- **You own the assembly.** The API will not hand you a finished string, partial-message handling is your job. Forget to concatenate and you display only the last fragment.
 - **The end is a separate signal.** The stream finishes with a terminal chunk (empty delta plus a finish_reason), not by the text simply stopping. Watch for it so you know when you have the complete answer.
 
 ## The mental model to keep
 
-A streamed answer is a **river of fragments, not a bucket of water.** Each delta is one more drop. Your job is to catch them in order and let them fill the buffer — and to notice the final empty chunk that says the river has run dry.`,
+A streamed answer is a **river of fragments, not a bucket of water.** Each delta is one more drop. Your job is to catch them in order and let them fill the buffer, and to notice the final empty chunk that says the river has run dry.`,
       key_terms: [
         { term: "Streaming", definition: "Receiving a response as a sequence of small chunks as it generates, rather than one complete object at the end." },
-        { term: "Delta", definition: "The newest fragment of text carried by a streaming chunk — the bit added since the previous chunk." },
+        { term: "Delta", definition: "The newest fragment of text carried by a streaming chunk, the bit added since the previous chunk." },
         { term: "Chunk", definition: "One piece of a streamed response, shaped like a mini response object with a delta instead of a full message." }
       ],
       callouts: [
-        { type: "analogy", title: "A river, not a bucket", content: "A normal response is a full bucket handed to you at once. A stream is a river of drops — each delta is one drop, and you catch them in order until the buffer is full.", position: "before" },
+        { type: "analogy", title: "A river, not a bucket", content: "A normal response is a full bucket handed to you at once. A stream is a river of drops, each delta is one drop, and you catch them in order until the buffer is full.", position: "before" },
         { type: "warning", title: "Some chunks carry no text", content: "The final chunk usually has an empty delta and just reports finish_reason. Use delta.get('content', '') so a missing content key is treated as 'nothing to add', not a crash.", position: "after" }
       ],
       concept_diagram: {
@@ -1314,7 +1314,7 @@ A streamed answer is a **river of fragments, not a bucket of water.** Each delta
           activity_title: "Streaming check",
           questions: [
             { question: "Each streaming chunk's delta contains the entire answer generated so far.", type: "true_false", correct_answer: "false", explanation: "A delta holds only the newest fragment; you concatenate fragments to build the full text." },
-            { question: "To rebuild the answer you must join the deltas in the exact ______ they arrive.", type: "fill_in", correct_answer: "order", explanation: "Order is sacred — out-of-order deltas scramble the words." }
+            { question: "To rebuild the answer you must join the deltas in the exact ______ they arrive.", type: "fill_in", correct_answer: "order", explanation: "Order is sacred, out-of-order deltas scramble the words." }
           ]
         }
       ],
@@ -1375,7 +1375,7 @@ print(text)
             "Append 'there', giving 'Hithere'.",
             "The final chunk carries finish_reason 'stop' and empty content, signaling the stream is complete with no further text."
           ],
-          output: "'Hithere' — empty deltas safely contribute nothing thanks to .get with a default."
+          output: "'Hithere', empty deltas safely contribute nothing thanks to .get with a default."
         }
       ],
       comparison_tables: [
@@ -1386,7 +1386,7 @@ print(text)
             { cells: ["What you receive", "One complete response object", "A sequence of small chunks"] },
             { cells: ["Where text lives", "message.content", "delta.content (a fragment)"] },
             { cells: ["When you see text", "All at once, at the end", "Word by word, as it generates"] },
-            { cells: ["Assembly work", "None — it's already whole", "You concatenate the deltas yourself"], highlight: true }
+            { cells: ["Assembly work", "None, it's already whole", "You concatenate the deltas yourself"], highlight: true }
           ]
         }
       ],
@@ -1410,7 +1410,7 @@ print(text)
       reflections: [
         {
           prompt: "In your own words: why does streaming put the burden of assembling the answer on your code instead of the API?",
-          sampleAnswer: "Streaming exists so users see text the instant it's generated, which means the API can't wait until the answer is whole before sending anything — it has to push each fragment out the moment it exists. Since the API never holds the complete string, it can only send you pieces, so reconstructing the full answer by concatenating the deltas in order naturally becomes your job. The trade is a faster-feeling experience in exchange for a little assembly work on your side."
+          sampleAnswer: "Streaming exists so users see text the instant it's generated, which means the API can't wait until the answer is whole before sending anything, it has to push each fragment out the moment it exists. Since the API never holds the complete string, it can only send you pieces, so reconstructing the full answer by concatenating the deltas in order naturally becomes your job. The trade is a faster-feeling experience in exchange for a little assembly work on your side."
         }
       ],
       hints: [
@@ -1421,8 +1421,8 @@ print(text)
       challenge_difficulty: "beginner",
       challenge_title: "Stream Assembler",
       challenge_description: "Reassemble a streamed answer from its deltas in order, halt the moment the stream's end marker arrives, and report how many real text fragments you stitched together.",
-      challenge_story: "Your chat UI consumes a model response as a **stream of deltas** — each line is the next fragment of text the model just produced. The stream ends with a special terminal marker, the literal token \`<END>\`, which carries no text and just announces completion. Your assembler must walk the deltas in order, glue the text together exactly as it arrives, and stop the instant it sees \`<END>\` (anything after it is not part of this answer). Then report the assembled text and how many text fragments you actually consumed.",
-      challenge_statement: "You are given \`n\` delta lines in order. Process them top to bottom:\n\n1. If a delta is exactly \`<END>\`, the stream is complete — stop immediately and do **not** treat it as text (ignore any deltas after it).\n2. Otherwise, append the delta's text to your running buffer and count it as one fragment.\n\nA delta line may be empty (an empty fragment that contributes nothing but still counts as a fragment, since it was a real chunk). Print the fully assembled text on its own line, then print \`CHUNKS <k>\` where \`k\` is the number of text fragments you appended (not counting the \`<END>\` marker).",
+      challenge_story: "Your chat UI consumes a model response as a **stream of deltas**: each line is the next fragment of text the model just produced. The stream ends with a special terminal marker, the literal token \`<END>\`, which carries no text and just announces completion. Your assembler must walk the deltas in order, glue the text together exactly as it arrives, and stop the instant it sees \`<END>\` (anything after it is not part of this answer). Then report the assembled text and how many text fragments you actually consumed.",
+      challenge_statement: "You are given \`n\` delta lines in order. Process them top to bottom:\n\n1. If a delta is exactly \`<END>\`, the stream is complete, stop immediately and do **not** treat it as text (ignore any deltas after it).\n2. Otherwise, append the delta's text to your running buffer and count it as one fragment.\n\nA delta line may be empty (an empty fragment that contributes nothing but still counts as a fragment, since it was a real chunk). Print the fully assembled text on its own line, then print \`CHUNKS <k>\` where \`k\` is the number of text fragments you appended (not counting the \`<END>\` marker).",
       challenge_input_format: "The first line is the integer `n`: the number of delta lines that follow. Each of the next `n` lines is one delta's text fragment (which may contain spaces, or be empty). The literal `<END>` on a line marks the terminal chunk.",
       challenge_output_format: "First line: the assembled text. Second line: `CHUNKS <k>` where `k` is how many text fragments were appended before the end marker.",
       challenge_constraints: [
@@ -1435,7 +1435,7 @@ print(text)
         { input: "4\nHel\nlo!\n there\n<END>", output: "Hello! there\nCHUNKS 3", explanation: "Three text deltas ('Hel', 'lo!', ' there') concatenate to 'Hello! there'. The <END> marker stops the stream and is not counted." },
         { input: "4\nA\n<END>\nB\nC", output: "A\nCHUNKS 1", explanation: "Only 'A' is appended before <END>; the 'B' and 'C' lines arrive after the end marker and are ignored." },
       ],
-      challenge_notes: "Concatenating deltas with no separator is exactly how real streaming works — the model already includes any needed spaces inside the fragments. Stopping at the end marker (rather than reading to EOF) mirrors why you watch for the terminal chunk: it tells you the answer is complete even if more bytes happen to follow on the wire.",
+      challenge_notes: "Concatenating deltas with no separator is exactly how real streaming works, the model already includes any needed spaces inside the fragments. Stopping at the end marker (rather than reading to EOF) mirrors why you watch for the terminal chunk: it tells you the answer is complete even if more bytes happen to follow on the wire.",
       challenge_hints: [
         "Read n, then iterate over exactly the next n lines in order.",
         "Break out of the loop the moment a line equals \"<END>\"; don't append it or count it.",
@@ -1482,17 +1482,17 @@ main()
       title: "Refusals and Safety Stops",
       concept: "Refusals",
       xp_reward: 10,
-      explanation: `You wire up a model to answer customer questions, ship it, and one day it replies "I'm sorry, but I can't help with that request." Your app proudly displays those words as if they were a real answer — formatted, timestamped, sitting in the chat bubble. The model didn't fail. It **refused**, on purpose, and your code never noticed the difference between a refusal and an answer. Reading that difference is the whole skill.
+      explanation: `You wire up a model to answer customer questions, ship it, and one day it replies "I'm sorry, but I can't help with that request." Your app proudly displays those words as if they were a real answer, formatted, timestamped, sitting in the chat bubble. The model didn't fail. It **refused**, on purpose, and your code never noticed the difference between a refusal and an answer. Reading that difference is the whole skill.
 
 ## What it is
 
-A **refusal** is when the model declines to fulfill a request — usually for safety, policy, or capability reasons — and says so in plain language instead of doing the task. A close cousin is the **safety stop**: the platform's filter blocks the output entirely, and the response signals that the content was withheld rather than completed.
+A **refusal** is when the model declines to fulfill a request, usually for safety, policy, or capability reasons, and says so in plain language instead of doing the task. A close cousin is the **safety stop**: the platform's filter blocks the output entirely, and the response signals that the content was withheld rather than completed.
 
-The trap is that a refusal *looks* like a normal answer. It arrives in the same \`content\` field, with the same fluent tone, and often with \`finish_reason == "stop"\` — because from the model's point of view, "I can't help with that" *is* a complete, natural reply. Naively, your code treats it as a successful answer and shows it to the user as if it solved their problem.
+The trap is that a refusal *looks* like a normal answer. It arrives in the same \`content\` field, with the same fluent tone, and often with \`finish_reason == "stop"\`, because from the model's point of view, "I can't help with that" *is* a complete, natural reply. Naively, your code treats it as a successful answer and shows it to the user as if it solved their problem.
 
 ## How it works
 
-There are two signals to watch. First, the structured one: some APIs expose an explicit field — a \`refusal\` string on the message, or a \`finish_reason\` of \`content_filter\` — that flags the response as not a real answer. Check that first; it's the reliable path.
+There are two signals to watch. First, the structured one: some APIs expose an explicit field, a \`refusal\` string on the message, or a \`finish_reason\` of \`content_filter\`, that flags the response as not a real answer. Check that first; it's the reliable path.
 
 \`\`\`python
 def classify(resp):
@@ -1510,26 +1510,26 @@ resp = {"choices": [{"message": {"refusal": "I can't help with that."},
 print(classify(resp))   # ('REFUSAL', "I can't help with that.")
 \`\`\`
 
-When no structured field exists, you fall back to **detecting refusal-shaped text** — phrases like "I can't", "I'm unable to", "I won't" at the start of the content. This is fuzzier and can misfire, so prefer the structured signal whenever the API provides it.
+When no structured field exists, you fall back to **detecting refusal-shaped text**: phrases like "I can't", "I'm unable to", "I won't" at the start of the content. This is fuzzier and can misfire, so prefer the structured signal whenever the API provides it.
 
 ## Why it matters
 
 Handling refusals gracefully is what separates a toy from a product:
 
-- **Don't present a refusal as the answer.** A user who asked a legitimate question and got "I can't help" deserves a fallback — rephrase, escalate to a human, or show a helpful message — not a dead end dressed up as a result.
+- **Don't present a refusal as the answer.** A user who asked a legitimate question and got "I can't help" deserves a fallback, rephrase, escalate to a human, or show a helpful message, not a dead end dressed up as a result.
 - **Distinguish refusal from blocked.** A refusal has explanatory text you might surface; a content-filter block has *no* usable content at all and must be handled as a hard stop.
-- **Don't retry blindly.** Re-sending the exact same request that got refused usually earns the same refusal — and burns tokens. Change the request or route it elsewhere.
+- **Don't retry blindly.** Re-sending the exact same request that got refused usually earns the same refusal, and burns tokens. Change the request or route it elsewhere.
 
 ## The mental model to keep
 
-A refusal is **a 'no' wearing the costume of an answer.** It fills the same content field, ends with the same 'stop' — so you have to look past the costume, check for the refusal signal, and route a 'no' differently from a 'yes.'`,
+A refusal is **a 'no' wearing the costume of an answer.** It fills the same content field, ends with the same 'stop', so you have to look past the costume, check for the refusal signal, and route a 'no' differently from a 'yes.'`,
       key_terms: [
         { term: "Refusal", definition: "When the model declines a request for safety, policy, or capability reasons and says so instead of doing the task." },
         { term: "Safety stop", definition: "A platform filter blocking the output entirely, signaled by a finish_reason like content_filter, with no usable content." },
         { term: "refusal field", definition: "An explicit field some APIs put on the message to flag that the reply is a refusal rather than a real answer." }
       ],
       callouts: [
-        { type: "analogy", title: "A 'no' in an answer's costume", content: "A refusal arrives in the same content field, with the same polite tone and the same 'stop' ending as a real answer. It's a 'no' wearing an answer's costume — you have to look past the costume.", position: "before" },
+        { type: "analogy", title: "A 'no' in an answer's costume", content: "A refusal arrives in the same content field, with the same polite tone and the same 'stop' ending as a real answer. It's a 'no' wearing an answer's costume, you have to look past the costume.", position: "before" },
         { type: "warning", title: "Don't retry a refusal unchanged", content: "Re-sending the identical request that got refused almost always earns the same refusal and wastes tokens. Change the request or route it to a human instead of looping.", position: "after" }
       ],
       concept_diagram: {
@@ -1537,7 +1537,7 @@ A refusal is **a 'no' wearing the costume of an answer.** It fills the same cont
         steps: [
           { label: "Response arrives", desc: "The content field is filled and finish_reason is often 'stop'." },
           { label: "Check the refusal signal", desc: "Look for a refusal field or a content_filter finish_reason." },
-          { label: "Classify", desc: "Refusal, blocked, or a genuine answer — three different outcomes." },
+          { label: "Classify", desc: "Refusal, blocked, or a genuine answer, three different outcomes." },
           { label: "Route accordingly", desc: "Show answers; fall back or escalate on refusals and blocks." }
         ]
       },
@@ -1581,7 +1581,7 @@ A refusal is **a 'no' wearing the costume of an answer.** It fills the same cont
             "Crash with an error"
           ],
           correct_index: 1,
-          explanation: "A refusal deserves graceful handling — a fallback path — not being shown as a solved answer or retried unchanged."
+          explanation: "A refusal deserves graceful handling, a fallback path, not being shown as a solved answer or retried unchanged."
         }
       ],
       participation_activities: [
@@ -1625,7 +1625,7 @@ else:
         {
           title: "routing a response by whether it's a refusal",
           steps: [
-            { label: "Open the message", detail: "Reach into choices[0].message — both real answers and refusals live here.", code: 'msg = resp["choices"][0]["message"]' },
+            { label: "Open the message", detail: "Reach into choices[0].message, both real answers and refusals live here.", code: 'msg = resp["choices"][0]["message"]' },
             { label: "Check the refusal field", detail: "If the message carries a non-empty refusal string, this reply is a 'no', not an answer.", code: 'if msg.get("refusal"): ...' },
             { label: "Check for a block", detail: "If there's no refusal field, a content_filter finish_reason means the output was withheld entirely.", code: 'choice.get("finish_reason") == "content_filter"' },
             { label: "Route the outcome", detail: "Answer -> show it. Refusal -> fallback. Block -> hard stop. Three branches, three behaviors.", code: 'return "ANSWER" / "REFUSAL" / "BLOCKED"' }
@@ -1641,14 +1641,14 @@ else:
             "It is None (empty), so the model did not decline.",
             "The content holds a real answer, so this is a normal reply."
           ],
-          output: "No — it's a genuine answer."
+          output: "No, it's a genuine answer."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "One response has message.refusal set to 'I won't do that' with finish_reason 'stop'. Another has empty content and finish_reason 'content_filter'. How should your app treat each?",
           steps: [
-            "The first has a populated refusal field, so it's a REFUSAL — surface a fallback message or escalate, and you may show its explanatory text.",
-            "The second has no content and a content_filter finish_reason, so it's a BLOCKED safety stop — there is nothing usable to display.",
+            "The first has a populated refusal field, so it's a REFUSAL, surface a fallback message or escalate, and you may show its explanatory text.",
+            "The second has no content and a content_filter finish_reason, so it's a BLOCKED safety stop, there is nothing usable to display.",
             "Both must NOT be shown as successful answers.",
             "Neither should be retried with the identical request, since the same input will trip the same outcome."
           ],
@@ -1686,7 +1686,7 @@ else:
       reflections: [
         {
           prompt: "In your own words: why is silently showing a refusal to the user worse than showing an outright error?",
-          sampleAnswer: "An error at least signals that something went wrong, so the user knows not to trust the result and can try again. A refusal shown as the answer looks like a real, finished reply — it has the same fluent tone and 'stop' ending — so the user may believe the system genuinely couldn't help or even acted on the non-answer. Detecting the refusal lets you offer a real fallback (rephrase, escalate, explain) instead of leaving the user staring at a polite dead end they mistake for a solution."
+          sampleAnswer: "An error at least signals that something went wrong, so the user knows not to trust the result and can try again. A refusal shown as the answer looks like a real, finished reply, it has the same fluent tone and 'stop' ending, so the user may believe the system genuinely couldn't help or even acted on the non-answer. Detecting the refusal lets you offer a real fallback (rephrase, escalate, explain) instead of leaving the user staring at a polite dead end they mistake for a solution."
         }
       ],
       hints: [
@@ -1697,8 +1697,8 @@ else:
       challenge_difficulty: "beginner",
       challenge_title: "Refusal Router",
       challenge_description: "Walk a batch of model replies, separate the genuine answers from the refusals, deliver the answers and hold back the refusals, and report the split.",
-      challenge_story: "Your assistant fields a queue of user requests, but not every reply is shippable. Some come back as **refusals** — the model declined, usually with a polite 'I can't help with that.' Showing those to users as if they were answers makes the product look broken, so you add a **router**: deliver real answers untouched, and quietly hold back refusals for a fallback path. Each reply is tagged with whether it's a refusal, so your job is to branch correctly and tally the results.",
-      challenge_statement: "You are given \`n\` replies. Each reply has an id, a flag, and the reply text:\n\n- If the flag is exactly \`refusal\`, the model declined — print \`<id>: REFUSED\` and do not deliver the text.\n- Otherwise (the flag is \`ok\`) it's a genuine answer — print \`<id>: <text>\`.\n\nProcess replies in input order. After all replies, print \`DELIVERED <d> REFUSED <r>\` where \`d\` is the number of answers delivered and \`r\` is the number of refusals held back.",
+      challenge_story: "Your assistant fields a queue of user requests, but not every reply is shippable. Some come back as **refusals**: the model declined, usually with a polite 'I can't help with that.' Showing those to users as if they were answers makes the product look broken, so you add a **router**: deliver real answers untouched, and quietly hold back refusals for a fallback path. Each reply is tagged with whether it's a refusal, so your job is to branch correctly and tally the results.",
+      challenge_statement: "You are given \`n\` replies. Each reply has an id, a flag, and the reply text:\n\n- If the flag is exactly \`refusal\`, the model declined, print \`<id>: REFUSED\` and do not deliver the text.\n- Otherwise (the flag is \`ok\`) it's a genuine answer, print \`<id>: <text>\`.\n\nProcess replies in input order. After all replies, print \`DELIVERED <d> REFUSED <r>\` where \`d\` is the number of answers delivered and \`r\` is the number of refusals held back.",
       challenge_input_format: "The first line is the integer `n`. Each of the next `n` lines is one reply: an id (no spaces), a single space, the flag (`ok` or `refusal`), a single space, then the reply text (which may contain spaces).",
       challenge_output_format: "One line per reply in input order (`<id>: <text>` or `<id>: REFUSED`), then a final line `DELIVERED <d> REFUSED <r>`.",
       challenge_constraints: [
@@ -1711,7 +1711,7 @@ else:
         { input: "3\na ok Here is the answer.\nb refusal I cannot help with that.\nc ok Sure thing.", output: "a: Here is the answer.\nb: REFUSED\nc: Sure thing.\nDELIVERED 2 REFUSED 1", explanation: "Replies a and c are tagged ok, so their text is delivered. Reply b is a refusal, so it's held back and shown as REFUSED. Two delivered, one refused." },
         { input: "2\nx refusal nope\ny refusal also nope", output: "x: REFUSED\ny: REFUSED\nDELIVERED 0 REFUSED 2", explanation: "Both replies are refusals, so nothing is delivered and the counts are 0 and 2." },
       ],
-      challenge_notes: "Branching on a structured flag (here, the \`ok\`/\`refusal\` tag) is exactly why APIs expose a refusal signal: it lets you route without guessing from the wording. Holding refusals back instead of showing them is the graceful-handling rule from the lesson — a refusal is a 'no', not a result.",
+      challenge_notes: "Branching on a structured flag (here, the \`ok\`/\`refusal\` tag) is exactly why APIs expose a refusal signal: it lets you route without guessing from the wording. Holding refusals back instead of showing them is the graceful-handling rule from the lesson, a refusal is a 'no', not a result.",
       challenge_hints: [
         "Use \`line.split(\" \", 2)\` to separate the id, the flag, and the (possibly multi-word) text.",
         "Branch on whether the flag equals \"refusal\"; everything else is a delivered answer.",
@@ -1766,11 +1766,11 @@ main()
       title: "Tool-Call Outputs",
       concept: "ToolCalls",
       xp_reward: 10,
-      explanation: `You ask your assistant "what's the weather in Paris?" and the model doesn't answer. Instead it hands back something stranger: a little structured request that says *call the function get_weather with city="Paris"*. That's not a failure — it's the model doing the smartest thing it can. It can't see the weather, so instead of hallucinating a number, it asks *you* to run the tool. Reading that branch in the response is how function calling works.
+      explanation: `You ask your assistant "what's the weather in Paris?" and the model doesn't answer. Instead it hands back something stranger: a little structured request that says *call the function get_weather with city="Paris"*. That's not a failure, it's the model doing the smartest thing it can. It can't see the weather, so instead of hallucinating a number, it asks *you* to run the tool. Reading that branch in the response is how function calling works.
 
 ## What it is
 
-When you give a model **tools** (functions it's allowed to invoke), a single response can come back in one of two shapes. Either the model produces ordinary **text content** — a plain answer — or it produces a **tool call**: a structured request naming a function and the arguments to pass it. The model never runs the function itself; it only *asks*. Your code runs the tool, then feeds the result back so the model can finish.
+When you give a model **tools** (functions it's allowed to invoke), a single response can come back in one of two shapes. Either the model produces ordinary **text content**: a plain answer, or it produces a **tool call**: a structured request naming a function and the arguments to pass it. The model never runs the function itself; it only *asks*. Your code runs the tool, then feeds the result back so the model can finish.
 
 The key field is \`tool_calls\` on the message. When it's present, the model wants a function executed. When it's absent (and \`content\` is filled), the model is just talking. Your job on every response is to **branch on which one you got.**
 
@@ -1795,7 +1795,7 @@ resp = {"choices": [{"message": {
 print(handle(resp))   # CALL get_weather Paris
 \`\`\`
 
-Notice that when there's a tool call, \`content\` is often \`None\` — the model has nothing to *say* yet because it's waiting on the tool's result. The real flow is a loop: model asks for a tool, you run it, you send the result back, the model uses it to produce the final text answer. Reading the response correctly is step one of that loop.
+Notice that when there's a tool call, \`content\` is often \`None\`, the model has nothing to *say* yet because it's waiting on the tool's result. The real flow is a loop: model asks for a tool, you run it, you send the result back, the model uses it to produce the final text answer. Reading the response correctly is step one of that loop.
 
 The \`finish_reason\` reinforces the branch: a tool-call response typically reports \`tool_calls\` as its finish_reason instead of \`stop\`, another signal that the model paused to call a function rather than finishing an answer.
 
@@ -1803,13 +1803,13 @@ The \`finish_reason\` reinforces the branch: a tool-call response typically repo
 
 Branching on tool calls is the foundation of every "agent" you'll build:
 
-- **It's a fork, not a value.** A response is either text *or* a tool call. Assuming it's always text — reading \`content\` blindly — crashes the moment \`content\` is \`None\` on a tool call.
-- **Tools are how the model acts.** Looking things up, doing math, hitting an API, sending an email — all happen because the model emitted a tool call and your code honored it.
+- **It's a fork, not a value.** A response is either text *or* a tool call. Assuming it's always text, reading \`content\` blindly, crashes the moment \`content\` is \`None\` on a tool call.
+- **Tools are how the model acts.** Looking things up, doing math, hitting an API, sending an email, all happen because the model emitted a tool call and your code honored it.
 - **The loop depends on it.** Miss the tool-call branch and the conversation stalls: the model is waiting for a result you never ran.
 
 ## The mental model to keep
 
-A tool-aware response is **a fork in the road, not a single destination.** One branch is "here's your answer" (text); the other is "please run this for me" (a tool call). Check which branch you're on *before* you reach for the content — because on the tool-call branch, there may be no content to read.`,
+A tool-aware response is **a fork in the road, not a single destination.** One branch is "here's your answer" (text); the other is "please run this for me" (a tool call). Check which branch you're on *before* you reach for the content, because on the tool-call branch, there may be no content to read.`,
       key_terms: [
         { term: "Tool call", definition: "A structured request in the response naming a function and arguments the model wants your code to run." },
         { term: "tool_calls field", definition: "The message field that holds tool calls; its presence means the model wants a function executed rather than giving plain text." },
@@ -1817,7 +1817,7 @@ A tool-aware response is **a fork in the road, not a single destination.** One b
       ],
       callouts: [
         { type: "analogy", title: "A fork in the road", content: "A tool-aware response splits two ways: 'here's your answer' (text) or 'please run this for me' (a tool call). You have to check which branch you're on before reaching for the content.", position: "before" },
-        { type: "warning", title: "content can be None on a tool call", content: "When the model emits a tool call, content is often None — it has nothing to say yet. Read content blindly and your code crashes. Branch on tool_calls first.", position: "after" }
+        { type: "warning", title: "content can be None on a tool call", content: "When the model emits a tool call, content is often None, it has nothing to say yet. Read content blindly and your code crashes. Branch on tool_calls first.", position: "after" }
       ],
       concept_diagram: {
         title: "Branching a tool-aware response",
@@ -1843,7 +1843,7 @@ A tool-aware response is **a fork in the road, not a single destination.** One b
             "The model runs it internally",
             "Your code runs it and feeds the result back",
             "The API server runs it automatically",
-            "Nobody — it's just a suggestion to ignore"
+            "Nobody, it's just a suggestion to ignore"
           ],
           correct_index: 1,
           explanation: "The model only asks; your code executes the tool and returns the result so the model can finish."
@@ -1876,7 +1876,7 @@ A tool-aware response is **a fork in the road, not a single destination.** One b
           activity_title: "Tool-call check",
           questions: [
             { question: "When the model emits a tool call, it runs the function itself before replying.", type: "true_false", correct_answer: "false", explanation: "The model only requests the call; your code runs the tool and feeds the result back." },
-            { question: "A response is either plain text or a ______ call — you must branch on which one you got.", type: "fill_in", correct_answer: "tool", explanation: "Check the tool_calls field to know which branch the response took." }
+            { question: "A response is either plain text or a ______ call, you must branch on which one you got.", type: "fill_in", correct_answer: "tool", explanation: "Check the tool_calls field to know which branch the response took." }
           ]
         }
       ],
@@ -1915,7 +1915,7 @@ else:
         {
           title: "routing a tool-aware response",
           steps: [
-            { label: "Open the message", detail: "Reach into choices[0].message — it may be text or a tool call.", code: 'msg = resp["choices"][0]["message"]' },
+            { label: "Open the message", detail: "Reach into choices[0].message, it may be text or a tool call.", code: 'msg = resp["choices"][0]["message"]' },
             { label: "Check tool_calls", detail: "If the tool_calls field is present and non-empty, the model wants a function run.", code: 'if msg.get("tool_calls"): ...' },
             { label: "Read the call", detail: "Pull the function name and arguments from the first tool call.", code: 'name = call["function"]["name"]' },
             { label: "Branch the behavior", detail: "Run the tool on this branch; on the text branch just show msg.content.", code: 'run(name, args)  # vs.  show(msg["content"])' }
@@ -1931,7 +1931,7 @@ else:
             "It is None (absent), so the model isn't asking to run anything.",
             "The content holds a plain answer, so this is the text branch."
           ],
-          output: "Plain text — show the content."
+          output: "Plain text, show the content."
         },
         {
           number: 2, difficulty: "medium",
@@ -1977,7 +1977,7 @@ else:
       reflections: [
         {
           prompt: "In your own words: why does the model emit a tool call instead of just answering, and what would happen if your code ignored it?",
-          sampleAnswer: "The model emits a tool call when it can't produce a trustworthy answer from its own frozen knowledge — it can't see live weather, run a real search, or send an email, so instead of hallucinating it asks your code to do the real action and report back. If your code ignored the tool call and just looked for content, it would find None and either crash or show nothing, and the conversation would stall because the model is paused waiting for a result it never receives. Honoring the branch — running the tool and feeding the result back — is what lets the model finish with a grounded answer."
+          sampleAnswer: "The model emits a tool call when it can't produce a trustworthy answer from its own frozen knowledge, it can't see live weather, run a real search, or send an email, so instead of hallucinating it asks your code to do the real action and report back. If your code ignored the tool call and just looked for content, it would find None and either crash or show nothing, and the conversation would stall because the model is paused waiting for a result it never receives. Honoring the branch, running the tool and feeding the result back, is what lets the model finish with a grounded answer."
         }
       ],
       hints: [
@@ -1988,8 +1988,8 @@ else:
       challenge_difficulty: "beginner",
       challenge_title: "Tool-Call Dispatcher",
       challenge_description: "Scan a batch of model responses, send the plain-text ones straight to the user and dispatch the tool-call ones to your function runner, and report how the batch split.",
-      challenge_story: "Your agent loop reads each model response and must decide what to do with it. Some responses are **plain text** — just show them. Others are **tool calls** — the model is asking your code to run a function (search, weather, email) and report back. Mixing these up breaks the agent: a tool call shown as text confuses the user, and a text answer sent to the function runner does nothing. Build the **dispatcher** that reads each response's kind, routes it correctly, and tallies the split so you can see how often the model reached for a tool.",
-      challenge_statement: "You are given \`n\` responses. Each has an id, a kind, and a payload:\n\n- If the kind is exactly \`tool\`, the payload is a function name plus its arguments — print \`<id>: CALL <payload>\` (dispatch to the tool runner).\n- Otherwise (the kind is \`text\`) the payload is the answer text — print \`<id>: TEXT <payload>\` (show it to the user).\n\nProcess responses in input order. After all of them, print \`TEXT <t> TOOL <c>\` where \`t\` is how many text responses were shown and \`c\` is how many tool calls were dispatched.",
+      challenge_story: "Your agent loop reads each model response and must decide what to do with it. Some responses are **plain text**: just show them. Others are **tool calls**: the model is asking your code to run a function (search, weather, email) and report back. Mixing these up breaks the agent: a tool call shown as text confuses the user, and a text answer sent to the function runner does nothing. Build the **dispatcher** that reads each response's kind, routes it correctly, and tallies the split so you can see how often the model reached for a tool.",
+      challenge_statement: "You are given \`n\` responses. Each has an id, a kind, and a payload:\n\n- If the kind is exactly \`tool\`, the payload is a function name plus its arguments, print \`<id>: CALL <payload>\` (dispatch to the tool runner).\n- Otherwise (the kind is \`text\`) the payload is the answer text, print \`<id>: TEXT <payload>\` (show it to the user).\n\nProcess responses in input order. After all of them, print \`TEXT <t> TOOL <c>\` where \`t\` is how many text responses were shown and \`c\` is how many tool calls were dispatched.",
       challenge_input_format: "The first line is the integer `n`. Each of the next `n` lines is one response: an id (no spaces), a single space, the kind (`text` or `tool`), a single space, then the payload (which may contain spaces).",
       challenge_output_format: "One line per response in input order (`<id>: TEXT <payload>` or `<id>: CALL <payload>`), then a final line `TEXT <t> TOOL <c>`.",
       challenge_constraints: [
@@ -2056,13 +2056,13 @@ main()
       title: "Logprobs and Confidence",
       concept: "Logprobs",
       xp_reward: 10,
-      explanation: `The model wrote "The capital of Australia is Canberra" and it's right — but was it *sure*? There's a number hiding in the response that answers exactly that: for every token it generated, the model can report how likely it thought that token was. Those numbers are **logprobs**, and they're the closest thing you get to a confidence meter on a model's output.
+      explanation: `The model wrote "The capital of Australia is Canberra" and it's right, but was it *sure*? There's a number hiding in the response that answers exactly that: for every token it generated, the model can report how likely it thought that token was. Those numbers are **logprobs**, and they're the closest thing you get to a confidence meter on a model's output.
 
 ## What it is
 
 A **logprob** is the log of the probability the model assigned to a token when it chose it. Probabilities run from 0 to 1; their logs run from negative numbers up to 0. A logprob of \`0\` means probability 1 (dead certain); a very negative logprob like \`-5\` means the model thought that token was unlikely yet picked it anyway. **Closer to 0 means more confident; more negative means less confident.**
 
-Why logs instead of plain probabilities? Probabilities of long sequences get vanishingly tiny, and logs turn awkward multiplication into easy addition while keeping the numbers in a readable range. You don't have to love the math — you just have to read the rule: **higher (closer to zero) logprob = the model was more sure.**
+Why logs instead of plain probabilities? Probabilities of long sequences get vanishingly tiny, and logs turn awkward multiplication into easy addition while keeping the numbers in a readable range. You don't have to love the math, you just have to read the rule: **higher (closer to zero) logprob = the model was more sure.**
 
 ## How it works
 
@@ -2080,7 +2080,7 @@ shaky = [t["token"] for t in tokens if t["logprob"] < threshold]
 print(shaky)   # [' Canberra']
 \`\`\`
 
-The token the model was *least* sure about — the most negative logprob — is often exactly where a hallucination or a guess lurks. A confident-sounding sentence can hide one wobbly token that flips it from true to false. Logprobs let you find that wobble instead of trusting the fluent surface.
+The token the model was *least* sure about, the most negative logprob, is often exactly where a hallucination or a guess lurks. A confident-sounding sentence can hide one wobbly token that flips it from true to false. Logprobs let you find that wobble instead of trusting the fluent surface.
 
 A caution: a high logprob means the token was a **likely continuation**, not that it's **true**. Confidence here is about plausibility, the same trap from the hallucination lesson. Logprobs are a useful *uncertainty signal*, not a truth oracle.
 
@@ -2088,20 +2088,20 @@ A caution: a high logprob means the token was a **likely continuation**, not tha
 
 Logprobs turn a black-box answer into something you can inspect:
 
-- **Flag shaky output.** Tokens below a confidence threshold are worth a second look — surface a warning, ask for verification, or re-ask.
+- **Flag shaky output.** Tokens below a confidence threshold are worth a second look, surface a warning, ask for verification, or re-ask.
 - **Compare candidates.** When the model returns several answers, the one with higher total logprob was, on average, the more confident path.
 - **Calibrate automation.** A pipeline can auto-accept high-confidence outputs and route low-confidence ones to a human, instead of treating every answer the same.
 
 ## The mental model to keep
 
-A logprob is the model **muttering how sure it was** about each word as it wrote. Closer to zero is a steady voice; deeply negative is a nervous one. Listen for the nervous tokens — but remember confidence is about *plausible*, not *true*.`,
+A logprob is the model **muttering how sure it was** about each word as it wrote. Closer to zero is a steady voice; deeply negative is a nervous one. Listen for the nervous tokens, but remember confidence is about *plausible*, not *true*.`,
       key_terms: [
         { term: "Logprob", definition: "The log of the probability the model assigned to a chosen token; closer to 0 means more confident, more negative means less." },
         { term: "Confidence signal", definition: "Using logprobs to gauge how sure the model was, flagging low-confidence tokens for review." },
         { term: "Threshold", definition: "A cutoff logprob below which a token is treated as low-confidence and worth a second look." }
       ],
       callouts: [
-        { type: "analogy", title: "The model muttering how sure it was", content: "Each logprob is the model's under-the-breath note on a word: a steady voice near zero, a nervous one deep in the negatives. Listen for the nervous tokens — that's where guesses hide.", position: "before" },
+        { type: "analogy", title: "The model muttering how sure it was", content: "Each logprob is the model's under-the-breath note on a word: a steady voice near zero, a nervous one deep in the negatives. Listen for the nervous tokens, that's where guesses hide.", position: "before" },
         { type: "warning", title: "Confident is not the same as true", content: "A high logprob means the token was a likely continuation, not that it's correct. Logprobs measure plausibility, exactly the hallucination trap. Treat them as an uncertainty signal, never a truth oracle.", position: "after" }
       ],
       concept_diagram: {
@@ -2126,18 +2126,18 @@ A logprob is the model **muttering how sure it was** about each word as it wrote
           question: "What does a logprob of 0 mean?",
           options: [
             "The model was completely unsure",
-            "The token had probability 1 — the model was certain",
+            "The token had probability 1, the model was certain",
             "The token was blocked",
             "The logprob feature was disabled"
           ],
           correct_index: 1,
-          explanation: "log(1) = 0, so a logprob of 0 means probability 1 — maximum confidence in that token."
+          explanation: "log(1) = 0, so a logprob of 0 means probability 1, maximum confidence in that token."
         },
         {
           question: "A confident-sounding sentence has one token with logprob -3.5 while the rest are near 0. What does that suggest?",
           options: [
             "The whole sentence is certainly false",
-            "That one token is where the model was least sure — a likely spot for a guess or error",
+            "That one token is where the model was least sure, a likely spot for a guess or error",
             "The model ran out of tokens",
             "Logprobs cannot be compared within a sentence"
           ],
@@ -2153,7 +2153,7 @@ A logprob is the model **muttering how sure it was** about each word as it wrote
             "They are always positive numbers"
           ],
           correct_index: 1,
-          explanation: "High confidence means a likely continuation, not a true one — the same plausible-vs-true trap as hallucinations."
+          explanation: "High confidence means a likely continuation, not a true one, the same plausible-vs-true trap as hallucinations."
         }
       ],
       participation_activities: [
@@ -2195,7 +2195,7 @@ for t in tokens:
             { label: "Get the logprobs", detail: "Each generated token carries its logprob when you request them.", code: 'tokens = [{"token": ..., "logprob": ...}, ...]' },
             { label: "Recall the scale", detail: "Closer to 0 means more confident; deeply negative means the model hesitated.", code: '-0.01 (sure)  vs  -2.80 (unsure)' },
             { label: "Apply a threshold", detail: "Pick a cutoff and flag any token below it as low-confidence.", code: 'if t["logprob"] < -1.0: flag(t)' },
-            { label: "Act on the flag", detail: "The least-confident token is the one to verify — often where a guess hides.", code: 'verify(" Canberra")  # most negative logprob' }
+            { label: "Act on the flag", detail: "The least-confident token is the one to verify, often where a guess hides.", code: 'verify(" Canberra")  # most negative logprob' }
           ]
         }
       ],
@@ -2217,7 +2217,7 @@ for t in tokens:
             "Scan each token against the -1.0 cutoff.",
             "Three tokens (-0.1, -0.3, -0.05) clear the bar, but -2.2 falls below it.",
             "Since at least one token is below threshold, the answer is routed to a human, not auto-accepted.",
-            "This is safer because the single low-confidence token is exactly where a guess or hallucination is most likely to be — catching it prevents shipping a shaky answer unchecked."
+            "This is safer because the single low-confidence token is exactly where a guess or hallucination is most likely to be, catching it prevents shipping a shaky answer unchecked."
           ],
           output: "Routed to a human, because the -2.2 token falls below the confidence threshold."
         }
@@ -2230,7 +2230,7 @@ for t in tokens:
             { cells: ["0.0", "1.0", "Maximum", "Model was certain"] },
             { cells: ["-0.1", "~0.90", "High", "Solid, trustworthy token"] },
             { cells: ["-1.0", "~0.37", "Moderate", "Worth a glance"] },
-            { cells: ["-3.0", "~0.05", "Low", "Likely a guess — verify it"], highlight: true }
+            { cells: ["-3.0", "~0.05", "Low", "Likely a guess, verify it"], highlight: true }
           ]
         }
       ],
@@ -2254,7 +2254,7 @@ for t in tokens:
       reflections: [
         {
           prompt: "In your own words: why is a single very-negative logprob in an otherwise confident answer worth paying attention to?",
-          sampleAnswer: "A fluent answer can read as completely authoritative while resting on one token the model actually wasn't sure about — and that wobbly token is precisely where a guess or hallucination tends to sit, like a made-up name, date, or number dropped into an otherwise solid sentence. A very-negative logprob is the model quietly admitting it hesitated there, so flagging it lets you verify the one risky word instead of trusting the confident surface. It turns a black-box answer into something you can spot-check at its weakest point."
+          sampleAnswer: "A fluent answer can read as completely authoritative while resting on one token the model actually wasn't sure about, and that wobbly token is precisely where a guess or hallucination tends to sit, like a made-up name, date, or number dropped into an otherwise solid sentence. A very-negative logprob is the model quietly admitting it hesitated there, so flagging it lets you verify the one risky word instead of trusting the confident surface. It turns a black-box answer into something you can spot-check at its weakest point."
         }
       ],
       hints: [
@@ -2265,7 +2265,7 @@ for t in tokens:
       challenge_difficulty: "intermediate",
       challenge_title: "Confidence Auditor",
       challenge_description: "Audit a generated answer token by token using its logprobs: flag every token below a confidence threshold and pinpoint the single least-confident token where a guess most likely hides.",
-      challenge_story: "Your team ships model answers into a high-stakes workflow, so 'it sounded confident' isn't good enough — you want the receipts. Each generated token comes with a **logprob**: closer to zero means the model was sure, deeply negative means it hesitated. You're building a **confidence auditor** that scans every token, flags the ones below a threshold for human review, and calls out the single shakiest token — the most likely spot for a hallucination. To keep the math exact, logprobs are given as integers in hundredths (so -250 means a logprob of -2.50).",
+      challenge_story: "Your team ships model answers into a high-stakes workflow, so 'it sounded confident' isn't good enough, you want the receipts. Each generated token comes with a **logprob**: closer to zero means the model was sure, deeply negative means it hesitated. You're building a **confidence auditor** that scans every token, flags the ones below a threshold for human review, and calls out the single shakiest token, the most likely spot for a hallucination. To keep the math exact, logprobs are given as integers in hundredths (so -250 means a logprob of -2.50).",
       challenge_statement: "You are given \`n\` tokens and an integer \`threshold\` (both logprobs are in hundredths, e.g. -100 means -1.00). Each token has a text label and an integer logprob.\n\n1. A token is **low-confidence** if its logprob is strictly **less than** \`threshold\`. Count how many tokens are low-confidence.\n2. Find the **least-confident** token: the one with the smallest (most negative) logprob. If two tokens tie on logprob, pick the one whose label is **lexicographically smallest**.\n\nPrint \`FLAGGED <count>\` (the number of low-confidence tokens), then \`LEAST <label> <logprob>\` for the least-confident token.",
       challenge_input_format: "The first line has two integers `n threshold`. Each of the next `n` lines has a token label (no spaces) and an integer logprob (in hundredths), space-separated.",
       challenge_output_format: "Two lines: `FLAGGED <count>` and `LEAST <label> <logprob>`.",
@@ -2279,7 +2279,7 @@ for t in tokens:
         { input: "3 -100\nthe -5\nxyzzy -250\ncat -40", output: "FLAGGED 1\nLEAST xyzzy -250", explanation: "Only `xyzzy` (-250) is below the threshold -100, so FLAGGED is 1. It is also the most negative logprob, so it's the least-confident token." },
         { input: "2 -100\na -300\nb -300", output: "FLAGGED 2\nLEAST a -300", explanation: "Both tokens are below -100, so FLAGGED is 2. They tie at -300, so the lexicographically smaller label `a` wins as least-confident." },
       ],
-      challenge_notes: "Using integer hundredths keeps the comparison exact and avoids float rounding, but the meaning is the same as real logprobs: more negative = less confident. The least-confident token is highlighted because a fluent answer often hides its single guess in exactly one wobbly token — that's the one worth verifying. Remember the caveat: low confidence flags a likely guess, but high confidence still only means plausible, not true.",
+      challenge_notes: "Using integer hundredths keeps the comparison exact and avoids float rounding, but the meaning is the same as real logprobs: more negative = less confident. The least-confident token is highlighted because a fluent answer often hides its single guess in exactly one wobbly token, that's the one worth verifying. Remember the caveat: low confidence flags a likely guess, but high confidence still only means plausible, not true.",
       challenge_hints: [
         "Read \`n\` and \`threshold\` from the first line, then loop over the next \`n\` token lines.",
         "Count a token when its logprob is strictly less than the threshold.",

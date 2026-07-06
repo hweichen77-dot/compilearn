@@ -7,7 +7,7 @@ export default {
     "category": "apcsp",
     "order": 105,
     "track": "apcsp",
-    "unit": "Big Idea 4 — Computer Systems & Networks",
+    "unit": "Big Idea 4, Computer Systems & Networks",
     "tags": [
       "the internet",
       "packets & routing",
@@ -302,7 +302,7 @@ export default {
       ],
       "challenge_title": "Survive a Router Failure",
       "challenge_language": "python",
-      "challenge_starter_code": "# First line: n m  (number of nodes and number of links).\n# Next m lines: each is \"<a> <b>\", an undirected link.\n# Last line: \"<src> <dst> <failed>\" — the failed router is removed.\n# Print \"reachable\" if src can still reach dst without using the failed node,\n# otherwise print \"unreachable\". (If src or dst is the failed node, print \"unreachable\".)\n\nimport sys\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0].split())\n# TODO: build the graph, remove the failed node, and run BFS\n",
+      "challenge_starter_code": "# First line: n m  (number of nodes and number of links).\n# Next m lines: each is \"<a> <b>\", an undirected link.\n# Last line: \"<src> <dst> <failed>\", the failed router is removed.\n# Print \"reachable\" if src can still reach dst without using the failed node,\n# otherwise print \"unreachable\". (If src or dst is the failed node, print \"unreachable\".)\n\nimport sys\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0].split())\n# TODO: build the graph, remove the failed node, and run BFS\n",
       "challenge_solution_code": "import sys\nfrom collections import deque, defaultdict\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0].split())\nadj = defaultdict(list)\nfor i in range(1, 1 + m):\n    a, b = data[i].split()\n    adj[a].append(b)\n    adj[b].append(a)\nsrc, dst, failed = data[1 + m].split()\nif src == failed or dst == failed:\n    print(\"unreachable\")\nelse:\n    seen = {src}\n    q = deque([src])\n    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if v != failed and v not in seen:\n                seen.add(v)\n                q.append(v)\n    print(\"reachable\" if dst in seen else \"unreachable\")",
       "challenge_test_cases": [
         {

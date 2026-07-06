@@ -1,7 +1,7 @@
-# CodeFlow — Analytics, UTM & Funnel
+# CodeFlow analytics, UTM, and funnel
 
 Analytics = PostHog (US cloud). Initialized in `src/lib/analytics.js`:
-`capture_pageview: false`, `autocapture: false`, session recording off — so we
+`capture_pageview: false`, `autocapture: false`, session recording off, so we
 only get the events we explicitly fire. `sanitize_properties` strips OAuth tokens
 and URL fragments before anything leaves the browser.
 
@@ -11,7 +11,7 @@ and URL fragments before anything leaves the browser.
 |---|---|---|
 | `$pageview` | route changes (`trackPageview`) | `$current_url` (sanitized), `page` |
 | `onboarding_shown` / `onboarding_complete` | `WelcomeModal.jsx` | `started` |
-| `guest_start` | `AuthContext.jsx` | — |
+| `guest_start` | `AuthContext.jsx` | (none) |
 | `sign_in_start` | `AuthContext.jsx` | `method: google` |
 | `sign_in` / `sign_up` | `AuthContext.jsx` | `method` |
 | `lesson_start` | `ProjectDetail.jsx` | `lesson_id`, `project_id` |
@@ -41,16 +41,16 @@ Secondary funnels worth saving:
 
 - **Activation rate** = unique users with `lesson_complete` ÷ unique users with
   `$pageview`. Optimize this, not signups.
-- **D1 / D7 retention** — PostHog Retention, returning event = `lesson_start`.
+- **D1 / D7 retention**: PostHog Retention, returning event = `lesson_start`.
 - **Sign-in adoption** = users with `sign_in` ÷ activated users.
 - **OAuth health** = `sign_in` ÷ `sign_in_start` (should be ~1; a low ratio means
-  the Google redirect is broken — ties to the sync gate).
+  the Google redirect is broken, which ties to the sync gate).
 
 ## UTM scheme (channel attribution)
 
 PostHog automatically parses `utm_source`, `utm_medium`, `utm_campaign`,
 `utm_term`, `utm_content` out of `$current_url` and sets them as person
-properties — so tagging links is all that's required; no code change. (Confirmed:
+properties, so tagging links is all that's required; no code change. (Confirmed:
 `trackPageview` passes `$current_url` and `sanitizeUrl` keeps utm params, only
 stripping the hash and OAuth tokens.)
 
@@ -85,5 +85,5 @@ Tiles:
 6. `feedback_submit` count + a table of recent feedback (`kind`)
 7. OAuth health: `sign_in` ÷ `sign_in_start` (number)
 
-Decision rule for launch: drive one channel, read tiles 3–4, fix the worst
+Decision rule for launch: drive one channel, read tiles 3-4, fix the worst
 step in tile 1, then scale the channel that activates best.

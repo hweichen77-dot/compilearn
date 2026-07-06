@@ -2,7 +2,7 @@ export default {
   project: {
     id: "ai-18",
     title: "The Context Window",
-    description: "Understand the model's working memory — the token budget that holds your system prompt, chat history, message, and its answer, and what to do when it runs out.",
+    description: "Understand the model's working memory: the token budget that holds your system prompt, chat history, message, and its answer, and what to do when it runs out.",
     difficulty: "beginner",
     category: "foundations",
     estimated_time: 45,
@@ -20,13 +20,13 @@ export default {
       concept: "Context window",
       challenge_difficulty: "beginner",
       xp_reward: 10,
-      explanation: `Imagine answering a question while staring at a desk that can only hold a few sheets of paper at once. Anything you want to consider has to fit on that desk. Push a new sheet on and an old one slides off the edge. That desk is the **context window** — the model's entire field of view for a single request.
+      explanation: `Imagine answering a question while staring at a desk that can only hold a few sheets of paper at once. Anything you want to consider has to fit on that desk. Push a new sheet on and an old one slides off the edge. That desk is the **context window**: the model's entire field of view for a single request.
 
 ## What it is
 
 The **context window** is the maximum number of tokens a model can consider in one request. And here's the part people miss: that budget covers **both** what you send in *and* what the model writes out. Input and output share the same desk.
 
-A token is just a chunk of text — roughly 4 characters of English, about ¾ of a word. So a window of, say, 8,000 tokens is room for roughly 6,000 words of *combined* prompt and answer. Modern models advertise windows from a few thousand tokens up into the millions, but the rule is identical at every size: there is a hard ceiling, and everything must fit under it.
+A token is just a chunk of text, roughly 4 characters of English, about ¾ of a word. So a window of, say, 8,000 tokens is room for roughly 6,000 words of *combined* prompt and answer. Modern models advertise windows from a few thousand tokens up into the millions, but the rule is identical at every size: there is a hard ceiling, and everything must fit under it.
 
 ## How it works
 
@@ -40,19 +40,19 @@ budget_for_answer = WINDOW - prompt_tokens
 print(budget_for_answer)   # 6800 tokens to write with
 \`\`\`
 
-Two things follow immediately. First, the bigger your input, the less room is left for the output. Second, nothing outside the window exists for the model — if a fact isn't in the window (or its frozen training), the model simply cannot see it.
+Two things follow immediately. First, the bigger your input, the less room is left for the output. Second, nothing outside the window exists for the model, if a fact isn't in the window (or its frozen training), the model simply cannot see it.
 
 ## Why it matters
 
 The window is the single most important constraint shaping how you use a model:
 
-- It explains why a model "forgets" the start of a very long chat — older text fell off the desk.
+- It explains why a model "forgets" the start of a very long chat, older text fell off the desk.
 - It caps how much you can paste in: a 500-page book will not fit in a small window all at once.
 - It forces real trade-offs: more context for the question means less room for the reply.
 
 ## The mental model to keep
 
-Don't picture infinite memory. Picture a **desk of fixed size**. Everything the model thinks about for this one request — your instructions, the conversation, and its own reply — has to fit on that desk at the same time.`,
+Don't picture infinite memory. Picture a **desk of fixed size**. Everything the model thinks about for this one request, your instructions, the conversation, and its own reply, has to fit on that desk at the same time.`,
       key_terms: [
         { term: "Context window", definition: "The maximum number of tokens a model can consider in a single request, covering both input and output." },
         { term: "Token", definition: "A chunk of text the model reads and writes; roughly 4 characters of English." },
@@ -146,10 +146,10 @@ room for answer: 6800`,
         {
           title: "one request, one desk",
           steps: [
-            { label: "Start with a ceiling", detail: "The model has a fixed window — say 8,000 tokens. That number never changes mid-request.", code: "WINDOW = 8000" },
+            { label: "Start with a ceiling", detail: "The model has a fixed window, say 8,000 tokens. That number never changes mid-request.", code: "WINDOW = 8000" },
             { label: "Add your input", detail: "Your instructions and text take up part of the desk. Say your prompt is 1,200 tokens.", code: "prompt_tokens = 1200" },
             { label: "Reserve the rest for output", detail: "Whatever is left is the only room the model has to write its answer.", code: "answer_room = WINDOW - prompt_tokens  # 6800" },
-            { label: "Nothing else fits", detail: "If you tried to paste in 9,000 tokens, it would not fit at all — the desk is full before the model even starts.", code: "9000 > WINDOW  ->  does not fit" }
+            { label: "Nothing else fits", detail: "If you tried to paste in 9,000 tokens, it would not fit at all, the desk is full before the model even starts.", code: "9000 > WINDOW  ->  does not fit" }
           ]
         }
       ],
@@ -170,10 +170,10 @@ room for answer: 6800`,
           steps: [
             "The window caps the total tokens in a single request at 8,000.",
             "The book alone is 120,000 tokens, far more than the window holds.",
-            "So the full book cannot fit in one request — not even leaving room for a question.",
+            "So the full book cannot fit in one request, not even leaving room for a question.",
             "You'd have to feed it in pieces or retrieve only the relevant parts (a later module)."
           ],
-          output: "No — 120,000 tokens is far larger than the 8,000-token window."
+          output: "No, 120,000 tokens is far larger than the 8,000-token window."
         }
       ],
       comparison_tables: [
@@ -184,7 +184,7 @@ room for answer: 6800`,
             { cells: ["What it holds", "This request's text", "Everything learned during training"] },
             { cells: ["Lifetime", "Just this one request", "Frozen permanently in weights"] },
             { cells: ["Size", "A token ceiling per request", "Baked into the model file"] },
-            { cells: ["You control it", "Yes — you choose what to put in", "No — set at training time"], highlight: true }
+            { cells: ["You control it", "Yes, you choose what to put in", "No, set at training time"], highlight: true }
           ]
         }
       ],
@@ -218,9 +218,9 @@ room for answer: 6800`,
       ],
       challenge_title: "Context Packer",
       challenge_description: "Build the prompt assembler that streams retrieved chunks onto the desk in priority order and stops the instant the next one won't fit under the window.",
-      challenge_story: "You're shipping the retrieval layer of a RAG assistant. A reranker hands you document chunks **already sorted by relevance** — most useful first. Your job is the **packer**: glue chunks into the prompt one at a time, but you must always leave a fixed slice of the window **reserved** for the model's answer. The moment the next chunk would push the prompt past that line, you stop cold — you never skip ahead to a smaller chunk, because the chunks are in priority order and a gap would mean injecting a *less* relevant chunk before a more relevant one. Tell the team how many chunks made it in and how much budget is left unused.",
-      challenge_statement: "You are given a window size \`W\`, a reserved answer size \`R\`, and \`n\` chunk sizes in **priority order** (most important first).\n\nThe budget available for chunks is \`W - R\`. Walk the chunks from first to last and add a chunk **only if** the running total of placed chunks would still be \`<= W - R\` after adding it. The **first** chunk that would exceed the budget halts packing immediately — do **not** consider any later chunk.\n\nPrint two numbers, each on its own line:\n\n1. How many chunks were packed.\n2. The leftover budget: \`(W - R)\` minus the total size of the packed chunks.",
-      challenge_input_format: "The first line has three integers: \`W R n\` — the window size, the reserved answer size, and the number of chunks.\n\nThe second line has \`n\` space-separated integers: the chunk sizes in priority order.",
+      challenge_story: "You're shipping the retrieval layer of a RAG assistant. A reranker hands you document chunks **already sorted by relevance**: most useful first. Your job is the **packer**: glue chunks into the prompt one at a time, but you must always leave a fixed slice of the window **reserved** for the model's answer. The moment the next chunk would push the prompt past that line, you stop cold, you never skip ahead to a smaller chunk, because the chunks are in priority order and a gap would mean injecting a *less* relevant chunk before a more relevant one. Tell the team how many chunks made it in and how much budget is left unused.",
+      challenge_statement: "You are given a window size \`W\`, a reserved answer size \`R\`, and \`n\` chunk sizes in **priority order** (most important first).\n\nThe budget available for chunks is \`W - R\`. Walk the chunks from first to last and add a chunk **only if** the running total of placed chunks would still be \`<= W - R\` after adding it. The **first** chunk that would exceed the budget halts packing immediately, do **not** consider any later chunk.\n\nPrint two numbers, each on its own line:\n\n1. How many chunks were packed.\n2. The leftover budget: \`(W - R)\` minus the total size of the packed chunks.",
+      challenge_input_format: "The first line has three integers: \`W R n\`, the window size, the reserved answer size, and the number of chunks.\n\nThe second line has \`n\` space-separated integers: the chunk sizes in priority order.",
       challenge_output_format: "Two lines: the count of packed chunks, then the leftover budget.",
       challenge_constraints: [
         "1 ≤ W ≤ 2000000",
@@ -232,7 +232,7 @@ room for answer: 6800`,
         { input: "1000 200 4\n300 300 300 300", output: "2\n200", explanation: "Budget = 1000 - 200 = 800. Chunk 1 (300) → 300 ≤ 800 ✓. Chunk 2 → 600 ✓. Chunk 3 → 900 > 800, halt. 2 packed, 800 - 600 = 200 left." },
         { input: "8000 1000 3\n2000 3000 5000", output: "2\n2000", explanation: "Budget = 7000. 2000 ✓ (2000), +3000 ✓ (5000), +5000 → 10000 > 7000 halt. 2 packed, 7000 - 5000 = 2000 left." },
       ],
-      challenge_notes: "This is *prefix packing*: because chunks arrive in priority order, the optimal selection is always a prefix — you stop at the first overflow rather than cherry-picking smaller chunks out of order. Real prompt assemblers behave exactly this way, which is why a single oversized early chunk can starve everything behind it.",
+      challenge_notes: "This is *prefix packing*: because chunks arrive in priority order, the optimal selection is always a prefix, you stop at the first overflow rather than cherry-picking smaller chunks out of order. Real prompt assemblers behave exactly this way, which is why a single oversized early chunk can starve everything behind it.",
       challenge_hints: [
         "The usable budget is `W - R`. Keep a running `used` total starting at 0.",
         "For each chunk in order, check `used + size <= budget` before committing; the first failure ends the loop with `break`.",
@@ -289,16 +289,16 @@ main()
       concept: "Token budget",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `You type one short sentence — "What's the weather?" — and somehow the request is 1,500 tokens. Where did they come from? You didn't write 1,500 tokens. But the app did, on your behalf, and all of it lands on the same desk.
+      explanation: `You type one short sentence, "What's the weather?", and somehow the request is 1,500 tokens. Where did they come from? You didn't write 1,500 tokens. But the app did, on your behalf, and all of it lands on the same desk.
 
 ## What it is
 
 The context window is a **budget**, and almost everything in a request spends from it. Four things, every time:
 
-1. **The system prompt** — hidden instructions the app sends first ("You are a helpful assistant…"). You never see it, but it's there, and it costs tokens.
-2. **The full chat history** — every earlier user message *and* every earlier model reply, re-sent on each turn.
-3. **Your new message** — the thing you actually typed.
-4. **Reserved space for the answer** — the model needs room left over to write its reply, so that headroom counts too.
+1. **The system prompt**: hidden instructions the app sends first ("You are a helpful assistant…"). You never see it, but it's there, and it costs tokens.
+2. **The full chat history**: every earlier user message *and* every earlier model reply, re-sent on each turn.
+3. **Your new message**: the thing you actually typed.
+4. **Reserved space for the answer**: the model needs room left over to write its reply, so that headroom counts too.
 
 ## How it works
 
@@ -442,7 +442,7 @@ total used: 1830`,
           steps: [
             "All three parts are input that goes into the window.",
             "Add them up: 150 + 800 + 50.",
-            "That's 1,000 tokens of input — before any answer is written."
+            "That's 1,000 tokens of input, before any answer is written."
           ],
           output: "1,000 input tokens"
         },
@@ -453,9 +453,9 @@ total used: 1830`,
             "Add the input: 300 + 3,200 + 100 = 3,600 tokens.",
             "Add the reserved answer space: 3,600 + 600 = 4,200 tokens needed.",
             "Compare to the window: 4,200 is greater than 4,000.",
-            "It overflows by 200 tokens, so it does not fit — history must be trimmed."
+            "It overflows by 200 tokens, so it does not fit, history must be trimmed."
           ],
-          output: "No — 4,200 needed exceeds the 4,000-token window by 200."
+          output: "No, 4,200 needed exceeds the 4,000-token window by 200."
         }
       ],
       comparison_tables: [
@@ -500,8 +500,8 @@ total used: 1830`,
       ],
       challenge_title: "Overflow Detector",
       challenge_description: "Replay a chat turn by turn, accounting for every hidden token, and pinpoint the exact turn where the request first blows past the window.",
-      challenge_story: "Your support bot keeps mysteriously erroring out deep into long conversations, and the on-call engineer wants to know **when** it tips over before it happens in production. Each turn, the app re-sends the whole bill: the hidden **system prompt**, the **entire history so far** (every past user message *and* every past assistant reply, because the model is stateless), the **new user message**, plus **reserved** headroom for the upcoming answer. Build the pre-flight checker that simulates the conversation and reports the first turn whose total spend exceeds the window — or confirms the whole chat stays under budget.",
-      challenge_statement: "You simulate a conversation. Constants for the session: window \`W\`, system-prompt size \`S\`, reserved answer size \`R\`. Then \`T\` turns arrive in order; turn \`t\` has a user-message size \`u_t\` and an assistant-reply size \`a_t\`.\n\nBefore turn \`t\`'s reply is generated, the request spends:\n\n\`\`\`\nused_t = S + history_before_t + u_t + R\n\`\`\`\n\nwhere \`history_before_t\` is the sum of all earlier turns' user **and** assistant tokens (turns \`1..t-1\`). After turn \`t\`, history grows by \`u_t + a_t\`.\n\nFind the **first** turn \`t\` (1-indexed) where \`used_t > W\`.\n\n- If such a turn exists, print \`OVERFLOW\` on the first line and that turn number on the second.\n- If no turn overflows, print \`OK\` on the first line and the leftover tokens after the **final** turn's request — that is \`W - (S + history_before_T + u_T + R)\` — on the second line.",
+      challenge_story: "Your support bot keeps mysteriously erroring out deep into long conversations, and the on-call engineer wants to know **when** it tips over before it happens in production. Each turn, the app re-sends the whole bill: the hidden **system prompt**, the **entire history so far** (every past user message *and* every past assistant reply, because the model is stateless), the **new user message**, plus **reserved** headroom for the upcoming answer. Build the pre-flight checker that simulates the conversation and reports the first turn whose total spend exceeds the window, or confirms the whole chat stays under budget.",
+      challenge_statement: "You simulate a conversation. Constants for the session: window \`W\`, system-prompt size \`S\`, reserved answer size \`R\`. Then \`T\` turns arrive in order; turn \`t\` has a user-message size \`u_t\` and an assistant-reply size \`a_t\`.\n\nBefore turn \`t\`'s reply is generated, the request spends:\n\n\`\`\`\nused_t = S + history_before_t + u_t + R\n\`\`\`\n\nwhere \`history_before_t\` is the sum of all earlier turns' user **and** assistant tokens (turns \`1..t-1\`). After turn \`t\`, history grows by \`u_t + a_t\`.\n\nFind the **first** turn \`t\` (1-indexed) where \`used_t > W\`.\n\n- If such a turn exists, print \`OVERFLOW\` on the first line and that turn number on the second.\n- If no turn overflows, print \`OK\` on the first line and the leftover tokens after the **final** turn's request, that is \`W - (S + history_before_T + u_T + R)\`, on the second line.",
       challenge_input_format: "The first line has four integers: \`W S R T\`.\n\nEach of the next \`T\` lines has two integers \`u_t a_t\`: the user-message and assistant-reply token sizes for that turn, oldest first.",
       challenge_output_format: "Two lines. Either \`OVERFLOW\` then the 1-indexed overflowing turn, or \`OK\` then the leftover tokens after the final turn's request.",
       challenge_constraints: [
@@ -514,7 +514,7 @@ total used: 1830`,
         { input: "1000 200 300 3\n30 100\n20 80\n40 120", output: "OK\n230", explanation: "t1: 200+0+30+300=530. t2: history=130, 200+130+20+300=650. t3: history=230, 200+230+40+300=770 ≤ 1000. No overflow; leftover after t3 = 1000-770 = 230." },
         { input: "1000 200 300 4\n100 200\n100 200\n100 200\n100 200", output: "OVERFLOW\n3", explanation: "t1=600, t2: history=300 → 900, t3: history=600 → 200+600+100+300=1200 > 1000. First overflow at turn 3." },
       ],
-      challenge_notes: "Notice the request size grows every turn even though your messages stay tiny — that's the re-sent history, the single biggest reason long chats get expensive and eventually fail. The reserved answer block is real budget too: it's space the model demands *before* writing a single output token.",
+      challenge_notes: "Notice the request size grows every turn even though your messages stay tiny, that's the re-sent history, the single biggest reason long chats get expensive and eventually fail. The reserved answer block is real budget too: it's space the model demands *before* writing a single output token.",
       challenge_hints: [
         "Keep a running `history` total. For each turn compute `used = S + history + u + R` BEFORE adding this turn to history.",
         "Record the first turn where `used > W` and stop updating that record (but you can keep looping or break early).",
@@ -578,14 +578,14 @@ main()
       concept: "Truncation",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `Halfway through a long chat, the model suddenly forgets your name — even though you told it ten minutes ago. It isn't being rude or buggy. Your name slid off the desk. This is what running out of context looks like, and it happens in one of two ways.
+      explanation: `Halfway through a long chat, the model suddenly forgets your name, even though you told it ten minutes ago. It isn't being rude or buggy. Your name slid off the desk. This is what running out of context looks like, and it happens in one of two ways.
 
 ## What it is
 
 When a request would exceed the window, you hit the ceiling, and there are only two possible outcomes:
 
 - **A hard error.** Some APIs simply refuse: the request is too big, so the call fails with a "context length exceeded" message. Annoying, but at least it's loud.
-- **Silent truncation.** Many chat apps quietly **drop the oldest text** to make the new request fit. No error, no warning — the start of the conversation just disappears. This is the dangerous one, because it fails quietly.
+- **Silent truncation.** Many chat apps quietly **drop the oldest text** to make the new request fit. No error, no warning, the start of the conversation just disappears. This is the dangerous one, because it fails quietly.
 
 Truncation almost always trims from the **oldest** end. The most recent messages are kept; the beginning falls away. That's exactly why a model "forgets" the early parts of a long chat: those tokens were cut to make room.
 
@@ -599,7 +599,7 @@ turns = [40, 40, 40]   # token cost of each turn, oldest first
 while sum(turns) > WINDOW:
     dropped = turns.pop(0)   # oldest turn falls off
     print("dropped a turn of", dropped, "tokens")
-print("kept:", turns)        # [40, 40] — the first turn is gone
+print("kept:", turns)        # [40, 40], the first turn is gone
 \`\`\`
 
 Notice the system prompt and your newest message are kept; it's the middle-aged history that gets sacrificed. The model now answers as if the dropped turns never happened.
@@ -616,10 +616,10 @@ None of this is the model "losing focus." It's literally not in the window anymo
 
 ## The mental model to keep
 
-When a chat gets long, the **beginning is the first casualty.** If something matters and the conversation is dragging on, don't assume the model still sees it — it may have already fallen off the front of the desk.`,
+When a chat gets long, the **beginning is the first casualty.** If something matters and the conversation is dragging on, don't assume the model still sees it, it may have already fallen off the front of the desk.`,
       key_terms: [
         { term: "Context length exceeded", definition: "A hard error returned when a request's tokens go over the model's window." },
-        { term: "Truncation", definition: "Silently dropping text — usually the oldest — so an over-budget request fits the window." },
+        { term: "Truncation", definition: "Silently dropping text, usually the oldest, so an over-budget request fits the window." },
         { term: "Oldest-first dropping", definition: "The common rule that the earliest turns are cut first, keeping recent messages." }
       ],
       callouts: [
@@ -711,9 +711,9 @@ kept: [40, 40]`,
           title: "how the oldest turn falls off",
           steps: [
             { label: "Measure the request", detail: "Add up the tokens of every turn. Here three turns of 40 make 120 tokens.", code: "sum(turns) = 120" },
-            { label: "Compare to the window", detail: "The window is 100, but the request is 120 — it's over by 20 tokens.", code: "120 > WINDOW(100)  ->  too big" },
+            { label: "Compare to the window", detail: "The window is 100, but the request is 120, it's over by 20 tokens.", code: "120 > WINDOW(100)  ->  too big" },
             { label: "Drop the oldest", detail: "Truncation pops the first turn off the front to shrink the request.", code: "turns.pop(0)  # removes the oldest 40" },
-            { label: "Now it fits", detail: "Two turns remain, totaling 80 tokens — under the window. The model never sees the dropped turn.", code: "kept = [40, 40]  # first turn forgotten" }
+            { label: "Now it fits", detail: "Two turns remain, totaling 80 tokens, under the window. The model never sees the dropped turn.", code: "kept = [40, 40]  # first turn forgotten" }
           ]
         }
       ],
@@ -724,20 +724,20 @@ kept: [40, 40]`,
           steps: [
             "Total is 60 + 60 = 120, which exceeds 100.",
             "Drop the oldest turn (the first 60).",
-            "Now only [60] remains, totaling 60 — under the window."
+            "Now only [60] remains, totaling 60, under the window."
           ],
-          output: "[60] — the oldest turn was dropped"
+          output: "[60], the oldest turn was dropped"
         },
         {
           number: 2, difficulty: "medium",
           prompt: "You set a rule in your first message of a chat. After many turns, the model breaks the rule. Is the model malfunctioning?",
           steps: [
             "As the chat grew, the total tokens eventually exceeded the window.",
-            "Truncation drops from the oldest end — and your first message is the oldest.",
+            "Truncation drops from the oldest end, and your first message is the oldest.",
             "So the rule fell out of the window and is now invisible to the model.",
             "The model isn't malfunctioning; it's answering correctly given what it can still see."
           ],
-          output: "No — the early rule was truncated out, so the model can no longer see it."
+          output: "No, the early rule was truncated out, so the model can no longer see it."
         }
       ],
       comparison_tables: [
@@ -746,7 +746,7 @@ kept: [40, 40]`,
           columns: ["Aspect", "Hard error", "Silent truncation"],
           rows: [
             { cells: ["What happens", "The request fails", "Oldest text is dropped"] },
-            { cells: ["Do you get a warning?", "Yes, an error message", "No — it's silent"] },
+            { cells: ["Do you get a warning?", "Yes, an error message", "No, it's silent"] },
             { cells: ["Easy to notice?", "Yes, the call breaks", "No, behavior just gets weird"] },
             { cells: ["Risk", "Annoying but obvious", "Confusing and easy to miss"], highlight: true }
           ]
@@ -782,9 +782,9 @@ kept: [40, 40]`,
       ],
       challenge_title: "Sliding-Window Truncator",
       challenge_description: "Implement the silent truncation a chat app performs in real time: as each new turn streams in, evict the oldest turns until the conversation fits again.",
-      challenge_story: "You inherited a chat product that silently drops history when it gets too big, and users complain the bot 'forgets' things mid-conversation. Before you fix the UX, you need to reproduce the engine exactly. Turns arrive one at a time, oldest first. After **each** arrival you append it, then evict turns from the **front** (the oldest) until the running total fits the history budget again — but you can **never drop the most recent turn**, even if it alone exceeds the budget (the model still tries, it just risks erroring). At the end, report how many turns got silently dropped, how many survive, and the final token total.",
-      challenge_statement: "You are given a history budget \`W\` and \`T\` turns arriving in order (oldest first), each with a token size. Maintain a queue of kept turns and a running total.\n\nFor each arriving turn:\n\n1. Append it to the back of the queue and add its size to the total.\n2. While the total is \`> W\` **and** more than one turn remains in the queue, remove the **oldest** turn from the front (this counts as one dropped turn) and subtract its size.\n\nThe guard \`more than one turn remains\` means a single turn larger than \`W\` is kept anyway — it is the newest and cannot be dropped.\n\nAfter processing all turns, print three numbers, each on its own line:\n\n1. The total number of dropped turns.\n2. The number of surviving turns in the queue.\n3. The final token total of the surviving turns.",
-      challenge_input_format: "The first line has two integers: \`W T\` — the history budget and the number of turns.\n\nThe second line has \`T\` space-separated integers: the turn sizes in arrival order, oldest first.",
+      challenge_story: "You inherited a chat product that silently drops history when it gets too big, and users complain the bot 'forgets' things mid-conversation. Before you fix the UX, you need to reproduce the engine exactly. Turns arrive one at a time, oldest first. After **each** arrival you append it, then evict turns from the **front** (the oldest) until the running total fits the history budget again, but you can **never drop the most recent turn**, even if it alone exceeds the budget (the model still tries, it just risks erroring). At the end, report how many turns got silently dropped, how many survive, and the final token total.",
+      challenge_statement: "You are given a history budget \`W\` and \`T\` turns arriving in order (oldest first), each with a token size. Maintain a queue of kept turns and a running total.\n\nFor each arriving turn:\n\n1. Append it to the back of the queue and add its size to the total.\n2. While the total is \`> W\` **and** more than one turn remains in the queue, remove the **oldest** turn from the front (this counts as one dropped turn) and subtract its size.\n\nThe guard \`more than one turn remains\` means a single turn larger than \`W\` is kept anyway, it is the newest and cannot be dropped.\n\nAfter processing all turns, print three numbers, each on its own line:\n\n1. The total number of dropped turns.\n2. The number of surviving turns in the queue.\n3. The final token total of the surviving turns.",
+      challenge_input_format: "The first line has two integers: \`W T\`, the history budget and the number of turns.\n\nThe second line has \`T\` space-separated integers: the turn sizes in arrival order, oldest first.",
       challenge_output_format: "Three lines: dropped count, surviving count, final token total.",
       challenge_constraints: [
         "1 ≤ W ≤ 1000000",
@@ -795,11 +795,11 @@ kept: [40, 40]`,
         { input: "70 4\n30 30 30 30", output: "2\n2\n60", explanation: "After turn 3 the total is 90 > 70, drop one (60). After turn 4, total 90 again, drop one more (60). Two dropped, two kept, total 60." },
         { input: "50 3\n60 10 10", output: "1\n2\n20", explanation: "Turn 1 alone (60) exceeds 50 but it's the only turn, so it stays. Turn 2 → total 70 > 50, drop the 60. Turn 3 → total 20 ≤ 50. One dropped, two kept, 20 total." },
       ],
-      challenge_notes: "This is a FIFO sliding window — a deque makes both the append and the front-eviction O(1), so the whole simulation is O(T) even for huge chats. The 'never drop the newest turn' rule is exactly why a single giant pasted document can still blow past the window and trigger a hard error instead of being silently trimmed.",
+      challenge_notes: "This is a FIFO sliding window, a deque makes both the append and the front-eviction O(1), so the whole simulation is O(T) even for huge chats. The 'never drop the newest turn' rule is exactly why a single giant pasted document can still blow past the window and trigger a hard error instead of being silently trimmed.",
       challenge_hints: [
         "Use collections.deque so popleft() is O(1); a plain list with pop(0) would be O(n) per drop.",
         "Track a running `total` so you never re-sum the whole queue.",
-        "The eviction loop condition is `total > W and len(queue) > 1` — the second clause protects the newest turn.",
+        "The eviction loop condition is `total > W and len(queue) > 1`, the second clause protects the newest turn.",
       ],
       challenge_starter_code: `import sys
 from collections import deque
@@ -854,13 +854,13 @@ main()
       concept: "Context management",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `So the desk fills up and old sheets slide off. You're not helpless about it. The whole craft of building good AI features is deciding *what stays on the desk* — and there are three reliable moves for keeping the important stuff in view.
+      explanation: `So the desk fills up and old sheets slide off. You're not helpless about it. The whole craft of building good AI features is deciding *what stays on the desk*, and there are three reliable moves for keeping the important stuff in view.
 
 ## What it is
 
 **Context management** is the practice of choosing what goes into the window so the model always has what it needs and nothing it doesn't. Three core strategies do most of the work:
 
-1. **Trim old turns.** Drop the oldest messages once you're near the limit — like silent truncation, but deliberate and on your terms.
+1. **Trim old turns.** Drop the oldest messages once you're near the limit, like silent truncation, but deliberate and on your terms.
 2. **Summarize history.** Replace many old turns with one short summary. Fifty turns of chatter become a three-line recap that costs a fraction of the tokens but preserves the gist.
 3. **Keep only relevant chunks.** Instead of stuffing everything in, include just the pieces that matter for *this* question. (Retrieval, a later module, automates picking those pieces.)
 
@@ -1019,9 +1019,9 @@ chars after: 49`,
           title: "three context strategies compared",
           columns: ["Strategy", "Keeps meaning?", "Token savings", "Best for"],
           rows: [
-            { cells: ["Trim old turns", "No — drops it", "High", "Old chatter that no longer matters"] },
-            { cells: ["Summarize history", "Yes — the gist", "High", "Long sessions you must remember"] },
-            { cells: ["Keep relevant chunks", "Yes — for the question", "Very high", "Answering from big documents"], highlight: true }
+            { cells: ["Trim old turns", "No, drops it", "High", "Old chatter that no longer matters"] },
+            { cells: ["Summarize history", "Yes, the gist", "High", "Long sessions you must remember"] },
+            { cells: ["Keep relevant chunks", "Yes, for the question", "Very high", "Answering from big documents"], highlight: true }
           ]
         }
       ],
@@ -1054,8 +1054,8 @@ chars after: 49`,
         "len(summary) gives the size of the summary; print both totals."
       ],
       challenge_title: "Summarize-or-Truncate",
-      challenge_description: "Decide the minimum amount of history to collapse into a summary so the conversation fits the window — preserving as many recent turns verbatim as possible.",
-      challenge_story: "You're building the context manager for a long-running agent. When history gets too big, you have two tools: **drop** old turns or **summarize** them. Summarizing wins because one short recap replaces many turns while keeping the gist — so your policy is: keep the most recent turns word-for-word, and collapse the **oldest prefix** of turns into a single summary of fixed cost \`C\`. You want to summarize as **few** turns as possible (summarizing destroys detail), while still fitting history into its budget. Find that minimal prefix, and report the resulting history size and the leftover room.",
+      challenge_description: "Decide the minimum amount of history to collapse into a summary so the conversation fits the window, preserving as many recent turns verbatim as possible.",
+      challenge_story: "You're building the context manager for a long-running agent. When history gets too big, you have two tools: **drop** old turns or **summarize** them. Summarizing wins because one short recap replaces many turns while keeping the gist, so your policy is: keep the most recent turns word-for-word, and collapse the **oldest prefix** of turns into a single summary of fixed cost \`C\`. You want to summarize as **few** turns as possible (summarizing destroys detail), while still fitting history into its budget. Find that minimal prefix, and report the resulting history size and the leftover room.",
       challenge_statement: "Session constants: window \`W\`, system prompt \`S\`, new message \`M\`, reserved answer \`R\`, and summary cost \`C\`. The tokens available for history are \`budget = W - S - M - R\`.\n\nYou have \`T\` history turns, oldest first, with sizes \`turns[0..T-1]\`. For a chosen \`k\` (0 ≤ k ≤ T): summarize the oldest \`k\` turns into one summary costing \`C\` (if \`k = 0\`, there is no summary and no cost), and keep turns \`k..T-1\` verbatim. The resulting history size is:\n\n\`\`\`\nsize(k) = (C if k > 0 else 0) + sum(turns[k..T-1])\n\`\`\`\n\nFind the **smallest** \`k\` such that \`size(k) <= budget\`.\n\n- If such a \`k\` exists, print three lines: \`k\`, then \`size(k)\`, then \`budget - size(k)\`.\n- If even summarizing all \`T\` turns (\`k = T\`) does not fit, print \`IMPOSSIBLE\` on a single line.",
       challenge_input_format: "The first line has six integers: \`W S M R C T\`.\n\nThe second line has \`T\` space-separated integers: the history turn sizes, oldest first.",
       challenge_output_format: "Either three lines (\`k\`, the history size, the leftover room) or a single line \`IMPOSSIBLE\`.",
@@ -1070,10 +1070,10 @@ chars after: 49`,
         { input: "4000 300 100 800 50 4\n900 800 700 600", output: "1\n2150\n650", explanation: "budget = 4000-300-100-800 = 2800. k=0 keeps all → 3000 > 2800. k=1 summarizes the oldest turn: 50 + (800+700+600) = 2150 ≤ 2800. Smallest k is 1; leftover 650." },
         { input: "2000 200 100 500 30 5\n400 400 400 400 400", output: "3\n830\n370", explanation: "budget = 1200. k=0:2000, k=1:30+1600=1630, k=2:30+1200=1230, k=3:30+800=830 ≤ 1200. Smallest fitting k is 3." },
       ],
-      challenge_notes: "Increasing \`k\` always shrinks (or holds) the history once you've paid the summary cost, so a single forward scan with a suffix-sum finds the answer in O(T). This 'summarize the oldest, keep the newest verbatim' policy is the workhorse of production agents — it trades old detail for room without losing the recent thread.",
+      challenge_notes: "Increasing \`k\` always shrinks (or holds) the history once you've paid the summary cost, so a single forward scan with a suffix-sum finds the answer in O(T). This 'summarize the oldest, keep the newest verbatim' policy is the workhorse of production agents, it trades old detail for room without losing the recent thread.",
       challenge_hints: [
         "Precompute suffix sums so `sum(turns[k:])` is O(1) per k.",
-        "The head cost is `C` when `k > 0` and `0` when `k == 0` — don't charge a summary for summarizing nothing.",
+        "The head cost is `C` when `k > 0` and `0` when `k == 0`, don't charge a summary for summarizing nothing.",
         "Scan k from 0 upward and take the first k whose size fits; if none through k = T fit, it's IMPOSSIBLE.",
       ],
       challenge_starter_code: `import sys
@@ -1138,7 +1138,7 @@ main()
       concept: "Counting",
       challenge_difficulty: "beginner",
       xp_reward: 10,
-      explanation: `You paste a document, the app says "12,000 tokens," and your own back-of-the-envelope math said 9,000. Neither of you is wrong, exactly. You estimated; the app *counted*. Knowing the difference between those two — and when each is good enough — is the whole skill here.
+      explanation: `You paste a document, the app says "12,000 tokens," and your own back-of-the-envelope math said 9,000. Neither of you is wrong, exactly. You estimated; the app *counted*. Knowing the difference between those two, and when each is good enough, is the whole skill here.
 
 ## What it is
 
@@ -1164,7 +1164,7 @@ exact = len(real_tokens)               # 5 tokens (truth)
 print("estimate:", estimate, "exact:", exact)
 \`\`\`
 
-The estimate said 6, the tokenizer said 5. Close, but not equal — and that gap is the point.
+The estimate said 6, the tokenizer said 5. Close, but not equal, and that gap is the point.
 
 ## Why it matters
 
@@ -1220,7 +1220,7 @@ The 4-chars rule is a **speedometer guess**; the tokenizer is the **odometer**. 
         {
           question: "When should you use the exact tokenizer instead of the quick estimate?",
           options: [
-            "Never — the estimate is always good enough",
+            "Never, the estimate is always good enough",
             "When the text must fit a hard limit or real money is on the line",
             "Only for text under 10 characters",
             "Only when the model is offline"
@@ -1303,11 +1303,11 @@ drift: 1`,
           prompt: "Your estimate says a 40,000-character prompt is 10,000 tokens, comfortably under a 12,000 limit. But it is full of code and rare identifiers. Should you trust the estimate to fit?",
           steps: [
             "The 4-chars rule assumes plain English, but code and rare identifiers split into many tiny tokens.",
-            "That means the real count is likely HIGHER than 10,000 — the estimate undercounts messy text.",
+            "That means the real count is likely HIGHER than 10,000, the estimate undercounts messy text.",
             "You only have 2,000 tokens of headroom, so even modest drift could push you over 12,000.",
             "Run the real tokenizer before sending; do not rely on the estimate when you are this close to a hard limit."
           ],
-          output: "No — code undercounts, so verify with the real tokenizer before trusting it to fit."
+          output: "No, code undercounts, so verify with the real tokenizer before trusting it to fit."
         }
       ],
       comparison_tables: [
@@ -1342,7 +1342,7 @@ drift: 1`,
       reflections: [
         {
           prompt: "In your own words: why is the 4-characters rule still useful even though it is only an estimate?",
-          sampleAnswer: "The rule is instant — it is just dividing the character count by four — so it lets me sanity-check whether a prompt is roughly affordable or roughly within a window without running anything. It drifts on messy or non-English text and shouldn't be trusted right at a hard limit, but for quick early decisions while sketching, a fast approximate answer is far more practical than spinning up the real tokenizer every time."
+          sampleAnswer: "The rule is instant, it is just dividing the character count by four, so it lets me sanity-check whether a prompt is roughly affordable or roughly within a window without running anything. It drifts on messy or non-English text and shouldn't be trusted right at a hard limit, but for quick early decisions while sketching, a fast approximate answer is far more practical than spinning up the real tokenizer every time."
         }
       ],
       hints: [
@@ -1352,7 +1352,7 @@ drift: 1`,
       ],
       challenge_title: "Tokenizer Calibrator",
       challenge_description: "Compare the 4-characters estimate against true tokenizer counts across many text samples and report how far off the rule is on average.",
-      challenge_story: "Your team relies on the quick 4-characters rule to size prompts, but lately requests near the limit have been silently rejected by the real tokenizer. Before you decide whether to keep trusting the rule, you want hard numbers: across a batch of real samples, how badly does the estimate drift from the true count? You're handed each sample's **character length** (so you can compute the estimate) alongside its **actual** token count from the tokenizer. Build the calibrator that reports the total absolute drift and how many samples the rule **undercounted** (estimate below the truth) — the dangerous direction near a limit.",
+      challenge_story: "Your team relies on the quick 4-characters rule to size prompts, but lately requests near the limit have been silently rejected by the real tokenizer. Before you decide whether to keep trusting the rule, you want hard numbers: across a batch of real samples, how badly does the estimate drift from the true count? You're handed each sample's **character length** (so you can compute the estimate) alongside its **actual** token count from the tokenizer. Build the calibrator that reports the total absolute drift and how many samples the rule **undercounted** (estimate below the truth), the dangerous direction near a limit.",
       challenge_statement: "For each sample you are given two integers: its character length \`chars\` and its true token count \`actual\`.\n\nThe estimate uses the 4-characters rule, rounded up: \`estimate = ceil(chars / 4)\`.\n\nFor each sample compute the absolute drift \`|estimate - actual|\`. A sample is **undercounted** when \`estimate < actual\`.\n\nPrint two lines:\n\n1. The total absolute drift summed over all samples.\n2. The number of undercounted samples.",
       challenge_input_format: "The first line is an integer \`n\`, the number of samples.\n\nEach of the next \`n\` lines has two integers: \`chars actual\`.",
       challenge_output_format: "Two lines: the total absolute drift, then the count of undercounted samples.",
@@ -1420,14 +1420,14 @@ main()
       concept: "Sizes",
       challenge_difficulty: "intermediate",
       xp_reward: 10,
-      explanation: `The first widely used chat models had an 8,000-token window — about a dozen pages. A few years later, some models advertise windows of a million tokens or more — a stack of novels. That is a hundred-fold jump, and it completely changes what a model can do in one request. But bigger is not automatically better, and knowing why is what separates picking a model from guessing at one.
+      explanation: `The first widely used chat models had an 8,000-token window, about a dozen pages. A few years later, some models advertise windows of a million tokens or more, a stack of novels. That is a hundred-fold jump, and it completely changes what a model can do in one request. But bigger is not automatically better, and knowing why is what separates picking a model from guessing at one.
 
 ## What it is
 
 Different models ship with very different **window sizes**, measured in tokens. You'll see common tiers:
 
-- **Small (about 8k tokens):** roughly 6,000 words — a short essay or a few files.
-- **Medium (about 32k tokens):** roughly 24,000 words — a long report.
+- **Small (about 8k tokens):** roughly 6,000 words, a short essay or a few files.
+- **Medium (about 32k tokens):** roughly 24,000 words, a long report.
 - **Large (128k to 200k tokens):** a whole book in one request.
 - **Huge (1M+ tokens):** an entire codebase or a shelf of documents at once.
 
@@ -1435,7 +1435,7 @@ Each tier is just a different ceiling on the same desk from lesson 1. The desk s
 
 ## How it works
 
-The window size is fixed per model — you don't grow it, you *choose* it by picking the right model for the task. The deciding factors are how much text the job genuinely needs in view at once, and what that costs:
+The window size is fixed per model, you don't grow it, you *choose* it by picking the right model for the task. The deciding factors are how much text the job genuinely needs in view at once, and what that costs:
 
 \`\`\`python
 task_tokens = 60000   # how much you actually need in the window
@@ -1461,14 +1461,14 @@ The window you choose drives both capability and cost:
 
 ## The mental model to keep
 
-Window size is like **choosing a vehicle.** A bike is cheap and quick for a short errand; a moving truck is the only thing that hauls a houseful of furniture, but you wouldn't drive it to buy milk. **Match the window to the load — no smaller, no bigger than you need.**`,
+Window size is like **choosing a vehicle.** A bike is cheap and quick for a short errand; a moving truck is the only thing that hauls a houseful of furniture, but you wouldn't drive it to buy milk. **Match the window to the load, no smaller, no bigger than you need.**`,
       key_terms: [
         { term: "Window size", definition: "The fixed maximum number of tokens a particular model can hold in one request, ranging from a few thousand to millions." },
         { term: "Window tier", definition: "A rough class of window size: small (~8k), medium (~32k), large (128k-200k), or huge (1M+)." },
         { term: "Right-sizing", definition: "Choosing the smallest window that comfortably fits the task, to balance capability against cost and speed." }
       ],
       callouts: [
-        { type: "analogy", title: "Pick the right vehicle", content: "A bike for a quick errand, a truck for a big move. A 200k window is a moving truck — essential for a houseful of furniture, wasteful for a carton of milk.", position: "before" },
+        { type: "analogy", title: "Pick the right vehicle", content: "A bike for a quick errand, a truck for a big move. A 200k window is a moving truck, essential for a houseful of furniture, wasteful for a carton of milk.", position: "before" },
         { type: "tip", title: "Smallest that fits", content: "Bigger windows cost more and run slower. Choose the smallest tier that comfortably holds the job, not the largest one available.", position: "after" }
       ],
       concept_diagram: {
@@ -1557,7 +1557,7 @@ use: large-200k`,
         {
           title: "choosing a window for the job",
           steps: [
-            { label: "Measure the task", detail: "Estimate how many tokens the request genuinely needs in view — say a 60,000-token report.", code: "task_tokens = 60000" },
+            { label: "Measure the task", detail: "Estimate how many tokens the request genuinely needs in view, say a 60,000-token report.", code: "task_tokens = 60000" },
             { label: "Rule out small tiers", detail: "8k and 32k windows can't hold 60,000 tokens, so they are off the table for this job.", code: "60000 > 32000  ->  too big for medium" },
             { label: "Pick the smallest fit", detail: "A large (200k) window fits comfortably. You don't reach for a 1M window you don't need.", code: 'model = "large-200k"' },
             { label: "Accept the trade-off", detail: "The bigger window costs more and runs slower than 8k, but it's the only tier that fits the load.", code: "bigger window -> more cost, more capacity" }
@@ -1570,7 +1570,7 @@ use: large-200k`,
           prompt: "You need to summarize a 5,000-word article (about 6,600 tokens) and reserve room for a short summary. Which window tier is enough?",
           steps: [
             "Estimate the input: 5,000 words is roughly 6,600 tokens.",
-            "Add a little room for the summary output — still well under 8,000.",
+            "Add a little room for the summary output, still well under 8,000.",
             "A small (~8k) window comfortably holds it, so no bigger tier is needed."
           ],
           output: "A small (~8k) window is enough"
@@ -1582,9 +1582,9 @@ use: large-200k`,
             "First check capability: 5,000 tokens fits inside the 8k window, so both models *can* do it.",
             "Since both fit, the deciding factor becomes cost and speed.",
             "The 8k model is 10x cheaper and faster, and you never use the extra room of the 200k model.",
-            "Right-sizing says pick the smallest window that fits — the 8k model wins."
+            "Right-sizing says pick the smallest window that fits, the 8k model wins."
           ],
-          output: "The 8k model — it fits the job and is 10x cheaper; the big window's extra room is wasted."
+          output: "The 8k model, it fits the job and is 10x cheaper; the big window's extra room is wasted."
         }
       ],
       comparison_tables: [
@@ -1619,7 +1619,7 @@ use: large-200k`,
       reflections: [
         {
           prompt: "In your own words: why might a smaller, cheaper window be the better choice even when a huge window is available?",
-          sampleAnswer: "If the task genuinely fits in a small window, the larger window's extra room buys nothing — I'd just be paying more and waiting longer for the same result. Bigger windows cost more per request and run slower, and a window padded with irrelevant text can even dilute the answer. So when the load is small, right-sizing to the smallest window that comfortably fits gives the same capability for less money and more speed."
+          sampleAnswer: "If the task genuinely fits in a small window, the larger window's extra room buys nothing, I'd just be paying more and waiting longer for the same result. Bigger windows cost more per request and run slower, and a window padded with irrelevant text can even dilute the answer. So when the load is small, right-sizing to the smallest window that comfortably fits gives the same capability for less money and more speed."
         }
       ],
       hints: [
@@ -1724,7 +1724,7 @@ main()
 
 **Lost in the middle** is the tendency of a model to pay **less attention to information in the middle** of a long context than to information at the beginning or the end. The result is a U-shaped accuracy curve: high at the edges, sagging in the center. A fact the model could easily use if placed first becomes easy to miss when buried halfway down a giant prompt.
 
-Crucially, this is about *position*, not whether the fact is in the window at all. The fact fits fine — the model just attends to it weakly because of where it sits.
+Crucially, this is about *position*, not whether the fact is in the window at all. The fact fits fine, the model just attends to it weakly because of where it sits.
 
 ## How it works
 
@@ -1748,19 +1748,19 @@ The fix is purely about *arrangement*. Move the must-use information to an edge,
 This quietly breaks long-context features that "should" work:
 
 - **Stuffing everything in isn't enough.** A fact can be present in the window and still get ignored because it landed in the dead zone.
-- **Order is a lever you control.** Putting instructions first and the critical reference last is a free, reliable quality boost — no model change required.
+- **Order is a lever you control.** Putting instructions first and the critical reference last is a free, reliable quality boost, no model change required.
 - **The longer the context, the worse the sag.** A bigger window gives you more room *and* a bigger middle for things to get lost in.
 
 ## The mental model to keep
 
-A long context is like a **speech the model half-listens to.** It remembers the opening and the closing; the middle blurs. **Put what must not be missed at the start or the end — never in the murky middle.**`,
+A long context is like a **speech the model half-listens to.** It remembers the opening and the closing; the middle blurs. **Put what must not be missed at the start or the end, never in the murky middle.**`,
       key_terms: [
         { term: "Lost in the middle", definition: "A model's tendency to attend less to information placed in the middle of a long context than at the start or end." },
         { term: "U-shaped accuracy", definition: "The pattern where recall is high at the beginning and end of a long context and lower in the center." },
         { term: "Positional attention", definition: "How strongly the model weights information based on where it sits in the input, independent of whether it fits." }
       ],
       callouts: [
-        { type: "insight", title: "Position changes attention", content: "The same fact is used reliably at an edge and missed in the middle. It's not about whether the fact fits — it's about where it sits.", position: "before" },
+        { type: "insight", title: "Position changes attention", content: "The same fact is used reliably at an edge and missed in the middle. It's not about whether the fact fits, it's about where it sits.", position: "before" },
         { type: "tip", title: "Instructions first, key fact last", content: "Bookend your prompt: put instructions at the very top and the most critical reference at the very bottom. Filler goes in the middle, where weak attention hurts least.", position: "after" }
       ],
       concept_diagram: {
@@ -1820,7 +1820,7 @@ A long context is like a **speech the model half-listens to.** It remembers the 
           activity_title: "Position check",
           questions: [
             { question: "Putting a critical fact in the middle of a very long prompt is just as reliable as putting it at the end.", type: "true_false", correct_answer: "false", explanation: "The middle gets the weakest attention, so it is the least reliable spot." },
-            { question: "The accuracy pattern of strong edges and a weak center is called a ______-shaped curve.", type: "fill_in", correct_answer: "U", explanation: "Recall is high at the start and end, low in the middle — a U shape." }
+            { question: "The accuracy pattern of strong edges and a weak center is called a ______-shaped curve.", type: "fill_in", correct_answer: "U", explanation: "Recall is high at the start and end, low in the middle, a U shape." }
           ]
         }
       ],
@@ -1852,7 +1852,7 @@ for i, item in enumerate(context):
           title: "arranging a prompt to beat the middle",
           steps: [
             { label: "Identify the must-use info", detail: "Find the one fact or instruction the model absolutely cannot miss.", code: 'key_fact = "the meeting is at 3pm."' },
-            { label: "Spot the dead zone", detail: "In a long prompt, the middle gets the weakest attention — a risky home for anything important.", code: "middle = weak attention region" },
+            { label: "Spot the dead zone", detail: "In a long prompt, the middle gets the weakest attention, a risky home for anything important.", code: "middle = weak attention region" },
             { label: "Bookend the essentials", detail: "Put instructions at the very start and the key fact at the very end, where attention is strongest.", code: "context = [instructions, *filler, key_fact]" },
             { label: "Bury the filler", detail: "Low-value reference text goes in the middle, where weak attention does the least harm.", code: "filler -> the murky middle" }
           ]
@@ -1867,7 +1867,7 @@ for i, item in enumerate(context):
             "That points to the rule being buried in the center, where attention is weakest.",
             "Moving it to the start or end should fix the problem."
           ],
-          output: "Probably in the middle — move it to an edge."
+          output: "Probably in the middle, move it to an edge."
         },
         {
           number: 2, difficulty: "medium",
@@ -1875,10 +1875,10 @@ for i, item in enumerate(context):
           steps: [
             "Document #11 sits in the middle of a long context, the region of weakest attention.",
             "Even though it fits in the window, the model attends to it too weakly to use it reliably.",
-            "Reorder so the most relevant document is at an edge — ideally last, right before the question.",
+            "Reorder so the most relevant document is at an edge, ideally last, right before the question.",
             "Better yet, retrieve and include only the relevant document instead of all 20, shrinking the middle entirely."
           ],
-          output: "Lost in the middle — move the relevant document to an edge, or retrieve only it."
+          output: "Lost in the middle, move the relevant document to an edge, or retrieve only it."
         }
       ],
       comparison_tables: [
@@ -2002,8 +2002,8 @@ main()
 
 When the input is bigger than what you want in the window, there are three strategies:
 
-1. **Stuff it.** Put as much as fits directly into the window. Simple and complete — until the input outgrows even a large window, or the cost and the lost-in-the-middle effect bite.
-2. **Summarize.** Compress the input (or the history) into a shorter form first, then send the summary. Cheap and scalable, but lossy — detail is thrown away.
+1. **Stuff it.** Put as much as fits directly into the window. Simple and complete, until the input outgrows even a large window, or the cost and the lost-in-the-middle effect bite.
+2. **Summarize.** Compress the input (or the history) into a shorter form first, then send the summary. Cheap and scalable, but lossy, detail is thrown away.
 3. **Retrieve.** Pull in only the chunks relevant to *this* question and send just those. Precise and cheap, but it depends on retrieval actually finding the right pieces.
 
 ## How it works
@@ -2030,7 +2030,7 @@ The decision hinges on two questions: does it fit, and does the question need *s
 Each strategy fails in its own way, and matching the failure mode to your task is the skill:
 
 - **Stuffing** is the most faithful but the most expensive, and on huge inputs it triggers cost blowups and lost-in-the-middle misses.
-- **Summarizing** scales to any size but **loses detail** — disastrous if the answer hinges on an exact clause you compressed away.
+- **Summarizing** scales to any size but **loses detail**: disastrous if the answer hinges on an exact clause you compressed away.
 - **Retrieval** is precise and cheap but **fails silently** when it fetches the wrong chunk: the model then answers confidently from incomplete context.
 
 Real systems often **combine** them: retrieve the relevant chunks, summarize the older history, and stuff the small, recent, must-have details verbatim.
@@ -2045,7 +2045,7 @@ Stuffing is **reading the whole book** every time. Summarizing is **reading the 
       ],
       callouts: [
         { type: "analogy", title: "Book, blurb, or index", content: "Stuffing reads the whole book each time. Summarizing reads the back-cover blurb. Retrieval uses the index to flip to one page. Pick by what the question actually needs.", position: "before" },
-        { type: "warning", title: "Retrieval can fail silently", content: "If retrieval fetches the wrong chunk, the model answers confidently from incomplete context — no error, just a quietly wrong answer. Precision depends on fetching the right pieces.", position: "after" }
+        { type: "warning", title: "Retrieval can fail silently", content: "If retrieval fetches the wrong chunk, the model answers confidently from incomplete context, no error, just a quietly wrong answer. Precision depends on fetching the right pieces.", position: "after" }
       ],
       concept_diagram: {
         title: "Choosing a long-context strategy",
@@ -2093,7 +2093,7 @@ Stuffing is **reading the whole book** every time. Summarizing is **reading the 
             "Always, regardless of size",
             "When the input comfortably fits and you want the most faithful, complete context",
             "Only when the input is non-English",
-            "Never — stuffing is always wrong"
+            "Never, stuffing is always wrong"
           ],
           correct_index: 1,
           explanation: "Stuffing is the simplest and most faithful option when the input fits the window without ballooning cost."
@@ -2153,14 +2153,14 @@ strategy: retrieve`,
             "Since it fits and you want full fidelity, no compression or retrieval is needed.",
             "Stuffing the whole report in is the simplest, most faithful choice."
           ],
-          output: "Stuff it — the report fits and you want complete context."
+          output: "Stuff it, the report fits and you want complete context."
         },
         {
           number: 2, difficulty: "medium",
           prompt: "You have a 2-million-token archive of support tickets and a model with a 200k window. A user asks a question that only a handful of past tickets answer. What strategy, and what's the main risk?",
           steps: [
             "The archive is 10x larger than the window, so stuffing is impossible.",
-            "The question depends on a few specific tickets, not the overall gist — that points to retrieval over summarizing.",
+            "The question depends on a few specific tickets, not the overall gist, that points to retrieval over summarizing.",
             "Retrieve the handful of relevant tickets and send only those, keeping cost low and detail intact.",
             "The main risk is a silent retrieval miss: if the wrong tickets are fetched, the model answers confidently from incomplete context."
           ],
@@ -2209,7 +2209,7 @@ strategy: retrieve`,
       ],
       challenge_title: "Strategy Router",
       challenge_description: "Route each long-context task to stuff, summarize, or retrieve based on whether it fits the window and whether it needs specific passages or the overall gist.",
-      challenge_story: "You're building the dispatcher at the front of a long-context pipeline. Every incoming task carries the size of its input in tokens and a flag for what kind of answer it needs. Your routing policy bundles the whole module's lessons into one rule: if the input **fits** the window, just **STUFF** it (simplest and most faithful). If it doesn't fit, branch on the need — tasks needing **specific** passages go to **RETRIEVE**, tasks needing only the **gist** go to **SUMMARIZE**. After routing a batch, your ops team wants a tally of how many tasks went to each strategy.",
+      challenge_story: "You're building the dispatcher at the front of a long-context pipeline. Every incoming task carries the size of its input in tokens and a flag for what kind of answer it needs. Your routing policy bundles the whole module's lessons into one rule: if the input **fits** the window, just **STUFF** it (simplest and most faithful). If it doesn't fit, branch on the need, tasks needing **specific** passages go to **RETRIEVE**, tasks needing only the **gist** go to **SUMMARIZE**. After routing a batch, your ops team wants a tally of how many tasks went to each strategy.",
       challenge_statement: "The window size \`W\` is fixed for the batch. You are given \`q\` tasks. Each task has an input size \`t\` (in tokens) and a need flag \`need\` which is either \`specific\` or \`gist\`.\n\nRoute each task:\n\n1. If \`t <= W\`, route to \`STUFF\` (regardless of need).\n2. Otherwise, if \`need\` is \`specific\`, route to \`RETRIEVE\`.\n3. Otherwise (\`need\` is \`gist\`), route to \`SUMMARIZE\`.\n\nPrint three lines, the count routed to each strategy in this order:\n\n1. \`STUFF <count>\`\n2. \`SUMMARIZE <count>\`\n3. \`RETRIEVE <count>\`",
       challenge_input_format: "The first line has two integers \`W q\`: the window size and the number of tasks.\n\nEach of the next \`q\` lines has an integer \`t\` and a word \`need\` (\`specific\` or \`gist\`), space-separated.",
       challenge_output_format: "Three lines: \`STUFF <count>\`, then \`SUMMARIZE <count>\`, then \`RETRIEVE <count>\`.",

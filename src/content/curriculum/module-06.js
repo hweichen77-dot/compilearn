@@ -25,14 +25,14 @@ export default {
 
 A **vector** is just an ordered list of numbers. Picture every word as a dot on a map. "cat" lives at coordinates \`[4, 1]\`. "kitten" lives nearby at \`[3, 1]\`. "car" is way off at \`[1, 5]\`. That list of coordinates is the vector. The map can have 2 dimensions like here, or 1,536 dimensions like a real embedding model. Same idea, more axes.
 
-The whole game of embeddings is one sentence: **place similar things close together and different things far apart.** Once meaning lives as coordinates, "find related words" turns into "find nearby dots," which is just arithmetic.
+The core idea of embeddings is one sentence: **place similar things close together and different things far apart.** Once meaning lives as coordinates, "find related words" turns into "find nearby dots," which is just arithmetic.
 
 ## How you compare two vectors
 
 You need two tools, and you build each one once:
 
-- **Dot product** — multiply matching components, then add them up. \`[4,1] · [3,1] = 4*3 + 1*1 = 13\`. A bigger result roughly means the two arrows point in a similar direction.
-- **Magnitude** — the length of the arrow from the origin to the dot. \`|[4,1]| = sqrt(4² + 1²) = sqrt(17) ≈ 4.123\`. This is just the Pythagorean theorem, extended to any number of axes.
+- **Dot product**, multiply matching components, then add them up. \`[4,1] · [3,1] = 4*3 + 1*1 = 13\`. A bigger result roughly means the two arrows point in a similar direction.
+- **Magnitude**, the length of the arrow from the origin to the dot. \`|[4,1]| = sqrt(4² + 1²) = sqrt(17) ≈ 4.123\`. This is just the Pythagorean theorem, extended to any number of axes.
 
 Both reduce to the same Python pattern: walk two lists in lockstep with \`zip\`, do a little math per pair, and \`sum\` the result.
 
@@ -50,7 +50,7 @@ That \`zip\` pattern shows up constantly across this whole module. Lock it in no
 
 Representing words as coordinates is what makes meaning *computable*. Search, recommendations, spam filters, and retrieval for chatbots all start by turning text into vectors so a CPU can rank "closeness" billions of times a second. You could instead store raw spelling, but spelling tells you nothing: "cat" and "car" differ by one letter yet mean unrelated things, while "cat" and "feline" share zero letters yet mean almost the same thing. Numbers placed by meaning fix that.
 
-There is a subtlety, though. You could measure plain straight-line (**Euclidean**) distance between two dots — the same Pythagorean idea as magnitude, but applied to the *gap* between two vectors: \`distance(a, b) = sqrt(sum((a_i - b_i)²))\`. For example, the distance from \`[0,0]\` to \`[3,4]\` is \`sqrt(3² + 4²) = sqrt(25) = 5\`. Sometimes that is fine. But for text, **direction usually matters more than length**. A long document about cats and a one-line tweet about cats should count as similar even though one vector is much "longer." That tension is exactly what the next lesson resolves with the angle between vectors.
+There is a subtlety, though. You could measure plain straight-line (**Euclidean**) distance between two dots, the same Pythagorean idea as magnitude, but applied to the *gap* between two vectors: \`distance(a, b) = sqrt(sum((a_i - b_i)²))\`. For example, the distance from \`[0,0]\` to \`[3,4]\` is \`sqrt(3² + 4²) = sqrt(25) = 5\`. Sometimes that is fine. But for text, **direction usually matters more than length**. A long document about cats and a one-line tweet about cats should count as similar even though one vector is much "longer." That tension is exactly what the next lesson resolves with the angle between vectors.
 
 ## The mental model to keep
 
@@ -145,7 +145,7 @@ A vector is a word's address on a map of meaning. Comparing words is just measur
             "Square every component: 6² = 36 and 8² = 64.",
             "Sum the squares: 36 + 64 = 100.",
             "Take the square root: sqrt(100) = 10.",
-            "Direction is unchanged if you scale the vector — [3, 4] points the same way but has magnitude 5. So magnitude measures length only, never which way the arrow points."
+            "Direction is unchanged if you scale the vector, [3, 4] points the same way but has magnitude 5. So magnitude measures length only, never which way the arrow points."
           ],
           output: "magnitude = 10 (length only, says nothing about direction)"
         }
@@ -155,9 +155,9 @@ A vector is a word's address on a map of meaning. Comparing words is just measur
           title: "dot product vs magnitude",
           columns: ["Tool", "What it measures", "Formula", "Uses two vectors?"],
           rows: [
-            { cells: ["Dot product", "How aligned two arrows are", "sum(a_i * b_i)", "Yes — needs a pair"] },
-            { cells: ["Magnitude", "Length of one arrow", "sqrt(sum(x_i²))", "No — one vector"] },
-            { cells: ["Combined (next lesson)", "Pure direction, length removed", "dot / (mag * mag)", "Yes — the workhorse"], highlight: true }
+            { cells: ["Dot product", "How aligned two arrows are", "sum(a_i * b_i)", "Yes, needs a pair"] },
+            { cells: ["Magnitude", "Length of one arrow", "sqrt(sum(x_i²))", "No, one vector"] },
+            { cells: ["Combined (next lesson)", "Pure direction, length removed", "dot / (mag * mag)", "Yes, the workhorse"], highlight: true }
           ]
         }
       ],
@@ -180,7 +180,7 @@ A vector is a word's address on a map of meaning. Comparing words is just measur
       reflections: [
         {
           prompt: "In your own words: why store a word as a vector of numbers instead of just storing its spelling?",
-          sampleAnswer: "Spelling tells you nothing about meaning — 'cat' and 'car' look similar but mean different things, while 'cat' and 'feline' share no letters but mean almost the same. A vector places each word by meaning, so you can do arithmetic (dot product, distance) to measure how related two words are."
+          sampleAnswer: "Spelling tells you nothing about meaning, 'cat' and 'car' look similar but mean different things, while 'cat' and 'feline' share no letters but mean almost the same. A vector places each word by meaning, so you can do arithmetic (dot product, distance) to measure how related two words are."
         }
       ],
       starter_code: `import math
@@ -226,7 +226,7 @@ cat . car = 9`,
       challenge_title: "Nearest Neighbor in Embedding Space",
       challenge_difficulty: "intermediate",
       challenge_description: "Given a query embedding and a catalog of named embeddings, print the one closest by Euclidean distance.",
-      challenge_story: "You are building the retrieval layer of an AI photo-tagging service. Every image has already been turned into an embedding vector by an upstream model, and so has the user's query image. The whole product hinges on one operation: *which stored image sits closest to this query in embedding space?* Closest dot on the map wins. You measure closeness the most literal way there is — straight-line (Euclidean) distance — and return the winning tag so the rest of the pipeline can act on it.",
+      challenge_story: "You are building the retrieval layer of an AI photo-tagging service. Every image has already been turned into an embedding vector by an upstream model, and so has the user's query image. The whole product hinges on one operation: *which stored image sits closest to this query in embedding space?* Closest dot on the map wins. You measure closeness the most literal way there is, straight-line (Euclidean) distance, and return the winning tag so the rest of the pipeline can act on it.",
       challenge_statement: "You are given a **query vector** and a catalog of **N named vectors**, all of dimension **D**. Find the catalog entry whose vector has the **smallest Euclidean distance** to the query.\n\nThe Euclidean distance between vectors `a` and `b` is `sqrt(sum((a_i - b_i)^2))`.\n\nIf two or more entries tie for the smallest distance, choose the one whose **name is lexicographically smallest**. Print that name and its distance.",
       challenge_input_format: "The first line holds two integers `N` and `D`.\nThe second line holds `D` integers: the query vector.\nEach of the next `N` lines holds a name (a string with no spaces) followed by `D` integers: that catalog entry's vector.",
       challenge_output_format: "One line: the winning name, a single space, then the Euclidean distance to the query formatted to exactly **4 decimal places**.",
@@ -331,9 +331,9 @@ def cosine(a, b):
 
 Reading the score is simple:
 
-- **1.0** — same direction. Basically synonyms.
-- **0.0** — perpendicular. Unrelated.
-- **-1.0** — opposite. Rare with real text embeddings, which usually land between 0 and 1.
+- **1.0**, same direction. Basically synonyms.
+- **0.0**, perpendicular. Unrelated.
+- **-1.0**, opposite. Rare with real text embeddings, which usually land between 0 and 1.
 
 So when you compute \`cosine(die_hard, mad_max) = 0.99\` and \`cosine(die_hard, notebook) = 0.26\`, the model is telling you Die Hard and Mad Max are nearly the same flavor of movie, and The Notebook is a different world.
 
@@ -429,7 +429,7 @@ Dot product asks "how much do these overlap, length included?" Cosine asks "igno
           steps: [
             "Dot product: 1*0 + 0*1 = 0.",
             "Magnitudes: |[1,0]| = 1 and |[0,1]| = 1.",
-            "Cosine = 0 / (1 * 1) = 0 — the vectors are perpendicular, so completely unrelated."
+            "Cosine = 0 / (1 * 1) = 0, the vectors are perpendicular, so completely unrelated."
           ],
           output: "cosine = 0.0 (unrelated)"
         },
@@ -440,7 +440,7 @@ Dot product asks "how much do these overlap, length included?" Cosine asks "igno
             "Dot product: 2*4 + 1*2 = 8 + 2 = 10.",
             "Magnitudes: |[2,1]| = sqrt(5) ≈ 2.236, |[4,2]| = sqrt(20) ≈ 4.472.",
             "Cosine = 10 / (2.236 * 4.472) = 10 / 10.0 = 1.0.",
-            "It is exactly 1.0 because [4, 2] is just [2, 1] scaled by 2 — same direction, double the length. Cosine ignores length, so it reports a perfect match."
+            "It is exactly 1.0 because [4, 2] is just [2, 1] scaled by 2, same direction, double the length. Cosine ignores length, so it reports a perfect match."
           ],
           output: "cosine = 1.0 (same direction, length doesn't matter)"
         }
@@ -450,7 +450,7 @@ Dot product asks "how much do these overlap, length included?" Cosine asks "igno
           title: "dot product vs cosine similarity",
           columns: ["Property", "Dot product", "Cosine similarity"],
           rows: [
-            { cells: ["Affected by length", "Yes — longer vectors score higher", "No — length divided out"] },
+            { cells: ["Affected by length", "Yes, longer vectors score higher", "No, length divided out"] },
             { cells: ["Range", "Unbounded", "-1 to 1"] },
             { cells: ["Fair across text sizes", "No", "Yes"] },
             { cells: ["Used for semantic search", "Only after normalizing", "The default choice"], highlight: true }
@@ -476,7 +476,7 @@ Dot product asks "how much do these overlap, length included?" Cosine asks "igno
       reflections: [
         {
           prompt: "Explain in your own words why a long article and a one-line tweet about the same topic get a high cosine score even though their vectors have very different lengths.",
-          sampleAnswer: "Cosine divides the dot product by both magnitudes, which removes length entirely and leaves only the angle between the vectors. Since both texts point the same direction on the map of meaning, the angle is tiny and the cosine is near 1 — the model judges them by topic, not by how many words they happen to have."
+          sampleAnswer: "Cosine divides the dot product by both magnitudes, which removes length entirely and leaves only the angle between the vectors. Since both texts point the same direction on the map of meaning, the angle is tiny and the cosine is near 1, the model judges them by topic, not by how many words they happen to have."
         }
       ],
       starter_code: `import math
@@ -543,7 +543,7 @@ The Notebook: 0.256`,
       challenge_title: "Closest by Angle",
       challenge_difficulty: "intermediate",
       challenge_description: "Pick the catalog vector most aligned with a query by cosine similarity, ignoring length entirely.",
-      challenge_story: "Your semantic search backend keeps surfacing long documents over short ones simply because longer text produces longer vectors, and raw dot product rewards length. Product is furious: a three-word support ticket that perfectly answers the query keeps losing to a rambling, half-relevant FAQ. The fix is to rank by **direction, not length** — cosine similarity. Re-rank the candidates so the one pointing most truly at the query wins, no matter how long or short its vector is.",
+      challenge_story: "Your semantic search backend keeps surfacing long documents over short ones simply because longer text produces longer vectors, and raw dot product rewards length. Product is furious: a three-word support ticket that perfectly answers the query keeps losing to a rambling, half-relevant FAQ. The fix is to rank by **direction, not length**, cosine similarity. Re-rank the candidates so the one pointing most truly at the query wins, no matter how long or short its vector is.",
       challenge_statement: "You are given **N** named candidate vectors and one **query** vector, all of dimension **D**. Print the candidate with the **highest cosine similarity** to the query.\n\nCosine similarity is `dot(a, b) / (magnitude(a) * magnitude(b))`, the cosine of the angle between the two vectors.\n\nIf two candidates tie for the highest similarity, choose the one whose **name is lexicographically smallest**. Print that name and its cosine similarity.",
       challenge_input_format: "The first line holds two integers `N` and `D`.\nEach of the next `N` lines holds a name (no spaces) followed by `D` numbers: that candidate's vector.\nThe final line holds `D` numbers: the query vector.",
       challenge_output_format: "One line: the winning name, a single space, then the cosine similarity formatted to exactly **4 decimal places**.",
@@ -555,10 +555,10 @@ The Notebook: 0.256`,
         "Names are non-empty, contain no whitespace, and are unique"
       ],
       challenge_examples: [
-        { input: "3 3\nDieHard 0.9 0.1 0.2\nNotebook 0.1 0.9 0.2\nMadMax 0.95 0.05 0.1\n0.9 0.1 0.2", output: "DieHard 1.0000", explanation: "The query is exactly DieHard's vector, so DieHard scores a perfect 1.0000 — same direction." },
+        { input: "3 3\nDieHard 0.9 0.1 0.2\nNotebook 0.1 0.9 0.2\nMadMax 0.95 0.05 0.1\n0.9 0.1 0.2", output: "DieHard 1.0000", explanation: "The query is exactly DieHard's vector, so DieHard scores a perfect 1.0000, same direction." },
         { input: "2 2\nalpha 2 0\nbeta 4 0\n1 0", output: "alpha 1.0000", explanation: "Both alpha and beta point along the x-axis, so both score 1.0000; the lexicographic tie-break picks alpha." }
       ],
-      challenge_notes: "Cosine ignores magnitude, which is exactly why alpha (length 2) and beta (length 4) tie above: only their shared direction matters. Compute `dot` and `magnitude` as small helpers and combine them — you will reuse this pattern in every later lesson.",
+      challenge_notes: "Cosine ignores magnitude, which is exactly why alpha (length 2) and beta (length 4) tie above: only their shared direction matters. Compute `dot` and `magnitude` as small helpers and combine them, you will reuse this pattern in every later lesson.",
       challenge_hints: [
         "Read line by line so each candidate's name and numbers stay together.",
         "cosine(a, b) = dot(a, b) / (magnitude(a) * magnitude(b)); build dot and magnitude as helpers.",
@@ -643,7 +643,7 @@ main()`,
       title: "Normalize Once, Compare Fast",
       concept: "Normalization",
       xp_reward: 10,
-      explanation: `Say you have got 10,000 movies and a user picks one. You want the closest matches, fast. Computing cosine the naive way recalculates two square-root magnitudes for *every* comparison. That is wasteful, and it gets brutal at a million vectors. Production search engines all use the same trick, and once you see it you cannot unsee it.
+      explanation: `Say you have got 10,000 movies and a user picks one. You want the closest matches, fast. Computing cosine the naive way recalculates two square-root magnitudes for *every* comparison. That is wasteful, and it gets brutal at a million vectors. Production search engines all use the same trick.
 
 ## What it is
 
@@ -665,13 +665,13 @@ Recall cosine is \`dot(a, b) / (mag(a) * mag(b))\`. If both vectors are already 
 cosine(a, b) = dot(a, b)        # when a and b are unit vectors
 \`\`\`
 
-That is the payoff. **Normalize your entire database once, up front, at index time.** After that, every query is a plain dot product — no square roots in the hot loop, no per-comparison magnitude work. For a million-vector index, that is the difference between snappy and sluggish. This is precisely why real vector databases store normalized embeddings, and some embedding APIs even return pre-normalized vectors so you can skip the step entirely.
+That is the payoff. **Normalize your entire database once, up front, at index time.** After that, every query is a plain dot product, no square roots in the hot loop, no per-comparison magnitude work. For a million-vector index, that is the difference between a fast search and a slow one. This is precisely why real vector databases store normalized embeddings, and some embedding APIs even return pre-normalized vectors so you can skip the step entirely.
 
 ## Why it matters
 
 Normalization is a classic **precompute** move: do the expensive work once and store the result so repeated queries stay cheap. A few things to keep straight:
 
-- Normalizing a **zero vector** divides by zero — the same trap as cosine. Guard it.
+- Normalizing a **zero vector** divides by zero, the same trap as cosine. Guard it.
 - After normalizing, the raw numbers look small (all between -1 and 1). That is expected, not a bug.
 - The angle between two vectors does not change when you normalize. You are only rescaling length, never rotating, so all your similarity scores stay identical.
 
@@ -779,7 +779,7 @@ Normalize once at index time so every search becomes a single fast dot product. 
             "Cosine the long way: dot = 3*4 + 4*3 = 24; magnitudes are both 5; cosine = 24 / (5*5) = 0.96.",
             "Normalize each: [3,4] → [0.6, 0.8] and [4,3] → [0.8, 0.6].",
             "Dot of the unit vectors: 0.6*0.8 + 0.8*0.6 = 0.48 + 0.48 = 0.96.",
-            "Both routes give 0.96 — proof that a normalized dot product IS cosine similarity."
+            "Both routes give 0.96, proof that a normalized dot product IS cosine similarity."
           ],
           output: "0.96 either way"
         }
@@ -875,8 +875,8 @@ cosine(a,b) = 0.96`,
       challenge_title: "Pre-Normalize the Index",
       challenge_difficulty: "beginner",
       challenge_description: "Convert a batch of embeddings into unit vectors so query time can skip the square roots.",
-      challenge_story: "Your vector database is about to serve millions of queries a second, and every query currently pays for two magnitude computations (two square roots) per comparison. A senior engineer points out the classic trick: **normalize every vector once at index time**, store the unit vectors, and cosine similarity collapses into a plain dot product at query time. Your job is the offline batch step — take the raw embeddings being ingested and emit their normalized forms. A zero vector (rare, but it happens with corrupt rows) has no direction, so it stays all zeros.",
-      challenge_statement: "You are given **N** vectors of dimension **D**. For each one, output its **normalized (unit) vector**: divide every component by the vector's magnitude `sqrt(sum(x_i^2))`.\n\nIf a vector is **all zeros**, its magnitude is 0 and it has no direction — output it unchanged as a vector of zeros.",
+      challenge_story: "Your vector database is about to serve millions of queries a second, and every query currently pays for two magnitude computations (two square roots) per comparison. A senior engineer points out the classic trick: **normalize every vector once at index time**, store the unit vectors, and cosine similarity collapses into a plain dot product at query time. Your job is the offline batch step, take the raw embeddings being ingested and emit their normalized forms. A zero vector (rare, but it happens with corrupt rows) has no direction, so it stays all zeros.",
+      challenge_statement: "You are given **N** vectors of dimension **D**. For each one, output its **normalized (unit) vector**: divide every component by the vector's magnitude `sqrt(sum(x_i^2))`.\n\nIf a vector is **all zeros**, its magnitude is 0 and it has no direction, output it unchanged as a vector of zeros.",
       challenge_input_format: "The first line holds two integers `N` and `D`.\nEach of the next `N` lines holds `D` numbers: one vector.",
       challenge_output_format: "Output `N` lines. Line `i` holds the `D` components of the `i`-th normalized vector, space-separated, each formatted to exactly **4 decimal places**.",
       challenge_constraints: [
@@ -888,7 +888,7 @@ cosine(a,b) = 0.96`,
         { input: "3 2\n3 4\n0 5\n0 0", output: "0.6000 0.8000\n0.0000 1.0000\n0.0000 0.0000", explanation: "(3,4) has magnitude 5 → (0.6, 0.8). (0,5) has magnitude 5 → (0, 1). (0,0) has no direction, so it stays zero." },
         { input: "1 3\n2 3 6", output: "0.2857 0.4286 0.8571", explanation: "Magnitude is sqrt(4+9+36)=7, so divide each component by 7." }
       ],
-      challenge_notes: "Once vectors are unit-length, `cosine(a, b)` simplifies to `dot(a, b)` because both magnitudes are 1 — that is the whole point of normalizing the index ahead of time. Guard the zero vector explicitly so you never divide by zero.",
+      challenge_notes: "Once vectors are unit-length, `cosine(a, b)` simplifies to `dot(a, b)` because both magnitudes are 1, that is the whole point of normalizing the index ahead of time. Guard the zero vector explicitly so you never divide by zero.",
       challenge_hints: [
         "magnitude(v) = sqrt(sum(x*x for x in v)).",
         "If the magnitude is exactly 0, emit a row of zeros instead of dividing.",
@@ -950,7 +950,7 @@ main()`,
       title: "Build the Movie Recommender",
       concept: "Recommender",
       xp_reward: 10,
-      explanation: `Time to ship the thing. "Because you watched Die Hard..." — that row on every streaming service is cosine similarity over movie vectors. You now have every piece to build it.
+      explanation: `The "Because you watched Die Hard..." row on every streaming service is cosine similarity over movie vectors, and you now have every piece to build it.
 
 ## What a recommender is
 
@@ -963,7 +963,7 @@ The recipe is four steps:
 1. Give each movie a vector. Real systems learn these from viewing data; here we hand-craft genre scores so you can read them.
 2. To recommend for a movie, compute cosine similarity from its vector to every other movie.
 3. Sort the results descending.
-4. Take the top N — that is the list.
+4. Take the top N, that is the list.
 
 Our vectors have five dimensions: \`[action, romance, comedy, scifi, drama]\`, each from 0 to 1. Die Hard is heavy action, light everything else. Interstellar leans sci-fi and drama. The math surfaces the right neighbors.
 
@@ -983,7 +983,7 @@ That \`if name != title\` is not optional. A movie is always perfectly similar t
 
 You could instead just filter by a single genre label, but movies are blends. Blade Runner is sci-fi *and* action *and* noir-drama at once. A vector captures that mix in one shot, so it finds Interstellar (another sci-fi/drama lean) even though their top genre tag differs. Tags cannot do that without a tangle of if-statements, and the tangle grows with every new genre. Vectors scale; rule-based tags do not.
 
-There is one more move that makes this production-ready. A real user likes several movies, not one. The standard trick: **average their liked vectors** into a single **taste vector**, then find the nearest movies to that average. One vector, one search, captures the blend of everything they enjoy — that is the challenge below.
+There is one more move that makes this production-ready. A real user likes several movies, not one. The standard trick: **average their liked vectors** into a single **taste vector**, then find the nearest movies to that average. One vector, one search, captures the blend of everything they enjoy, that is the challenge below.
 
 ## The mental model to keep
 
@@ -1065,7 +1065,7 @@ Embed, compare with cosine, sort, return top N. That same four-step skeleton pow
             { label: "Pick the seed movie", detail: "The movie the user just watched becomes the query vector.", code: 'target = movies["Die Hard"]' },
             { label: "Score every other movie", detail: "Cosine similarity from the seed to each candidate, skipping the seed itself.", code: "[(name, cosine(target, vec)) for name, vec in movies.items() if name != title]" },
             { label: "Sort by similarity, descending", detail: "Highest cosine first so the closest matches rise to the top.", code: "scored.sort(key=lambda x: -x[1])" },
-            { label: "Return the top N", detail: "Slice the best few — that is the recommendation row.", code: "scored[:3]  ->  Mad Max, Blade Runner, Interstellar" }
+            { label: "Return the top N", detail: "Slice the best few, that is the recommendation row.", code: "scored[:3]  ->  Mad Max, Blade Runner, Interstellar" }
           ]
         }
       ],
@@ -1085,7 +1085,7 @@ Embed, compare with cosine, sort, return top N. That same four-step skeleton pow
           prompt: "A user liked Die Hard = [1, 0] and The Notebook = [0, 1]. Build their taste vector, then score Bridesmaids = [0.5, 0.5] against it.",
           steps: [
             "Average the liked vectors component-wise: [(1+0)/2, (0+1)/2] = [0.5, 0.5].",
-            "That [0.5, 0.5] is the taste vector — equal pull toward action and romance.",
+            "That [0.5, 0.5] is the taste vector, equal pull toward action and romance.",
             "cosine(taste, Bridesmaids) = (0.5*0.5 + 0.5*0.5) / (sqrt(0.5) * sqrt(0.5)) = 0.5 / 0.5 = 1.0.",
             "Bridesmaids points the exact same direction as the blended taste, so it is a perfect match for this mixed user."
           ],
@@ -1207,8 +1207,8 @@ Because you liked Interstellar:
       challenge_difficulty: "intermediate",
       challenge_description: "Average a user's liked-movie vectors into a taste profile, then recommend the unseen movie closest to it.",
       challenge_statement: "You are building the core of a movie recommender. A user has rated some movies, and you have an embedding for every movie in the catalog.\n\nBuild the user's **taste vector** as the **element-wise average** of the vectors of the movies they liked. Then score every movie the user has **not** liked by cosine similarity to the taste vector, and recommend the highest-scoring one.\n\nNever recommend a movie the user already liked (it would score near-perfectly against a taste vector built partly from itself). If two unseen movies tie for the top score, choose the one whose **name is lexicographically smallest**.",
-      challenge_story: "It is launch week for the recommendations tab. The model team handed you embeddings for the whole catalog; your job is the logic that turns *\"movies this user loved\"* into *\"one movie to suggest next.\"* The trick everyone uses: blend the liked movies into a single **taste vector** (just average them), then find the unseen movie whose vector points most the same way. Skip anything they have already seen — recommending a movie back to the person who just rated it is the fastest way to look broken.",
-      challenge_input_format: "The first line holds two integers `N` and `D` — the catalog size and embedding dimension.\nEach of the next `N` lines holds a movie name (no spaces) followed by `D` numbers: that movie's vector.\nThe final line holds the space-separated names of the movies the user liked (at least one).",
+      challenge_story: "It is launch week for the recommendations tab. The model team handed you embeddings for the whole catalog; your job is the logic that turns *\"movies this user loved\"* into *\"one movie to suggest next.\"* The trick everyone uses: blend the liked movies into a single **taste vector** (just average them), then find the unseen movie whose vector points most the same way. Skip anything they have already seen, recommending a movie back to the person who just rated it is the fastest way to look broken.",
+      challenge_input_format: "The first line holds two integers `N` and `D`, the catalog size and embedding dimension.\nEach of the next `N` lines holds a movie name (no spaces) followed by `D` numbers: that movie's vector.\nThe final line holds the space-separated names of the movies the user liked (at least one).",
       challenge_output_format: "One line: the recommended movie's name, a single space, then its cosine similarity to the taste vector formatted to exactly **4 decimal places**.",
       challenge_constraints: [
         "1 ≤ number of liked movies < N ≤ 1000",
@@ -1221,7 +1221,7 @@ Because you liked Interstellar:
         { input: "4 3\nDieHard 0.9 0.1 0.2\nNotebook 0.1 0.9 0.2\nMadMax 0.95 0.05 0.1\nBridesmaids 0.2 0.4 0.9\nDieHard MadMax", output: "Bridesmaids 0.3705", explanation: "Taste = average of DieHard and MadMax = (0.925, 0.075, 0.15). DieHard and MadMax are excluded as already liked, so the recommender ranks the two remaining films; Bridesmaids edges out Notebook." },
         { input: "3 2\nA 1 0\nB 0 1\nC 0.9 0.1\nA", output: "C 0.9939", explanation: "Taste is just A's vector (1, 0). Of the unseen movies, C points almost the same way (score 0.9939) while B is perpendicular." }
       ],
-      challenge_notes: "The taste vector is a blended 'smoothie' of everything the user liked; cosine then finds the unseen movie that 'tastes' most like that blend. Excluding the seed movies is the single most common bug in a first recommender — guard it with a set lookup.",
+      challenge_notes: "The taste vector is a blended 'smoothie' of everything the user liked; cosine then finds the unseen movie that 'tastes' most like that blend. Excluding the seed movies is the single most common bug in a first recommender, guard it with a set lookup.",
       challenge_hints: [
         "Store the catalog as a dict name → vector, and remember insertion order for deterministic iteration.",
         "taste[i] = average of liked_vec[i] over all liked movies.",
@@ -1320,7 +1320,7 @@ main()`,
 
 An **embedding model** converts text into a fixed-length vector of floats that represents its meaning. **Semantic search** is finding documents by meaning rather than exact words, using those vectors and cosine similarity. The two ideas are inseparable: the model gives you the coordinates, cosine ranks the closeness.
 
-## How it works — and where keyword search breaks
+## How it works, and where keyword search breaks
 
 Old-school search matches literal words. Type "I forgot my password and can't sign in" and a keyword engine finds the doc containing "password." But it completely misses "My login isn't working anymore" because that doc shares *zero* words with your query. Same meaning, different vocabulary, and keyword search is blind to it.
 
@@ -1350,7 +1350,7 @@ From there the loop is four steps:
 
 ## Why it matters
 
-This is the engine behind modern search and **RAG** (Retrieval-Augmented Generation): you embed your documents, retrieve the relevant ones by similarity, and feed them to an LLM as grounded context. Done once at index time, document embeddings are reused across every query, so only the short query is embedded fresh — that is what keeps it fast and cheap at scale. The runnable code below uses pre-stored vectors so it is deterministic with no network call, but the logic is identical to production. Watch the payoff: the query has no words in common with "My login isn't working anymore," yet that doc still ranks second. Keyword search can never pull that off.
+This is the engine behind modern search and **RAG** (Retrieval-Augmented Generation): you embed your documents, retrieve the relevant ones by similarity, and feed them to an LLM as grounded context. Done once at index time, document embeddings are reused across every query, so only the short query is embedded fresh, that is what keeps it fast and cheap at scale. The runnable code below uses pre-stored vectors so it is deterministic with no network call, but the logic is identical to production. Watch the payoff: the query has no words in common with "My login isn't working anymore," yet that doc still ranks second. Keyword search can never pull that off.
 
 ## The mental model to keep
 
@@ -1432,7 +1432,7 @@ The model turns text into coordinates; cosine ranks the coordinates. Embed once,
             { label: "User types a query", detail: "Free-form text, possibly sharing no words with any stored doc.", code: '"I forgot my password and can\'t sign in"' },
             { label: "Embed the query", detail: "The model returns a vector capturing the meaning, not the words.", code: "query_vec = embed(query)  # e.g. [0.88, 0.14, 0.06]" },
             { label: "Cosine against every stored doc", detail: "Score the query vector against each pre-embedded document.", code: "[(doc, cosine(query_vec, vec)) for doc, vec in docs.items()]" },
-            { label: "Sort and surface the top hits", detail: "The login doc ranks high despite zero shared words — that is semantic matching.", code: "0.998  \"My login isn't working anymore\"" }
+            { label: "Sort and surface the top hits", detail: "The login doc ranks high despite zero shared words, that is semantic matching.", code: "0.998  \"My login isn't working anymore\"" }
           ]
         }
       ],
@@ -1452,9 +1452,9 @@ The model turns text into coordinates; cosine ranks the coordinates. Embed once,
           prompt: "A query about 'sign in' shares no words with a doc about 'login.' Explain step by step how semantic search still ranks that doc near the top.",
           steps: [
             "The embedding model was trained on huge text where 'sign in,' 'login,' and 'log in' appear in the same contexts.",
-            "It therefore places all three near each other in vector space — their vectors point almost the same direction.",
+            "It therefore places all three near each other in vector space, their vectors point almost the same direction.",
             "When the query is embedded, its vector lands in that same neighborhood.",
-            "Cosine between the query vector and the login doc's vector is high (small angle), so it ranks near the top — even though they share zero literal words. Keyword search, comparing words, would score them 0."
+            "Cosine between the query vector and the login doc's vector is high (small angle), so it ranks near the top, even though they share zero literal words. Keyword search, comparing words, would score them 0."
           ],
           output: "High cosine from shared meaning, not shared words"
         }
@@ -1491,7 +1491,7 @@ The model turns text into coordinates; cosine ranks the coordinates. Embed once,
       reflections: [
         {
           prompt: "In your own words: why must the embedding API key come from an environment variable instead of being written directly in the source code?",
-          sampleAnswer: "A key pasted into source travels everywhere the code goes — into git history, shared files, and public repos. Bots scrape GitHub for leaked keys within minutes and run up charges or steal access. Reading it from os.environ keeps the secret out of the code entirely, so the same source can be shared or committed safely while the key stays on the machine that runs it."
+          sampleAnswer: "A key pasted into source travels everywhere the code goes, into git history, shared files, and public repos. Bots scrape GitHub for leaked keys within minutes and run up charges or steal access. Reading it from os.environ keeps the secret out of the code entirely, so the same source can be shared or committed safely while the key stays on the machine that runs it."
         }
       ],
       starter_code: `import math
@@ -1564,8 +1564,8 @@ Top matches (semantic):
       ],
       challenge_title: "Top-K Semantic Retrieval",
       challenge_difficulty: "beginner",
-      challenge_description: "Return the K documents most semantically similar to a query embedding, best first — the retrieval core of a RAG system.",
-      challenge_story: "You are wiring up the retrieval step of a RAG (retrieval-augmented generation) assistant. Before the language model answers, your code has to pull the **K most relevant document chunks** out of the knowledge base and hand them over as context. Keyword search would miss a chunk about 'sign in' when the user types 'login isn't working' — but embeddings match on meaning, not spelling. Each chunk is already an embedding; so is the query. Rank by cosine similarity and return the top K, highest first.",
+      challenge_description: "Return the K documents most semantically similar to a query embedding, best first, the retrieval core of a RAG system.",
+      challenge_story: "You are wiring up the retrieval step of a RAG (retrieval-augmented generation) assistant. Before the language model answers, your code has to pull the **K most relevant document chunks** out of the knowledge base and hand them over as context. Keyword search would miss a chunk about 'sign in' when the user types 'login isn't working', but embeddings match on meaning, not spelling. Each chunk is already an embedding; so is the query. Rank by cosine similarity and return the top K, highest first.",
       challenge_statement: "You are given **N** document embeddings, a positive integer **K**, and one **query** embedding, all of dimension **D**. Return the **K documents with the highest cosine similarity** to the query, ordered from highest to lowest.\n\nIf two documents have equal cosine similarity, order them by **lexicographically smallest name first**. It is guaranteed that `K ≤ N`.",
       challenge_input_format: "The first line holds three integers `N`, `D`, and `K`.\nEach of the next `N` lines holds a document name (no spaces) followed by `D` numbers: that document's embedding.\nThe final line holds `D` numbers: the query embedding.",
       challenge_output_format: "Output `K` lines, best match first. Each line holds a document name, a single space, then its cosine similarity to the query formatted to exactly **4 decimal places**.",
@@ -1658,17 +1658,17 @@ main()`,
       title: "Embedding Dimensions: What They Capture",
       concept: "Dimensions",
       xp_reward: 10,
-      explanation: `All module long the vectors were tiny: two or three numbers. Real embeddings are monsters. A common text model returns **1,536 floats per string**, and the big ones push past 3,000. Why on earth do you need three thousand numbers to represent the word "dog"? Because each number is a separate **axis of meaning**, and meaning has far more than two or three sides.
+      explanation: `All module long the vectors were tiny: two or three numbers. Real embeddings are far larger. A common text model returns **1,536 floats per string**, and the big ones push past 3,000. Why on earth do you need three thousand numbers to represent the word "dog"? Because each number is a separate **axis of meaning**, and meaning has far more than two or three sides.
 
 ## What it is
 
-Every slot in an embedding is a **dimension** — one independent direction the model can use to place a word. In the toy \`[action, romance]\` movie space you had exactly two axes, so every movie was pinned by just two facts. Real text has thousands of facts that matter at once: tense, formality, topic, sentiment, is-it-a-question, is-it-code, language, and many the model invented that have no human name. Each gets its own dimension.
+Every slot in an embedding is a **dimension**, one independent direction the model can use to place a word. In the toy \`[action, romance]\` movie space you had exactly two axes, so every movie was pinned by just two facts. Real text has thousands of facts that matter at once: tense, formality, topic, sentiment, is-it-a-question, is-it-code, language, and many the model invented that have no human name. Each gets its own dimension.
 
 The headline idea: **more dimensions means more room to keep different meanings apart.** With two axes, "bank" the riverbank and "bank" the money place are forced near each other. With a thousand axes, the model has space to separate them along the dimensions that actually distinguish them.
 
 ## How it works
 
-A trained model does not assign axes by hand. It learns them, and remarkable structure falls out. Some directions end up encoding clean concepts — a "royalty" direction, a "plural" direction, a "past tense" direction. The famous demo: take the vector for "king," subtract a "male" direction, add a "female" direction, and you land near "queen." Meaning becomes arithmetic on axes.
+A trained model does not assign axes by hand. It learns them, and remarkable structure falls out. Some directions end up encoding clean concepts, a "royalty" direction, a "plural" direction, a "past tense" direction. The famous demo: take the vector for "king," subtract a "male" direction, add a "female" direction, and you land near "queen." Meaning becomes arithmetic on axes.
 
 \`\`\`python
 # Each axis is one semantic direction. Find a word's dominant one.
@@ -1677,7 +1677,7 @@ dominant_axis = max(range(len(king)), key=lambda i: abs(king[i]))
 print(dominant_axis)  # 0 -> 'royalty' is this word's strongest signal
 \`\`\`
 
-You almost never read individual axes in production — most are uninterpretable blends. But the principle holds: each dimension is a knob, and a word's vector is the full setting of every knob at once.
+You almost never read individual axes in production, most are uninterpretable blends. But the principle holds: each dimension is a knob, and a word's vector is the full setting of every knob at once.
 
 ## Why it matters
 
@@ -1689,7 +1689,7 @@ Dimension count is a real engineering trade-off, not a "bigger is better" knob:
 
 ## The mental model to keep
 
-A dimension is one axis of meaning, and an embedding is a word's position along every axis at once. More axes give the model more room to keep different meanings apart — at a cost in memory and compute you pay on every single comparison.`,
+A dimension is one axis of meaning, and an embedding is a word's position along every axis at once. More axes give the model more room to keep different meanings apart, at a cost in memory and compute you pay on every single comparison.`,
       key_terms: [
         { term: "Dimension", definition: "One axis of an embedding vector, an independent direction the model uses to encode some aspect of meaning." },
         { term: "Semantic direction", definition: "A direction in vector space that lines up with a human concept, like 'plural' or 'past tense'." },
@@ -1854,7 +1854,7 @@ dominant meaning: royalty`,
       challenge_difficulty: "beginner",
       challenge_description: "For each query word, report which embedding dimension carries its strongest signal.",
       challenge_story: "You are debugging an embedding model and want a quick lens on what each word leans toward. Every word already has an embedding, and you have decided that the dimension with the **largest absolute value** is a rough proxy for that word's dominant semantic direction. Build the tool that, given the embedding table and a list of query words, prints the dominant axis index for each one. It is a crude probe, but it is exactly the kind of sanity check engineers run when inspecting a freshly trained model.",
-      challenge_statement: "You are given **N** words, each with a **D-dimensional** embedding, then a list of **query words**.\n\nFor each query word, find the **dimension index (0-based) whose value has the largest absolute value** — its dominant axis. If two dimensions tie on absolute value, choose the **smaller index**.\n\nPrint each query word followed by its dominant axis index.",
+      challenge_statement: "You are given **N** words, each with a **D-dimensional** embedding, then a list of **query words**.\n\nFor each query word, find the **dimension index (0-based) whose value has the largest absolute value**, its dominant axis. If two dimensions tie on absolute value, choose the **smaller index**.\n\nPrint each query word followed by its dominant axis index.",
       challenge_input_format: "The first line holds two integers `N` and `D`.\nEach of the next `N` lines holds a word (no spaces) followed by `D` numbers: its embedding.\nThe final line holds the space-separated query words (each guaranteed to appear in the table).",
       challenge_output_format: "One line per query word, in input order: the word, a single space, then its dominant axis index.",
       challenge_constraints: [
@@ -1937,7 +1937,7 @@ main()`,
 
 ## What it is
 
-**Chunking** is breaking a long document into smaller passages — **chunks** — before embedding, so each vector represents one focused idea instead of a blur of many. A chunk might be a paragraph, a few sentences, or a fixed number of words. Each chunk gets its own embedding and its own row in the index. When a query comes in, you retrieve the matching chunks, not whole documents.
+**Chunking** is breaking a long document into smaller passages, called **chunks**, before embedding, so each vector represents one focused idea instead of a blur of many. A chunk might be a paragraph, a few sentences, or a fixed number of words. Each chunk gets its own embedding and its own row in the index. When a query comes in, you retrieve the matching chunks, not whole documents.
 
 ## How it works
 
@@ -1957,7 +1957,7 @@ def chunk_words(words, max_size):
     return chunks
 \`\`\`
 
-Two dials control quality. **Chunk size** sets how much meaning each vector carries: too big and the vector blurs many topics together; too small and a single idea gets split across chunks so neither one is complete. A few hundred tokens is a common sweet spot. **Overlap** repeats a little text between neighboring chunks so a sentence that straddles a boundary is not cut in half — the answer to a query is never stranded between two chunks. Smarter schemes split on natural seams (paragraphs, headings, sentences) instead of blindly counting words, so a chunk rarely begins mid-thought.
+Two dials control quality. **Chunk size** sets how much meaning each vector carries: too big and the vector blurs many topics together; too small and a single idea gets split across chunks so neither one is complete. A few hundred tokens is a common sweet spot. **Overlap** repeats a little text between neighboring chunks so a sentence that straddles a boundary is not cut in half, the answer to a query is never stranded between two chunks. Smarter schemes split on natural seams (paragraphs, headings, sentences) instead of blindly counting words, so a chunk rarely begins mid-thought.
 
 ## Why it matters
 
@@ -2070,7 +2070,7 @@ Embed ideas, not documents. Chunk a long text into focused passages first, tune 
           prompt: "A FAQ answer is split exactly at a chunk boundary: 'To cancel, go to Settings' ends chunk 1 and 'and click Delete Account' begins chunk 2. A user asks 'how do I cancel my account?' Why might retrieval miss, and how does overlap fix it?",
           steps: [
             "Neither chunk contains the full answer, so neither vector strongly matches the complete query.",
-            "Chunk 1 lacks the 'Delete Account' step; chunk 2 lacks the 'cancel' framing — each is half an idea.",
+            "Chunk 1 lacks the 'Delete Account' step; chunk 2 lacks the 'cancel' framing, each is half an idea.",
             "With overlap, chunk 2 also repeats the tail of chunk 1, so it now contains the whole instruction.",
             "That overlapping chunk points squarely at the query's meaning, so cosine ranks it high and retrieval succeeds."
           ],
@@ -2210,7 +2210,7 @@ main()`,
       title: "Caching and Updating Embeddings",
       concept: "Lifecycle",
       xp_reward: 10,
-      explanation: `Embedding is not free. Every call to the model costs money and milliseconds, and a real knowledge base has millions of chunks that mostly never change. Re-embedding all of them on every deploy would torch your budget and your latency. So production systems treat embeddings as a **cache you maintain over time**, not a thing you compute once and forget. This lesson is the unglamorous lifecycle work that keeps a vector index correct and cheap.
+      explanation: `Embedding is not free. Every call to the model costs money and milliseconds, and a real knowledge base has millions of chunks that mostly never change. Re-embedding all of them on every deploy would waste both your budget and your latency. So production systems treat embeddings as a **cache you maintain over time**, not a thing you compute once and forget. This lesson is the unglamorous lifecycle work that keeps a vector index correct and cheap.
 
 ## What it is
 
@@ -2229,7 +2229,7 @@ def needs_reembed(chunk_id, text, cache):
     return False                        # hash matches -> reuse stored vector
 \`\`\`
 
-If the hash matches, the text is byte-for-byte the same, so the old vector is still correct and you skip the expensive call. If it differs, the source changed and the stored vector is now **stale** — recompute it. This makes updates **incremental**: edit ten chunks out of a million and you embed ten, not a million.
+If the hash matches, the text is byte-for-byte the same, so the old vector is still correct and you skip the expensive call. If it differs, the source changed and the stored vector is now **stale**, recompute it. This makes updates **incremental**: edit ten chunks out of a million and you embed ten, not a million.
 
 One more piece keeps you safe across model upgrades: the **index version**. When you switch to a new embedding model, every old vector is meaningless because vectors from different models are not comparable. Stamp the index with a model version; when it changes, re-embed everything once and bump the version. Mixing two models' vectors in one index silently corrupts every similarity score.
 
@@ -2238,7 +2238,7 @@ One more piece keeps you safe across model upgrades: the **index version**. When
 This is the difference between a demo and a system that survives contact with real, changing data:
 
 - **Cost and speed.** Cache hits cost nothing. Only changed chunks hit the API, so updates stay fast and cheap at scale.
-- **Correctness.** Stale vectors silently return wrong results — the index says one thing, the document says another. Hash checks catch exactly the chunks that drifted.
+- **Correctness.** Stale vectors silently return wrong results, the index says one thing, the document says another. Hash checks catch exactly the chunks that drifted.
 - **Safe migrations.** Versioning the index means a model upgrade never leaves you comparing apples to oranges across two embedding spaces.
 
 ## The mental model to keep
@@ -2431,7 +2431,7 @@ api calls: 2`,
       challenge_title: "Incremental Re-Embed Counter",
       challenge_difficulty: "beginner",
       challenge_description: "Process a stream of chunk updates and count how many actually trigger an embedding API call.",
-      challenge_story: "Your RAG pipeline re-runs every time the source docs change, and finance is watching the embedding bill. The rule is simple: a chunk only needs a fresh embedding when its **content hash** differs from what is cached — a brand-new chunk, or one whose text was edited. An unchanged chunk reuses its stored vector for free. You are given the ordered stream of (chunk id, content hash) events from one ingestion run. Report, per event, whether it re-embeds or hits the cache, then the total number of API calls so the team can sanity-check the bill.",
+      challenge_story: "Your RAG pipeline re-runs every time the source docs change, and finance is watching the embedding bill. The rule is simple: a chunk only needs a fresh embedding when its **content hash** differs from what is cached, a brand-new chunk, or one whose text was edited. An unchanged chunk reuses its stored vector for free. You are given the ordered stream of (chunk id, content hash) events from one ingestion run. Report, per event, whether it re-embeds or hits the cache, then the total number of API calls so the team can sanity-check the bill.",
       challenge_statement: "You are given **N** events in order. Each event is a **chunk id** and the **content hash** of that chunk's current text.\n\nMaintain a cache mapping chunk id to its last-seen hash. For each event:\n\n- If the chunk id is **not yet cached**, or its **cached hash differs** from the event's hash, it is a **re-embed**: print `id REEMBED`, count an API call, and update the cache to the new hash.\n- Otherwise (cached hash matches) it is a cache hit: print `id CACHED`.\n\nAfter all events, print the total number of re-embeds (API calls).",
       challenge_input_format: "The first line holds a single integer `N`: the number of events.\nEach of the next `N` lines holds a chunk id and a content hash, space-separated (neither contains spaces).",
       challenge_output_format: "Output `N` lines, one per event in order: the chunk id, a space, then `REEMBED` or `CACHED`.\nThen one final line: the total number of re-embeds.",

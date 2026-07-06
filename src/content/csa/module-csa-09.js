@@ -7,7 +7,7 @@ export default {
     "category": "apcsa",
     "order": 209,
     "track": "apcsa",
-    "unit": "Unit 9 — Inheritance",
+    "unit": "Unit 9, Inheritance",
     "tags": [
       "java",
       "oop",

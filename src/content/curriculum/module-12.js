@@ -19,7 +19,7 @@ export default {
       title: "Why a Vector Database?",
       concept: "VectorDB",
       xp_reward: 10,
-      explanation: `You embed a million support tickets into 1,536-dimensional vectors, store them in a Python list, and write a loop that compares each one to the query. It works for the demo. Then a real query lands and your "search" takes nine seconds. That gap — between a toy similarity loop and a system that answers in milliseconds at scale — is exactly what a **vector database** exists to close.
+      explanation: `You embed a million support tickets into 1,536-dimensional vectors, store them in a Python list, and write a loop that compares each one to the query. It works for the demo. Then a real query lands and your "search" takes nine seconds. That gap between a toy similarity loop and a system that answers in milliseconds at scale is what a **vector database** exists to close.
 
 ## What it is
 
@@ -35,7 +35,7 @@ A vector database wraps three jobs around your embeddings:
 2. **Index** them into a structure that avoids comparing the query to every single vector.
 3. **Query**: embed the incoming text, search the index, return the top-k ids and scores.
 
-The naive version — compare against everything — is called **brute-force** or **flat** search. Here it is:
+The naive version, compare against everything, is called **brute-force** or **flat** search. Here it is:
 
 \`\`\`python
 import numpy as np
@@ -55,7 +55,7 @@ This is correct but **O(n)** per query: double the data, double the time. At a m
 
 - **Scale.** Brute force is fine at thousands, fatal at millions. The index is the whole reason the database exists.
 - **It powers RAG.** Retrieval-augmented generation lives or dies on fast, relevant retrieval. The vector DB is the "retrieval" half.
-- **More than similarity.** Production systems need filtering, hybrid keyword matching, and re-ranking — features a raw NumPy loop will never give you, and the rest of this module builds.
+- **More than similarity.** Production systems need filtering, hybrid keyword matching, and re-ranking, features a raw NumPy loop will never give you, and the rest of this module builds.
 
 ## The mental model to keep
 
@@ -196,7 +196,7 @@ score: 0.9988`,
           number: 2, difficulty: "medium",
           prompt: "A teammate stores embeddings in a normal SQL table and asks, 'Why can't I just write WHERE similarity(query, vec) > 0.8?' What's the problem at scale?",
           steps: [
-            "A SQL WHERE clause with a computed similarity must evaluate that function for every row — that is brute force in disguise.",
+            "A SQL WHERE clause with a computed similarity must evaluate that function for every row, that is brute force in disguise.",
             "There is no index that lets the database skip rows, because B-tree indexes work on ordered scalar values, not high-dimensional closeness.",
             "So the query degrades to a full table scan that recomputes similarity for millions of rows.",
             "A vector database fixes this with a specialized approximate index that finds close vectors without scoring all of them."
@@ -247,7 +247,7 @@ score: 0.9988`,
       challenge_title: "Top-k Semantic Search",
       challenge_difficulty: "intermediate",
       challenge_description: "Build the brute-force nearest-neighbor core of a vector database: embed everything, score by cosine similarity, return the closest k.",
-      challenge_story: "You're shipping the retrieval layer for an AI documentation assistant. Every help article has already been turned into an **embedding** — a vector of floats that captures its meaning. When a user types a question, your embedding model turns it into a **query vector**, and your job is to find the \`k\` stored vectors whose meaning is closest. The industry-standard distance for normalized text embeddings is **cosine similarity**: the cosine of the angle between two vectors, where 1.0 means identical direction. Before you reach for a fancy ANN index, you ship the honest baseline — score the query against every vector and keep the best.",
+      challenge_story: "You're shipping the retrieval layer for an AI documentation assistant. Every help article has already been turned into an **embedding**: a vector of floats that captures its meaning. When a user types a question, your embedding model turns it into a **query vector**, and your job is to find the \`k\` stored vectors whose meaning is closest. The industry-standard distance for normalized text embeddings is **cosine similarity**: the cosine of the angle between two vectors, where 1.0 means identical direction. Before you reach for a fancy ANN index, you ship the honest baseline, score the query against every vector and keep the best.",
       challenge_statement: "You are given a query vector and \`n\` document vectors, all of dimension \`d\`. Return the **top \`k\`** documents by **cosine similarity** to the query.\n\nCosine similarity between vectors \`a\` and \`b\` is:\n\n\`\`\`\ncos(a, b) = dot(a, b) / (||a|| * ||b||)\n\`\`\`\n\nwhere \`||v||\` is the Euclidean norm. If either vector has zero norm, treat its similarity as \`0.0000\`.\n\nRank documents by similarity **descending**. If two documents tie on similarity (rounded to 4 decimals), the one with the **smaller index** comes first. Print the top \`k\`.",
       challenge_input_format: "The first line has three integers `n d k`: the number of document vectors, the dimension, and how many results to return.\n\nThe second line has `d` space-separated floats: the query vector.\n\nEach of the next `n` lines has `d` space-separated floats: one document vector. Documents are indexed `0` to `n-1` in the order given.",
       challenge_output_format: "Print `k` lines. Each line is the document index and its cosine similarity, space-separated, with the similarity formatted to exactly 4 decimal places (e.g. `0 0.9939`).",
@@ -261,10 +261,10 @@ score: 0.9988`,
         { input: "3 2 2\n0.9 0.1\n1.0 0.0\n0.0 1.0\n0.8 0.2", output: "0 0.9939\n2 0.9910", explanation: "The query points mostly along the first axis. Document 0 ([1,0]) is closest (cos 0.9939), then document 2 ([0.8,0.2]) at 0.9910. Document 1 ([0,1]) is nearly orthogonal and drops out." },
         { input: "4 3 3\n1 2 3\n2 4 6\n1 0 0\n3 2 1\n0 0 5", output: "0 1.0000\n3 0.8018\n2 0.7143", explanation: "Document 0 is an exact scalar multiple of the query, so cosine is 1.0000. The others rank by angle." },
       ],
-      challenge_notes: "This is the *exact* search a vector DB approximates. It is O(n·d) per query — perfect for thousands of vectors, hopeless at billions, which is exactly why ANN indexes (the next lesson) exist. Cosine ignores magnitude and only compares direction, which is why a vector and its scalar multiple score 1.0.",
+      challenge_notes: "This is the *exact* search a vector DB approximates. It is O(n·d) per query, perfect for thousands of vectors, hopeless at billions, which is exactly why ANN indexes (the next lesson) exist. Cosine ignores magnitude and only compares direction, which is why a vector and its scalar multiple score 1.0.",
       challenge_hints: [
         "Compute the query norm once, then loop over documents computing each dot product and norm.",
-        "Guard against a zero norm before dividing — return 0.0 for that document instead of crashing.",
+        "Guard against a zero norm before dividing, return 0.0 for that document instead of crashing.",
         "Sort by a key of `(-similarity, index)` so highest similarity wins and ties fall back to the smaller index.",
       ],
       challenge_starter_code: `import sys
@@ -347,7 +347,7 @@ main()
 
 ## What it is
 
-**Approximate nearest neighbor (ANN)** search returns vectors that are *very likely* the closest, without guaranteeing they are *exactly* the closest. You give up a sliver of **recall** — the fraction of true nearest neighbors you actually find — and in return you get an enormous speedup. The structure that makes this possible is the **index**.
+**Approximate nearest neighbor (ANN)** search returns vectors that are *very likely* the closest, without guaranteeing they are *exactly* the closest. You give up a sliver of **recall**: the fraction of true nearest neighbors you actually find, and in return you get an enormous speedup. The structure that makes this possible is the **index**.
 
 The most common modern index is **HNSW** (Hierarchical Navigable Small World): a layered graph you walk to home in on close vectors fast.
 
@@ -355,8 +355,8 @@ The most common modern index is **HNSW** (Hierarchical Navigable Small World): a
 
 HNSW builds a graph where each vector is a node connected to some of its near neighbors, arranged in layers:
 
-1. **Top layers are sparse** — a few nodes with long-range links, like an express highway across the dataset.
-2. **Lower layers are dense** — many nodes with short links, like local streets.
+1. **Top layers are sparse**: a few nodes with long-range links, like an express highway across the dataset.
+2. **Lower layers are dense**: many nodes with short links, like local streets.
 3. **A search starts at the top**, greedily hops toward the query along the highway, then drops to lower layers to refine.
 4. **It stops** when it can't get any closer, returning the best nodes it found.
 
@@ -373,12 +373,12 @@ This is the core tuning dial: **ef trades recall for speed.** Crank it up when a
 ## Why it matters
 
 - **Recall vs latency is a dial, not a default.** Every ANN index lets you pick a point on that curve. The right point depends on your product, not on the library.
-- **99% recall is often plenty.** Missing the true #1 result occasionally is fine when the #2 is nearly as relevant — and worth it for a 100x speedup.
+- **99% recall is often plenty.** Missing the true #1 result occasionally is fine when the #2 is nearly as relevant, and worth it for a 100x speedup.
 - **Index choice has costs.** HNSW gives great recall and speed but uses more memory and is slow to build. Other indexes (IVF, flat) trade differently. There is no free lunch.
 
 ## The mental model to keep
 
-An ANN index is a **shortcut map**: instead of visiting every vector, you follow a few good roads toward the answer. You might miss the single closest house, but you'll reliably land on its street — far, far faster.`,
+An ANN index is a **shortcut map**: instead of visiting every vector, you follow a few good roads toward the answer. You might miss the single closest house, but you'll reliably land on its street, far, far faster.`,
       key_terms: [
         { term: "Approximate nearest neighbor (ANN)", definition: "Search that returns very likely (not guaranteed) closest vectors, trading exactness for speed." },
         { term: "Index", definition: "A data structure over the vectors that lets a query skip most comparisons." },
@@ -567,7 +567,7 @@ exact best score: 0.974`,
       challenge_title: "Recall@k Benchmark",
       challenge_difficulty: "intermediate",
       challenge_description: "Your ANN index is fast but lossy. Measure how many true neighbors it still finds by computing recall@k across a whole query benchmark.",
-      challenge_story: "You swapped your slow brute-force search for a blazing-fast **approximate nearest neighbor (ANN)** index. It is 50x faster — but approximate, so it sometimes misses a true neighbor. Before you ship it, the eval harness must answer one question: *how much accuracy did we trade away?* The standard metric is **recall@k**: for each query, what fraction of the ground-truth top-k neighbors did the index actually return? You run a benchmark of many queries and report both the per-query recall and the **mean recall@k** across the whole set — the single number that decides whether the speedup is worth it.",
+      challenge_story: "You swapped your slow brute-force search for a blazing-fast **approximate nearest neighbor (ANN)** index. It is 50x faster, but approximate, so it sometimes misses a true neighbor. Before you ship it, the eval harness must answer one question: *how much accuracy did we trade away?* The standard metric is **recall@k**: for each query, what fraction of the ground-truth top-k neighbors did the index actually return? You run a benchmark of many queries and report both the per-query recall and the **mean recall@k** across the whole set, the single number that decides whether the speedup is worth it.",
       challenge_statement: "You run \`q\` benchmark queries with parameter \`k\`. For each query you have:\n\n- the **exact** top-k neighbor ids (ground truth, from brute-force search), and\n- the **approx** top-k neighbor ids returned by the ANN index.\n\nFor each query, **recall@k** is:\n\n\`\`\`\n(number of exact ids that also appear in approx) / k\n\`\`\`\n\nUse only the **first k** ids of each list if extras are present. Treat the ids as a set (ignore order and duplicates).\n\nPrint each query's recall@k in order, then print the **mean** recall@k over all \`q\` queries. Every value is formatted to exactly 4 decimal places.",
       challenge_input_format: "The first line has two integers `q k`: the number of queries and the cutoff k.\n\nThen each query takes two lines: the first line is the exact top-k neighbor ids (space-separated), the second is the approx top-k neighbor ids (space-separated).",
       challenge_output_format: "Print `q + 1` lines. The first `q` lines are the per-query recall@k values in input order, each to 4 decimal places. The final line is the mean recall@k over all queries, also to 4 decimal places.",
@@ -581,7 +581,7 @@ exact best score: 0.974`,
         { input: "1 5\n3 7 9 2 5\n3 7 9 2 8", output: "0.8000\n0.8000", explanation: "Four of the five true neighbors (3, 7, 9, 2) appear in the approximate result; id 5 was missed and 8 is a false hit. Recall is 4/5 = 0.8000, and with one query the mean equals it." },
         { input: "2 3\n10 11 12\n10 11 99\n5 6 7\n6 5 7", output: "0.6667\n1.0000\n0.8333", explanation: "Query 1 finds 2 of 3 (0.6667); query 2 finds all 3 regardless of order (1.0000). The mean is (0.6667 + 1.0000) / 2 = 0.8333." },
       ],
-      challenge_notes: "Recall is set-based: order does not matter, only whether each true neighbor was retrieved. This is precisely the knob you tune when you raise \`efSearch\` in an HNSW index — more candidates explored means higher recall but slower queries. A mean recall@10 of 0.95 is a common production target.",
+      challenge_notes: "Recall is set-based: order does not matter, only whether each true neighbor was retrieved. This is precisely the knob you tune when you raise \`efSearch\` in an HNSW index, more candidates explored means higher recall but slower queries. A mean recall@10 of 0.95 is a common production target.",
       challenge_hints: [
         "Convert each list's first k ids to a `set`, then intersect with `&` and take the length.",
         "Accumulate a running total of recalls so you can divide by q at the end for the mean.",
@@ -646,7 +646,7 @@ main()
       title: "Metadata Filtering",
       concept: "Filtering",
       xp_reward: 10,
-      explanation: `A user on your German support site asks a question and your retriever confidently returns the perfect answer — in English, from a document marked "internal only," dated three years before the feature existed. The vectors were similar. The result was useless. **Metadata filtering** is how you keep similarity search inside the boundaries reality demands.
+      explanation: `A user on your German support site asks a question and your retriever confidently returns the perfect answer, in English, from a document marked "internal only," dated three years before the feature existed. The vectors were similar. The result was useless. **Metadata filtering** is how you keep similarity search inside the boundaries reality demands.
 
 ## What it is
 
@@ -862,8 +862,8 @@ for d in eligible:
       ],
       challenge_title: "Metadata-Filtered Retrieval",
       challenge_difficulty: "advanced",
-      challenge_description: "Pure similarity isn't enough — a doc must also pass hard business rules. Apply equality filters and a recency floor before ranking.",
-      challenge_story: "Your RAG assistant serves a regulated enterprise. Similarity decides *which docs are relevant*, but **metadata** decides *which docs the user is even allowed to see*: the right language, the right product tier, recent enough to be accurate. A pre-filter that the index respects is non-negotiable — surfacing a stale or out-of-scope passage isn't just a bad answer, it's a compliance incident. So your retriever first discards anything that fails the metadata predicates, **then** ranks whatever survives by its semantic score.",
+      challenge_description: "Pure similarity isn't enough, a doc must also pass hard business rules. Apply equality filters and a recency floor before ranking.",
+      challenge_story: "Your RAG assistant serves a regulated enterprise. Similarity decides *which docs are relevant*, but **metadata** decides *which docs the user is even allowed to see*: the right language, the right product tier, recent enough to be accurate. A pre-filter that the index respects is non-negotiable, surfacing a stale or out-of-scope passage isn't just a bad answer, it's a compliance incident. So your retriever first discards anything that fails the metadata predicates, **then** ranks whatever survives by its semantic score.",
       challenge_statement: "You are given \`n\` candidate documents. Each has an integer **id**, a float similarity **score**, an integer **year**, and zero or more string **metadata** key/value pairs.\n\nApply two filters:\n\n1. **Recency floor:** keep only documents with \`year >= min_year\`.\n2. **Equality filters:** for each given \`(key, value)\` filter, the document's metadata for that key must equal that value. A document missing the key fails.\n\nAmong the survivors, rank by **score descending**. If two survivors tie on score, the one with the **smaller id** comes first. Print the surviving ids in rank order. If nothing survives, print \`NONE\`.",
       challenge_input_format: "The first line is an integer `n`. Each of the next `n` lines describes a document: `id score year` followed by zero or more `key value` metadata pairs, all space-separated (e.g. `2 0.86 2024 lang de`).\n\nThe next line is an integer `min_year`.\n\nThe next line is an integer `f`, the number of equality filters. Each of the following `f` lines is one `key value` pair.",
       challenge_output_format: "One line: the surviving document ids in rank order, space-separated. If no document survives, print `NONE`.",
@@ -877,7 +877,7 @@ for d in eligible:
         { input: "4\n1 0.90 2021 lang de\n2 0.86 2024 lang de\n3 0.93 2024 lang en\n4 0.80 2023 lang de\n2023\n1\nlang de", output: "2 4", explanation: "Doc 1 fails the year floor (2021 < 2023); doc 3 fails the language filter (en ≠ de). The German docs from 2023+ are 2 (0.86) and 4 (0.80), ranked by score." },
         { input: "5\n10 0.95 2024 lang en tier pro\n11 0.91 2024 lang en tier free\n12 0.99 2022 lang en tier pro\n13 0.88 2025 lang en tier pro\n14 0.70 2024 lang de tier pro\n2023\n2\nlang en\ntier pro", output: "10 13", explanation: "Both filters must pass: doc 11 is the free tier, doc 12 is too old, doc 14 is German. Docs 10 (0.95) and 13 (0.88) survive and rank by score." },
       ],
-      challenge_notes: "This is *pre-filtering*: cut the candidate set down before ranking. Vector DBs implement exactly this (Pinecone metadata filters, pgvector \`WHERE\` clauses). The ordering still comes from similarity — metadata only decides eligibility, never rank position.",
+      challenge_notes: "This is *pre-filtering*: cut the candidate set down before ranking. Vector DBs implement exactly this (Pinecone metadata filters, pgvector \`WHERE\` clauses). The ordering still comes from similarity, metadata only decides eligibility, never rank position.",
       challenge_hints: [
         "Write a predicate that returns False the moment any filter fails, so you can drop a doc early.",
         "Use `all(meta.get(key) == value for key, value in filters)` to require every equality filter at once.",
@@ -972,7 +972,7 @@ main()
       title: "Hybrid Search: Keyword + Vector",
       concept: "Hybrid",
       xp_reward: 10,
-      explanation: `A user searches for error code "E-4021". Your beautiful semantic search returns documents about *general error handling* — relevant in meaning, useless in fact, because it never anchored on that exact string. Meanwhile a dumb keyword search would have nailed it instantly. The fix isn't to pick a side. It's **hybrid search**: run both and combine them.
+      explanation: `A user searches for error code "E-4021". Your beautiful semantic search returns documents about *general error handling*, relevant in meaning, useless in fact, because it never anchored on that exact string. Meanwhile a dumb keyword search would have nailed it instantly. The fix isn't to pick a side. It's **hybrid search**: run both and combine them.
 
 ## What it is
 
@@ -1187,7 +1187,7 @@ print(fused)
       challenge_title: "Weighted Reciprocal Rank Fusion",
       challenge_difficulty: "advanced",
       challenge_description: "Keyword search and vector search each return a ranked list. Fuse them into one ranking with weighted Reciprocal Rank Fusion.",
-      challenge_story: "Your support search is **hybrid**: a keyword (BM25) engine that nails exact error codes and SKUs, and a vector engine that catches paraphrases and synonyms. Each returns its own ranked list, and neither alone is best. The clean way to merge them — no score normalization, no tuning headaches — is **Reciprocal Rank Fusion (RRF)**: a document's fused score is the sum over every list of \`weight / (k + rank)\`, where rank is 0-based. RRF only cares *where* a doc landed in each list, not the raw scores, which makes it robust across wildly different engines. You give keyword results extra pull by weighting that list higher.",
+      challenge_story: "Your support search is **hybrid**: a keyword (BM25) engine that nails exact error codes and SKUs, and a vector engine that catches paraphrases and synonyms. Each returns its own ranked list, and neither alone is best. The clean way to merge them, no score normalization, no tuning headaches, is **Reciprocal Rank Fusion (RRF)**: a document's fused score is the sum over every list of \`weight / (k + rank)\`, where rank is 0-based. RRF only cares *where* a doc landed in each list, not the raw scores, which makes it robust across wildly different engines. You give keyword results extra pull by weighting that list higher.",
       challenge_statement: "You are given \`m\` ranked lists of document ids and a constant \`k\`. Each list \`j\` has an integer **weight** \`w_j\`. A document at 0-based **rank** \`r\` in list \`j\` contributes:\n\n\`\`\`\nw_j * (1 / (k + r))\n\`\`\`\n\nto that document's fused score. Sum these contributions across all lists a document appears in.\n\nRank documents by fused score **descending**. If two documents tie on fused score (compared at 9 decimal places of precision), order them **lexicographically by id**.\n\nFirst print the fused order on one line (ids space-separated). Then print each id with its fused score to exactly 6 decimal places, in the same order.",
       challenge_input_format: "The first line has two integers `m k`: the number of ranked lists and the RRF constant.\n\nEach of the next `m` lines is one list: an integer weight followed by the document ids in rank order, all space-separated (e.g. `2 docB docA` means weight 2, with docB at rank 0 and docA at rank 1).",
       challenge_output_format: "The first line is the fused ranking: all ids in fused order, space-separated. Then one line per id, `id score`, with the fused score to exactly 6 decimal places, in the same fused order.",
@@ -1201,7 +1201,7 @@ print(fused)
         { input: "2 60\n2 docB docA\n1 docA docC", output: "docA docB docC\ndocA 0.049454\ndocB 0.033333\ndocC 0.016393", explanation: "docA scores 2/(60+1) from the keyword list plus 1/(60+0) from the vector list = 0.049454, edging out docB at 2/(60+0)=0.033333. docC only appears once at vector rank 1: 1/(60+1)=0.016393." },
         { input: "3 10\n1 a b c\n1 c b a\n2 b", output: "b a c\nb 0.381818\na 0.183333\nc 0.183333", explanation: "b appears at rank 1, rank 1, and rank 0 (weight 2), accumulating the highest fused score. a and c tie exactly, so they order lexicographically: a before c." },
       ],
-      challenge_notes: "The constant \`k\` (often 60) dampens the gap between top ranks so no single list can dominate. RRF needs no score calibration — it's why production hybrid search defaults to it. The lexicographic tie-break makes the output deterministic when two docs land in symmetric positions.",
+      challenge_notes: "The constant \`k\` (often 60) dampens the gap between top ranks so no single list can dominate. RRF needs no score calibration, it's why production hybrid search defaults to it. The lexicographic tie-break makes the output deterministic when two docs land in symmetric positions.",
       challenge_hints: [
         "Accumulate scores in a dict: for each list, add `weight * (1 / (k + rank))` for every id at its rank.",
         "Use `enumerate(ids)` to get the 0-based rank of each id in a list.",
@@ -1227,7 +1227,7 @@ def main():
     # to scores[doc_id] (start missing ids at 0.0).
     scores = {}
 
-    # The compound sort key is pre-written for you — this is the tricky part:
+    # The compound sort key is pre-written for you, this is the tricky part:
     # highest fused score first, ties broken lexicographically by id.
     order = sorted(scores.keys(), key=lambda d: (-round(scores[d], 9), d))
 
@@ -1272,16 +1272,16 @@ main()
       title: "Re-ranking & Scaling",
       concept: "Reranking",
       xp_reward: 10,
-      explanation: `Your vector search returns 50 candidates in 8 milliseconds. Most are roughly right; the truly best three are buried at positions 11, 19, and 34. Re-running the whole index more carefully would be too slow. So you do the smart thing: let the fast index cast a wide net, then spend real compute re-scoring only the handful it caught. That two-stage pattern — **retrieve then re-rank** — is how production search gets both fast *and* accurate.
+      explanation: `Your vector search returns 50 candidates in 8 milliseconds. Most are roughly right; the truly best three are buried at positions 11, 19, and 34. Re-running the whole index more carefully would be too slow. So you do the smart thing: let the fast index cast a wide net, then spend real compute re-scoring only the handful it caught. That two-stage pattern, **retrieve then re-rank**: is how production search gets both fast *and* accurate.
 
 ## What it is
 
 **Re-ranking** is a second pass that re-scores a small candidate set with a heavier, more accurate model, then reorders them. The standard architecture is **two-stage retrieval**:
 
-1. **Retrieve** — a fast ANN search pulls a wide top-k (say 50-100 candidates). Cheap, approximate, high recall.
-2. **Re-rank** — a slower **cross-encoder** scores each candidate against the query directly and reorders. Expensive, precise, run only on the survivors.
+1. **Retrieve**: a fast ANN search pulls a wide top-k (say 50-100 candidates). Cheap, approximate, high recall.
+2. **Re-rank**: a slower **cross-encoder** scores each candidate against the query directly and reorders. Expensive, precise, run only on the survivors.
 
-The key distinction: the retriever uses a **bi-encoder** (embed query and docs separately, compare vectors), while the re-ranker uses a **cross-encoder** (feed query and doc together through a model for a relevance score). Cross-encoders are far more accurate but far too slow to run over millions of docs — which is exactly why you only run them on the retrieved few.
+The key distinction: the retriever uses a **bi-encoder** (embed query and docs separately, compare vectors), while the re-ranker uses a **cross-encoder** (feed query and doc together through a model for a relevance score). Cross-encoders are far more accurate but far too slow to run over millions of docs, which is exactly why you only run them on the retrieved few.
 
 ## How it works
 
@@ -1296,7 +1296,7 @@ You pay the cross-encoder cost on 50 items, not 50 million. The retriever's job 
 
 ## Why it matters
 
-- **Best of both.** Fast retrieval keeps latency low; re-ranking sharpens the final order where it counts — the top few the user actually sees.
+- **Best of both.** Fast retrieval keeps latency low; re-ranking sharpens the final order where it counts, the top few the user actually sees.
 - **Scaling levers are real.** Larger datasets push you toward **sharding** (split vectors across machines) and **quantization** (compress vectors to use less memory), each trading a little accuracy or recall for capacity and speed.
 - **Recall before precision.** If stage 1 never retrieves a good doc, stage 2 can't rescue it. Tune the retriever for recall first, then let the re-ranker handle precision.
 
@@ -1478,7 +1478,7 @@ print(top2)
       challenge_title: "Retrieve-then-Rerank Pipeline",
       challenge_difficulty: "intermediate",
       challenge_description: "Cast a wide cheap net, then re-score the finalists with an expensive cross-encoder. Build the two-stage retrieval pipeline.",
-      challenge_story: "Your cross-encoder reranker is *accurate* but *slow* — far too slow to run on every document in the corpus. So production search runs in two stages. **Stage 1 (retrieve):** a fast ANN index pulls a wide candidate set, optimized for recall so no good doc is missed. **Stage 2 (rerank):** the heavyweight cross-encoder re-scores only those few candidates, optimized for precision so the very best answer lands on top. The catch: a doc the retriever drops is gone forever, no matter how well the reranker would have scored it. You implement the funnel that turns a cheap recall score and an expensive precision score into a final shortlist.",
+      challenge_story: "Your cross-encoder reranker is *accurate* but *slow*, far too slow to run on every document in the corpus. So production search runs in two stages. **Stage 1 (retrieve):** a fast ANN index pulls a wide candidate set, optimized for recall so no good doc is missed. **Stage 2 (rerank):** the heavyweight cross-encoder re-scores only those few candidates, optimized for precision so the very best answer lands on top. The catch: a doc the retriever drops is gone forever, no matter how well the reranker would have scored it. You implement the funnel that turns a cheap recall score and an expensive precision score into a final shortlist.",
       challenge_statement: "You are given \`n\` documents. Each has a string **id**, a float **retrieve_score** (stage-1 ANN score), and a float **rerank_score** (stage-2 cross-encoder score).\n\nRun the two stages:\n\n1. **Retrieve:** keep the top \`retrieve_k\` documents by **retrieve_score** descending. If two tie on retrieve_score, prefer the **lexicographically smaller id**.\n2. **Rerank:** reorder *only those survivors* by **rerank_score** descending. If two tie on rerank_score, prefer the **lexicographically smaller id**. Take the top \`final_k\`.\n\nPrint the final shortlist of ids, space-separated. If \`final_k\` exceeds the number of survivors, print all survivors in reranked order.",
       challenge_input_format: "The first line is an integer `n`. Each of the next `n` lines is `id retrieve_score rerank_score`, space-separated.\n\nThe final line has two integers `retrieve_k final_k`.",
       challenge_output_format: "One line: the final ids after retrieve-then-rerank, space-separated, best first.",
@@ -1489,10 +1489,10 @@ print(top2)
         "Ties on either score break by lexicographically smaller id.",
       ],
       challenge_examples: [
-        { input: "4\na 0.80 0.30\nb 0.75 0.95\nc 0.70 0.60\nd 0.40 0.99\n3 2", output: "b c", explanation: "Stage 1 keeps the top-3 by retrieve_score: a (0.80), b (0.75), c (0.70); d is dropped despite its 0.99 rerank score — the retriever never surfaced it. Stage 2 reorders the survivors by rerank_score: b (0.95), c (0.60), a (0.30). The top-2 are b and c." },
+        { input: "4\na 0.80 0.30\nb 0.75 0.95\nc 0.70 0.60\nd 0.40 0.99\n3 2", output: "b c", explanation: "Stage 1 keeps the top-3 by retrieve_score: a (0.80), b (0.75), c (0.70); d is dropped despite its 0.99 rerank score, the retriever never surfaced it. Stage 2 reorders the survivors by rerank_score: b (0.95), c (0.60), a (0.30). The top-2 are b and c." },
         { input: "5\np 0.99 0.10\nq 0.95 0.90\nr 0.90 0.85\ns 0.85 0.99\nt 0.50 0.99\n4 3", output: "s q r", explanation: "Stage 1 keeps p, q, r, s (top-4 by retrieve; t is cut). Stage 2 reranks them: s (0.99), q (0.90), r (0.85), p (0.10). Top-3 are s, q, r." },
       ],
-      challenge_notes: "This funnel is why hybrid search feels both fast and smart: the expensive model only ever sees a handful of candidates. The classic failure mode is setting \`retrieve_k\` too small — a brilliant reranker can't rank a document the retriever already threw away, exactly what happens to doc d above.",
+      challenge_notes: "This funnel is why hybrid search feels both fast and smart: the expensive model only ever sees a handful of candidates. The classic failure mode is setting \`retrieve_k\` too small, a brilliant reranker can't rank a document the retriever already threw away, exactly what happens to doc d above.",
       challenge_hints: [
         "Sort all docs by `(-retrieve_score, id)` and slice the first `retrieve_k` for stage 1.",
         "Sort that survivor list by `(-rerank_score, id)` and slice the first `final_k` for stage 2.",
