@@ -77,10 +77,10 @@ export default function Layout({ children, currentPageName }) {
               style={{ background: "#34302A" }}
             />
             <span
-              className="text-sm tracking-widest uppercase transition-colors duration-200"
+              className="inline-flex items-center text-sm tracking-widest uppercase transition-colors duration-200"
               style={{ color: "#FFFFFF", fontFamily: "'Spline Sans Mono Variable', ui-monospace, monospace", lineHeight: 1 }}
             >
-              codeflow<span className="cf-cursor">_</span>
+              codeflow<span className="cf-cursor" aria-hidden="true" />
             </span>
           </Link>
 
