@@ -196,6 +196,12 @@ export default function ProjectDetail() {
     }
   };
 
+  // Reset scroll to the top of the page whenever the lesson changes, so Next/Prev
+  // land you at the start of the new lesson instead of wherever the button was.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeLessonId]);
+
   const goToNextLesson = () => {
     if (activeLessonIndex < lessons.length - 1) {
       setActiveLessonId(lessons[activeLessonIndex + 1].id);

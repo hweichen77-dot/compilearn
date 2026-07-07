@@ -168,7 +168,9 @@
 .cf-cursor {
   display: inline-block;
   width: 0.5ch;
-  color: #E8A33C;
+  height: 0.95em;
+  margin-left: 2px;
+  background: #E8A33C;
   animation: cf-blink 1.1s steps(1) infinite;
 }
 
