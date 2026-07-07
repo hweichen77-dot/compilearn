@@ -6,6 +6,8 @@ import { Link, useParams } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { resolveLessonSlugs, getLessonPath } from "@/content";
 import useDocumentHead from "@/lib/useDocumentHead";
+import { touchStreak } from "@/lib/progressStats";
+import { recordActivity } from "@/lib/retention";
 import { motion, AnimatePresence } from "framer-motion";
 import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
@@ -175,6 +177,8 @@ export default function ProjectDetail() {
         });
       }
       if (!existing?.completed) {
+        try { recordActivity('lesson'); } catch {  }
+        try { touchStreak(); } catch {  }
         try { track('lesson_complete', { lesson_id: lessonId, project_id: projectId, time_spent_seconds: timeSpent }); } catch {  }
       }
     },

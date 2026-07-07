@@ -1,4 +1,5 @@
-import { namespacedKey } from "./progressStats";
+import { namespacedKey, touchStreak } from "./progressStats";
+import { recordActivity } from "./retention";
 
 // Tracks which playground labs the learner has solved (held all attacks).
 // Per-user namespaced localStorage, mirrors the lesson/challenge progress model.
@@ -28,6 +29,8 @@ export function markLabSolved(id) {
   if (solved.includes(id)) return false;
   solved.push(id);
   try { localStorage.setItem(KEY(), JSON.stringify(solved)); } catch { /* ignore */ }
+  try { touchStreak(); } catch { /* ignore */ }
+  try { recordActivity("lab"); } catch { /* ignore */ }
   try { window.dispatchEvent(new CustomEvent(PLAYGROUND_CHANGED_EVENT, { detail: { id } })); } catch { /* ignore */ }
   return true;
 }

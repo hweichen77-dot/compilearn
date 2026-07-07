@@ -12,6 +12,11 @@ import { UserChallenges } from "../api/supabaseClient";
 import { getChallengeStats } from "../api/progressStore";
 import { getLessonPath } from "../content";
 import LevelUpModal from "../components/gamification/LevelUpModal";
+import { getStreakInfo } from "../lib/progressStats";
+import { shouldShowWeeklyRecap } from "../lib/retention";
+import DailyGoal from "../components/retention/DailyGoal";
+import ReviewSection from "../components/retention/ReviewSection";
+import WeeklyRecapModal from "../components/retention/WeeklyRecapModal";
 
 // Palette (no blue/purple/cyan): off-black bg, warm amber/gold accents, emerald
 // for "complete", stark white text, warm-slate hover.
@@ -80,6 +85,10 @@ export default function Dashboard() {
   });
 
   const [levelUp, setLevelUp] = useState(null);
+  const [showRecap, setShowRecap] = useState(false);
+  useEffect(() => {
+    if (progress.length && shouldShowWeeklyRecap(progress)) setShowRecap(true);
+  }, [progress]);
   useEffect(() => {
     if (!user || progress.length === 0) return;
     const xp = progress.filter(p => p.completed).reduce((s, p) => s + (p.points_earned || 10), 0);
@@ -106,6 +115,12 @@ export default function Dashboard() {
   const lvlPct = lvl.max === Infinity ? 100 : Math.min(100, Math.round(((totalXP - lvl.min) / (lvl.max - lvl.min)) * 100));
   const toNext = lvl.max === Infinity ? 0 : Math.max(0, lvl.max - totalXP);
   const streak = Math.max(getStreak(), challengeStats.streak);
+  const streakInfo = getStreakInfo();
+  const welcomeSub = streakInfo.atRisk && streakInfo.current > 0
+    ? `You're on a ${streakInfo.current}-day streak. Do one lesson today to keep it alive.`
+    : streakInfo.current > 1
+    ? `${streakInfo.current}-day streak going. ${completedLessons} lessons, ${totalXP} XP so far.`
+    : `You've completed ${completedLessons} ${completedLessons === 1 ? "lesson" : "lessons"} and earned ${totalXP} XP. Start a streak today.`;
 
   const lessonsByProject = (projId) =>
     allLessons.filter(l => l.project_id === projId).sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -163,7 +178,7 @@ export default function Dashboard() {
             Welcome back, {firstName}.
           </h1>
           <p className="mt-3 text-base" style={{ color: C.dim, fontFamily: font.display }}>
-            You've completed {completedLessons} {completedLessons === 1 ? "lesson" : "lessons"} and earned {totalXP} XP. Keep the streak alive.
+            {welcomeSub}
           </p>
         </motion.div>
 
@@ -229,6 +244,11 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
+        {/* Daily goal + streak (retention) */}
+        <div className="mt-8">
+          <DailyGoal />
+        </div>
+
         {/* 5. Continue learning hero */}
         {heroProject && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
@@ -271,9 +291,14 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+        {/* Spaced review (retention) */}
+        <div className="mt-10">
+          <ReviewSection lessons={allLessons} progress={progress} />
+        </div>
       </div>
 
       {levelUp && <LevelUpModal level={levelUp} onClose={() => setLevelUp(null)} />}
+      {showRecap && <WeeklyRecapModal progress={progress} onClose={() => setShowRecap(false)} />}
     </div>
   );
 }

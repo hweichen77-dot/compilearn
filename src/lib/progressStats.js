@@ -19,32 +19,66 @@ export function namespacedKey(base, id) {
 }
 
 const streakKey = (id) => namespacedKey(STREAK_BASE, id);
+const MAX_FREEZES = 3;
+
+// Whole-day difference between a stored toDateString() and today.
+function dayGap(lastVisit, now = new Date()) {
+  if (!lastVisit) return Infinity;
+  const from = new Date(lastVisit);
+  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const b = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((b - a) / 86400000);
+}
+
+function readStreak() {
+  try { return JSON.parse(localStorage.getItem(streakKey()) || "{}"); } catch { return {}; }
+}
 
 export function getStreak() {
+  const data = readStreak();
+  const gap = dayGap(data.lastVisit);
+  // Live today/yesterday, or one missed day covered by an available freeze.
+  if (gap <= 1) return data.streak || 0;
+  if (gap === 2 && (data.freezes || 0) > 0) return data.streak || 0;
+  return 0;
+}
+
+export function touchStreak() {
   try {
-    const data = JSON.parse(localStorage.getItem(streakKey()) || "{}");
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    if (data.lastVisit === today || data.lastVisit === yesterday) return data.streak || 0;
-    return 0;
+    const data = readStreak();
+    const gap = dayGap(data.lastVisit);
+    const prev = data.streak || 0;
+    let freezes = data.freezes || 0;
+    let streak;
+    if (data.lastVisit == null) streak = 1;
+    else if (gap === 0) streak = prev || 1;         // already active today
+    else if (gap === 1) streak = prev + 1;          // consecutive day
+    else if (gap === 2 && freezes > 0) { freezes -= 1; streak = prev + 1; } // freeze covered 1 missed day
+    else streak = 1;                                // streak broke
+    // Earn a freeze each time the streak crosses a multiple of 5 (cap 3).
+    if (streak > prev && streak % 5 === 0) freezes = Math.min(MAX_FREEZES, freezes + 1);
+    const longest = Math.max(data.longest || 0, streak);
+    localStorage.setItem(streakKey(), JSON.stringify({ lastVisit: new Date().toDateString(), streak, freezes, longest }));
+    return streak;
   } catch {
     return 0;
   }
 }
 
-export function touchStreak() {
-  try {
-    const data = JSON.parse(localStorage.getItem(streakKey()) || "{}");
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    let streak = 1;
-    if (data.lastVisit === today) streak = data.streak || 1;
-    else if (data.lastVisit === yesterday) streak = (data.streak || 0) + 1;
-    localStorage.setItem(streakKey(), JSON.stringify({ lastVisit: today, streak }));
-    return streak;
-  } catch {
-    return 0;
-  }
+// Rich streak state for the UI: current, freezes banked, longest ever, whether
+// the user has been active today, and whether the streak is at risk (alive but
+// no activity yet today — the moment to nudge them).
+export function getStreakInfo() {
+  const data = readStreak();
+  const current = getStreak();
+  const gap = dayGap(data.lastVisit);
+  return {
+    current,
+    freezes: data.freezes || 0,
+    longest: Math.max(data.longest || 0, current),
+    activeToday: gap === 0,
+    atRisk: current > 0 && gap !== 0,
+  };
 }
 
 export function summarize(progress = [], projects = [], lessons = []) {
