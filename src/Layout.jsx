@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { useAuth } from "@/lib/AuthContext";
 import { PageTransition } from "@/lib/motion";
+import MilestoneBurst from "@/components/retention/MilestoneBurst";
+import FirstWinOnboarding from "@/components/retention/FirstWinOnboarding";
 
 export default function Layout({ children, currentPageName }) {
   const { user, logout } = useAuth();
@@ -45,6 +47,8 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div style={{ background: "#15130E", minHeight: "100vh" }}>
       <div className="cf-grain" aria-hidden="true" />
+      {user && <MilestoneBurst />}
+      {user && <FirstWinOnboarding />}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] font-sans text-xs tracking-widest uppercase px-4 py-2"

@@ -1,4 +1,5 @@
 import { touchStreak } from '../lib/progressStats'
+import { recordActivity } from '../lib/retention'
 import { track } from '../lib/analytics'
 
 export const PROGRESS_KEY = 'codeflow_progress_v1'
@@ -108,7 +109,10 @@ export function markChallengeComplete(id) {
   }
   writeArr(CHALLENGES_KEY, rows)
   try { touchStreak() } catch {  }
-  if (wasNew) { try { track('challenge_complete', { id }) } catch {  } }
+  if (wasNew) {
+    try { recordActivity('challenge') } catch {  }
+    try { track('challenge_complete', { id }) } catch {  }
+  }
   return rows.find((r) => r.id === id) || null
 }
 
