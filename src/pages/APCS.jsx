@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
 import ProgressRing from "../components/gamification/ProgressRing";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Eyebrow, KIT } from "@/components/ui/kit";
 
 const TRACKS = [
   { key: "apcsp", label: "AP CSP", title: "Computer Science Principles", lang: "Python · pseudocode",
@@ -65,7 +66,7 @@ export default function APCS() {
       <div className="relative px-8 lg:px-16 pt-28 pb-12" style={{ borderBottom: "1px solid #262219" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
         <div className="max-w-7xl mx-auto">
-          <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: "#FFFFFF" }}>AP COMPUTER SCIENCE</div>
+          <Eyebrow className="mb-3">AP COMPUTER SCIENCE</Eyebrow>
           <h1 style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 20px" }}>
             Pass the AP exam.<br />
             <span style={{ WebkitTextStroke: "1.5px #E8A33C", color: "transparent" }}>And understand it.</span>
@@ -108,9 +109,7 @@ export default function APCS() {
         ) : (
           units.map((unit) => (
             <div key={unit}>
-              <div className="font-sans text-xs tracking-widest uppercase mb-5" style={{ color: "#E8A33C" }}>
-                {unit}
-              </div>
+              <Eyebrow color={KIT.amber} className="mb-5">{unit}</Eyebrow>
               <Stagger as="div" style={{ borderTop: "1px solid #262219" }}>
                 {byUnit.get(unit).map((p, i) => {
                   const dc = DIFF_COLOR[p.difficulty] || DIFF_COLOR.beginner;

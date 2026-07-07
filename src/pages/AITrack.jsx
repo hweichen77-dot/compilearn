@@ -7,6 +7,7 @@ import { api } from "@/api/apiClient";
 import ProgressRing from "../components/gamification/ProgressRing";
 import { foundationsAreFinished, isModuleGated } from "@/lib/foundationsGate";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Card, Eyebrow, PrimaryButton } from "@/components/ui/kit";
 
 const CAPSTONES = [
   {
@@ -95,7 +96,7 @@ export default function AITrack() {
       <div className="relative px-8 lg:px-16 pt-28 pb-16" style={{ borderBottom: "1px solid #262219" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
         <div className="max-w-7xl mx-auto">
-          <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: "#FFFFFF" }}>AI TRACK</div>
+          <Eyebrow className="mb-3">AI TRACK</Eyebrow>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 20px" }}
           >
@@ -111,9 +112,7 @@ export default function AITrack() {
       <div className="max-w-7xl mx-auto px-8 lg:px-16 py-16 space-y-20">
 
         <div>
-          <div className="font-sans text-xs tracking-widest uppercase mb-8" style={{ color: "#FFFFFF" }}>
-            CURRICULUM, {trackItems.length} MODULES
-          </div>
+          <Eyebrow className="mb-8">CURRICULUM, {trackItems.length} MODULES</Eyebrow>
 
           <div
             className="grid gap-8 px-6 py-3 mb-px"
@@ -225,9 +224,7 @@ export default function AITrack() {
         </div>
 
         <div>
-          <div className="font-sans text-xs tracking-widest uppercase mb-8" style={{ color: "#FFFFFF" }}>
-            CAPSTONE PROJECTS, WHAT YOU WILL BUILD
-          </div>
+          <Eyebrow className="mb-8">CAPSTONE PROJECTS, WHAT YOU WILL BUILD</Eyebrow>
           <Stagger className="grid md:grid-cols-3 gap-0" as="div" style={{ border: "1px solid #262219" }}>
             {CAPSTONES.map((cap, i) => {
               const dc = DIFF_COLOR[cap.level];
@@ -267,8 +264,8 @@ export default function AITrack() {
           </Stagger>
         </div>
 
-        <div className="text-center py-12" style={{ border: "1px solid #262219" }}>
-          <div className="font-sans text-xs tracking-widest uppercase mb-5" style={{ color: "#FFFFFF" }}>READY?</div>
+        <Card hover={false} className="text-center py-12 px-6">
+          <Eyebrow className="mb-5">READY?</Eyebrow>
           <h2
             style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", margin: "0 0 16px" }}
           >
@@ -277,17 +274,10 @@ export default function AITrack() {
           <p className="font-display text-base mb-8" style={{ color: "#FFFFFF", fontWeight: 400 }}>
             The projects are in the Projects section. Filter by category "AI/ML".
           </p>
-          <Link to={createPageUrl("Projects")}>
-            <button
-              className="font-sans text-sm tracking-widest uppercase px-10 py-5 transition-all duration-200"
-              style={{ background: "#E8A33C", color: "#15130E", border: "1px solid #E8A33C", fontWeight: 700 }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(232,163,60,0.3)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-            >
-              Browse Projects →
-            </button>
-          </Link>
-        </div>
+          <div className="flex justify-center">
+            <PrimaryButton to={createPageUrl("Projects")}>Browse Projects</PrimaryButton>
+          </div>
+        </Card>
       </div>
 
       {nudge && (

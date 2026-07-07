@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Card } from "@/components/ui/kit";
 import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
 import ProblemStatement from "../components/challenge/ProblemStatement";
@@ -186,22 +187,24 @@ export default function ChallengeDetail() {
         )}
 
         {!challenge.statement && challenge.test_cases && challenge.test_cases.length > 0 && (
-          <StaggerItem as="div" style={{ border: "1px solid #262219", background: "#131009" }}>
-            <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-              <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
-                Test Cases
-              </span>
-            </div>
-            <div className="px-5 py-4 space-y-2">
-              {challenge.test_cases.map((tc, i) => (
-                <div key={i} className="flex items-center gap-4 font-mono text-xs py-2" style={{ borderBottom: i < challenge.test_cases.length - 1 ? "1px solid #1C1A14" : "none" }}>
-                  <span style={{ color: "#FFFFFF" }}>{String(i + 1).padStart(2, "0")}</span>
-                  <span style={{ color: "#FFFFFF" }}>in: <span style={{ color: "#FFFFFF" }}>{tc.input}</span></span>
-                  <span style={{ color: "#FFFFFF" }}>→</span>
-                  <span style={{ color: "#FFFFFF" }}>expect: <span style={{ color: "#E8A33C" }}>{tc.expected_output}</span></span>
-                </div>
-              ))}
-            </div>
+          <StaggerItem as="div">
+            <Card className="overflow-hidden">
+              <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
+                <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
+                  Test Cases
+                </span>
+              </div>
+              <div className="px-5 py-4 space-y-2">
+                {challenge.test_cases.map((tc, i) => (
+                  <div key={i} className="flex items-center gap-4 font-mono text-xs py-2" style={{ borderBottom: i < challenge.test_cases.length - 1 ? "1px solid #1C1A14" : "none" }}>
+                    <span style={{ color: "#FFFFFF" }}>{String(i + 1).padStart(2, "0")}</span>
+                    <span style={{ color: "#FFFFFF" }}>in: <span style={{ color: "#FFFFFF" }}>{tc.input}</span></span>
+                    <span style={{ color: "#FFFFFF" }}>→</span>
+                    <span style={{ color: "#FFFFFF" }}>expect: <span style={{ color: "#E8A33C" }}>{tc.expected_output}</span></span>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </StaggerItem>
         )}
 

@@ -7,6 +7,7 @@ import { createPageUrl } from "../utils";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/content/categories";
 import { foundationsAreFinished, isModuleGated } from "@/lib/foundationsGate";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Eyebrow } from "@/components/ui/kit";
 
 const DIFFICULTY_LABEL = {
   beginner: "00",
@@ -95,7 +96,7 @@ export default function Projects() {
         />
         <div className="max-w-7xl mx-auto">
           <div className="flex items-baseline gap-6 mb-2">
-            <span className="font-sans text-xs tracking-widest" style={{ color: "#FFFFFF" }}>PROJECTS</span>
+            <Eyebrow>PROJECTS</Eyebrow>
           </div>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 16px" }}
@@ -177,9 +178,7 @@ export default function Projects() {
                   className="flex items-baseline gap-3 px-6 pt-8 pb-3"
                   style={{ borderBottom: "1px solid #1F1C15" }}
                 >
-                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
-                    {section.label}
-                  </span>
+                  <Eyebrow>{section.label}</Eyebrow>
                   <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
                     {section.items.length}
                   </span>
@@ -350,12 +349,7 @@ export default function Projects() {
 
             {filtered.length === 0 && (
               <div className="text-center py-24">
-                <div
-                  className="font-sans text-xs tracking-widest uppercase mb-4"
-                  style={{ color: "#FFFFFF" }}
-                  >
-                   NO RESULTS
-                </div>
+                <Eyebrow className="mb-4">NO RESULTS</Eyebrow>
                 <p className="font-display text-base" style={{ color: "#FFFFFF" }}>
                   No projects match your filter.
                 </p>

@@ -6,23 +6,11 @@ import { createPageUrl } from "../utils";
 import { useAuth } from "../lib/AuthContext";
 import { summarize, touchStreak } from "../lib/progressStats";
 import { Stagger, StaggerItem, AnimatedBar } from "@/lib/motion";
+import { Card, StatCard, StatGrid, HeroCard, ProgressBar, PrimaryButton, Eyebrow, KIT } from "@/components/ui/kit";
+import { Shield, Flame, BookOpen, FolderGit2 } from "lucide-react";
 
 const LABEL = font.body;
 const SERIF = font.display;
-
-function StatCard({ label, value, sub, accent = "#E8A33C" }) {
-  return (
-    <div className="p-6" style={{ border: "1px solid #262219", background: "#131009" }}>
-      <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
-        {label}
-      </div>
-      <div className="font-sans font-bold" style={{ fontSize: "2rem", lineHeight: 1, color: accent, letterSpacing: "-0.03em" }}>
-        {value}
-      </div>
-      {sub && <div className="font-sans text-xs mt-2" style={{ color: "#FFFFFF", fontFamily: LABEL }}>{sub}</div>}
-    </div>
-  );
-}
 
 export default function AuthHome() {
   const { user } = useAuth();
@@ -82,9 +70,7 @@ export default function AuthHome() {
     <div className="min-h-screen px-8 lg:px-16 pt-28 pb-20" style={{ background: "#15130E" }}>
       <div className="max-w-5xl mx-auto">
         <div className="mb-10">
-          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: "#E8A33C", fontFamily: LABEL }}>
-            {greeting}
-          </div>
+          <Eyebrow color={KIT.amber} className="mb-2">{greeting}</Eyebrow>
           <h1 style={{ fontFamily: SERIF, fontSize: "2.6rem", fontWeight: 800, letterSpacing: "-0.02em", color: "#F2EDE2", margin: 0, lineHeight: 1.05 }}>
             Welcome back, {firstName}.
           </h1>
@@ -95,61 +81,45 @@ export default function AuthHome() {
           </p>
         </div>
 
-        <Stagger className="grid gap-4 mb-10" as="div" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-          <StaggerItem as="div"><StatCard label="Level" value={lvl.name} sub={`${totalXP} XP total`} accent={lvl.color || "#E8A33C"} /></StaggerItem>
-          <StaggerItem as="div"><StatCard label="Day streak" value={streak} sub={streak > 0 ? "Don't break it" : "Start today"} accent="#E0B341" /></StaggerItem>
-          <StaggerItem as="div"><StatCard label="Lessons done" value={completed.length} sub={`${lessons.length} total`} /></StaggerItem>
-          <StaggerItem as="div"><StatCard label="Projects done" value={projectsCompleted} sub={`${projects.length} total`} accent="#C2643C" /></StaggerItem>
-        </Stagger>
+        <StatGrid className="mb-10">
+          <StatCard label="Level" value={lvl.name} sub={`${totalXP} XP total`} icon={Shield} accent={KIT.gold} />
+          <StatCard label="Day streak" value={streak} sub={streak > 0 ? "Don't break it" : "Start today"} icon={Flame} accent={KIT.ember} pulse />
+          <StatCard label="Lessons done" value={completed.length} sub={`${lessons.length} total`} icon={BookOpen} accent={KIT.amber} />
+          <StatCard label="Projects done" value={projectsCompleted} sub={`${projects.length} total`} icon={FolderGit2} accent={KIT.emerald} />
+        </StatGrid>
 
-        <div className="p-6 mb-10" style={{ border: "1px solid #262219", background: "#131009" }}>
+        <Card hover={false} className="p-6 mb-10">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
-              Level {lvl.name}
-            </span>
-            <span className="font-sans text-xs" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
+            <Eyebrow>Level {lvl.name}</Eyebrow>
+            <span className="font-sans text-xs" style={{ color: KIT.dim, fontFamily: LABEL }}>
               {lvl.max === Infinity ? "MAX" : `${lvl.max - totalXP} XP to ${nextLvl.name}`}
             </span>
           </div>
-          <div style={{ height: "8px", background: "#262219", borderRadius: "4px", overflow: "hidden" }}>
-            <AnimatedBar pct={lvlPct} color="linear-gradient(90deg, #9A6A1F, #E8A33C)" style={{ height: "100%", borderRadius: "4px" }} />
-          </div>
-        </div>
+          <ProgressBar pct={lvlPct} />
+        </Card>
 
         {resume && (
-          <div className="mb-10">
-            <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
-              {resume.done > 0 ? "Continue learning" : "Start here"}
+          <HeroCard
+            eyebrow={resume.done > 0 ? "Continue learning" : "Start here"}
+            title={resume.title}
+            className="mb-10"
+          >
+            <div className="font-sans text-xs mt-2" style={{ color: KIT.dim, fontFamily: LABEL }}>
+              {resume.done}/{resume.total} lessons · {resume.pct}% complete
             </div>
-            <Link
-              to={`${createPageUrl("ProjectDetail")}?id=${resume.id}`}
-              className="block p-6 transition-all duration-150"
-              style={{ border: "1px solid #E8A33C33", background: "#E8A33C08" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#E8A33C14"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#E8A33C08"; e.currentTarget.style.transform = ""; }}
-            >
-              <div className="flex items-center justify-between gap-6">
-                <div>
-                  <div style={{ fontFamily: SERIF, fontSize: "1.5rem", fontWeight: 700, color: "#F2EDE2", letterSpacing: "-0.01em" }}>
-                    {resume.title}
-                  </div>
-                  <div className="font-sans text-xs mt-2" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
-                    {resume.done}/{resume.total} lessons · {resume.pct}% complete
-                  </div>
-                </div>
-                <span className="font-sans text-sm tracking-widest uppercase px-5 py-3 flex-shrink-0"
-                  style={{ background: "#E8A33C", color: "#15130E", fontWeight: 700, fontFamily: LABEL }}>
-                  {resume.done > 0 ? "Resume →" : "Begin →"}
-                </span>
-              </div>
-            </Link>
-          </div>
+            <div className="mt-4">
+              <ProgressBar pct={resume.pct} color={KIT.emerald} />
+            </div>
+            <div className="mt-6">
+              <PrimaryButton to={`${createPageUrl("ProjectDetail")}?id=${resume.id}`}>
+                {resume.done > 0 ? "Resume" : "Begin"}
+              </PrimaryButton>
+            </div>
+          </HeroCard>
         )}
 
         <div>
-          <div className="font-sans text-xs tracking-widest uppercase mb-4" style={{ color: "#FFFFFF", fontFamily: LABEL }}>
-            Your projects
-          </div>
+          <Eyebrow className="mb-4">Your projects</Eyebrow>
           <Stagger className="space-y-0" as="div">
             {projectStats.map((p, i) => {
               const isDone = p.total > 0 && p.done === p.total;
