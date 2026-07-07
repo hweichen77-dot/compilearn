@@ -28,6 +28,7 @@ import LessonCompletionCelebration from "../components/lesson/LessonCompletionCe
 import { foundationsAreFinished, isModuleGated } from "@/lib/foundationsGate";
 import { track } from "@/lib/analytics";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Eyebrow, KIT } from "@/components/ui/kit";
 
 const DIFFICULTY_NUM = { beginner: "00", intermediate: "01", advanced: "02" };
 
@@ -386,9 +387,9 @@ export default function ProjectDetail() {
                   {DIFFICULTY_NUM[project.difficulty] || "00"}
                 </span>
                 <div>
-                  <div className="font-sans text-xs tracking-widest uppercase mb-1" style={{ color: "#E8A33C" }}>
+                  <Eyebrow color={KIT.amber} className="mb-1">
                     {project.difficulty} · {project.category?.replace("_", "/")}
-                  </div>
+                  </Eyebrow>
                   <h1
                     style={{ fontFamily: font.display, fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: 0 }}
                   >
@@ -450,12 +451,9 @@ export default function ProjectDetail() {
             >
               <StreakBadge completedCount={completedCount} />
 
-              <div
-                className="font-sans text-xs tracking-widest uppercase mb-5"
-                style={{ color: "#FFFFFF" }}
-              >
+              <Eyebrow color={KIT.white} className="mb-5">
                 LESSONS
-              </div>
+              </Eyebrow>
 
               <Stagger as="div" className="space-y-0">
                 {lessons.map((lesson, i) => {

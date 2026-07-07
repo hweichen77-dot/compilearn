@@ -3,6 +3,7 @@ import { font } from "@/lib/tokens";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Eyebrow, KIT } from "@/components/ui/kit";
 import { COMPETITIVE, COMPETITIVE_TOPICS, COMPETITIVE_DIFFICULTIES } from "@/content";
 
 const DIFF_NUM = { easy: "01", medium: "02", hard: "03" };
@@ -33,7 +34,7 @@ export default function Competitive() {
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
         <div className="max-w-7xl mx-auto">
           <div className="flex items-baseline gap-6 mb-2">
-            <span className="font-sans text-xs tracking-widest" style={{ color: "#FFFFFF" }}>COMPETITIVE</span>
+            <Eyebrow color={KIT.white}>COMPETITIVE</Eyebrow>
           </div>
           <h1 style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 16px" }}>
             Write the algorithm yourself.
@@ -45,9 +46,9 @@ export default function Competitive() {
             className="mt-6 flex items-start gap-3 px-4 py-3 max-w-2xl"
             style={{ border: "1px solid #34302A", background: "#E8A33C08", borderRadius: "4px" }}
           >
-            <span className="font-sans text-xs tracking-widest uppercase mt-px" style={{ color: "#E8A33C" }}>
+            <Eyebrow color={KIT.amber} className="mt-px">
               Optional · Advanced
-            </span>
+            </Eyebrow>
             <p className="font-display text-xs leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400 }}>
               Not for beginners. These are hard C++ problems for people who can already code. It's a big
               jump from the Python AI track.

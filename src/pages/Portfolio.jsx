@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { font } from "@/lib/tokens";
 import { api } from "@/api/apiClient";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { ExternalLink, Lock, Globe } from "lucide-react";
 import { Stagger, StaggerItem } from "@/lib/motion";
+import { Card, Eyebrow, PrimaryButton } from "@/components/ui/kit";
 
 export default function Portfolio() {
   const [user, setUser] = useState(null);
@@ -29,7 +29,7 @@ export default function Portfolio() {
       <div className="relative px-8 lg:px-16 pt-28 pb-16" style={{ borderBottom: "1px solid #262219" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
         <div className="max-w-5xl mx-auto">
-          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: "#FFFFFF" }}>PORTFOLIO</div>
+          <Eyebrow className="mb-2">PORTFOLIO</Eyebrow>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 12px" }}
           >
@@ -51,34 +51,24 @@ export default function Portfolio() {
             ))}
           </div>
         ) : submissions.length === 0 ? (
-          <div className="text-center py-24" style={{ border: "1px solid #262219" }}>
-            <div className="font-sans text-xs tracking-widest uppercase mb-4" style={{ color: "#FFFFFF" }}>
-              NO SUBMISSIONS YET
-            </div>
+          <Card hover={false} className="text-center py-24">
+            <Eyebrow className="mb-4">NO SUBMISSIONS YET</Eyebrow>
             <p className="font-display text-base mb-8" style={{ color: "#FFFFFF", fontWeight: 400 }}>
               Complete the AI/ML track to submit your first capstone project.
             </p>
-            <Link to={createPageUrl("AITrack")}>
-              <button
-                className="font-sans text-xs tracking-widest uppercase px-8 py-4 transition-all duration-150"
-                style={{ background: "#E8A33C", color: "#15130E", fontWeight: 700 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(232,163,60,0.2)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-              >
-                Explore AI Track →
-              </button>
-            </Link>
-          </div>
+            <div className="flex justify-center">
+              <PrimaryButton to={createPageUrl("AITrack")}>Explore AI Track</PrimaryButton>
+            </div>
+          </Card>
         ) : (
           <Stagger className="space-y-px" as="div">
             {submissions.map((sub, i) => (
               <StaggerItem
                 key={sub.id}
                 className="group"
-                style={{ border: "1px solid #262219", background: "#131009" }}
                 as="div"
               >
-                <div className="p-6">
+                <Card className="p-6">
                   <div className="flex items-start justify-between gap-6">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
@@ -136,7 +126,7 @@ export default function Portfolio() {
                   <div className="mt-3 font-sans text-xs" style={{ color: "#FFFFFF" }}>
                     {sub.submitted_date ? new Date(sub.submitted_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : ""}
                   </div>
-                </div>
+                </Card>
               </StaggerItem>
             ))}
           </Stagger>

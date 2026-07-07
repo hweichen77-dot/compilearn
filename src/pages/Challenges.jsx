@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Stagger, StaggerItem } from "@/lib/motion";
 import { CATEGORY_LABELS } from "@/content/categories";
+import { Eyebrow } from "@/components/ui/kit";
 
 const DIFF_NUM = { beginner: "01", easy: "01", intermediate: "02", medium: "02", advanced: "03", hard: "03" };
 const DIFFICULTIES = ["all", "beginner", "intermediate", "advanced"];
@@ -65,7 +66,7 @@ export default function Challenges() {
         />
         <div className="max-w-7xl mx-auto">
           <div className="flex items-baseline gap-6 mb-2">
-            <span className="font-sans text-xs tracking-widest" style={{ color: "#FFFFFF" }}>CHALLENGES</span>
+            <Eyebrow>CHALLENGES</Eyebrow>
           </div>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 16px" }}
