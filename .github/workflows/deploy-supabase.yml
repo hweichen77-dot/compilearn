@@ -44,12 +44,15 @@ jobs:
       - name: Set function secrets (skips any that are unset)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          TUTOR_GROQ_API_KEY: ${{ secrets.TUTOR_GROQ_API_KEY }}
+          INVOKE_GROQ_API_KEY: ${{ secrets.INVOKE_GROQ_API_KEY }}
+          PLAYGROUND_GROQ_API_KEY: ${{ secrets.PLAYGROUND_GROQ_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RETENTION_FROM: ${{ secrets.RETENTION_FROM }}
           RETENTION_TRIGGER_SECRET: ${{ secrets.RETENTION_TRIGGER_SECRET }}
         run: |
           args=()
-          for k in GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET; do
+          for k in GROQ_API_KEY TUTOR_GROQ_API_KEY INVOKE_GROQ_API_KEY PLAYGROUND_GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET; do
             v="${!k}"
             [ -n "$v" ] && args+=("$k=$v")
           done

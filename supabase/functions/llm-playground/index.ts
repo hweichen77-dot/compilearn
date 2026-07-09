@@ -1,5 +1,5 @@
 
-const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+const GROQ_API_KEY = Deno.env.get("PLAYGROUND_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
