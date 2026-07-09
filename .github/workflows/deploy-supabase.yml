@@ -70,6 +70,10 @@ jobs:
           # with a shared secret and is called by pg_cron, so no JWT.
           supabase functions deploy invoke-llm     --project-ref "$PROJECT_REF"
           supabase functions deploy delete-account  --project-ref "$PROJECT_REF"
+          supabase functions deploy llm-playground  --project-ref "$PROJECT_REF"
+          supabase functions deploy ai-tutor        --project-ref "$PROJECT_REF"
+          supabase functions deploy run-cpp         --project-ref "$PROJECT_REF"
+          supabase functions deploy run-java        --project-ref "$PROJECT_REF"
           supabase functions deploy retention-email --project-ref "$PROJECT_REF" --no-verify-jwt
 
       - name: Apply retention cron (only when Resend is configured)
