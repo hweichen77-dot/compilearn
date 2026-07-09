@@ -2,7 +2,7 @@
 import { checkLimits } from "../_shared/rateLimit.ts";
 
 const GROQ_API_KEY = Deno.env.get("TUTOR_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
-const MODEL = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
 const MAX_MESSAGE_CHARS = 1500;
