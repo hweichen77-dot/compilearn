@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkLimits } from "../_shared/rateLimit.ts";
 
 const GROQ_API_KEY = Deno.env.get("INVOKE_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
@@ -95,8 +96,8 @@ Deno.serve(async (req: Request) => {
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const rlKey = caller === "secret" ? `ip:${ip}` : `user:${caller}`;
-  if (rateLimited(rlKey)) return json({ error: "rate limit exceeded" }, 429);
-  if (globalLimited()) return json({ error: "service busy, try again shortly" }, 429);
+  const limitErr = await checkLimits({ caller: rlKey, fn: "invoke-llm", perMin: 20, globalPerMin: 120, globalPerDay: 5000 });
+  if (limitErr) return json({ error: limitErr }, 429);
 
   try {
     const { prompt, max_tokens } = await req.json();

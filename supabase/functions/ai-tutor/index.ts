@@ -1,4 +1,6 @@
 
+import { checkLimits } from "../_shared/rateLimit.ts";
+
 const GROQ_API_KEY = Deno.env.get("TUTOR_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
@@ -86,8 +88,8 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  if (rateLimited(`ip:${ip}`)) return json({ error: "You're sending messages too fast — wait a moment and try again." }, 429);
-  if (globalLimited()) return json({ error: "The tutor is busy right now — try again shortly." }, 429);
+  const limitErr = await checkLimits({ caller: `ip:${ip}`, fn: "ai-tutor", perMin: 12, globalPerMin: 240, globalPerDay: 8000 });
+  if (limitErr) return json({ error: limitErr }, 429);
 
   let payload: {
     messages?: unknown;

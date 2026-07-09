@@ -1,5 +1,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkLimits } from "../_shared/rateLimit.ts";
 
 const COMPILER = "g132";
 const GODBOLT_URL = `https://godbolt.org/api/compiler/${COMPILER}/compile`;
@@ -96,8 +97,8 @@ Deno.serve(async (req: Request) => {
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const rlKey = caller === "secret" ? `ip:${ip}` : `user:${caller}`;
-  if (rateLimited(rlKey)) return json({ error: "rate limit exceeded" }, 429);
-  if (globalLimited()) return json({ error: "service busy, try again shortly" }, 429);
+  const limitErr = await checkLimits({ caller: rlKey, fn: "run-cpp", perMin: 20, globalPerMin: 200, globalPerDay: 5000 });
+  if (limitErr) return json({ error: limitErr }, 429);
 
   try {
     const { source, stdin } = await req.json();

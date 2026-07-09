@@ -1,5 +1,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkLimits } from "../_shared/rateLimit.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -25,6 +26,9 @@ Deno.serve(async (req: Request) => {
   const { data: userData, error: userErr } = await admin.auth.getUser(token);
   const uid = userData?.user?.id;
   if (userErr || !uid) return json({ error: "invalid token" }, 401);
+
+  const limitErr = await checkLimits({ caller: `user:${uid}`, fn: "delete-account", perMin: 5, globalPerMin: 30, globalPerDay: 500 });
+  if (limitErr) return json({ error: limitErr }, 429);
 
   const { error: delErr } = await admin.auth.admin.deleteUser(uid);
   if (delErr) {

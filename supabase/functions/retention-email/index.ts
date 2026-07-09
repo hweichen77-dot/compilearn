@@ -1,4 +1,6 @@
 
+import { checkLimits } from "../_shared/rateLimit.ts";
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("RETENTION_FROM") ?? "CodeFlow <onboarding@resend.dev>";
 const TRIGGER_SECRET = Deno.env.get("RETENTION_TRIGGER_SECRET");
@@ -57,6 +59,9 @@ Deno.serve(async (req: Request) => {
   if (!TRIGGER_SECRET || !safeEqual(String(body.secret ?? ""), TRIGGER_SECRET)) return json({ error: "unauthorized" }, 401);
   const email = String(body.email || "").trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: "invalid email" }, 400);
+
+  const limitErr = await checkLimits({ caller: email || "cron", fn: "retention-email", perMin: 60, globalPerMin: 120, globalPerDay: 10000 });
+  if (limitErr) return json({ error: limitErr }, 429);
 
   const { subject, html } = subjectAndBody(body);
   try {
