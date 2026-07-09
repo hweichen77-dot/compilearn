@@ -32,3 +32,14 @@ dist-ssr
 .env
 __pycache__/
 *.pyc
+
+# AI tool files
+.claude/
+CLAUDE.md
+.cursor/
+.clinerules
+AGENTS.md
+.windsurf/
+.codex/
+.claude-mem/
+.aider*
