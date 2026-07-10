@@ -111,6 +111,7 @@ Deno.serve(async (req: Request) => {
             ],
             max_tokens: maxTokens,
             temperature: 0.7,
+            reasoning_effort: "low",
           }),
         });
         if (!resp.ok) {

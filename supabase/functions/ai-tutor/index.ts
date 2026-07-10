@@ -140,6 +140,7 @@ Deno.serve(async (req: Request) => {
         messages: [{ role: "system", content: sys }, ...convo],
         max_tokens: MAX_TOKENS,
         temperature: 0.5,
+        reasoning_effort: "low",
       }),
     });
     if (!resp.ok) {

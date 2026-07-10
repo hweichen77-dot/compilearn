@@ -121,6 +121,7 @@ Deno.serve(async (req: Request) => {
         model: MODEL,
         max_tokens: Math.min(Number(max_tokens) || 1024, 4096),
         messages: [{ role: "user", content: prompt }],
+        reasoning_effort: "low",
       }),
     });
 
