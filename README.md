@@ -15,7 +15,7 @@ CodeFlow spans four tracks of project-based curriculum:
 - AP Computer Science A: the full AP CSA curriculum (Java)
 - Competitive Coding: algorithmic problem solving (C++)
 
-Across the tracks: 38 projects, 300+ lessons, and 300+ coding
+Across the tracks: 22 projects, 300+ lessons, and 300+ coding
 challenges, each with a runnable reference solution verified in CI.
 
 ## In-browser code runners
