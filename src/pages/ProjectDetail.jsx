@@ -663,6 +663,7 @@ export default function ProjectDetail() {
                   </div>
                   </div>
 
+                  {!activeLesson.illustrative && (activeLesson.starter_code || activeLesson.solution_code) && (
                   <CodeEditor
                     code={code}
                     onChange={setCode}
@@ -674,6 +675,7 @@ export default function ProjectDetail() {
                     solutionCode={activeLesson.solution_code || ""}
                     enableAIAnalysis={!!activeLesson.solution_code}
                   />
+                  )}
 
                   {output && activeLesson?.expected_output && (
                     <OutputComparison
