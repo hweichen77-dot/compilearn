@@ -691,6 +691,9 @@ export default function ProjectDetail() {
                     quizComplete={quizDone}
                     participationComplete={participationDone}
                     challengeComplete={challengeDone}
+                    showParticipation={!!(activeLesson.participation_activities?.length)}
+                    showQuiz={!!(activeLesson.quiz_questions?.length)}
+                    showChallenge={!!activeLesson.challenge_title && !activeLesson.illustrative}
                     nextLessonTitle={activeLessonIndex < lessons.length - 1 ? lessons[activeLessonIndex + 1].title : null}
                     onNextLesson={goToNextLesson}
                   />

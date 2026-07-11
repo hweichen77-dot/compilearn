@@ -12,10 +12,20 @@ export default function LessonPointsSummary({
   quizComplete,
   participationComplete,
   challengeComplete,
+  showParticipation = true,
+  showQuiz = true,
+  showChallenge = true,
   nextLessonTitle,
   onNextLesson,
 }) {
-  const pct = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+  const items = [
+    { label: "Reading", done: readingComplete, pts: 2 },
+    showParticipation && { label: "Participation Activities", done: participationComplete, pts: 3 },
+    showQuiz && { label: "Quiz", done: quizComplete, pts: 3 },
+    showChallenge && { label: "Coding Challenge", done: challengeComplete, pts: 2 },
+  ].filter(Boolean);
+  const total = items.reduce((sum, it) => sum + it.pts, 0);
+  const pct = total > 0 ? Math.round((earnedPoints / total) * 100) : 0;
   const allDone = pct === 100;
   const celebratedRef = useRef(false);
 
@@ -31,13 +41,6 @@ export default function LessonPointsSummary({
       });
     }
   }, [allDone]);
-
-  const items = [
-    { label: "Reading", done: readingComplete, pts: 2 },
-    { label: "Participation Activities", done: participationComplete, pts: 3 },
-    { label: "Quiz", done: quizComplete, pts: 3 },
-    { label: "Coding Challenge", done: challengeComplete, pts: 2 },
-  ];
 
   return (
     <div style={{ ...traceStyles.terminal, overflow: "hidden", fontFamily: trace.mono }}>
@@ -65,7 +68,7 @@ export default function LessonPointsSummary({
               XP
             </div>
             <div style={{ fontSize: "1.35rem", fontWeight: 700, color: allDone ? trace.lime : trace.text, letterSpacing: "-0.02em" }}>
-              {earnedPoints} <span style={{ fontSize: "0.85rem", color: '#FFFFFF', fontWeight: 400 }}>/ {totalPoints}</span>
+              {earnedPoints} <span style={{ fontSize: "0.85rem", color: '#FFFFFF', fontWeight: 400 }}>/ {total}</span>
             </div>
           </div>
         </div>
