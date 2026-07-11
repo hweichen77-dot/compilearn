@@ -27,3 +27,4 @@ end;
 $$;
 
 revoke all on function public.rl_consume(text, integer, bigint) from public, anon, authenticated;
+grant execute on function public.rl_consume(text, integer, bigint) to service_role;
