@@ -71,7 +71,7 @@ export default function HeroSection() {
             </button>
             <button
               style={btnGhost}
-              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero" }); document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}
+              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero" }); window.open("https://github.com/hweichen77-dot/codeflow/releases/latest", "_blank", "noopener,noreferrer"); }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#756C5C")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "#34302A")}
             >
