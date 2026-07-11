@@ -62,6 +62,19 @@ jobs:
             echo "No function secrets present to set."
           fi
 
+      - name: Apply rate-limit schema
+        run: |
+          set -e
+          jq -Rs '{query: .}' < supabase/rate-limit.sql > /tmp/rl.json
+          code=$(curl -sS -o /tmp/rlresp.json -w '%{http_code}' \
+            -X POST "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "content-type: application/json" \
+            --data @/tmp/rl.json)
+          echo "rate-limit SQL HTTP $code"
+          if [ "$code" -ge 300 ]; then cat /tmp/rlresp.json; exit 1; fi
+          echo "Rate-limit schema applied."
+
       - name: Deploy functions
         run: |
           set -e

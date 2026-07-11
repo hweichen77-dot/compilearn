@@ -1,3 +1,27 @@
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+let dbClient: SupabaseClient | null | undefined;
+function getDb(): SupabaseClient | null {
+  if (dbClient === undefined) {
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    dbClient = url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
+  }
+  return dbClient;
+}
+
+async function dbConsume(bucket: string, max: number, windowMs: number): Promise<boolean | null> {
+  const db = getDb();
+  if (!db) return null;
+  try {
+    const { data, error } = await db.rpc("rl_consume", { p_bucket: bucket, p_max: max, p_window_ms: windowMs });
+    if (error || typeof data !== "boolean") return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 let kvPromise: Promise<Deno.Kv | null> | null = null;
 function getKv(): Promise<Deno.Kv | null> {
   if (kvPromise === null) {
@@ -29,6 +53,9 @@ function memConsume(bucket: string, max: number, windowMs: number): boolean {
 }
 
 async function consume(bucket: string, max: number, windowMs: number): Promise<boolean> {
+  const db = await dbConsume(bucket, max, windowMs);
+  if (db !== null) return db;
+
   const kv = await getKv();
   if (!kv) return memConsume(bucket, max, windowMs);
   const key = ["rl", bucket];
