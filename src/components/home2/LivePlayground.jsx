@@ -69,20 +69,22 @@ export default function LivePlayground() {
           Introducing: the <em style={{ fontStyle: "italic", fontWeight: 500, color: "#E8A33C" }}>LLM Playground.</em>
         </h2>
         <p style={{ fontFamily: body, marginTop: "18px", maxWidth: "60ch", color: "#B9B1A2", fontSize: "1.08rem", lineHeight: 1.6 }}>
-          Most courses show you a screenshot of a chatbot and call it AI engineering.
-          The Playground drops you straight into the loop the pros use: write a
-          prompt, send it to a real large language model, and read what actually
-          comes back. No API keys, no setup, no account, right in your browser.
+          The Playground is where you write prompts and watch a real language
+          model answer them, right in your browser. You don't need an account or
+          an API key. Type your instructions, hit run, and read what the model
+          does with them.
         </p>
         <p style={{ fontFamily: body, marginTop: "14px", maxWidth: "60ch", color: "#B9B1A2", fontSize: "1.08rem", lineHeight: 1.6 }}>
-          It powers every lesson: you don't memorize prompt theory, you ship a
-          prompt and get graded on what the model does. Here's a taste, a
-          security challenge you can play right now.
+          This is where you get to mess around with prompt engineering, the skill
+          you only really pick up by trying: you phrase a prompt one way, watch it
+          miss, and tighten it until the model behaves. The most fun way to
+          practice is defense. You write a system prompt, then fire attacking
+          prompts at it and see if it holds up.
         </p>
         <p style={{ fontFamily: body, marginTop: "22px", maxWidth: "60ch", color: "#ECE7DC", fontSize: "1.02rem", lineHeight: 1.6, fontWeight: 500 }}>
-          The challenge: your system prompt guards a secret word. Three
-          prompt-injection attacks try to trick the model into leaking it. Edit
-          your defense, run it against a live model, and see whether it held.
+          The challenge below guards a secret word. Three injection attacks try to
+          talk the model into leaking it. Edit your defense, run it against a live
+          model, and see whether it survives.
         </p>
 
         <div style={{ marginTop: "40px", display: "grid", gap: "20px", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)" }} className="cf-pg-grid">
