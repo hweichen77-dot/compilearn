@@ -8,7 +8,8 @@ const SERIF = font.display
 const CHUNK_ERROR =
   /Loading chunk|ChunkLoadError|dynamically imported module|Failed to fetch dynamically imported|Importing a module script failed/i
 
-const RELOAD_GUARD = 'codeflow:chunk-reloaded'
+const RELOAD_KEY = 'codeflow:chunk-reload-at'
+const RELOAD_COOLDOWN_MS = 10000
 
 export default class RouteErrorBoundary extends React.Component {
   constructor(props) {
@@ -24,8 +25,9 @@ export default class RouteErrorBoundary extends React.Component {
     const isChunk = CHUNK_ERROR.test(String(error?.message || error?.name || ''))
     if (isChunk) {
       try {
-        if (!sessionStorage.getItem(RELOAD_GUARD)) {
-          sessionStorage.setItem(RELOAD_GUARD, '1')
+        const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0)
+        if (Date.now() - last > RELOAD_COOLDOWN_MS) {
+          sessionStorage.setItem(RELOAD_KEY, String(Date.now()))
           window.location.reload()
           return
         }
