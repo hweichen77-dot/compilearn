@@ -1,6 +1,7 @@
 import React from "react";
 import { font } from "@/lib/tokens";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 import { track } from "@/lib/analytics";
 
 const display = font.display;
@@ -9,6 +10,7 @@ const mono = font.mono;
 
 export default function HeroSection() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <section style={{ borderBottom: "1px solid #221F18", overflow: "hidden" }}>
       <div className="cf-hero" style={{
@@ -63,7 +65,7 @@ export default function HeroSection() {
           <div style={{ marginTop: "44px", display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
             <button
               style={btnPrimary}
-              onClick={() => { track("cta_click", { cta: "start_track", location: "hero" }); navigate("/ProjectDetail?id=ai-01"); }}
+              onClick={() => { track("cta_click", { cta: "start_track", location: "hero" }); navigate(user ? "/ProjectDetail?id=ai-01" : "/login"); }}
               onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-2px)")}
               onMouseLeave={e => (e.currentTarget.style.transform = "none")}
             >
