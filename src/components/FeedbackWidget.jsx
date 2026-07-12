@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { font } from "@/lib/tokens";
 import { track } from '@/lib/analytics'
+import { supabase } from '@/api/supabaseClient'
 
 const LABEL = font.body
-const REPO = 'hweichen77-dot/codeflow'
 
 const KINDS = [
   { key: 'bug', label: 'Bug' },
@@ -15,6 +15,7 @@ export default function FeedbackWidget() {
   const [open, setOpen] = useState(false)
   const [kind, setKind] = useState('bug')
   const [text, setText] = useState('')
+  const [status, setStatus] = useState('idle')
 
   const toggle = () => {
     setOpen((v) => {
@@ -23,23 +24,24 @@ export default function FeedbackWidget() {
     })
   }
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     const body = text.trim()
-    if (!body) return
+    if (!body || status === 'sending') return
     track('feedback_submit', { kind })
+    setStatus('sending')
 
-    const title = `[${kind}] ${body.slice(0, 60)}${body.length > 60 ? '…' : ''}`
-    const issueBody = `${body}\n\n---\n- Page: ${window.location.pathname}\n- Type: ${kind}\n- UA: ${navigator.userAgent}`
-    const url =
-      `https://github.com/${REPO}/issues/new` +
-      `?title=${encodeURIComponent(title)}` +
-      `&body=${encodeURIComponent(issueBody)}` +
-      `&labels=${encodeURIComponent(kind === 'bug' ? 'bug' : 'feedback')}`
-
-    window.open(url, '_blank', 'noopener,noreferrer')
-    setText('')
-    setOpen(false)
+    try {
+      const { data, error } = await supabase.functions.invoke('feedback', {
+        body: { kind, text: body, page: window.location.pathname, ua: navigator.userAgent },
+      })
+      if (error || data?.error) throw error || new Error(data.error)
+      setStatus('sent')
+      setText('')
+      setTimeout(() => { setOpen(false); setStatus('idle') }, 1200)
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -126,26 +128,26 @@ export default function FeedbackWidget() {
             />
 
             <div className="flex items-center justify-between">
-              <a
-                href="mailto:hello@codeflow.app"
+              <span
                 className="font-sans text-xs"
-                style={{ color: '#FFFFFF', fontFamily: LABEL }}
+                style={{ color: status === 'error' ? '#E8735A' : '#8F8779', fontFamily: LABEL }}
+                role="status"
               >
-                or email us
-              </a>
+                {status === 'sent' ? 'Thanks — sent!' : status === 'error' ? "Couldn't send — try again" : ''}
+              </span>
               <button
                 type="submit"
-                disabled={!text.trim()}
+                disabled={!text.trim() || status === 'sending'}
                 className="font-sans text-xs tracking-widest uppercase px-5 py-2.5 transition-all"
                 style={{
-                  background: text.trim() ? '#E8A33C' : '#262219',
-                  color: text.trim() ? '#15130E' : '#8F8779',
+                  background: text.trim() && status !== 'sending' ? '#E8A33C' : '#262219',
+                  color: text.trim() && status !== 'sending' ? '#15130E' : '#8F8779',
                   fontWeight: 700,
-                  cursor: text.trim() ? 'pointer' : 'not-allowed',
+                  cursor: text.trim() && status !== 'sending' ? 'pointer' : 'not-allowed',
                   fontFamily: LABEL,
                 }}
               >
-                Send →
+                {status === 'sending' ? 'Sending…' : status === 'sent' ? 'Sent ✓' : 'Send →'}
               </button>
             </div>
           </form>

@@ -74,6 +74,9 @@ export default function APCS() {
           <p className="font-display text-base max-w-prose" style={{ color: "#FFFFFF", fontWeight: 400 }}>
             CSP in Python, CSA in Java. Both follow the AP exam, and you write code the whole way, with practice on the multiple choice and FRQs.
           </p>
+          <p className="font-sans text-xs max-w-prose mt-5" style={{ color: "#8F8779", lineHeight: 1.6 }}>
+            CodeFlow is an independent project, not affiliated with or endorsed by the College Board. AP® and Advanced Placement® are registered trademarks of the College Board.
+          </p>
         </div>
       </div>
 

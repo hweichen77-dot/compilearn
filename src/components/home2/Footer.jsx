@@ -75,7 +75,7 @@ export default function Footer() {
           <div>
             <div style={idx}>About</div>
             <FootLink href="https://github.com/hweichen77-dot/codeflow" target="_blank" rel="noopener noreferrer">GitHub</FootLink>
-            <FootLink href="mailto:hello@codeflow.app">Contact</FootLink>
+            <FootLink href="mailto:jason.huang317235@gmail.com">Contact</FootLink>
             <FootRouterLink to={createPageUrl("Privacy")}>Privacy</FootRouterLink>
             <FootRouterLink to={createPageUrl("Terms")}>Terms</FootRouterLink>
           </div>
@@ -91,6 +91,9 @@ export default function Footer() {
           letterSpacing: "0.04em",
         }}>
           © 2026 CodeFlow, learn by building.
+          <div style={{ marginTop: "10px", color: "#8F8779", lineHeight: 1.6 }}>
+            Independent project, not affiliated with or endorsed by the College Board. AP® and Advanced Placement® are registered trademarks of the College Board. AI output can be inaccurate — verify before relying on it.
+          </div>
         </div>
       </div>
     </footer>

@@ -73,7 +73,7 @@ export default function HeroSection() {
             </button>
             <button
               style={btnGhost}
-              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "mac" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.2.2/CodeFlow_2.2.2_universal.dmg"; }}
+              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "mac" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.3.0/CodeFlow_2.3.0_universal.dmg"; }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#756C5C")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "#34302A")}
             >
@@ -81,7 +81,7 @@ export default function HeroSection() {
             </button>
             <button
               style={btnGhost}
-              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "windows" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.2.2/CodeFlow_2.2.2_x64_en-US.msi"; }}
+              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "windows" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.3.0/CodeFlow_2.3.0_x64_en-US.msi"; }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#756C5C")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "#34302A")}
             >

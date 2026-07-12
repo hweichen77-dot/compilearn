@@ -88,6 +88,7 @@ jobs:
           supabase functions deploy run-cpp         --project-ref "$PROJECT_REF"
           supabase functions deploy run-java        --project-ref "$PROJECT_REF"
           supabase functions deploy retention-email --project-ref "$PROJECT_REF" --no-verify-jwt
+          supabase functions deploy feedback        --project-ref "$PROJECT_REF" --no-verify-jwt
 
       - name: Apply retention cron (only when Resend is configured)
         env:

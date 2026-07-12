@@ -82,7 +82,7 @@ export default function Privacy() {
 
         <StaggerItem as="div"><Section title="Contact">
           <p>
-            Questions? <a href="mailto:hello@codeflow.app" style={{ color: '#E8A33C' }}>hello@codeflow.app</a>.
+            Questions? <a href="mailto:jason.huang317235@gmail.com" style={{ color: '#E8A33C' }}>jason.huang317235@gmail.com</a>.
             See also our <Link to={createPageUrl('Terms')} style={{ color: '#E8A33C' }}>Terms of Service</Link>.
           </p>
         </Section></StaggerItem>

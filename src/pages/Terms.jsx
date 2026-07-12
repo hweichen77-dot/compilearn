@@ -60,11 +60,12 @@ export default function Terms() {
           </p>
           <p>
             We do not knowingly collect personal information from children under 13, in keeping
-            with COPPA. If a school or teacher uses CodeFlow with students, any student records
-            are handled as education records under FERPA: they are used only to provide the
-            service and are never sold. Parents, guardians, and schools may request access to or
+            with COPPA. If a school or teacher uses CodeFlow with students, we will handle any
+            student data consistent with FERPA and will sign a data-processing agreement on
+            request; such data is used only to provide the service and is never sold. Parents,
+            guardians, and schools may request access to or
             deletion of a minor&apos;s data by emailing{' '}
-            <a href="mailto:hello@codeflow.app" style={{ color: '#E8A33C' }}>hello@codeflow.app</a>.
+            <a href="mailto:jason.huang317235@gmail.com" style={{ color: '#E8A33C' }}>jason.huang317235@gmail.com</a>.
             See our <Link to={createPageUrl('Privacy')} style={{ color: '#E8A33C' }}>Privacy Policy</Link> for details.
           </p>
         </Section></StaggerItem>
@@ -83,17 +84,52 @@ export default function Terms() {
           </p>
         </Section></StaggerItem>
 
+        <StaggerItem as="div"><Section title="AI features">
+          <p>
+            Some features (the playground and tutor) generate responses with AI language models.
+            AI output can be inaccurate, incomplete, or biased, and is provided for learning only,
+            not as professional, legal, financial, or safety advice. Verify anything important
+            before relying on it. You are responsible for how you use content you generate.
+          </p>
+        </Section></StaggerItem>
+
         <StaggerItem as="div"><Section title="No warranty">
           <p>
-            CodeFlow is provided &quot;as is,&quot; without warranty. We work to keep it accurate and
-            available but can&apos;t guarantee it&apos;s error-free or always online.
+            CodeFlow is provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any
+            kind, express or implied, including fitness for a particular purpose. We work to keep it
+            accurate and available but can&apos;t guarantee it&apos;s error-free or always online.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="Limitation of liability">
+          <p>
+            To the maximum extent permitted by law, CodeFlow and its operator are not liable for any
+            indirect, incidental, or consequential damages, or for any loss of data, arising from your
+            use of the service. Because CodeFlow is provided free of charge, our total liability for any
+            claim is limited to USD $100.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="Trademarks & affiliation">
+          <p>
+            CodeFlow is an independent project and is not affiliated with, authorized, or endorsed by
+            the College Board, Oracle, or any other organization. AP&reg; and Advanced Placement&reg;
+            are registered trademarks of the College Board; other product and company names are the
+            trademarks of their respective owners and are used for identification only.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="Governing law">
+          <p>
+            These terms are governed by the laws of the State of California, USA, without regard to its
+            conflict-of-law rules.
           </p>
         </Section></StaggerItem>
 
         <StaggerItem as="div"><Section title="Changes & contact">
           <p>
             We may update these terms; continued use means you accept the changes. Questions?{' '}
-            <a href="mailto:hello@codeflow.app" style={{ color: '#E8A33C' }}>hello@codeflow.app</a>.
+            <a href="mailto:jason.huang317235@gmail.com" style={{ color: '#E8A33C' }}>jason.huang317235@gmail.com</a>.
             See also our <Link to={createPageUrl('Privacy')} style={{ color: '#E8A33C' }}>Privacy Policy</Link>.
           </p>
         </Section></StaggerItem>
