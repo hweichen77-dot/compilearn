@@ -1,6 +1,6 @@
 {
-  "name": "CodeFlow",
-  "short_name": "CodeFlow",
+  "name": "Compilearn",
+  "short_name": "Compilearn",
   "description": "Learn to code by actually building things. Projects, challenges, and real execution in the browser.",
   "start_url": ".",
   "scope": ".",

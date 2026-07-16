@@ -43,8 +43,8 @@ const TOP_PAGE_META = {
     description: 'AP Computer Science Principles and A curriculum with interactive lessons and runnable code.',
     blurb: 'AP CS Principles and A curriculum with interactive, runnable lessons.',
   },
-  Privacy: { title: 'Privacy', description: 'CodeFlow privacy policy.', blurb: 'Privacy policy.' },
-  Terms: { title: 'Terms', description: 'CodeFlow terms of service.', blurb: 'Terms of service.' },
+  Privacy: { title: 'Privacy', description: 'Compilearn privacy policy.', blurb: 'Privacy policy.' },
+  Terms: { title: 'Terms', description: 'Compilearn terms of service.', blurb: 'Terms of service.' },
 }
 
 const esc = (s) =>
@@ -63,7 +63,7 @@ const stripMd = (s) =>
     .trim()
 
 function replaceHead(html, { title, description, url }) {
-  const t = esc(`${title} · CodeFlow`)
+  const t = esc(`${title} · Compilearn`)
   const d = esc(description)
   const u = esc(url)
   return html

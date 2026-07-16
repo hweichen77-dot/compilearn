@@ -48,7 +48,7 @@ export default function WelcomeModal() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Welcome to CodeFlow"
+      aria-label="Welcome to Compilearn"
       className="fixed inset-0 z-[90] flex items-center justify-center px-6"
       style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) dismiss(false) }}
@@ -61,7 +61,7 @@ export default function WelcomeModal() {
           Hey {firstName}, here&apos;s the idea.
         </h1>
         <p className="font-display text-sm mb-7" style={{ color: '#FFFFFF' }}>
-          Three things make CodeFlow work. Then you&apos;re off.
+          Three things make Compilearn work. Then you&apos;re off.
         </p>
 
         <div className="space-y-4 mb-8">

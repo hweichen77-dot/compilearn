@@ -1,6 +1,6 @@
-# CodeFlow
+# Compilearn
 
-Learn to code by building real things. CodeFlow is a free educational platform
+Learn to code by building real things. Compilearn is a free educational platform
 where you write and run actual programs in the browser, with no setup and no toy
 sandboxes. A tutor explains why each step works, not only what the answer is.
 
@@ -8,7 +8,7 @@ Available on the web and as a desktop app (macOS/Windows/Linux via Tauri).
 
 ## Tracks
 
-CodeFlow spans four tracks of project-based curriculum:
+Compilearn spans four tracks of project-based curriculum:
 
 - AI Engineering: build with LLMs, APIs, and modern AI tooling (Python)
 - AP Computer Science Principles: the full AP CSP curriculum (Python + pseudocode)

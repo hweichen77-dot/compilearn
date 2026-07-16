@@ -20,7 +20,7 @@ export default function HomeNav() {
             <rect x="18" y="14.6" width="6" height="2.8" rx="1.4" fill="#F6C560" />
             <path d="M8.5 25.5 C11.5 25.5 11.5 22.7 14.5 22.7 C17.5 22.7 17.5 25.5 20.5 25.5 C22.4 25.5 23 24.6 23.5 23.8" stroke="#E8A33C" strokeWidth="2.2" strokeLinecap="round" opacity="0.5" />
           </svg>
-          <span style={{ color: "#F2EDE2", fontSize: "17px", fontWeight: 700, letterSpacing: "-0.3px" }}>CodeFlow</span>
+          <span style={{ color: "#F2EDE2", fontSize: "17px", fontWeight: 700, letterSpacing: "-0.3px" }}>Compilearn</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>

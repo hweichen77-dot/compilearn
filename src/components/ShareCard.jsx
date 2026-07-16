@@ -31,8 +31,8 @@ export default function ShareCard({ name, level, levelName, totalXP, lessons, ch
         method = "native";
         await navigator.share({
           files: [file],
-          title: "My CodeFlow progress",
-          text: `Level ${level}: ${lessons} lessons, ${challenges} challenges, ${streak}-day streak on CodeFlow.`,
+          title: "My Compilearn progress",
+          text: `Level ${level}: ${lessons} lessons, ${challenges} challenges, ${streak}-day streak on Compilearn.`,
         });
       } else {
         const url = URL.createObjectURL(blob);
@@ -102,7 +102,7 @@ export default function ShareCard({ name, level, levelName, totalXP, lessons, ch
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <span style={{ height: "2px", width: "52px", background: "#E8A33C", display: "inline-block" }} />
               <span style={{ fontFamily: BODY, fontSize: "20px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#D4882E", fontWeight: 600 }}>
-                CodeFlow
+                Compilearn
               </span>
             </div>
             <div style={{ fontFamily: DISPLAY, fontSize: "76px", fontWeight: 800, letterSpacing: "-0.035em", color: "#F2EDE2", lineHeight: 1.02, marginTop: "32px" }}>

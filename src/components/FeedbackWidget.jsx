@@ -121,7 +121,7 @@ export default function FeedbackWidget() {
                   ? 'What went wrong, and what did you expect?'
                   : kind === 'content'
                   ? 'Which lesson, and what was confusing or wrong?'
-                  : 'What would make CodeFlow better?'
+                  : 'What would make Compilearn better?'
               }
               className="w-full px-3 py-2 font-display text-sm outline-none mb-3"
               style={{ background: '#15130E', border: '1px solid #34302A', color: '#ECE7DC', resize: 'vertical' }}

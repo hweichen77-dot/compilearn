@@ -39,7 +39,7 @@ export default function ProfileGate() {
             margin: '0 0 12px',
           }}
         >
-          Welcome to CodeFlow
+          Welcome to Compilearn
         </h1>
         <p
           className="font-display text-sm mb-8"

@@ -1,4 +1,4 @@
--- CodeFlow Database Schema
+-- Compilearn Database Schema
 -- Run in Supabase SQL editor: Settings > SQL Editor
 
 -- User profiles (extends auth.users)

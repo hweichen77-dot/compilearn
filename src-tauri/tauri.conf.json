@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "CodeFlow",
+  "productName": "Compilearn",
   "version": "2.3.0",
-  "identifier": "com.codeflow.app",
+  "identifier": "com.compilearn.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "CodeFlow",
+        "title": "Compilearn",
         "width": 1280,
         "height": 832,
         "minWidth": 900,

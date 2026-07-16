@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const SITE = 'CodeFlow'
+const SITE = 'Compilearn'
 const ORIGIN = 'https://hweichen77-dot.github.io/codeflow'
 
 function setMeta(selector, attr, value) {

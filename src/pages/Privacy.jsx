@@ -39,7 +39,7 @@ export default function Privacy() {
 
         <StaggerItem as="div"><Section title="What we collect">
           <p>
-            CodeFlow is built local-first. Your learning progress, completed lessons, challenges,
+            Compilearn is built local-first. Your learning progress, completed lessons, challenges,
             XP, and streaks, is stored in your browser&apos;s localStorage by default and never
             leaves your device unless you create an account.
           </p>

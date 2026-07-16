@@ -2,7 +2,7 @@
 import { checkLimits } from "../_shared/rateLimit.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM = Deno.env.get("RETENTION_FROM") ?? "CodeFlow <onboarding@resend.dev>";
+const FROM = Deno.env.get("RETENTION_FROM") ?? "Compilearn <onboarding@resend.dev>";
 const TRIGGER_SECRET = Deno.env.get("RETENTION_TRIGGER_SECRET");
 const SITE = Deno.env.get("SITE_URL") ?? "https://hweichen77-dot.github.io/codeflow/";
 
@@ -28,19 +28,19 @@ function subjectAndBody({ name, streak, kind, resumeUrl }: { name?: string; stre
   if (kind === "goal") {
     return {
       subject: "One lesson keeps today going",
-      html: `<p>Hi ${who},</p><p>You're one short of today's goal on CodeFlow. A single lesson takes a few minutes.</p><p><a href="${url}">Pick up where you left off</a>.</p>`,
+      html: `<p>Hi ${who},</p><p>You're one short of today's goal on Compilearn. A single lesson takes a few minutes.</p><p><a href="${url}">Pick up where you left off</a>.</p>`,
     };
   }
   if (kind === "weekly") {
     return {
-      subject: "Your week on CodeFlow",
+      subject: "Your week on Compilearn",
       html: `<p>Hi ${who},</p><p>Here's a quick recap of your week. Ready for the next one?</p><p><a href="${url}">Keep learning</a>.</p>`,
     };
   }
 
   const s = streak && streak > 0 ? `${streak}-day` : "";
   return {
-    subject: s ? `Keep your ${s} streak alive` : "Come back to CodeFlow",
+    subject: s ? `Keep your ${s} streak alive` : "Come back to Compilearn",
     html: `<p>Hi ${who},</p><p>${s ? `Your ${s} streak is about to break.` : "It's been a bit."} One lesson keeps it going.</p><p><a href="${url}">Resume now</a>.</p>`,
   };
 }

@@ -1,7 +1,7 @@
 import { checkLimits } from "../_shared/rateLimit.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM = Deno.env.get("FEEDBACK_FROM") ?? "CodeFlow Feedback <onboarding@resend.dev>";
+const FROM = Deno.env.get("FEEDBACK_FROM") ?? "Compilearn Feedback <onboarding@resend.dev>";
 const TO = Deno.env.get("FEEDBACK_TO") ?? "jason.huang317235@gmail.com";
 
 const cors = {
@@ -48,7 +48,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         from: FROM,
         to: TO,
-        subject: `[CodeFlow ${kind}] ${text.slice(0, 60)}${text.length > 60 ? "…" : ""}`,
+        subject: `[Compilearn ${kind}] ${text.slice(0, 60)}${text.length > 60 ? "…" : ""}`,
         html,
       }),
     });

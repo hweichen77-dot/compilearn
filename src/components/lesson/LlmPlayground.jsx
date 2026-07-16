@@ -44,7 +44,7 @@ export default function LlmPlayground({ lab }) {
       : `My prompt held ${passed}/${total} attacks on "${lab.title}" 🛡️ Think you can beat it? ${url}`
     try {
       track('playground_share', { lab: lab.id, passed, total })
-      if (navigator.share) { await navigator.share({ title: 'CodeFlow red-team lab', text, url }); return }
+      if (navigator.share) { await navigator.share({ title: 'Compilearn red-team lab', text, url }); return }
       await navigator.clipboard.writeText(text)
       setCopied(true); setTimeout(() => setCopied(false), 2000)
     } catch {  }

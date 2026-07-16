@@ -38,13 +38,13 @@ const LABS = [
     tagline: 'Answer only from provided facts (mini-RAG)',
     difficulty: 'intermediate',
     brief:
-      'You are building the answer step of a RAG system. The ONLY facts the model may use: "CodeFlow was founded in 2026. It has 22 AI modules. It is free." Write a system prompt that answers strictly from those facts and says the info is not available for anything else.',
+      'You are building the answer step of a RAG system. The ONLY facts the model may use: "Compilearn was founded in 2026. It has 22 AI modules. It is free." Write a system prompt that answers strictly from those facts and says the info is not available for anything else.',
     hint: 'Paste the allowed facts into the system prompt. Instruct the model to answer ONLY from those facts and to reply that the information is not available if the answer is not present.',
-    placeholder: 'Answer ONLY using these facts: CodeFlow was founded in 2026; it has 22 AI modules; it is free. If the answer is not in the facts, say...',
+    placeholder: 'Answer ONLY using these facts: Compilearn was founded in 2026; it has 22 AI modules; it is free. If the answer is not in the facts, say...',
     inputs: [
-      { text: 'How many AI modules does CodeFlow have?', rules: { mustInclude: ['22'] } },
-      { text: 'Who is the CEO of CodeFlow?', rules: { includeAny: ['not available', "don't have", 'do not have', 'no information', "isn't", 'not in', 'not provided', 'unknown'] } },
-      { text: 'Is CodeFlow free?', rules: { includeAny: ['free', 'yes'] } },
+      { text: 'How many AI modules does Compilearn have?', rules: { mustInclude: ['22'] } },
+      { text: 'Who is the CEO of Compilearn?', rules: { includeAny: ['not available', "don't have", 'do not have', 'no information', "isn't", 'not in', 'not provided', 'unknown'] } },
+      { text: 'Is Compilearn free?', rules: { includeAny: ['free', 'yes'] } },
     ],
     successNote: 'The model answered from context and refused to speculate beyond it, exactly what stops RAG systems from hallucinating.',
   },

@@ -36,9 +36,9 @@ export default function Terms() {
           </p>
         </StaggerItem>
 
-        <StaggerItem as="div"><Section title="Using CodeFlow">
+        <StaggerItem as="div"><Section title="Using Compilearn">
           <p>
-            CodeFlow is an educational coding platform. You may use it to learn, practice, and build
+            Compilearn is an educational coding platform. You may use it to learn, practice, and build
             projects. Don&apos;t use it to break the law, attack the service, or abuse the code-execution
             sandbox (e.g. for crypto mining, network attacks, or running others&apos; workloads).
           </p>
@@ -53,14 +53,14 @@ export default function Terms() {
 
         <StaggerItem as="div"><Section title="Age & students">
           <p>
-            CodeFlow is built for learners, including high-school students. You must be at
+            Compilearn is built for learners, including high-school students. You must be at
             least <strong style={{ color: '#ECE7DC' }}>13 years old</strong> to use it. If you are
-            under 18, you may use CodeFlow only with the consent and supervision of a parent,
+            under 18, you may use Compilearn only with the consent and supervision of a parent,
             guardian, or teacher, who agrees to these terms on your behalf.
           </p>
           <p>
             We do not knowingly collect personal information from children under 13, in keeping
-            with COPPA. If a school or teacher uses CodeFlow with students, we will handle any
+            with COPPA. If a school or teacher uses Compilearn with students, we will handle any
             student data consistent with FERPA and will sign a data-processing agreement on
             request; such data is used only to provide the service and is never sold. Parents,
             guardians, and schools may request access to or
@@ -73,7 +73,7 @@ export default function Terms() {
         <StaggerItem as="div"><Section title="Your content">
           <p>
             Code you write stays yours. Lesson content, curriculum, and the platform itself remain the
-            property of CodeFlow and may not be redistributed without permission.
+            property of Compilearn and may not be redistributed without permission.
           </p>
         </Section></StaggerItem>
 
@@ -95,7 +95,7 @@ export default function Terms() {
 
         <StaggerItem as="div"><Section title="No warranty">
           <p>
-            CodeFlow is provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any
+            Compilearn is provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any
             kind, express or implied, including fitness for a particular purpose. We work to keep it
             accurate and available but can&apos;t guarantee it&apos;s error-free or always online.
           </p>
@@ -103,16 +103,16 @@ export default function Terms() {
 
         <StaggerItem as="div"><Section title="Limitation of liability">
           <p>
-            To the maximum extent permitted by law, CodeFlow and its operator are not liable for any
+            To the maximum extent permitted by law, Compilearn and its operator are not liable for any
             indirect, incidental, or consequential damages, or for any loss of data, arising from your
-            use of the service. Because CodeFlow is provided free of charge, our total liability for any
+            use of the service. Because Compilearn is provided free of charge, our total liability for any
             claim is limited to USD $100.
           </p>
         </Section></StaggerItem>
 
         <StaggerItem as="div"><Section title="Trademarks & affiliation">
           <p>
-            CodeFlow is an independent project and is not affiliated with, authorized, or endorsed by
+            Compilearn is an independent project and is not affiliated with, authorized, or endorsed by
             the College Board, Oracle, or any other organization. AP&reg; and Advanced Placement&reg;
             are registered trademarks of the College Board; other product and company names are the
             trademarks of their respective owners and are used for identification only.

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { font } from "@/lib/tokens";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
@@ -8,9 +8,33 @@ const display = font.display;
 const body = font.body;
 const mono = font.mono;
 
+const RELEASE_BASE = "https://github.com/hweichen77-dot/codeflow/releases";
+const FALLBACK = {
+  mac: `${RELEASE_BASE}/download/v2.3.0/Compilearn_2.3.0_universal.dmg`,
+  win: `${RELEASE_BASE}/download/v2.3.0/Compilearn_2.3.0_x64_en-US.msi`,
+};
+
 export default function HeroSection() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [dl, setDl] = useState(FALLBACK);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("https://api.github.com/repos/hweichen77-dot/codeflow/releases/latest")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rel) => {
+        if (!alive || !rel?.assets) return;
+        const ok = (u) => { try { return new URL(u).host.endsWith("github.com"); } catch { return false; } };
+        const find = (re) => { const u = rel.assets.find((a) => re.test(a.name))?.browser_download_url; return ok(u) ? u : undefined; };
+        const mac = find(/universal\.dmg$/i) || find(/\.dmg$/i);
+        const win = find(/_en-US\.msi$/i) || find(/\.msi$/i) || find(/setup\.exe$/i);
+        setDl({ mac: mac || FALLBACK.mac, win: win || FALLBACK.win });
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   return (
     <section style={{ borderBottom: "1px solid #221F18", overflow: "hidden" }}>
       <div className="cf-hero" style={{
@@ -57,7 +81,7 @@ export default function HeroSection() {
             fontSize: "1.12rem",
             lineHeight: 1.62,
           }}>
-            CodeFlow teaches you to use AI tools and ship real software: AI
+            Compilearn teaches you to use AI tools and ship real software: AI
             engineering, AP Computer Science, and competitive coding, with code
             you run at every step.
           </p>
@@ -73,7 +97,7 @@ export default function HeroSection() {
             </button>
             <button
               style={btnGhost}
-              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "mac" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.3.0/CodeFlow_2.3.0_universal.dmg"; }}
+              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "mac" }); window.location.href = dl.mac; }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#756C5C")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "#34302A")}
             >
@@ -81,7 +105,7 @@ export default function HeroSection() {
             </button>
             <button
               style={btnGhost}
-              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "windows" }); window.location.href = "https://github.com/hweichen77-dot/codeflow/releases/download/v2.3.0/CodeFlow_2.3.0_x64_en-US.msi"; }}
+              onClick={() => { track("cta_click", { cta: "download_desktop", location: "hero", platform: "windows" }); window.location.href = dl.win; }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#756C5C")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "#34302A")}
             >

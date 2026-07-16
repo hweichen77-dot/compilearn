@@ -84,7 +84,7 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         with:
           tagName: ${{ steps.ref.outputs.value }}
-          releaseName: CodeFlow ${{ steps.ref.outputs.value }}
+          releaseName: Compilearn ${{ steps.ref.outputs.value }}
           releaseBody: 'Desktop installers (.dmg for macOS, .msi/.exe for Windows). See notes on the matching release.'
           releaseDraft: false
           prerelease: false

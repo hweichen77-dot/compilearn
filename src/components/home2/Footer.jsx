@@ -20,7 +20,7 @@ function Wordmark() {
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: "10px", fontFamily: display, fontWeight: 800, fontSize: "1.18rem", letterSpacing: "-0.02em", color: "#ECE7DC" }}>
       <span style={{ width: "9px", height: "9px", background: "#E8A33C", borderRadius: "1px", transform: "translateY(-1px)" }} />
-      CodeFlow
+      Compilearn
     </div>
   );
 }
@@ -90,7 +90,7 @@ export default function Footer() {
           color: "#FFFFFF",
           letterSpacing: "0.04em",
         }}>
-          © 2026 CodeFlow, learn by building.
+          © 2026 Compilearn, learn by building.
           <div style={{ marginTop: "10px", color: "#8F8779", lineHeight: 1.6 }}>
             Independent project, not affiliated with or endorsed by the College Board. AP® and Advanced Placement® are registered trademarks of the College Board. AI output can be inaccurate — verify before relying on it.
           </div>

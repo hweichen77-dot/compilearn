@@ -24,7 +24,7 @@ export default function DataControls() {
     setBusy('export')
     try {
       await exportUserData()
-      toast({ title: 'Data exported', description: 'A JSON file with all your CodeFlow data was downloaded.' })
+      toast({ title: 'Data exported', description: 'A JSON file with all your Compilearn data was downloaded.' })
     } catch {
       toast({ title: 'Export failed', description: 'Could not build your data file. Try again.', variant: 'destructive' })
     } finally {
@@ -40,7 +40,7 @@ export default function DataControls() {
         toast({ title: 'Account deleted', description: 'Your account and all synced data were permanently removed.' })
       } else {
         deleteLocalData()
-        toast({ title: 'Data deleted', description: 'All CodeFlow data on this device was removed.' })
+        toast({ title: 'Data deleted', description: 'All Compilearn data on this device was removed.' })
       }
       setTimeout(() => { window.location.href = import.meta.env.BASE_URL || '/' }, 900)
     } catch {
@@ -69,7 +69,7 @@ export default function DataControls() {
           type="button"
           onClick={onExport}
           disabled={busy != null}
-          aria-label="Export all my CodeFlow data as a JSON file"
+          aria-label="Export all my Compilearn data as a JSON file"
           style={{
             ...btnBase,
             background: 'transparent',

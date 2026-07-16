@@ -45,7 +45,7 @@ export default function Testimonials() {
               <em style={{ fontStyle: "italic", color: "#E8A33C", fontWeight: 500 }}>building real things</em>.
             </blockquote>
             <figcaption style={{ fontFamily: body, fontSize: "0.8rem", color: "#FFFFFF", letterSpacing: "0.04em" }}>
-              The CodeFlow mission
+              The Compilearn mission
             </figcaption>
           </figure>
 

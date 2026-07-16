@@ -63,7 +63,7 @@ export default function AuthGate() {
   };
 
   const titles = {
-    google: 'Welcome to CodeFlow',
+    google: 'Welcome to Compilearn',
     guest: 'Quick start',
   };
   const subtitles = {
