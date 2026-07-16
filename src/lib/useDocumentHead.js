@@ -20,7 +20,21 @@ function setMeta(selector, attr, value) {
   return { el, prev, created }
 }
 
-export function useDocumentHead({ title, description, path } = {}) {
+const LD_ID = 'compilearn-jsonld'
+
+function setJsonLd(data) {
+  if (typeof document === 'undefined') return null
+  const existed = document.getElementById(LD_ID)
+  const prev = existed?.textContent ?? null
+  const el = existed || document.createElement('script')
+  el.type = 'application/ld+json'
+  el.id = LD_ID
+  el.textContent = JSON.stringify(data)
+  if (!existed) document.head.appendChild(el)
+  return { el, prev, created: !existed }
+}
+
+export function useDocumentHead({ title, description, path, schemaType = 'LearningResource' } = {}) {
   useEffect(() => {
     if (typeof document === 'undefined') return
     const fullTitle = title ? `${title} · ${SITE}` : SITE
@@ -48,6 +62,18 @@ export function useDocumentHead({ title, description, path } = {}) {
       setMeta('meta[name="twitter:description"]', 'content', description),
     ].filter(Boolean)
 
+    const ld = setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': schemaType,
+      name: fullTitle,
+      description: description || 'Learn to code in your browser with a live AI tutor.',
+      url: canonical,
+      provider: { '@type': 'Organization', name: SITE, url: `${ORIGIN}/` },
+      isAccessibleForFree: true,
+      inLanguage: 'en',
+      learningResourceType: 'Interactive lesson',
+    })
+
     return () => {
       document.title = prevTitle
       changes.forEach(({ el, prev, created }) => {
@@ -56,8 +82,12 @@ export function useDocumentHead({ title, description, path } = {}) {
       })
       if (linkCreated) linkEl.remove()
       else if (prevHref != null) linkEl.setAttribute('href', prevHref)
+      if (ld) {
+        if (ld.created) ld.el.remove()
+        else if (ld.prev != null) ld.el.textContent = ld.prev
+      }
     }
-  }, [title, description, path])
+  }, [title, description, path, schemaType])
 }
 
 export default useDocumentHead
