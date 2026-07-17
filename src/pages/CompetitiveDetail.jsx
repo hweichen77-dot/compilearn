@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "@/styles/landing.css";
 import { font } from "@/lib/tokens";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
@@ -51,7 +52,7 @@ export default function CompetitiveDetail() {
   if (!problem) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: "#15130E" }}>
-        <div className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>404, NOT FOUND</div>
+        <div className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>404, NOT FOUND</div>
         <Link to={createPageUrl("Competitive")}>
           <button className="font-sans text-xs tracking-widest uppercase px-5 py-2" style={{ color: "#E8A33C", border: "1px solid #E8A33C33" }}>
             ← Back to Competitive
@@ -63,10 +64,10 @@ export default function CompetitiveDetail() {
 
   return (
     <div style={{ background: "#15130E", minHeight: "100vh" }}>
-      <div className="relative pt-20" style={{ borderBottom: "1px solid #262219" }}>
+      <div className="relative pt-20" style={{ borderBottom: "1px solid #2a231a" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
         <div className="max-w-5xl mx-auto px-8 lg:px-16 py-10">
-          <Link to={createPageUrl("Competitive")} className="font-sans text-xs tracking-widest uppercase mb-8 inline-block" style={{ color: "#FFFFFF" }}>
+          <Link to={createPageUrl("Competitive")} className="font-sans text-xs tracking-widest uppercase mb-8 inline-block" style={{ color: "#F2EDE2" }}>
             ← Competitive
           </Link>
           <div className="flex items-start gap-5">
@@ -78,12 +79,12 @@ export default function CompetitiveDetail() {
                 <span className="font-sans text-xs tracking-widest uppercase px-2.5 py-1" style={{ color: "#E8A33C", border: "1px solid #E8A33C33", background: "#E8A33C10" }}>
                   {problem.difficulty}
                 </span>
-                <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>{problem.algorithm_focus}</span>
+                <span className="font-sans text-xs" style={{ color: "#F2EDE2" }}>{problem.algorithm_focus}</span>
               </div>
               <h1 style={{ fontFamily: font.display, fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: 0 }}>
                 {problem.title}
               </h1>
-              <div className="flex items-center gap-4 mt-3 font-sans text-xs" style={{ color: "#FFFFFF" }}>
+              <div className="flex items-center gap-4 mt-3 font-sans text-xs" style={{ color: "#F2EDE2" }}>
                 {problem.time_limit_ms && <span>⏱ {problem.time_limit_ms} ms</span>}
                 {problem.memory_limit_mb && <span>▤ {problem.memory_limit_mb} MB</span>}
                 <span>C++17</span>
@@ -111,11 +112,11 @@ export default function CompetitiveDetail() {
 
         <AnimatePresence>
           {passed && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-4 px-6 py-5" style={{ border: "1px solid #E8A33C33", background: "#E8A33C08" }}>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-4 px-6 py-5" style={{ border: "1px solid #E8A33C33", background: "#E8A33C08", borderRadius: 14 }}>
               <span className="font-sans text-sm" style={{ color: "#E8A33C" }}>✓</span>
               <div>
                 <div className="font-sans text-xs tracking-widest uppercase mb-1" style={{ color: "#E8A33C" }}>Accepted</div>
-                <div className="font-display text-sm" style={{ color: "#FFFFFF", fontWeight: 400 }}>All test cases passed. Clean.</div>
+                <div className="font-display text-sm" style={{ color: "#F2EDE2", fontWeight: 400 }}>All test cases passed. Clean.</div>
               </div>
             </motion.div>
           )}
@@ -123,12 +124,12 @@ export default function CompetitiveDetail() {
 
         <StaggerItem className="flex flex-wrap gap-3" as="div">
           {problem.editorial && (
-            <button onClick={() => setShowEditorial(!showEditorial)} className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150" style={{ color: showEditorial ? "#E8A33C" : "#FFFFFF", border: `1px solid ${showEditorial ? "#E8A33C33" : "#262219"}`, background: showEditorial ? "#E8A33C10" : "transparent" }}>
+            <button onClick={() => setShowEditorial(!showEditorial)} className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: showEditorial ? "#E8A33C" : "#F2EDE2", border: `1px solid ${showEditorial ? "#E8A33C33" : "#2a231a"}`, background: showEditorial ? "#E8A33C10" : "transparent" }}>
               {showEditorial ? ", Editorial" : "+ Editorial"}
             </button>
           )}
           {problem.solution_cpp && (
-            <button onClick={() => setShowSolution(!showSolution)} className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150" style={{ color: "#ECE7DC", border: "1px solid #262219" }}>
+            <button onClick={() => setShowSolution(!showSolution)} className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: "#ECE7DC", border: "1px solid #2a231a" }}>
               {showSolution ? ", Solution" : "Show Solution"}
             </button>
           )}
@@ -137,11 +138,11 @@ export default function CompetitiveDetail() {
         <AnimatePresence>
           {showEditorial && problem.editorial && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
+              <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                <div className="px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
                   <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#E8A33C" }}>Editorial</span>
                 </div>
-                <p className="font-display text-sm leading-relaxed px-5 py-4" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+                <p className="font-display text-sm leading-relaxed px-5 py-4" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                   {problem.editorial}
                 </p>
               </div>
@@ -152,12 +153,12 @@ export default function CompetitiveDetail() {
         <AnimatePresence>
           {showSolution && problem.solution_cpp && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>Solution</span>
+              <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
+                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>Solution</span>
                   <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#E8A33C", border: "1px solid #E8A33C33", background: "#E8A33C10" }}>C++</span>
                 </div>
-                <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#FFFFFF" }}>
+                <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#F2EDE2" }}>
                   {problem.solution_cpp}
                 </pre>
               </div>

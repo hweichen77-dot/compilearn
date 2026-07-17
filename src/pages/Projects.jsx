@@ -6,14 +6,25 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/content/categories";
 import { foundationsAreFinished, isModuleGated } from "@/lib/foundationsGate";
-import { Stagger, StaggerItem } from "@/lib/motion";
-import { Eyebrow } from "@/components/ui/kit";
+import { Reveal, GlowCard } from "@/components/landing/primitives";
+import "@/styles/landing.css";
 
 const DIFFICULTY_LABEL = {
   beginner: "00",
   intermediate: "01",
   advanced: "02",
 };
+
+function Label({ children, color = "#6f665a", className = "", style }) {
+  return (
+    <span
+      className={`text-[11px] tracking-[0.18em] uppercase ${className}`}
+      style={{ fontFamily: font.mono, color, ...style }}
+    >
+      {children}
+    </span>
+  );
+}
 
 export default function Projects() {
   const [search, setSearch] = useState("");
@@ -85,25 +96,30 @@ export default function Projects() {
   ].filter((s) => s.items.length > 0);
 
   return (
-    <div className="min-h-screen" style={{ background: "#15130E" }}>
+    <div className="min-h-screen" style={{ background: "#0c0a08" }}>
+      <style>{`
+        .cl-row { transition: transform .25s cubic-bezier(.16,1,.3,1), border-color .25s, box-shadow .25s; }
+        .cl-row:hover { border-color: #3a3428 !important; box-shadow: 0 14px 44px -14px rgba(232,163,60,0.35); }
+        @media (prefers-reduced-motion: reduce) { .cl-row { transition: none; } }
+      `}</style>
       <div
         className="relative px-8 lg:px-16 pt-28 pb-16"
-        style={{ borderBottom: "1px solid #262219" }}
+        style={{ borderBottom: "1px solid #2a231a" }}
       >
         <div
           className="absolute top-0 left-0 right-0 h-px"
           style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }}
         />
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-baseline gap-6 mb-2">
-            <Eyebrow>PROJECTS</Eyebrow>
+          <div className="mb-3">
+            <Label color="#E8A33C">Projects</Label>
           </div>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 16px" }}
           >
             Choose your module.
           </h1>
-          <p className="font-display text-base" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+          <p className="text-base" style={{ fontFamily: font.body, color: "#a99f8f", fontWeight: 400 }}>
             Each project is a chapter. New here? Start at the top and work down, each one builds on the last.
           </p>
         </div>
@@ -113,8 +129,8 @@ export default function Projects() {
         <div className="flex flex-wrap items-center gap-4 mb-12">
           <div className="relative flex-1 min-w-48 max-w-xs">
             <span
-              className="absolute left-4 top-1/2 -translate-y-1/2 font-sans text-xs pointer-events-none"
-              style={{ color: "#FFFFFF" }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none"
+              style={{ fontFamily: font.mono, color: "#6f665a" }}
             >
               /search
             </span>
@@ -122,12 +138,17 @@ export default function Projects() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="filter projects..."
-              className="w-full font-sans text-sm py-3 pl-16 pr-4 bg-transparent outline-none"
+              className="w-full text-sm py-3 pl-16 pr-4 bg-transparent outline-none transition-colors duration-150"
               style={{
-                border: "1px solid #262219",
-                color: "#ECE7DC",
+                fontFamily: font.body,
+                border: "1px solid #2a231a",
+                borderRadius: "12px",
+                background: "#17130e",
+                color: "#F2EDE2",
                 caretColor: "#E8A33C",
               }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#E8A33C")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#2a231a")}
             />
           </div>
 
@@ -136,11 +157,13 @@ export default function Projects() {
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
-                className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                className="text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
                 style={{
-                  border: `1px solid ${category === cat.value ? "#E8A33C" : "#262219"}`,
-                  color: category === cat.value ? "#E8A33C" : "#C9C1B2",
-                  background: category === cat.value ? "#E8A33C10" : "transparent",
+                  fontFamily: font.mono,
+                  borderRadius: "10px",
+                  border: `1px solid ${category === cat.value ? "#E8A33C" : "#2a231a"}`,
+                  color: category === cat.value ? "#f4b95a" : "#a99f8f",
+                  background: category === cat.value ? "rgba(232,163,60,0.10)" : "transparent",
                 }}
               >
                 {cat.label}
@@ -150,41 +173,39 @@ export default function Projects() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-px">
+          <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
               <div
                 key={i}
                 className="h-24 animate-pulse"
-                style={{ background: "#131009", border: "1px solid #262219" }}
+                style={{ background: "#17130e", border: "1px solid #2a231a", borderRadius: "16px" }}
               />
             ))}
           </div>
         ) : (
           <div>
             <div
-              className="grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-3 mb-px"
-              style={{ borderBottom: "1px solid #262219" }}
+              className="grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-3 mb-2"
+              style={{ borderBottom: "1px solid #2a231a" }}
             >
               {["LVL", "PROJECT", "LESSONS", "STATUS"].map(h => (
-                <div key={h} className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
-                  {h}
-                </div>
+                <Label key={h}>{h}</Label>
               ))}
             </div>
 
             {sections.map((section) => (
-              <div key={section.id} className="mb-12 last:mb-0">
+              <Reveal as="div" key={section.id} className="mb-12 last:mb-0">
                 <div
-                  className="flex items-baseline gap-3 px-6 pt-8 pb-3"
+                  className="flex items-baseline gap-3 px-6 pt-8 pb-3 mb-3"
                   style={{ borderBottom: "1px solid #1F1C15" }}
                 >
-                  <Eyebrow>{section.label}</Eyebrow>
-                  <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
+                  <Label color="#a99f8f">{section.label}</Label>
+                  <span className="text-xs" style={{ fontFamily: font.mono, color: "#6f665a" }}>
                     {section.items.length}
                   </span>
                 </div>
 
-                <Stagger as="div">
+                <div className="space-y-2">
                   {section.items.map((project) => {
                     const status = getStatus(project);
                     const pct = getProgress(project);
@@ -194,168 +215,141 @@ export default function Projects() {
                       difficulty: project.difficulty,
                     });
                     const rowInner = (
+                      <GlowCard
+                        className="cl-row grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-6"
+                        style={{ background: "#17130e", border: "1px solid #2a231a", borderRadius: "16px", opacity: gated ? 0.55 : 1 }}
+                      >
                         <div
-                          className="grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-6 transition-all duration-200"
-                          style={{ borderBottom: "1px solid #262219", border: "1px solid transparent", borderBottomColor: "#262219", borderRadius: "14px", opacity: gated ? 0.55 : 1 }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.background = "#1B1913";
-                            e.currentTarget.style.borderColor = "#3A3428";
-                            e.currentTarget.style.paddingLeft = "1.75rem";
-                            e.currentTarget.style.boxShadow = "0 12px 40px -12px rgba(232,163,60,0.33)";
-                            if (gated) e.currentTarget.style.opacity = "0.8";
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.background = "";
-                            e.currentTarget.style.borderColor = "transparent";
-                            e.currentTarget.style.borderBottomColor = "#262219";
-                            e.currentTarget.style.paddingLeft = "1.5rem";
-                            e.currentTarget.style.boxShadow = "none";
-                            if (gated) e.currentTarget.style.opacity = "0.55";
+                          className="font-bold"
+                          style={{
+                            fontFamily: font.mono,
+                            fontSize: "1.5rem",
+                            color: "#6f665a",
+                            letterSpacing: "-0.05em",
                           }}
                         >
-                          <div
-                            className="font-sans font-bold"
-                            style={{
-                              fontSize: "1.5rem",
-                              color: "#ECE7DC",
-                              letterSpacing: "-0.05em",
-                            }}
-                          >
-                            {DIFFICULTY_LABEL[project.difficulty] || "00"}
-                          </div>
-
-                          <div>
-                            <div className="flex items-center gap-3 mb-1">
-                              <div
-                                className="font-display font-bold text-lg leading-snug transition-colors duration-200 group-hover:text-white"
-                                style={{ color: "#FFFFFF", letterSpacing: "-0.02em" }}
-                              >
-                                {project.title}
-                              </div>
-                              {gated && (
-                                <span
-                                  className="font-sans text-xs tracking-widest uppercase px-2 py-0.5 whitespace-nowrap"
-                                  style={{ color: "#E0B341", border: "1px solid #E0B34133", background: "#E0B34110" }}
-                                >
-                                  Finish Foundations first
-                                </span>
-                              )}
-                            </div>
-                            {project.description && (
-                              <div
-                                className="font-display text-sm line-clamp-1"
-                                style={{ color: "#FFFFFF", fontWeight: 400 }}
-                              >
-                                {project.description}
-                              </div>
-                            )}
-                            {status === "in_progress" && (
-                              <div className="flex items-center gap-3 mt-2">
-                                <div className="flex gap-1">
-                                  {Array.from({ length: 10 }).map((_, di) => (
-                                    <div
-                                      key={di}
-                                      className="w-1.5 h-1.5 transition-all duration-200"
-                                      style={{
-                                        background: di < Math.round(pct / 10) ? "#E8A33C" : "#262219",
-                                      }}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="font-sans text-xs" style={{ color: "#E8A33C" }}>
-                                  {pct}%
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div
-                            className="font-sans text-sm text-right"
-                            style={{ color: "#FFFFFF" }}
-                          >
-                            {project.lessons_count ? `${project.lessons_count}` : ", "}
-                            {project.estimated_time ? (
-                              <div className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
-                                {project.estimated_time}min
-                              </div>
-                            ) : null}
-                          </div>
-
-                          <div>
-                            {gated && (
-                              <span
-                                className="font-sans text-xs tracking-widest uppercase px-3 py-1"
-                                style={{ color: "#E0B341", border: "1px solid #E0B34133", background: "#E0B34110" }}
-                              >
-                                LOCKED
-                              </span>
-                            )}
-                            {!gated && status === "completed" && (
-                              <span
-                                className="font-sans text-xs tracking-widest uppercase px-3 py-1"
-                                style={{ color: "#E8A33C", border: "1px solid #E8A33C33", background: "#E8A33C10" }}
-                              >
-                                DONE
-                              </span>
-                            )}
-                            {!gated && status === "in_progress" && (
-                              <span
-                                className="font-sans text-xs tracking-widest uppercase px-3 py-1"
-                                style={{ color: "#FFFFFF", border: "1px solid #34302A", background: "#131009" }}
-                              >
-                                ACTIVE
-                              </span>
-                            )}
-                            {!gated && status === "not_started" && (
-                              <span
-                                className="font-sans text-xs tracking-widest uppercase px-3 py-1"
-                                style={{ color: "#FFFFFF", border: "1px solid #34302A" }}
-                              >
-                                START
-                              </span>
-                            )}
-                          </div>
+                          {DIFFICULTY_LABEL[project.difficulty] || "00"}
                         </div>
+
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <div
+                              className="font-display font-bold text-lg leading-snug transition-colors duration-200 group-hover:text-white"
+                              style={{ color: "#F2EDE2", letterSpacing: "-0.02em" }}
+                            >
+                              {project.title}
+                            </div>
+                            {gated && (
+                              <Label
+                                color="#f4b95a"
+                                className="px-2 py-0.5 whitespace-nowrap"
+                                style={{ border: "1px solid rgba(232,163,60,0.25)", background: "rgba(232,163,60,0.08)", borderRadius: "8px" }}
+                              >
+                                Finish Foundations first
+                              </Label>
+                            )}
+                          </div>
+                          {project.description && (
+                            <div
+                              className="text-sm line-clamp-1"
+                              style={{ fontFamily: font.body, color: "#a99f8f", fontWeight: 400 }}
+                            >
+                              {project.description}
+                            </div>
+                          )}
+                          {status === "in_progress" && (
+                            <div className="flex items-center gap-3 mt-2">
+                              <div className="flex gap-1">
+                                {Array.from({ length: 10 }).map((_, di) => (
+                                  <div
+                                    key={di}
+                                    className="w-1.5 h-1.5 rounded-sm transition-all duration-200"
+                                    style={{
+                                      background: di < Math.round(pct / 10) ? "#E8A33C" : "#2a231a",
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs" style={{ fontFamily: font.mono, color: "#f4b95a" }}>
+                                {pct}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div
+                          className="text-sm text-right"
+                          style={{ fontFamily: font.mono, color: "#a99f8f" }}
+                        >
+                          {project.lessons_count ? `${project.lessons_count}` : ", "}
+                          {project.estimated_time ? (
+                            <div className="text-xs" style={{ fontFamily: font.mono, color: "#6f665a" }}>
+                              {project.estimated_time}min
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div>
+                          {gated && (
+                            <Label color="#f4b95a" className="px-3 py-1" style={{ border: "1px solid rgba(232,163,60,0.25)", background: "rgba(232,163,60,0.08)", borderRadius: "8px" }}>
+                              LOCKED
+                            </Label>
+                          )}
+                          {!gated && status === "completed" && (
+                            <Label color="#5fbf7e" className="px-3 py-1" style={{ border: "1px solid rgba(95,191,126,0.3)", background: "rgba(95,191,126,0.08)", borderRadius: "8px" }}>
+                              DONE
+                            </Label>
+                          )}
+                          {!gated && status === "in_progress" && (
+                            <Label color="#E8A33C" className="px-3 py-1" style={{ border: "1px solid rgba(232,163,60,0.3)", background: "rgba(232,163,60,0.08)", borderRadius: "8px" }}>
+                              ACTIVE
+                            </Label>
+                          )}
+                          {!gated && status === "not_started" && (
+                            <Label color="#a99f8f" className="px-3 py-1" style={{ border: "1px solid #2a231a", borderRadius: "8px" }}>
+                              START
+                            </Label>
+                          )}
+                        </div>
+                      </GlowCard>
                     );
 
-                    return (
-                      <StaggerItem key={project.id} as="div">
-                        {gated ? (
-                          <div
-                            role="button"
-                            tabIndex={0}
-                            aria-disabled="true"
-                            title="Finish the Foundations modules to unlock this"
-                            className="group block cursor-not-allowed"
-                            onClick={() => setNudge(project.title)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                setNudge(project.title);
-                              }
-                            }}
-                          >
-                            {rowInner}
-                          </div>
-                        ) : (
-                          <Link
-                            to={createPageUrl(`ProjectDetail?id=${project.id}`)}
-                            className="group block"
-                          >
-                            {rowInner}
-                          </Link>
-                        )}
-                      </StaggerItem>
+                    return gated ? (
+                      <div
+                        key={project.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-disabled="true"
+                        title="Finish the Foundations modules to unlock this"
+                        className="group block cursor-not-allowed"
+                        onClick={() => setNudge(project.title)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setNudge(project.title);
+                          }
+                        }}
+                      >
+                        {rowInner}
+                      </div>
+                    ) : (
+                      <Link
+                        key={project.id}
+                        to={createPageUrl(`ProjectDetail?id=${project.id}`)}
+                        className="group block"
+                      >
+                        {rowInner}
+                      </Link>
                     );
                   })}
-                </Stagger>
-              </div>
+                </div>
+              </Reveal>
             ))}
 
             {filtered.length === 0 && (
               <div className="text-center py-24">
-                <Eyebrow className="mb-4">NO RESULTS</Eyebrow>
-                <p className="font-display text-base" style={{ color: "#FFFFFF" }}>
+                <Label className="block mb-4">No results</Label>
+                <p className="font-display text-base" style={{ color: "#a99f8f" }}>
                   No projects match your filter.
                 </p>
               </div>
@@ -366,8 +360,8 @@ export default function Projects() {
 
       {nudge && (
         <div
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 font-sans text-xs tracking-widest uppercase px-5 py-3 shadow-lg"
-          style={{ color: "#E0B341", border: "1px solid #E0B34155", background: "#1a1407" }}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 text-xs tracking-widest uppercase px-5 py-3 shadow-lg"
+          style={{ fontFamily: font.mono, color: "#f4b95a", border: "1px solid rgba(232,163,60,0.4)", background: "#17130e", borderRadius: "12px" }}
           role="status"
         >
           Finish the Foundations modules to unlock "{nudge}"

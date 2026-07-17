@@ -19,21 +19,22 @@ import { shouldShowWeeklyRecap } from "../lib/retention";
 import DailyGoal from "../components/retention/DailyGoal";
 import ReviewSection from "../components/retention/ReviewSection";
 import WeeklyRecapModal from "../components/retention/WeeklyRecapModal";
+import "@/styles/landing.css";
 
 const C = {
   bg: "#15130E",
-  card: "#1B1913",
-  cardHover: "#221F17",
-  border: "#2A261D",
-  borderHi: "#3A3428",
+  card: "#17130E",
+  cardHover: "#1F1B12",
+  border: "#2A231A",
+  borderHi: "#3A3020",
   amber: "#E8A33C",
-  amberBright: "#F5B942",
-  gold: "#F2C94C",
+  amberBright: "#F4B95A",
+  gold: "#F4B95A",
   ember: "#FF7A3D",
-  emerald: "#4CC98A",
-  white: "#FFFFFF",
+  emerald: "#5FBF7E",
+  white: "#F2EDE2",
   text: "#F2EDE2",
-  dim: "#B9B1A2",
+  dim: "#A99F8F",
 };
 
 export default function Dashboard() {
@@ -187,7 +188,7 @@ export default function Dashboard() {
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <div className="font-sans text-xs tracking-[0.2em] uppercase mb-3" style={{ color: C.amber }}>{greeting}</div>
           <h1 style={{ fontFamily: font.display, fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-0.03em", color: C.white, lineHeight: 1.1, margin: 0 }}>
-            Welcome back, {firstName}.
+            Welcome back, <span className="cl-grad">{firstName}</span>.
           </h1>
           <p className="mt-3 text-base" style={{ color: C.dim, fontFamily: font.display }}>
             {welcomeSub}

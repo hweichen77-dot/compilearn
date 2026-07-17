@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import "@/styles/landing.css";
 import { font } from "@/lib/tokens";
 import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -362,7 +363,7 @@ export default function ProjectDetail() {
         >
           Finish the Foundations first.
         </h1>
-        <p className="font-display text-base" style={{ color: "#FFFFFF", maxWidth: "32rem" }}>
+        <p className="font-display text-base" style={{ color: "#F2EDE2", maxWidth: "32rem" }}>
           "{project.title}" builds on the beginner modules. Complete most of the
           Foundations track and this unlocks automatically.
         </p>
@@ -387,7 +388,7 @@ export default function ProjectDetail() {
       />
       <div
         className="relative pt-20"
-        style={{ borderBottom: "1px solid #262219" }}
+        style={{ borderBottom: "1px solid #2a231a" }}
       >
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
 
@@ -422,7 +423,7 @@ export default function ProjectDetail() {
                   </h1>
                 </div>
               </div>
-              <p className="font-display text-sm leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400, maxWidth: "55ch" }}>
+              <p className="font-display text-sm leading-relaxed" style={{ color: "#F2EDE2", fontWeight: 400, maxWidth: "55ch" }}>
                 {project.description}
               </p>
             </div>
@@ -445,7 +446,7 @@ export default function ProjectDetail() {
                         ? "#E8A33C"
                         : l.id === activeLessonId
                         ? "#8F8779"
-                        : "#262219",
+                        : "#2a231a",
                       border: l.id === activeLessonId ? "1px solid #8F8779" : "1px solid transparent",
                     }}
                   />
@@ -472,7 +473,7 @@ export default function ProjectDetail() {
           <div className="relative" style={{ width: "220px" }}>
             <div
               className="sticky top-20"
-              style={{ borderLeft: "1px solid #262219", paddingLeft: "1.25rem" }}
+              style={{ borderLeft: "1px solid #2a231a", paddingLeft: "1.25rem" }}
             >
               <StreakBadge completedCount={completedCount} />
 
@@ -534,7 +535,7 @@ export default function ProjectDetail() {
                 <button
                   onClick={dismissNavHint}
                   className="font-sans text-xs tracking-widest uppercase px-3 py-1.5 transition-all duration-150"
-                  style={{ color: "#FFFFFF", border: "1px solid #262219", background: "#131009" }}
+                  style={{ color: "#F2EDE2", border: "1px solid #2a231a", background: "#17130e" }}
                   title="Dismiss hint"
                 >
                   ← → to navigate lessons
@@ -545,8 +546,8 @@ export default function ProjectDetail() {
                 className="font-sans text-xs tracking-widest uppercase px-3 py-1.5 transition-all duration-150"
                 style={{
                   color: focusMode ? "#E8A33C" : "#6E665A",
-                  border: `1px solid ${focusMode ? "#E8A33C33" : "#262219"}`,
-                  background: focusMode ? "#E8A33C10" : "#131009",
+                  border: `1px solid ${focusMode ? "#E8A33C33" : "#2a231a"}`,
+                  background: focusMode ? "#E8A33C10" : "#17130e",
                 }}
                 title="Toggle focus mode"
               >
@@ -706,7 +707,7 @@ export default function ProjectDetail() {
                         <button
                           onClick={handleExpandLesson}
                           disabled={expandingLesson}
-                          className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                          className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
                           style={{
                             color: "#C2643C", border: "1px solid #C2643C33",
                             background: "#C2643C10", opacity: expandingLesson ? 0.5 : 1,
@@ -717,7 +718,7 @@ export default function ProjectDetail() {
                         <button
                           onClick={handleEnrichLesson}
                           disabled={enrichingLesson}
-                          className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                          className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
                           style={{
                             color: "#cc66ff", border: "1px solid #cc66ff33",
                             background: "#cc66ff10", opacity: enrichingLesson ? 0.5 : 1,
@@ -730,10 +731,10 @@ export default function ProjectDetail() {
                     {activeLesson.hints && activeLesson.hints.length > 0 && (
                       <button
                         onClick={() => setShowHints(!showHints)}
-                        className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                        className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
                         style={{
                           color: showHints ? "#E8A33C" : "#4A453C",
-                          border: `1px solid ${showHints ? "#E8A33C33" : "#262219"}`,
+                          border: `1px solid ${showHints ? "#E8A33C33" : "#2a231a"}`,
                           background: showHints ? "#E8A33C10" : "transparent",
                         }}
                       >
@@ -743,10 +744,10 @@ export default function ProjectDetail() {
                     {activeLesson.solution_code && (
                       <button
                         onClick={() => setShowSolution(!showSolution)}
-                        className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                        className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
                         style={{
                           color: showSolution ? "#8F8779" : "#3A352D",
-                          border: `1px solid ${showSolution ? "#34302A" : "#262219"}`,
+                          border: `1px solid ${showSolution ? "#34302A" : "#2a231a"}`,
                         }}
                       >
                         {showSolution ? ", Solution" : "Show Solution"}
@@ -799,8 +800,8 @@ export default function ProjectDetail() {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                          <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
+                        <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                          <div className="px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
                             <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#E8A33C" }}>
                               Hints
                             </span>
@@ -811,7 +812,7 @@ export default function ProjectDetail() {
                                 <span className="font-sans text-xs flex-shrink-0 mt-0.5" style={{ color: "#ECE7DC" }}>
                                   {String(i + 1).padStart(2, "0")}
                                 </span>
-                                <p className="font-display text-sm leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+                                <p className="font-display text-sm leading-relaxed" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                                   {hint}
                                 </p>
                               </div>
@@ -830,9 +831,9 @@ export default function ProjectDetail() {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                          <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-                            <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
+                        <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                          <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
+                            <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>
                               Solution
                             </span>
                             <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#E8A33C", border: "1px solid #E8A33C33", background: "#E8A33C10" }}>
@@ -841,7 +842,7 @@ export default function ProjectDetail() {
                           </div>
                           <pre
                             className="font-mono overflow-x-auto p-5"
-                            style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#FFFFFF" }}
+                            style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#F2EDE2" }}
                           >
                             {activeLesson.solution_code}
                           </pre>

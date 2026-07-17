@@ -4,9 +4,9 @@ import { api } from "@/api/apiClient";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
-import { Stagger, StaggerItem } from "@/lib/motion";
 import { CATEGORY_LABELS } from "@/content/categories";
-import { Eyebrow } from "@/components/ui/kit";
+import { Reveal, GlowCard } from "@/components/landing/primitives";
+import "@/styles/landing.css";
 
 const DIFF_NUM = { beginner: "01", easy: "01", intermediate: "02", medium: "02", advanced: "03", hard: "03" };
 const DIFFICULTIES = ["all", "beginner", "intermediate", "advanced"];
@@ -15,6 +15,17 @@ const SORTS = [
   { key: "difficulty", label: "Easiest first" },
   { key: "order", label: "Curriculum order" },
 ];
+
+function Label({ children, color = "#6f665a", className = "", style }) {
+  return (
+    <span
+      className={`text-[11px] tracking-[0.18em] uppercase ${className}`}
+      style={{ fontFamily: font.mono, color, ...style }}
+    >
+      {children}
+    </span>
+  );
+}
 
 export default function Challenges() {
   const [search, setSearch] = useState("");
@@ -36,7 +47,7 @@ export default function Challenges() {
   }, [challenges, search, difficulty]);
 
   return (
-    <div className="min-h-screen" style={{ background: "#15130E" }}>
+    <div className="min-h-screen" style={{ background: "#0c0a08" }}>
       <style>{`
         .challenge-row {
           grid-template-columns: 2.5rem 1fr auto;
@@ -46,40 +57,28 @@ export default function Challenges() {
             grid-template-columns: 2.5rem 1fr auto auto;
           }
         }
-        .challenge-row-link {
-          border-radius: 14px;
-          border: 1px solid transparent;
-        }
-        .challenge-row-link:hover {
-          background: #1B1913;
-          border-color: #3A3428;
-          padding-left: 1.75rem;
-          box-shadow: 0 12px 40px -12px rgba(232,163,60,0.33);
-        }
-        @media (min-width: 640px) {
-          .challenge-row-link:hover {
-            padding-left: 1.75rem;
-          }
-        }
+        .cl-row { transition: transform .25s cubic-bezier(.16,1,.3,1), border-color .25s, box-shadow .25s; }
+        .cl-row:hover { border-color: #3a3428 !important; box-shadow: 0 14px 44px -14px rgba(232,163,60,0.35); }
+        @media (prefers-reduced-motion: reduce) { .cl-row { transition: none; } }
       `}</style>
       <div
         className="relative px-4 sm:px-8 lg:px-16 pt-28 pb-16"
-        style={{ borderBottom: "1px solid #262219" }}
+        style={{ borderBottom: "1px solid #2a231a" }}
       >
         <div
           className="absolute top-0 left-0 right-0 h-px"
           style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }}
         />
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-baseline gap-6 mb-2">
-            <Eyebrow>CHALLENGES</Eyebrow>
+          <div className="mb-3">
+            <Label color="#E8A33C">Challenges</Label>
           </div>
           <h1
             style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#F2EDE2", lineHeight: 1.12, margin: "0 0 16px" }}
           >
             One problem at a time.
           </h1>
-          <p className="font-display text-base" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+          <p className="text-base" style={{ fontFamily: font.body, color: "#a99f8f", fontWeight: 400 }}>
             Focused problems. No setup. Pure coding.
           </p>
         </div>
@@ -89,8 +88,8 @@ export default function Challenges() {
         <div className="flex flex-wrap items-center gap-4 mb-12">
           <div className="relative flex-1 min-w-48 max-w-xs">
             <span
-              className="absolute left-4 top-1/2 -translate-y-1/2 font-sans text-xs pointer-events-none"
-              style={{ color: "#FFFFFF" }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none"
+              style={{ fontFamily: font.mono, color: "#6f665a" }}
             >
               /search
             </span>
@@ -98,8 +97,10 @@ export default function Challenges() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="filter challenges..."
-              className="w-full font-sans text-sm py-3 pl-16 pr-4 bg-transparent outline-none"
-              style={{ border: "1px solid #262219", color: "#ECE7DC", caretColor: "#E8A33C" }}
+              className="w-full text-sm py-3 pl-16 pr-4 bg-transparent outline-none transition-colors duration-150"
+              style={{ fontFamily: font.body, border: "1px solid #2a231a", borderRadius: "12px", background: "#17130e", color: "#F2EDE2", caretColor: "#E8A33C" }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#E8A33C")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#2a231a")}
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -107,11 +108,13 @@ export default function Challenges() {
               <button
                 key={d}
                 onClick={() => setDifficulty(d)}
-                className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                className="text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
                 style={{
-                  border: `1px solid ${difficulty === d ? "#E8A33C" : "#262219"}`,
-                  color: difficulty === d ? "#E8A33C" : "#BBB3A4",
-                  background: difficulty === d ? "#E8A33C10" : "transparent",
+                  fontFamily: font.mono,
+                  borderRadius: "10px",
+                  border: `1px solid ${difficulty === d ? "#E8A33C" : "#2a231a"}`,
+                  color: difficulty === d ? "#f4b95a" : "#a99f8f",
+                  background: difficulty === d ? "rgba(232,163,60,0.10)" : "transparent",
                 }}
               >
                 {d}
@@ -124,11 +127,13 @@ export default function Challenges() {
               <button
                 key={s.key}
                 onClick={() => setSort(s.key)}
-                className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+                className="text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
                 style={{
-                  border: `1px solid ${sort === s.key ? "#E8A33C" : "#262219"}`,
-                  color: sort === s.key ? "#E8A33C" : "#BBB3A4",
-                  background: sort === s.key ? "#E8A33C10" : "transparent",
+                  fontFamily: font.mono,
+                  borderRadius: "10px",
+                  border: `1px solid ${sort === s.key ? "#E8A33C" : "#2a231a"}`,
+                  color: sort === s.key ? "#f4b95a" : "#a99f8f",
+                  background: sort === s.key ? "rgba(232,163,60,0.10)" : "transparent",
                 }}
               >
                 {s.label}
@@ -139,92 +144,83 @@ export default function Challenges() {
 
         {!isLoading && filtered.length > 0 && (
           <div
-            className="grid items-center gap-4 sm:gap-8 px-4 sm:px-6 py-3 mb-px challenge-row"
-            style={{ borderBottom: "1px solid #262219" }}
+            className="grid items-center gap-4 sm:gap-8 px-4 sm:px-6 py-3 mb-2 challenge-row"
+            style={{ borderBottom: "1px solid #2a231a" }}
           >
             {["LVL", "CHALLENGE", "TOPIC", "XP"].map(h => (
-              <div
-                key={h}
-                className={`font-sans text-xs tracking-widest uppercase${h === "TOPIC" ? " hidden sm:block" : ""}`}
-                style={{ color: "#FFFFFF" }}
-              >
+              <Label key={h} className={h === "TOPIC" ? "hidden sm:block" : ""}>
                 {h}
-              </div>
+              </Label>
             ))}
           </div>
         )}
 
         {isLoading ? (
-          <div className="space-y-px">
+          <div className="space-y-3">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-20 animate-pulse" style={{ background: "#131009", border: "1px solid #262219" }} />
+              <div key={i} className="h-20 animate-pulse" style={{ background: "#17130e", border: "1px solid #2a231a", borderRadius: "16px" }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
-            <div className="font-sans text-xs tracking-widest uppercase mb-4" style={{ color: "#FFFFFF" }}>NO RESULTS</div>
-            <p className="font-display text-base" style={{ color: "#FFFFFF" }}>No challenges match your filter.</p>
+            <Label className="block mb-4">No results</Label>
+            <p className="font-display text-base" style={{ color: "#a99f8f" }}>No challenges match your filter.</p>
           </div>
         ) : (
-          <Stagger as="div">
+          <Reveal as="div" className="space-y-2">
             {filtered.map((challenge) => (
-              <StaggerItem key={challenge.id} as="div">
-                <Link to={createPageUrl(`ChallengeDetail?id=${challenge.id}`)}>
+              <Link key={challenge.id} to={createPageUrl(`ChallengeDetail?id=${challenge.id}`)} className="group block">
+                <GlowCard
+                  className="challenge-row cl-row grid items-center gap-4 sm:gap-8 px-4 sm:px-6 py-5"
+                  style={{ background: "#17130e", border: "1px solid #2a231a", borderRadius: "16px" }}
+                >
                   <div
-                    className="challenge-row challenge-row-link grid items-center gap-4 sm:gap-8 px-4 sm:px-6 py-5 transition-all duration-200 group"
-                    style={{ borderBottom: "1px solid #1C1A14" }}
+                    className="font-bold"
+                    style={{ fontFamily: font.mono, fontSize: "1.25rem", color: "#6f665a", letterSpacing: "-0.05em" }}
                   >
-                    <div
-                      className="font-sans font-bold"
-                      style={{ fontSize: "1.25rem", color: "#ECE7DC", letterSpacing: "-0.05em" }}
-                    >
-                      {DIFF_NUM[challenge.difficulty] || "01"}
-                    </div>
-
-                    <div>
-                      {challenge.project_title && (
-                        <div
-                          className="font-sans text-xs tracking-wide mb-1"
-                          style={{ color: "#FFFFFF" }}
-                        >
-                          {challenge.project_title}
-                        </div>
-                      )}
-                      <div
-                        className="font-display font-bold text-base leading-snug mb-0.5 transition-colors duration-150 group-hover:text-white"
-                        style={{ color: "#FFFFFF", letterSpacing: "-0.02em" }}
-                      >
-                        {challenge.title}
-                      </div>
-                      {challenge.description && (
-                        <div
-                          className="font-display text-xs line-clamp-1"
-                          style={{ color: "#FFFFFF", fontWeight: 400 }}
-                        >
-                          {challenge.description}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="hidden sm:block">
-                      <span
-                        className="font-sans text-xs tracking-widest uppercase px-2.5 py-1"
-                        style={{ color: "#FFFFFF", border: "1px solid #34302A" }}
-                      >
-                        {CATEGORY_LABELS[challenge.topic] || challenge.topic || challenge.category}
-                      </span>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="font-sans text-xs" style={{ color: "#E8A33C" }}>
-                        +{challenge.xp || 15}xp
-                      </span>
-                    </div>
+                    {DIFF_NUM[challenge.difficulty] || "01"}
                   </div>
-                </Link>
-              </StaggerItem>
+
+                  <div>
+                    {challenge.project_title && (
+                      <div
+                        className="text-xs tracking-wide mb-1"
+                        style={{ fontFamily: font.mono, color: "#6f665a" }}
+                      >
+                        {challenge.project_title}
+                      </div>
+                    )}
+                    <div
+                      className="font-display font-bold text-base leading-snug mb-0.5 transition-colors duration-150 group-hover:text-white"
+                      style={{ color: "#F2EDE2", letterSpacing: "-0.02em" }}
+                    >
+                      {challenge.title}
+                    </div>
+                    {challenge.description && (
+                      <div
+                        className="text-xs line-clamp-1"
+                        style={{ fontFamily: font.body, color: "#a99f8f", fontWeight: 400 }}
+                      >
+                        {challenge.description}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="hidden sm:block">
+                    <Label color="#a99f8f" className="px-2.5 py-1" style={{ border: "1px solid #2a231a", borderRadius: "8px" }}>
+                      {CATEGORY_LABELS[challenge.topic] || challenge.topic || challenge.category}
+                    </Label>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs" style={{ fontFamily: font.mono, color: "#f4b95a" }}>
+                      +{challenge.xp || 15}xp
+                    </span>
+                  </div>
+                </GlowCard>
+              </Link>
             ))}
-          </Stagger>
+          </Reveal>
         )}
       </div>
     </div>

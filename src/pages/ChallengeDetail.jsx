@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "@/styles/landing.css";
 import { font } from "@/lib/tokens";
 import { api } from "@/api/apiClient";
 import { useQuery } from "@tanstack/react-query";
@@ -77,7 +78,7 @@ export default function ChallengeDetail() {
   if (!challenge) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: "#15130E" }}>
-        <div className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>404, NOT FOUND</div>
+        <div className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>404, NOT FOUND</div>
         <Link to={createPageUrl("Challenges")}>
           <button className="font-sans text-xs tracking-widest uppercase px-5 py-2" style={{ color: "#E8A33C", border: "1px solid #E8A33C33" }}>
             ← Back to Challenges
@@ -89,14 +90,14 @@ export default function ChallengeDetail() {
 
   return (
     <div style={{ background: "#15130E", minHeight: "100vh" }}>
-      <div className="relative pt-20" style={{ borderBottom: "1px solid #262219" }}>
+      <div className="relative pt-20" style={{ borderBottom: "1px solid #2a231a" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #E8A33C, transparent)" }} />
 
         <div className="max-w-5xl mx-auto px-8 lg:px-16 py-10">
           <Link
             to={createPageUrl("Challenges")}
             className="font-sans text-xs tracking-widest uppercase mb-8 inline-block transition-colors duration-150"
-            style={{ color: "#FFFFFF" }}
+            style={{ color: "#F2EDE2" }}
             onMouseEnter={e => e.currentTarget.style.color = "#E8A33C"}
             onMouseLeave={e => e.currentTarget.style.color = "#C9C1B2"}
           >
@@ -119,7 +120,7 @@ export default function ChallengeDetail() {
                   {challenge.difficulty}
                 </span>
                 {challenge.xp && (
-                  <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
+                  <span className="font-sans text-xs" style={{ color: "#F2EDE2" }}>
                     +{challenge.xp}xp
                   </span>
                 )}
@@ -129,7 +130,7 @@ export default function ChallengeDetail() {
               >
                 {challenge.title}
               </h1>
-              <p className="font-display text-sm mt-2 leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+              <p className="font-display text-sm mt-2 leading-relaxed" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                 {challenge.description}
               </p>
             </div>
@@ -138,16 +139,16 @@ export default function ChallengeDetail() {
       </div>
 
       <Stagger className="max-w-5xl mx-auto px-8 lg:px-16 py-10 space-y-8" as="div">
-        <StaggerItem as="div" style={{ border: "1px solid #262219", background: "#131009" }}>
+        <StaggerItem as="div" style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
           <button
             onClick={() => setShowPrimer(!showPrimer)}
             className="flex items-center justify-between w-full px-5 py-3 text-left"
-            style={{ borderBottom: showPrimer ? "1px solid #262219" : "none" }}
+            style={{ borderBottom: showPrimer ? "1px solid #2a231a" : "none" }}
           >
             <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#E8A33C" }}>
               How this works
             </span>
-            <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
+            <span className="font-sans text-xs" style={{ color: "#F2EDE2" }}>
               {showPrimer ? ", " : "+"}
             </span>
           </button>
@@ -169,7 +170,7 @@ export default function ChallengeDetail() {
                       <span className="font-sans text-xs flex-shrink-0 mt-0.5" style={{ color: "#E8A33C" }}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <p className="font-display text-sm leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+                      <p className="font-display text-sm leading-relaxed" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                         {line}
                       </p>
                     </div>
@@ -189,18 +190,18 @@ export default function ChallengeDetail() {
         {!challenge.statement && challenge.test_cases && challenge.test_cases.length > 0 && (
           <StaggerItem as="div">
             <Card className="overflow-hidden">
-              <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-                <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>
+              <div className="px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
+                <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>
                   Test Cases
                 </span>
               </div>
               <div className="px-5 py-4 space-y-2">
                 {challenge.test_cases.map((tc, i) => (
                   <div key={i} className="flex items-center gap-4 font-mono text-xs py-2" style={{ borderBottom: i < challenge.test_cases.length - 1 ? "1px solid #1C1A14" : "none" }}>
-                    <span style={{ color: "#FFFFFF" }}>{String(i + 1).padStart(2, "0")}</span>
-                    <span style={{ color: "#FFFFFF" }}>in: <span style={{ color: "#FFFFFF" }}>{tc.input}</span></span>
-                    <span style={{ color: "#FFFFFF" }}>→</span>
-                    <span style={{ color: "#FFFFFF" }}>expect: <span style={{ color: "#E8A33C" }}>{tc.expected_output}</span></span>
+                    <span style={{ color: "#F2EDE2" }}>{String(i + 1).padStart(2, "0")}</span>
+                    <span style={{ color: "#F2EDE2" }}>in: <span style={{ color: "#F2EDE2" }}>{tc.input}</span></span>
+                    <span style={{ color: "#F2EDE2" }}>→</span>
+                    <span style={{ color: "#F2EDE2" }}>expect: <span style={{ color: "#E8A33C" }}>{tc.expected_output}</span></span>
                   </div>
                 ))}
               </div>
@@ -226,14 +227,14 @@ export default function ChallengeDetail() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               className="flex items-center gap-4 px-6 py-5"
-              style={{ border: "1px solid #E8A33C33", background: "#E8A33C08" }}
+              style={{ border: "1px solid #E8A33C33", background: "#E8A33C08", borderRadius: 14 }}
             >
               <span className="font-sans text-sm" style={{ color: "#E8A33C" }}>✓</span>
               <div>
                 <div className="font-sans text-xs tracking-widest uppercase mb-1" style={{ color: "#E8A33C" }}>
                   Challenge Complete
                 </div>
-                <div className="font-display text-sm" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+                <div className="font-display text-sm" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                   All tests passed. Well done.
                 </div>
               </div>
@@ -245,10 +246,10 @@ export default function ChallengeDetail() {
           {challenge.hints && challenge.hints.length > 0 && (
             <button
               onClick={() => setShowHints(!showHints)}
-              className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
+              className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
               style={{
                 color: showHints ? "#E8A33C" : "#BBB3A4",
-                border: `1px solid ${showHints ? "#E8A33C33" : "#262219"}`,
+                border: `1px solid ${showHints ? "#E8A33C33" : "#2a231a"}`,
                 background: showHints ? "#E8A33C10" : "transparent",
               }}
             >
@@ -258,8 +259,8 @@ export default function ChallengeDetail() {
           {challenge.solution_code && (
             <button
               onClick={() => setShowSolution(!showSolution)}
-              className="font-sans text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
-              style={{ color: "#ECE7DC", border: "1px solid #262219" }}
+              className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150"
+              style={{ color: "#ECE7DC", border: "1px solid #2a231a" }}
               onMouseEnter={e => e.currentTarget.style.color = "#C9C1B2"}
               onMouseLeave={e => e.currentTarget.style.color = "#ECE7DC"}
             >
@@ -276,17 +277,17 @@ export default function ChallengeDetail() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
+              <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                <div className="px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
                   <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#E8A33C" }}>Hints</span>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   {challenge.hints.map((hint, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <span className="font-sans text-xs flex-shrink-0 mt-0.5" style={{ color: "#FFFFFF" }}>
+                      <span className="font-sans text-xs flex-shrink-0 mt-0.5" style={{ color: "#F2EDE2" }}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <p className="font-display text-sm leading-relaxed" style={{ color: "#FFFFFF", fontWeight: 400 }}>
+                      <p className="font-display text-sm leading-relaxed" style={{ color: "#F2EDE2", fontWeight: 400 }}>
                         {hint}
                       </p>
                     </div>
@@ -305,12 +306,12 @@ export default function ChallengeDetail() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div style={{ border: "1px solid #262219", background: "#131009" }}>
-                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#FFFFFF" }}>Solution</span>
+              <div style={{ border: "1px solid #2a231a", background: "#17130e", borderRadius: 14, overflow: "hidden" }}>
+                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #2a231a" }}>
+                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#F2EDE2" }}>Solution</span>
                   <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#E8A33C", border: "1px solid #E8A33C33", background: "#E8A33C10" }}>PY</span>
                 </div>
-                <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#FFFFFF" }}>
+                <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#F2EDE2" }}>
                   {challenge.solution_code}
                 </pre>
               </div>

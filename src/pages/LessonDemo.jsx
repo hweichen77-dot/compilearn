@@ -3,13 +3,26 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowRight, Clock, RefreshCw } from "lucide-react";
 
-import { Stagger, StaggerItem, HoverCard } from "@/lib/motion";
+import "@/styles/landing.css";
+import { Reveal } from "@/components/landing/primitives";
 import StepThrough from "@/components/lesson/blocks/StepThrough";
 import InteractiveTokenizer from "@/components/lesson/blocks/InteractiveTokenizer";
 import DragToBin from "@/components/lesson/blocks/DragToBin";
 import WorkedExample from "@/components/lesson/blocks/WorkedExample";
 import ComparisonTable from "@/components/lesson/blocks/ComparisonTable";
 import Reflection from "@/components/lesson/blocks/Reflection";
+
+const C = {
+  bg: "#15130E",
+  surface: "#17130e",
+  border: "#2a231a",
+  text: "#F2EDE2",
+  muted: "#a99f8f",
+  dim: "#6f665a",
+  amber: "#E8A33C",
+  amber2: "#f4b95a",
+  green: "#5fbf7e",
+};
 
 const PART_1 = `Type the word **"unbelievable"** into a model and it never sees that word. It sees three pieces, roughly \`un\`, \`believ\`, \`able\`. Those pieces are **tokens**, and they are the real units a language model reads and writes. Every limit, every bill, and a surprising number of bugs trace straight back to them.
 
@@ -41,26 +54,26 @@ function InlineCheck({ question, options, correct, explain }) {
   const [pick, setPick] = useState(null);
   const done = pick !== null;
   return (
-    <div className="my-7" style={{ border: "1px solid #262219", background: "#131009" }}>
-      <div className="px-5 py-3" style={{ borderBottom: "1px solid #262219" }}>
-        <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#C2643C" }}>CHECK YOURSELF</span>
+    <div className="my-7" style={{ border: `1px solid ${C.border}`, background: C.surface, borderRadius: 14 }}>
+      <div className="px-5 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+        <span className="font-sans text-xs tracking-widest uppercase" style={{ color: C.amber }}>CHECK YOURSELF</span>
       </div>
       <div className="p-5">
-        <p className="font-display text-sm mb-4" style={{ color: "#FFFFFF", fontWeight: 500 }}>{question}</p>
+        <p className="font-display text-sm mb-4" style={{ color: C.text, fontWeight: 500 }}>{question}</p>
         <div className="space-y-2">
           {options.map((o, i) => {
             const isPick = pick === i;
             const isAns = i === correct;
-            let border = "#2A261E", color = "#C2BAAA", bg = "#1C1A14";
-            if (done && isAns) { border = "#E8A33C"; color = "#E8A33C"; bg = "#E8A33C10"; }
-            else if (done && isPick) { border = "#ff6b35"; color = "#ff6b35"; bg = "#ff6b3510"; }
+            let border = C.border, color = C.muted, bg = "transparent";
+            if (done && isAns) { border = C.amber; color = C.amber2; bg = "#E8A33C10"; }
+            else if (done && isPick) { border = "#c46a4a"; color = "#e08a68"; bg = "#c46a4a10"; }
             return (
               <button
                 key={i}
                 onClick={() => !done && setPick(i)}
                 disabled={done}
                 className="w-full text-left flex items-center gap-3 px-4 py-2.5 font-display text-sm transition-all"
-                style={{ background: bg, border: `1px solid ${border}`, color, cursor: done ? "default" : "pointer" }}
+                style={{ background: bg, border: `1px solid ${border}`, color, borderRadius: 10, cursor: done ? "default" : "pointer" }}
               >
                 <span className="font-sans text-xs" style={{ opacity: 0.6 }}>{String.fromCharCode(65 + i)}</span>
                 {o}
@@ -69,7 +82,7 @@ function InlineCheck({ question, options, correct, explain }) {
           })}
         </div>
         {done && (
-          <p className="font-display text-sm mt-4 px-4 py-3" style={{ color: "#FFFFFF", background: "#15130E", border: "1px solid #262219" }}>{explain}</p>
+          <p className="font-display text-sm mt-4 px-4 py-3" style={{ color: C.text, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10 }}>{explain}</p>
         )}
       </div>
     </div>
@@ -78,14 +91,15 @@ function InlineCheck({ question, options, correct, explain }) {
 
 function ReadingBox({ children }) {
   return (
-    <div className="lesson-doc px-7 py-6" style={{ background: "#ffffff", color: "#262219" }}>
+    <div className="lesson-doc px-7 py-6" style={{ background: C.surface, color: C.text, border: `1px solid ${C.border}`, borderRadius: 14 }}>
       <style>{`
-        .lesson-doc h2 { font-family:'Bricolage Grotesque Variable', system-ui, sans-serif; font-weight:800; font-size:1.35rem; letter-spacing:-0.02em; margin:1.6rem 0 0.7rem; color:#15130E; }
-        .lesson-doc p { font-size:0.95rem; line-height:1.7; margin:0 0 0.9rem; color:#34302A; }
+        .lesson-doc h2 { font-family:'Bricolage Grotesque Variable', system-ui, sans-serif; font-weight:800; font-size:1.35rem; letter-spacing:-0.02em; margin:1.6rem 0 0.7rem; color:#F2EDE2; }
+        .lesson-doc p { font-family:'Hanken Grotesk Variable', system-ui, sans-serif; font-size:0.95rem; line-height:1.7; margin:0 0 0.9rem; color:#d8cfbf; }
         .lesson-doc ul,.lesson-doc ol { margin:0 0 0.9rem 1.2rem; }
-        .lesson-doc li { font-size:0.95rem; line-height:1.6; margin-bottom:0.35rem; color:#34302A; }
-        .lesson-doc strong { color:#15130E; font-weight:700; }
-        .lesson-doc code { font-family:'JetBrains Mono',monospace; font-size:0.82rem; background:#F2EDE2; padding:1px 5px; border-radius:3px; color:#9333ea; }
+        .lesson-doc li { font-family:'Hanken Grotesk Variable', system-ui, sans-serif; font-size:0.95rem; line-height:1.6; margin-bottom:0.35rem; color:#d8cfbf; }
+        .lesson-doc strong { color:#F2EDE2; font-weight:700; }
+        .lesson-doc em { color:#c9c0b0; }
+        .lesson-doc code { font-family:'Spline Sans Mono Variable', ui-monospace, monospace; font-size:0.82rem; background:#221c14; padding:1px 5px; border-radius:4px; color:#f4b95a; }
       `}</style>
       <ReactMarkdown remarkGfm={remarkGfm} remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
     </div>
@@ -94,52 +108,52 @@ function ReadingBox({ children }) {
 
 function SectionLabel({ children }) {
   return (
-    <div className="font-sans text-xs tracking-widest uppercase mt-12 mb-3" style={{ color: "#FFFFFF" }}>
-      <span style={{ color: "#E8A33C" }}>//</span> {children}
+    <div className="font-sans text-xs tracking-widest uppercase mt-12 mb-3" style={{ color: C.muted }}>
+      <span style={{ color: C.amber }}>//</span> {children}
     </div>
   );
 }
 
 export default function LessonDemo() {
   return (
-    <div className="min-h-screen px-6 lg:px-10 pt-24 pb-24" style={{ background: "#15130E" }}>
-      <Stagger className="max-w-3xl mx-auto" as="div">
-        <StaggerItem as="div" className="mb-6 px-4 py-2 font-sans text-xs tracking-widest uppercase" style={{ background: "#cc66ff14", border: "1px solid #cc66ff44", color: "#cc66ff" }}>
-          PROTOTYPE, proposed lesson content style (not yet rolled out)
-        </StaggerItem>
+    <div className="min-h-screen px-6 lg:px-10 pt-24 pb-24" style={{ background: C.bg }}>
+      <div className="max-w-3xl mx-auto">
+        <Reveal as="div" className="mb-6 font-sans text-xs tracking-widest uppercase" style={{ color: C.dim }}>
+          PROTOTYPE — proposed lesson content style (not yet rolled out)
+        </Reveal>
 
-        <StaggerItem as="div">
-          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: "#E8A33C" }}>MODULE 1 · LESSON 2 · CONCEPT: TOKENS</div>
-          <h1 className="font-display font-black mb-3" style={{ fontSize: "2.3rem", lineHeight: 1.05, letterSpacing: "-0.03em", color: "#f5f5f5" }}>
+        <Reveal as="div">
+          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: C.amber }}>MODULE 1 · LESSON 2 · CONCEPT: TOKENS</div>
+          <h1 className="font-display font-black mb-3" style={{ fontSize: "2.3rem", lineHeight: 1.05, letterSpacing: "-0.03em", color: C.text }}>
             Tokens: The Model Doesn't See Words
           </h1>
-          <div className="flex flex-wrap items-center gap-4 font-sans text-xs mb-8" style={{ color: "#FFFFFF" }}>
+          <div className="flex flex-wrap items-center gap-4 font-sans text-xs mb-8" style={{ color: C.muted }}>
             <span className="flex items-center gap-1.5"><Clock size={12} /> 12 min read</span>
             <span className="flex items-center gap-1.5"><RefreshCw size={12} /> Updated Jun 2026</span>
-            <span style={{ color: "#E8A33C" }}>+10 XP</span>
+            <span style={{ color: C.amber }}>+10 XP</span>
           </div>
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div" className="px-5 py-4 mb-8" style={{ border: "1px solid #262219", background: "#131009", borderLeft: "2px solid #E8A33C" }}>
-          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: "#E8A33C" }}>WHAT YOU'LL LEARN</div>
-          <ul className="space-y-1 font-display text-sm" style={{ color: "#FFFFFF" }}>
+        <Reveal as="div" className="px-5 py-4 mb-8" style={{ border: `1px solid ${C.border}`, background: C.surface, borderLeft: `2px solid ${C.amber}`, borderRadius: 14 }}>
+          <div className="font-sans text-xs tracking-widest uppercase mb-2" style={{ color: C.amber }}>WHAT YOU'LL LEARN</div>
+          <ul className="space-y-1 font-display text-sm" style={{ color: C.text }}>
             <li>, What a token is and why models use them instead of words or letters</li>
             <li>, How tokenization drives cost, context limits, and weird failures</li>
             <li>, How to estimate token counts and API spend in your head</li>
           </ul>
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
           <SectionLabel>Read</SectionLabel>
           <ReadingBox>{PART_1}</ReadingBox>
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
           <SectionLabel>Try the tool</SectionLabel>
           <InteractiveTokenizer />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Watch it happen</SectionLabel>
         <StepThrough
           title="text → tokens → bill"
@@ -150,14 +164,14 @@ export default function LessonDemo() {
             { label: "You get billed + limited", detail: "Token count drives the API bill (in and out) and must fit inside the context window.", code: "5 tokens · $3 / 1M in  →  $0.000015" },
           ]}
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
           <SectionLabel>Read</SectionLabel>
           <ReadingBox>{PART_2}</ReadingBox>
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Worked examples</SectionLabel>
         <WorkedExample
           number={1}
@@ -182,9 +196,9 @@ export default function LessonDemo() {
           ]}
           output={"$0.012000 per call"}
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Compare the approaches</SectionLabel>
         <ComparisonTable
           title="three ways to split text"
@@ -195,9 +209,9 @@ export default function LessonDemo() {
             { cells: ["Subword (BPE)", "~50, 100k", "3 (un · believ · able)", "The sweet spot every modern LLM uses"], highlight: true },
           ]}
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Sort it</SectionLabel>
         <DragToBin
           title="few tokens vs many tokens"
@@ -213,9 +227,9 @@ export default function LessonDemo() {
             { id: "i5", text: '"good morning"', bin: "few" },
           ]}
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Check yourself</SectionLabel>
         <InlineCheck
           question="Why is counting the letters in 'strawberry' hard for an LLM?"
@@ -223,38 +237,40 @@ export default function LessonDemo() {
           correct={1}
           explain="The model operates on tokens (chunks). The individual letters live inside a chunk it treats as one unit, so they aren't directly visible to it."
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Reflect</SectionLabel>
         <Reflection
           prompt="In one or two sentences: why does rare or messy text cost more tokens than plain English?"
           sampleAnswer="The tokenizer only has whole-chunk symbols for text it saw often. Rare or messy text isn't in that set, so it gets rebuilt from many tiny pieces, and more pieces means more tokens, which means more cost."
         />
-        </StaggerItem>
+        </Reveal>
 
-        <StaggerItem as="div">
+        <Reveal as="div">
         <SectionLabel>Keep going</SectionLabel>
-        <Stagger className="grid sm:grid-cols-2 gap-3" as="div">
+        <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { k: "NEXT LESSON", t: "Training vs Inference", c: "#E8A33C" },
-            { k: "PRACTICE", t: "Challenge: Estimate an API bill", c: "#C2643C" },
-            { k: "RELATED", t: "Context Windows & Memory", c: "#cc66ff" },
-            { k: "RELATED", t: "Why LLMs Make Things Up", c: "#cc66ff" },
+            { k: "NEXT LESSON", t: "Training vs Inference", c: C.amber },
+            { k: "PRACTICE", t: "Challenge: Estimate an API bill", c: C.amber2 },
+            { k: "RELATED", t: "Context Windows & Memory", c: C.green },
+            { k: "RELATED", t: "Why LLMs Make Things Up", c: C.green },
           ].map((x) => (
-            <StaggerItem key={x.t} as="div">
-              <HoverCard className="flex items-center justify-between px-4 py-3 group cursor-pointer transition-all" style={{ border: "1px solid #262219", background: "#131009" }} as="div">
-                <div>
-                  <div className="font-sans text-xs tracking-widest uppercase mb-0.5" style={{ color: x.c }}>{x.k}</div>
-                  <div className="font-display text-sm font-medium" style={{ color: "#FFFFFF" }}>{x.t}</div>
-                </div>
-                <ArrowRight size={15} style={{ color: "#FFFFFF" }} />
-              </HoverCard>
-            </StaggerItem>
+            <div
+              key={x.t}
+              className="cl-lift flex items-center justify-between px-4 py-3 group cursor-pointer"
+              style={{ border: `1px solid ${C.border}`, background: C.surface, borderRadius: 14 }}
+            >
+              <div>
+                <div className="font-sans text-xs tracking-widest uppercase mb-0.5" style={{ color: x.c }}>{x.k}</div>
+                <div className="font-display text-sm font-medium" style={{ color: C.text }}>{x.t}</div>
+              </div>
+              <ArrowRight size={15} style={{ color: C.muted }} />
+            </div>
           ))}
-        </Stagger>
-        </StaggerItem>
-      </Stagger>
+        </div>
+        </Reveal>
+      </div>
     </div>
   );
 }
