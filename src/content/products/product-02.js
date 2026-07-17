@@ -94,6 +94,69 @@ print(messages[0]["role"], "->", messages[0]["content"])
         "Build the content with an f-string that includes the incoming message.",
         "Use \\n inside the string to put the instruction on its own line.",
       ],
+      animated_diagrams: [
+        {
+          title: "From incoming message to draft request",
+          caption: "The incoming message is data you wrap, not a turn you answer.",
+          loop: false,
+          nodes: [
+            { label: "Incoming", sub: "message arrives", detail: "Someone sends you a message. It is input for your program, not a question you chat back to." },
+            { label: "Frame it", sub: "add instruction", detail: "Wrap the message in one clear instruction: 'Incoming message: ... Write a reply.'" },
+            { label: "User turn", sub: "one message dict", detail: "Put that framed text in a single user turn inside the messages list." },
+            { label: "Model", sub: "drafts reply", detail: "The system prompt tells the model to ghostwrite a reply in your voice and return only that reply." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "reply generator", definition: "A tool that reads a message someone sent you and writes a reply for you, rather than chatting back at you." },
+        { term: "system prompt", definition: "A standing instruction that names the model's job for the whole request, like 'draft a reply in the user's voice.'" },
+        { term: "user turn", definition: "One entry in the messages list with role 'user' that carries the text you want the model to act on." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does the system prompt say 'Return only the reply'?",
+          options: [
+            "To make the model respond faster",
+            "To stop the model from adding a preamble like 'Sure, here is a reply:'",
+            "To force the reply under 300 tokens",
+            "To switch the model into a different language",
+          ],
+          correct_index: 1,
+          explanation: "Without it, the model often wraps the draft in a chatty preamble you would then have to strip out.",
+        },
+        {
+          question: "In this framing, what role does the incoming message play?",
+          options: [
+            "It is a turn in a conversation the model answers directly",
+            "It is data the model reads to draft your reply",
+            "It is the system prompt",
+            "It is the model's own output",
+          ],
+          correct_index: 1,
+          explanation: "The model is a ghostwriter here. The incoming message is source material for your reply, not something the model answers to you.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A reply generator chats back and forth with you like a chatbot.", correct_answer: "false", explanation: "It writes as you, to a third person. The model is a ghostwriter, not your conversation partner." },
+            { type: "fill_in", question: "The framed request goes into one turn with which role?", correct_answer: "user", explanation: "The instruction plus the incoming message sit in a single user turn." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Turn the incoming message 'Hey, are we still on for lunch Friday?' into a one-turn messages list.",
+          steps: [
+            "Write the instruction and message into one string: 'Incoming message:\\nHey, are we still on for lunch Friday?\\n\\nWrite a reply.'",
+            "Wrap that string in a dict: {\"role\": \"user\", \"content\": <string>}.",
+            "Put the dict in a list, since the messages field is always a list of turns.",
+          ],
+          output: "[{\"role\": \"user\", \"content\": \"Incoming message:\\nHey, are we still on for lunch Friday?\\n\\nWrite a reply.\"}]",
+        },
+      ],
       challenge_title: "Which Messages Need a Reply?",
       challenge_description:
         "Before drafting, sort a batch of incoming messages: questions need a reply, statements are just FYI.",
@@ -223,6 +286,73 @@ for raw in samples:
         "Split the text on \\n so you can inspect the first line.",
         "lines[0].rstrip().endswith(\":\") tells you it's a preamble.",
         "Rejoin lines[1:] with \\n and .strip() the result before returning.",
+      ],
+      animated_diagrams: [
+        {
+          title: "From response object to clean draft",
+          caption: "The text is buried in the response, and it may carry a preamble you peel off.",
+          loop: false,
+          nodes: [
+            { label: "Response", sub: "object back", detail: "The Messages API returns a response object, not a bare string." },
+            { label: "content[0]", sub: "first block", detail: "resp.content is a list of content blocks. The first block holds your text." },
+            { label: ".text", sub: "raw draft", detail: "Reading .text off that block gives you the raw draft string." },
+            { label: "Strip preamble", sub: "drop colon line", detail: "If the first line ends with a colon, it is almost always a preamble like 'Here is a draft:'. Drop it." },
+            { label: "Clean draft", sub: "sendable", detail: "What remains is the reply you can drop straight into an email box." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "content block", definition: "One item in the response's content list. A plain text reply lives in the first block's .text field." },
+        { term: "preamble", definition: "A throat-clearing line the model sometimes adds before the real draft, like 'Sure, here you go:'." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Where does the reply text live in a Messages API response?",
+          options: [
+            "resp.text",
+            "resp.content[0].text",
+            "resp.messages[0]",
+            "resp.reply",
+          ],
+          correct_index: 1,
+          explanation: "resp.content is a list of blocks. For a plain text reply you read .text off the first block.",
+        },
+        {
+          question: "What signals that the first line is a preamble to strip?",
+          options: [
+            "It ends with a colon",
+            "It is shorter than 5 words",
+            "It contains an exclamation mark",
+            "It is all uppercase",
+          ],
+          correct_index: 0,
+          explanation: "A first line ending in a colon is almost always a wrapper like 'Here is a draft:'. Drop it and keep the rest.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The Messages API returns the reply as a plain Python string.", correct_answer: "false", explanation: "It returns a response object. You reach the text through content[0].text." },
+            { type: "fill_in", question: "One method that removes leading and trailing whitespace from a string is called what?", correct_answer: "strip", explanation: "text.strip() trims surrounding whitespace before and after you drop the preamble line." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Clean the raw draft 'Here is a draft:\\n\\nSounds good, Friday works!'",
+          steps: [
+            "Strip the whole string, then split on newlines: ['Here is a draft:', '', 'Sounds good, Friday works!'].",
+            "Check the first line. 'Here is a draft:' ends with a colon, so it is a preamble.",
+            "Drop line 0 and rejoin the rest with newlines: '\\nSounds good, Friday works!'.",
+            "Strip again to remove the blank line left at the front.",
+          ],
+          output: "Sounds good, Friday works!",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Clean early, not late", content: "A preamble line looks harmless in a print statement but ships the model's stage directions the moment a real user copies the draft. Peel it off as part of the core loop." },
       ],
       challenge_title: "Strip the Preamble",
       challenge_description:
@@ -374,6 +504,69 @@ print("exclaim:", profile["exclaim"])
         "reply.lower().startswith((\"hi\", \"hey\", \"hello\")) checks the greeting.",
         "any(...) collapses a per-reply check into one True/False for the profile.",
       ],
+      animated_diagrams: [
+        {
+          title: "Sample replies to tone profile",
+          caption: "You measure four habits from past replies and hand them to the model as rules.",
+          loop: false,
+          nodes: [
+            { label: "Samples", sub: "past replies", detail: "Start with a handful of replies the user actually wrote." },
+            { label: "Measure", sub: "count habits", detail: "Walk each reply and measure length, greeting, sign-off, and energy." },
+            { label: "Profile", sub: "small dict", detail: "Collapse the measurements into one dict: avg_words, greeting, signoff, exclaim." },
+            { label: "System rules", sub: "explicit targets", detail: "Turn each number into an instruction: 'about 6 words', 'open with a greeting', 'keep it flat'." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "tone profile", definition: "A small dict of measurable writing habits (length, greeting, sign-off, energy) pulled from a user's past replies." },
+        { term: "tone signal", definition: "One observable habit you can count, like whether a reply opens with a greeting or uses an exclamation mark." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why measure tone with numbers instead of writing 'casual and friendly' in the prompt?",
+          options: [
+            "Numbers are cheaper to send",
+            "The model ignores adjectives entirely",
+            "'About 6 words' is a target the model can hit, while 'be concise' leaves room to drift",
+            "Numbers make the reply longer",
+          ],
+          correct_index: 2,
+          explanation: "Vague words let the model pick its own idea of casual. A measured target like 'about 6 words' leaves no room for that drift.",
+        },
+        {
+          question: "What does build_profile return?",
+          options: [
+            "The single best sample reply",
+            "A dict of measured habits like avg_words and greeting",
+            "A finished draft",
+            "The model's response object",
+          ],
+          correct_index: 1,
+          explanation: "It returns the tone profile: a dict capturing average length, greeting, sign-off, and exclamation use across the samples.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The greeting field is True only when every sample opens with hi, hey, or hello.", correct_answer: "false", explanation: "It uses any(...), so one sample opening with a greeting is enough to set greeting to True." },
+            { type: "fill_in", question: "Which built-in splits a reply into words so you can count them?", correct_answer: "split", explanation: "reply.split() breaks the reply on whitespace, and len() of that list is the word count." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Build the profile for [\"Hey! Sounds great, see you then.\", \"Thanks so much, works for me!\", \"Sure, I'll be there.\"]",
+          steps: [
+            "Count words per reply: 6, 6, 4. Total is 16 over 3 replies, so 5.33 rounds to avg_words 5.",
+            "Check greeting: the first reply starts with 'Hey', so greeting is True.",
+            "Check signoff: 'Thanks' appears in the second reply, so signoff is True.",
+            "Check exclaim: replies one and two contain '!', so exclaim is True.",
+          ],
+          output: "{\"avg_words\": 5, \"greeting\": True, \"signoff\": True, \"exclaim\": True}",
+        },
+      ],
       challenge_title: "Tone Fingerprint",
       challenge_description:
         "Read a batch of the user's replies and report three tone signals: how many use a greeting, how many use an exclamation, and the average word count.",
@@ -506,6 +699,69 @@ print("last:", messages[-1]["content"])
         "Each example contributes two turns: a user turn then an assistant turn.",
         "Loop the pairs first, then append the real incoming message last.",
         "n examples plus the new message gives 2*n + 1 turns.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Building a few-shot transcript",
+          caption: "Past examples become alternating turns, then the new message goes on the end.",
+          loop: false,
+          nodes: [
+            { label: "Example in", sub: "user turn", detail: "Each example's incoming message becomes a user turn." },
+            { label: "Your reply", sub: "assistant turn", detail: "Your real reply to it becomes an assistant turn, so the model sees how you answered." },
+            { label: "Repeat", sub: "more pairs", detail: "More example pairs keep the strict user, assistant, user, assistant alternation." },
+            { label: "New message", sub: "final user turn", detail: "The real incoming message is one more user turn at the end." },
+            { label: "Model draft", sub: "next assistant", detail: "The model produces the next assistant turn, continuing your established style." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "few-shot prompting", definition: "Giving the model a few worked examples before the real task so it pattern-matches off them instead of its own defaults." },
+        { term: "zero-shot prompting", definition: "Asking with instructions only, no examples. The model relies on its defaults for tone and shape." },
+        { term: "alternation rule", definition: "The Messages API requires turns to alternate user and assistant and start with a user turn." },
+      ],
+      inline_quizzes: [
+        {
+          question: "How is each example encoded in the messages list?",
+          options: [
+            "As one user turn holding both the message and reply",
+            "As a user turn (the incoming message) followed by an assistant turn (your reply)",
+            "As a system prompt",
+            "As two assistant turns",
+          ],
+          correct_index: 1,
+          explanation: "The incoming message is a user turn and your reply is the assistant turn, which keeps the required alternation.",
+        },
+        {
+          question: "With 2 example pairs plus 1 new incoming message, how many turns are in the list?",
+          options: ["3", "4", "5", "6"],
+          correct_index: 2,
+          explanation: "Each pair is 2 turns, so 2 pairs give 4, plus the final user turn makes 5. That is 2*n + 1.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "Few-shot examples must alternate user and assistant and start with a user turn.", correct_answer: "true", explanation: "That is the Messages API alternation rule. Each example is one user turn plus one assistant turn, which keeps it intact." },
+            { type: "fill_in", question: "Asking with instructions only and no examples is called what kind of prompting?", correct_answer: "zero-shot", explanation: "Zero-shot is instructions only. Few-shot adds a handful of worked examples first." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Assemble the few-shot list from [(\"Lunch Friday?\", \"Sounds good, see you then!\"), (\"Can you review the doc?\", \"Sure, I'll take a look today.\")] with new incoming 'Are you free Monday?'",
+          steps: [
+            "Start with an empty messages list.",
+            "For pair 1, append {'role':'user','content':'Lunch Friday?'} then {'role':'assistant','content':'Sounds good, see you then!'}.",
+            "For pair 2, append the user turn 'Can you review the doc?' then the assistant turn 'Sure, I'll take a look today.'.",
+            "Append the new incoming as a final user turn: {'role':'user','content':'Are you free Monday?'}.",
+          ],
+          output: "5 turns, roles: user assistant user assistant user",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "Imitation, not instruction", content: "Two good examples usually beat ten lines of rules. Tone is imitation, so showing the model your replies steers it more directly than describing them." },
       ],
       challenge_title: "Assemble the Few-Shot Prompt",
       challenge_description:
@@ -669,6 +925,71 @@ print("best:", pick_best(drafts, target))
         "(\"!\" in draft) != target[\"exclaim\"] is True when the energy disagrees.",
         "Track the lowest score as you scan; keep the first draft on ties by using strict <.",
       ],
+      animated_diagrams: [
+        {
+          title: "Generate several, then pick",
+          caption: "Request a few candidates, score each against the profile, and keep the closest.",
+          loop: true,
+          nodes: [
+            { label: "Generate", sub: "one candidate", detail: "Call the model with some temperature so each candidate is phrased a little differently." },
+            { label: "Collect", sub: "add to list", detail: "Append the candidate and loop again until you have a few drafts." },
+            { label: "Score", sub: "tone distance", detail: "Measure how far each draft sits from your tone profile: word-count gap plus an energy penalty." },
+            { label: "Pick best", sub: "smallest gap", detail: "Keep the draft with the lowest score. On ties, keep the first for a deterministic result." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "temperature", definition: "A sampling knob. Higher values make the model's wording more varied, so repeated calls give different phrasings." },
+        { term: "non-deterministic", definition: "Producing different output for the same input across runs. Language models do this, especially with temperature above 0." },
+        { term: "tone distance", definition: "A cheap score for how far a draft sits from your tone profile. Lower means closer to your voice." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why generate several drafts instead of one?",
+          options: [
+            "It makes each call cheaper",
+            "The model is non-deterministic, so more candidates raise your odds of a good one",
+            "The API requires at least three drafts",
+            "It removes the need for a tone profile",
+          ],
+          correct_index: 1,
+          explanation: "Repeated calls give varied phrasings. Generating a few and picking the best turns that variance to your advantage.",
+        },
+        {
+          question: "In tone_distance, when does the '!' check add a penalty?",
+          options: [
+            "Whenever the draft is too long",
+            "When the draft's use of '!' disagrees with the profile's exclaim flag",
+            "Only when the draft has no words",
+            "Every time, regardless of the profile",
+          ],
+          correct_index: 1,
+          explanation: "(\"!\" in draft) != profile[\"exclaim\"] is True when the energy disagrees, so the score gets a penalty of 3.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A lower tone_distance means the draft is closer to your voice.", correct_answer: "true", explanation: "Distance measures the gap from your profile, so smaller is better and min() picks the winner." },
+            { type: "fill_in", question: "Using a strict less-than when scanning keeps which draft on a tie, the first or the last?", correct_answer: "first", explanation: "With strict <, a later equal score never replaces the current best, so the earliest draft wins the tie." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Target {\"avg_words\": 6, \"exclaim\": True}. Score \"Sure, sounds great, I'll be there!\" (6 words, has !) and \"Yes.\" (1 word, no !).",
+          steps: [
+            "Draft 1 word count is 6, so the length gap is abs(6 - 6) = 0.",
+            "Draft 1 has '!' and the target wants '!', so they agree. No penalty. Score is 0.",
+            "Draft 2 word count is 1, so the length gap is abs(1 - 6) = 5.",
+            "Draft 2 has no '!' but the target wants one, so add 3. Score is 8.",
+            "0 is less than 8, so pick draft 1.",
+          ],
+          output: "best: Sure, sounds great, I'll be there!",
+        },
+      ],
       challenge_title: "Pick the On-Tone Draft",
       challenge_description:
         "Given a target word count and several candidate drafts, print the index and text of the draft whose length is closest to the target (first on ties).",
@@ -818,6 +1139,73 @@ for d in drafts:
         "strip().strip('\"').strip() removes outer whitespace, then quotes, then whitespace again.",
         "An empty result after stripping means the draft is unusable.",
         "\" \".join(words[:max_words]) truncates an overlong draft cleanly.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Clean, validate, or fall back",
+          caption: "Every draft is untrusted input. Guard against empty, quoted, and overlong cases.",
+          loop: false,
+          nodes: [
+            { label: "Raw draft", sub: "untrusted", detail: "Treat the draft as untrusted input, because it came from a probabilistic system." },
+            { label: "Strip", sub: "space, quotes", detail: "Strip whitespace, then surrounding quotes, then whitespace again in that order." },
+            { label: "Empty?", sub: "reject", detail: "If nothing usable remains, signal unusable so the caller can try another candidate." },
+            { label: "Too long?", sub: "cap words", detail: "If it runs past the word cap, keep only the first max_words words." },
+            { label: "Fallback", sub: "safe reply", detail: "If every candidate is unusable, return a safe generic reply instead of crashing." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "fallback", definition: "A safe default reply you return when every generated candidate cleans to nothing usable, so the tool never sends blank." },
+        { term: "graceful degradation", definition: "Handling bad output by returning something safe instead of raising an error and stopping." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why is the strip order 'whitespace, quotes, whitespace' rather than just 'quotes'?",
+          options: [
+            "It runs faster that way",
+            "A leading space can hide inside the quotes, so you trim before and after removing them",
+            "Quotes are only valid at the end of a string",
+            "The order does not matter",
+          ],
+          correct_index: 1,
+          explanation: "Outer whitespace can sit outside the quotes and inside them, so you strip, remove quotes, then strip again.",
+        },
+        {
+          question: "What should choose_reply do when every candidate cleans to nothing usable?",
+          options: [
+            "Raise an exception",
+            "Return an empty string",
+            "Return a safe fallback like 'Thanks, I'll get back to you.'",
+            "Retry forever",
+          ],
+          correct_index: 2,
+          explanation: "A tool that always produces something sendable beats one that crashes, so it returns a safe fallback.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A draft that is empty after stripping should be sent as-is.", correct_answer: "false", explanation: "An empty result is unusable. Signal it so the caller can fall back to another candidate or a safe default." },
+            { type: "fill_in", question: "Returning a safe default when output is unusable is called degrading how?", correct_answer: "gracefully", explanation: "Graceful degradation means returning something safe instead of raising and stopping." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "clean_draft('  \"Sounds good!\"  ', max_words=8) and clean_draft('', max_words=8)",
+          steps: [
+            "For the first, strip whitespace: '\"Sounds good!\"'. Strip quotes: 'Sounds good!'. Strip again: 'Sounds good!'.",
+            "It is not empty and has 2 words, under the cap of 8, so return it unchanged.",
+            "For the second, stripping leaves an empty string.",
+            "Empty means unusable, so return the empty signal instead of a draft.",
+          ],
+          output: "'Sounds good!' and '' (unusable)",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Never send a blank reply", content: "An empty or whitespace-only draft is the most common failure. Catch it and fall back, or your tool quietly pastes nothing into someone's inbox." },
       ],
       challenge_title: "Reject or Clean",
       challenge_description:
@@ -976,6 +1364,65 @@ print("total_tokens:", used)
         "reversed(costs) walks the examples newest-first.",
         "Include an example only while kept < max_examples AND used + cost <= budget.",
         "Break at the first example that doesn't fit; don't skip ahead to a smaller one.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Greedy newest-first selection",
+          caption: "Walk examples newest-first and keep each while it fits both limits.",
+          loop: true,
+          nodes: [
+            { label: "Newest", sub: "start here", detail: "Begin with your most recent reply, since recent replies best reflect how you write now." },
+            { label: "Fits?", sub: "budget + cap", detail: "Include it only while kept is under the count cap and used plus its cost stays within the token budget." },
+            { label: "Keep", sub: "add cost", detail: "If it fits, add its tokens to the running total and move to the next-newest example." },
+            { label: "Overflow", sub: "stop", detail: "At the first example that would break either limit, stop. You do not skip ahead to a smaller one." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "token budget", definition: "A hard ceiling on how many tokens the few-shot examples may use, so prompt cost stays bounded." },
+        { term: "token estimate", definition: "A rough count of tokens, often about 4 characters per token, used to size text before sending." },
+        { term: "greedy selection", definition: "Take items in order and keep each one that fits, stopping at the first that does not, without reshuffling." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Roughly how many characters make up one token in the estimate used here?",
+          options: ["1", "About 4", "About 20", "100"],
+          correct_index: 1,
+          explanation: "The rough rule is about 4 characters per token, so len(text) // 4 gives a usable estimate.",
+        },
+        {
+          question: "Why bound examples by both a token budget and a max count?",
+          options: [
+            "The API rejects prompts with more than 5 examples",
+            "A budget alone could pack in many tiny examples for little benefit, and a count alone could blow the budget on long ones",
+            "Counts are more accurate than tokens",
+            "It has no real effect, either one works alone",
+          ],
+          correct_index: 1,
+          explanation: "Together they give a predictable worst case, so you know the most this prompt can cost before shipping.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The selector walks examples oldest-first.", correct_answer: "false", explanation: "It walks newest-first with reversed(costs), because your most recent replies best match how you write now." },
+            { type: "fill_in", question: "When an example would overflow the budget, the loop does what: skip or break?", correct_answer: "break", explanation: "It breaks at the first miss. Greedy newest-first selection stops rather than hunting for a smaller later example." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "budget=15, max_examples=5, costs=[6, 7, 9] (oldest to newest). Select newest-first.",
+          steps: [
+            "Reverse to newest-first: [9, 7, 6].",
+            "Newest costs 9. kept 0 < 5 and 0 + 9 <= 15, so keep it. used=9, kept=1.",
+            "Next costs 7. kept 1 < 5 but 9 + 7 = 16, which is over 15. It does not fit.",
+            "Break at the first miss. Two older examples are dropped.",
+          ],
+          output: "kept 1, dropped 2, tokens used 9",
+        },
       ],
       challenge_title: "Budget the Examples",
       challenge_description:
@@ -1165,6 +1612,75 @@ print("Saved to Portfolio: Smart Reply Generator")
         "Clean every candidate first, then filter out the empty ones.",
         "target_words rounds the average word count of the samples.",
         "Pick the usable draft whose word count is closest to target, keeping the first on ties.",
+      ],
+      animated_diagrams: [
+        {
+          title: "The full Smart Reply pipeline",
+          caption: "Six stages turn an incoming message into one sendable, on-voice reply.",
+          loop: false,
+          nodes: [
+            { label: "Capture tone", sub: "build profile", detail: "Measure the user's sample replies into a tone profile (lesson 3)." },
+            { label: "Few-shot", sub: "budgeted examples", detail: "Build the prompt from a budgeted set of examples plus the incoming message (lessons 4 and 7)." },
+            { label: "Generate", sub: "several drafts", detail: "Ask the model for a few candidate drafts (lesson 5)." },
+            { label: "Clean", sub: "drop unusable", detail: "Clean every draft and drop the empty or broken ones (lesson 6)." },
+            { label: "Pick best", sub: "tone distance", detail: "Choose the surviving draft closest to the tone profile (lesson 5)." },
+            { label: "Return", sub: "reply or fallback", detail: "Return one reply, or a safe fallback if nothing survived." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "pipeline", definition: "A fixed ordered flow where each stage's output feeds the next, here turning a message into one reply." },
+        { term: "shipped", definition: "Runs from a clean start, handles weird input without crashing, and always returns something sendable." },
+      ],
+      inline_quizzes: [
+        {
+          question: "In the finished pipeline, what runs first?",
+          options: [
+            "Generating drafts",
+            "Capturing tone from the sample replies",
+            "Cleaning the drafts",
+            "Returning the fallback",
+          ],
+          correct_index: 1,
+          explanation: "You capture tone into a profile first, because the few-shot prompt and the final pick both depend on it.",
+        },
+        {
+          question: "What does 'shipped' mean for this tool?",
+          options: [
+            "It runs on a hosted server",
+            "It runs from a clean start, survives weird input, and always returns something sendable",
+            "It has a graphical interface",
+            "It never calls the model",
+          ],
+          correct_index: 1,
+          explanation: "Shipped here is about reliability, not infrastructure: clean start, no crashes on odd input, always a sendable result.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "If every candidate cleans to nothing usable, the pipeline should crash.", correct_answer: "false", explanation: "It returns a safe fallback like 'Thanks, I'll get back to you.' so it always produces something sendable." },
+            { type: "fill_in", question: "Finishing this lesson records the build in which tab?", correct_answer: "portfolio", explanation: "The Smart Reply Generator lands in your Portfolio tab as a working tool you built." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "hard",
+          prompt: "samples=[\"Hey! Sounds great, see you then.\", \"Thanks, works for me!\"], candidates=[\"Sure, Friday works for me!\", \"Yes.\", '  \"Sounds perfect, see you Friday then!\"  '], max_words=12.",
+          steps: [
+            "Target words: samples have 6 and 4 words, average 5, so target is 5.",
+            "Clean each candidate. 'Sure, Friday works for me!' stays (5 words). 'Yes.' stays (1 word). The quoted one strips to 'Sounds perfect, see you Friday then!' (6 words).",
+            "None are empty, so all three are usable.",
+            "Score by distance from 5: candidate 0 gap 0, candidate 1 gap 4, candidate 2 gap 1.",
+            "Smallest gap is 0, so pick candidate 0.",
+          ],
+          output: "final reply: Sure, Friday works for me!",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "One clever function, plain plumbing", content: "A finished AI product is mostly ordinary code around a single model call. You own every stage here, so you can trust, tune, and ship the whole thing." },
       ],
       challenge_title: "Run the Pipeline",
       challenge_description:

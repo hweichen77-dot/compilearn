@@ -63,6 +63,62 @@ The first instinct is to send everything to the model, and eventually we will. B
 ## The mental model to keep
 
 Think of the transcript as raw ore and the action items as the metal you want out of it. The model does the smelting later, but you still decide what goes in and what a clean result looks like. Below, build the candidate filter by hand, no API yet, so you get a feel for the raw material before you automate it.`,
+      animated_diagrams: [
+        {
+          title: "The extraction pipeline",
+          caption: "The same six steps run every time you turn a transcript into action items.",
+          loop: false,
+          nodes: [
+            { label: "Ingest", sub: "read transcript", detail: "Load the raw meeting text, the wall of words you want commitments out of." },
+            { label: "Prompt", sub: "wrap in instructions", detail: "Put the transcript inside a prompt that tells the model exactly what to pull out." },
+            { label: "Model", sub: "call the API", detail: "The model reads the whole transcript and returns the commitments it found." },
+            { label: "Parse", sub: "text to records", detail: "Turn the loose reply into structured items your code can sort and group. This is the new skill." },
+            { label: "Verify", sub: "check each item", detail: "Drop junk, fill blanks, keep only the items you trust." },
+            { label: "Report", sub: "print for a human", detail: "Group by person and render a clean list someone can act on." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Extraction", definition: "Turning free text into structured records your code can sort, count, and group." },
+        { term: "Structured data", definition: "Data organized into named fields, like owner and due, instead of a paragraph of prose." },
+        { term: "Trigger word", definition: "A word like 'will' or 'todo' that hints a line is a commitment, useful for a cheap first-pass filter." },
+      ],
+      inline_quizzes: [
+        {
+          question: "How is extraction different from summarizing?",
+          options: [
+            "Summarizing makes text shorter; extraction turns text into structured records",
+            "They are the same thing with different names",
+            "Extraction always needs a bigger model",
+            "Summarizing keeps every word; extraction deletes words",
+          ],
+          correct_index: 0,
+          explanation: "A summary is shorter text. Extraction pulls out fields (owner, task, due) that your code can work with.",
+        },
+        {
+          question: "Why filter for trigger words before calling the model?",
+          options: [
+            "It replaces the model entirely",
+            "It shrinks the job and shows you the shape of the problem cheaply",
+            "The model cannot read full transcripts",
+            "Trigger words are required by the API",
+          ],
+          correct_index: 1,
+          explanation: "The filter is a free first pass. It makes the extraction smaller and helps you understand the raw material before automating it.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Filter these lines with TRIGGERS = ('will', 'todo', 'action'): \"Alex will send the report\" / \"we chatted about lunch\" / \"TODO: book the room\"",
+          steps: [
+            "Lowercase line 1: 'alex will send the report' contains 'will', keep it.",
+            "Lowercase line 2: 'we chatted about lunch' has no trigger word, drop it.",
+            "Lowercase line 3: 'todo: book the room' contains 'todo', keep it.",
+          ],
+          output: "2 candidate action lines: the Alex line and the TODO line.",
+        },
+      ],
       starter_code: `# First pass, no API yet: pull the candidate action lines out of a transcript.
 # An action line tends to contain a trigger word like "will", "todo", "action".
 
@@ -220,6 +276,61 @@ Extraction is a contract with two sides you both control. The **prompt** promise
 ## The mental model to keep
 
 The model is a translator from messy language to a fixed shape you designed. You wrote the shape; the model fills it in. Below, skip the network and practice the parser side: turn one delimited reply into a clean three-field record.`,
+      animated_diagrams: [
+        {
+          title: "One sentence to one record",
+          caption: "The prompt promises a shape; the parser turns that shape into a record.",
+          loop: false,
+          nodes: [
+            { label: "Sentence", sub: "raw commitment", detail: "\"Alex will send the Q3 report by Friday.\" is language, not data yet." },
+            { label: "Prompt shape", sub: "owner | task | due", detail: "You tell the model to return exactly one pipe-delimited line, nothing else." },
+            { label: "Model line", sub: "Alex | Send... | Friday", detail: "The model fills in your shape and returns a single delimited string." },
+            { label: "split('|')", sub: "cut into pieces", detail: "Splitting on the pipe gives a list of three raw strings." },
+            { label: "Record", sub: "owner/task/due dict", detail: "Strip each piece and build a dict your code can store and group." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Delimiter", definition: "A separator character, here the pipe, that marks where one field ends and the next begins." },
+        { term: "Parse", definition: "Turn a string into structured data your program can use, like splitting a line into named fields." },
+        { term: "Two-sided contract", definition: "The prompt promises a format and the parser assumes it; both must agree or extraction breaks." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why start with a pipe-delimited line instead of JSON?",
+          options: [
+            "JSON cannot hold three fields",
+            "A delimited line is trivial to produce and parse, so you learn 'consistent shape' before 'rich shape'",
+            "Pipes are faster for the model",
+            "JSON is not supported by the API",
+          ],
+          correct_index: 1,
+          explanation: "The pipe is a training wheel. It separates the two hard parts: getting a consistent shape first, then a richer one later.",
+        },
+        {
+          question: "The model returns \"Alex | Send report | Friday\" with spaces around the pipes. What must the parser do?",
+          options: [
+            "Reject the line as malformed",
+            "Split on '|' and strip whitespace off each piece",
+            "Ask the model to try again",
+            "Replace spaces with underscores",
+          ],
+          correct_index: 1,
+          explanation: "Models add spaces around separators. Split on the pipe, then .strip() each part so 'Alex ' becomes 'Alex'.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Parse the model line: \"Sam | Book the room | Monday\"",
+          steps: [
+            "Split on '|' -> ['Sam ', ' Book the room ', ' Monday'].",
+            "Strip each piece -> ['Sam', 'Book the room', 'Monday'].",
+            "Map them to the field names owner, task, due in order.",
+          ],
+          output: "{\"owner\": \"Sam\", \"task\": \"Book the room\", \"due\": \"Monday\"}",
+        },
+      ],
       starter_code: `# The model returned one action item as a delimited line.
 # Your job is the parser side: turn it into a three-field record.
 
@@ -341,6 +452,56 @@ There are two places a rule can live: in the prompt (the model applies it) or in
 ## The mental model to keep
 
 The model reports the facts; your code sets the house style. Below, take several extracted lines, some with blanks, and normalize every one into a complete three-field record with sensible defaults.`,
+      animated_diagrams: [
+        {
+          title: "Normalizing one item",
+          caption: "The model reports what was said; your code fills the blanks with house-style defaults.",
+          loop: false,
+          nodes: [
+            { label: "Model line", sub: "may have blanks", detail: "\" | Update the wiki | \" came back with no owner and no due date." },
+            { label: "Split + strip", sub: "three raw parts", detail: "Cut on the pipe and strip each field so a blank field is an empty string." },
+            { label: "owner or default", sub: "blank to Unassigned", detail: "An empty string is falsy, so '' or 'Unassigned' picks the default." },
+            { label: "due or default", sub: "blank to No deadline", detail: "Same trick for the deadline: keep what was said, otherwise use a label." },
+            { label: "Full record", sub: "always 3 fields", detail: "Every item now has all three fields, even when the transcript only gave one." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Normalize", definition: "Reshape messy records into one consistent form, here always three filled fields." },
+        { term: "Falsy", definition: "A value Python treats as false in a condition; an empty string is falsy, which makes the 'or default' idiom work." },
+        { term: "Extraction vs policy rules", definition: "Extraction rules (what was said) belong in the prompt; policy rules (blanks show as Unassigned) belong in code." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does the expression \"\" or \"Unassigned\" evaluate to?",
+          options: ["An empty string", "\"Unassigned\"", "True", "None"],
+          correct_index: 1,
+          explanation: "An empty string is falsy, so 'or' returns the right side. 'Alex' or 'Unassigned' would stay 'Alex' because a non-empty string is truthy.",
+        },
+        {
+          question: "Where should the 'blanks display as Unassigned' rule live?",
+          options: [
+            "In the prompt, so the model applies it",
+            "In your Python code, because it is deterministic and free",
+            "In the transcript",
+            "Nowhere; leave blanks blank",
+          ],
+          correct_index: 1,
+          explanation: "Display defaults are a policy decision. Keep the model's job narrow (extract what was said) and apply presentation rules in code.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Normalize the extracted line: \" | Update the wiki | \"",
+          steps: [
+            "Split and strip -> owner '', task 'Update the wiki', due ''.",
+            "owner: '' or 'Unassigned' -> 'Unassigned'.",
+            "due: '' or 'No deadline' -> 'No deadline'. task is left as-is.",
+          ],
+          output: "{\"owner\": \"Unassigned\", \"task\": \"Update the wiki\", \"due\": \"No deadline\"}",
+        },
+      ],
       starter_code: `# The model extracted several items, but some fields came back blank.
 # Normalize every line into a complete record with sensible defaults.
 
@@ -492,6 +653,61 @@ def is_valid(item):
 ## The mental model to keep
 
 JSON is the handoff point between what the model writes and what your program can work with. You ask for a precise shape, pull it out defensively because the model gets chatty, then validate before you trust it. Below, take a realistic messy reply, pull the JSON out of the surrounding text, and keep only the complete items.`,
+      animated_diagrams: [
+        {
+          title: "From chatty reply to clean items",
+          caption: "Ask for JSON, pull it out of whatever the model wrapped it in, then validate.",
+          loop: false,
+          nodes: [
+            { label: "Model reply", sub: "JSON plus chatter", detail: "\"Here are the items: [ ... ] hope that helps!\" mixes the array with prose." },
+            { label: "Find [ ... ]", sub: "first [ to last ]", detail: "Slice from the first '[' to the last ']' to grab just the array, code fence or not." },
+            { label: "json.loads", sub: "text to list", detail: "Parse the slice into a real Python list of dicts." },
+            { label: "Validate", sub: "check every key", detail: "Keep only items where owner, task, and due are all present and non-empty." },
+            { label: "Clean list", sub: "trusted records", detail: "What survives is safe to group, sort, and render." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "JSON", definition: "A text format for structured data, the standard shape for model output your code needs to parse." },
+        { term: "Schema", definition: "The exact keys and value types you ask the model to return, like owner, task, and due." },
+        { term: "Validation", definition: "Checking parsed data has the fields you need before you trust it downstream." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why slice from the first '[' to the last ']' instead of calling json.loads directly?",
+          options: [
+            "It runs faster",
+            "The model often wraps JSON in prose or a code fence, and the slice survives that",
+            "json.loads cannot read arrays",
+            "It removes duplicate items",
+          ],
+          correct_index: 1,
+          explanation: "Even when you ask for 'only JSON', models add a lead-in or a code fence. Grabbing first '[' to last ']' ignores the surrounding text.",
+        },
+        {
+          question: "What does all(item.get(k) for k in REQUIRED) catch?",
+          options: [
+            "Only missing keys",
+            "Only empty values",
+            "Both a missing key (get returns None) and a blank value (empty string), since both are falsy",
+            "Extra keys the model added",
+          ],
+          correct_index: 2,
+          explanation: "item.get(k) returns None for a missing key and '' for a blank value. Both are falsy, so one all(...) rejects either problem.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Extract and validate: 'Here you go: [{\"owner\": \"Alex\", \"task\": \"Send report\", \"due\": \"Friday\"}, {\"owner\": \"Sam\", \"task\": \"Book room\", \"due\": \"\"}] done!'",
+          steps: [
+            "First '[' and last ']' bound the array; slice and json.loads it into 2 dicts.",
+            "Item 1: owner, task, due all non-empty -> valid.",
+            "Item 2: due is '' which is falsy -> all(...) is False -> invalid, drop it.",
+          ],
+          output: "Parsed 2 items, kept 1 valid: Alex -> Send report.",
+        },
+      ],
       starter_code: `import json
 
 # The model returned JSON, but wrapped in chatty text (as it often does).
@@ -639,6 +855,60 @@ Notice the division of labor across this project. The model did the hard, fuzzy 
 ## The mental model to keep
 
 Grouping turns a pile into folders, one per person, each holding just their work. The model filled the pile; a dict of lists sorts it into folders. Below, group a list of action items by owner and print each person's tasks with a count.`,
+      animated_diagrams: [
+        {
+          title: "Flat list into folders",
+          caption: "One pass with setdefault turns a mixed pile into one folder per owner.",
+          loop: true,
+          nodes: [
+            { label: "Next item", sub: "read one record", detail: "Take the next action item from the flat list, for example {owner: Alex, task: Send report}." },
+            { label: "setdefault", sub: "find owner's list", detail: "groups.setdefault(owner, []) returns Alex's list, creating an empty one the first time." },
+            { label: "append", sub: "drop it in", detail: "Append the whole item to that owner's list, keeping its task and due." },
+            { label: "sorted view", sub: "folders A to Z", detail: "After the loop, iterate sorted(groups) so owners print alphabetically and stably." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Dict of lists", definition: "A dictionary whose values are lists; the standard shape for grouping items by a key." },
+        { term: "setdefault", definition: "Returns the value for a key, inserting a default (here an empty list) if the key is new." },
+        { term: "Stable sort", definition: "An ordering that gives the same result every run; sorting owners alphabetically makes the report predictable." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does groups.setdefault(owner, []) return the first time it sees a new owner?",
+          options: [
+            "None",
+            "A fresh empty list, which it also stores under that owner",
+            "The whole groups dict",
+            "An error",
+          ],
+          correct_index: 1,
+          explanation: "For a new key setdefault inserts the default [] and returns it, so you can append immediately. For an existing key it returns the current list.",
+        },
+        {
+          question: "Why loop over sorted(groups) instead of groups directly?",
+          options: [
+            "Dicts cannot be looped",
+            "A plain dict yields owners in first-seen order, which is arbitrary; sorting makes the report stable and alphabetical",
+            "sorted removes duplicates",
+            "It is faster",
+          ],
+          correct_index: 1,
+          explanation: "Insertion order is whatever the transcript happened to mention first. sorted(groups) gives a stable, readable A-to-Z report.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Group: Alex/Send report, Sam/Book room, Alex/Review PR",
+          steps: [
+            "Alex is new: setdefault makes []; append Send report -> {Alex: [Send report]}.",
+            "Sam is new: append Book room -> {Alex: [...], Sam: [Book room]}.",
+            "Alex exists: append Review PR -> {Alex: [Send report, Review PR], Sam: [Book room]}.",
+          ],
+          output: "Alex (2): Send report, Review PR / Sam (1): Book room",
+        },
+      ],
       starter_code: `# Turn a flat list of action items into a per-owner view.
 
 items = [
@@ -782,6 +1052,41 @@ Every one of these items came from a model call you paid for. When you retry a m
 ## The mental model to keep
 
 Cleaning is the bouncer at the door: junk gets turned away and the incomplete get patched up, so everything past that point is in order. Below, write the one pass that drops taskless items and defaults the blanks.`,
+      animated_diagrams: [
+        {
+          title: "The cleaning boundary",
+          caption: "One pass at the edge either drops an item or repairs it, so everything after is trusted.",
+          loop: true,
+          nodes: [
+            { label: "Raw item", sub: "maybe broken", detail: "Take the next parsed item; it might have a blank task, a missing owner, or nothing at all." },
+            { label: "Task check", sub: "no task, drop", detail: "(it.get('task') or '').strip() gives ''; if empty, skip the item, it is not real work." },
+            { label: "Repair blanks", sub: "fill owner/due", detail: "Default a blank owner to Unassigned and a blank due to No deadline." },
+            { label: "Trusted item", sub: "3 fields, safe", detail: "Append the repaired record. Past this point, no code needs to re-check it." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Validate at the boundary", definition: "Distrust data once, at the edge where it enters your program, then trust it everywhere after." },
+        { term: "Defensive get", definition: "(it.get('task') or '') returns '' for a missing key or None, so .strip() never crashes on bad input." },
+      ],
+      callouts: [
+        {
+          type: "tip",
+          position: "after",
+          title: "Repair in code, not another API call",
+          content: "Every item cost a model call you paid for. When a fix is deterministic, repair it in Python instead of re-extracting; that round-trip is free.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "An action item with an empty task should be kept and shown with a blank.", correct_answer: "false", explanation: "An item with no task is not an action item. Drop it in the cleaning pass." },
+            { type: "true_false", question: "(it.get('task') or '') prevents a crash when the 'task' key is missing entirely.", correct_answer: "true", explanation: ".get returns None for a missing key, and 'or \"\"' turns that None into a string so .strip() is safe." },
+            { type: "fill_in", question: "A blank owner should default to which single word label?", correct_answer: "Unassigned", explanation: "Blank owners become 'Unassigned' so the report stays complete." },
+          ],
+        },
+      ],
       starter_code: `# Harden the extractor: drop junk items, repair the fixable ones.
 
 raw_items = [
@@ -943,6 +1248,62 @@ A \`set\` gives O(1) membership checks, so this stays fast even on a long day's 
 ## The mental model to keep
 
 A long meeting is more like a book than a single page. You read it a chapter at a time, jot the commitments from each, then merge your notes and cross out the ones you wrote twice. Chunk to fit the context and the budget; dedup to clean up the seams. Below, chunk a transcript, estimate each chunk's tokens, and dedup repeated lines.`,
+      animated_diagrams: [
+        {
+          title: "Chunk, extract, merge, dedup",
+          caption: "A long transcript is read a piece at a time, then the seams are cleaned up.",
+          loop: true,
+          nodes: [
+            { label: "Split", sub: "fixed-size chunks", detail: "Break the transcript into slices of, say, 40 lines each so every call is small and cheap." },
+            { label: "Estimate", sub: "~4 chars/token", detail: "Roughly size each chunk so you can predict the bill before spending it." },
+            { label: "Extract chunk", sub: "one call each", detail: "Run the extractor on the current chunk and collect its items." },
+            { label: "Merge", sub: "combine lists", detail: "Concatenate every chunk's items into one big list." },
+            { label: "Dedup", sub: "keep first seen", detail: "A chunk boundary can catch the same item twice; a set drops the repeats, keeping order." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Chunking", definition: "Splitting a long input into smaller pieces so each fits the context window and costs less per call." },
+        { term: "Token estimate", definition: "A rough size, about four characters per token, used to predict a call's cost before running it." },
+        { term: "Dedup", definition: "Removing repeated items while keeping the first occurrence, using a set to remember what you have seen." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does chunking create duplicate action items?",
+          options: [
+            "The model is broken",
+            "An item mentioned near a chunk boundary can be caught in both neighboring chunks",
+            "Sets always duplicate data",
+            "Chunks are always identical",
+          ],
+          correct_index: 1,
+          explanation: "Splitting can put the same commitment at the edge of two chunks, so it gets extracted twice. That is exactly what dedup cleans up.",
+        },
+        {
+          question: "What makes the set-based dedup fast even on a long day of items?",
+          options: [
+            "Sets sort the items",
+            "A set gives O(1) membership checks, so 'seen' lookups stay cheap",
+            "It skips the loop",
+            "Lists are faster than sets",
+          ],
+          correct_index: 1,
+          explanation: "Membership in a set is roughly constant time, so checking 'have I seen this' stays fast as the list grows.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Dedup: ['Alex report', 'Sam room', 'Alex report', 'Priya PR']",
+          steps: [
+            "'Alex report' not in seen: add it, keep it.",
+            "'Sam room' not in seen: add it, keep it.",
+            "'Alex report' already in seen: skip it.",
+            "'Priya PR' not in seen: add it, keep it.",
+          ],
+          output: "3 unique lines, in first-seen order: Alex report, Sam room, Priya PR.",
+        },
+      ],
       starter_code: `# Scale up: chunk a long transcript, gauge cost, and remove duplicates.
 
 transcript_lines = [
@@ -1125,6 +1486,48 @@ Three checks, the same three every project ends on: it runs from a clean start o
 ## It lands in your Portfolio
 
 Finishing this lesson saves **Meeting Notes to Action Items** to your Portfolio automatically, with the title and what you built: a tool that turns a raw transcript into owned, dated, grouped action items. Keep an example transcript and its rendered report alongside it, proof it works, and a demo you can show. You built an extraction pipeline end to end: prompt design, structured output, validation, and the plain-code transforms that make a model's output trustworthy. That pattern is most of applied AI. Below, write the final renderer that turns your cleaned items into the report you ship.`,
+      animated_diagrams: [
+        {
+          title: "The whole product, one line",
+          caption: "One fuzzy model step at the top, then reliable Python transforms to the finished report.",
+          loop: false,
+          nodes: [
+            { label: "Transcript", sub: "raw text in", detail: "The meeting text arrives, the same input you started with in lesson 1." },
+            { label: "Model", sub: "extract items", detail: "One API call does the fuzzy part: reading language and pulling out commitments." },
+            { label: "extract_json", sub: "defensive parse", detail: "Pull the JSON array out of the chatty reply and load it into records." },
+            { label: "clean", sub: "drop + default", detail: "Remove junk items and fill blanks so every record is complete." },
+            { label: "dedup", sub: "remove repeats", detail: "Collapse duplicates from chunking or people repeating themselves." },
+            { label: "render_report", sub: "grouped Markdown", detail: "Group by owner, sort, and format the report a human actually reads." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Pipeline", definition: "A fixed sequence of steps where each one's output feeds the next, from transcript to finished report." },
+        { term: "Render", definition: "Turning structured records into human-readable output, here grouped Markdown you can paste into a doc or ticket." },
+      ],
+      inline_quizzes: [
+        {
+          question: "In the finished pipeline, how many times does the model appear?",
+          options: [
+            "Once, at the top, doing the fuzzy extraction",
+            "Once per output line",
+            "At every step",
+            "Never; it is all Python",
+          ],
+          correct_index: 0,
+          explanation: "The model runs once to do the one thing only it can. Everything after (parse, clean, dedup, render) is deterministic Python.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Is it shipped?",
+          questions: [
+            { type: "true_false", question: "A shippable version runs from a clean start on one transcript.", correct_answer: "true", explanation: "Running end to end from scratch is one of the three ship checks." },
+            { type: "true_false", question: "An empty transcript should raise an exception rather than print an empty report.", correct_answer: "false", explanation: "It should handle a meeting with no action items gracefully: an empty report, not a crash." },
+            { type: "fill_in", question: "The renderer groups items by which field before printing?", correct_answer: "owner", explanation: "render_report groups by owner so each person sees their own section." },
+          ],
+        },
+      ],
       starter_code: `# The ship step: render cleaned items into the Markdown report you deliver.
 
 items = [

@@ -72,6 +72,42 @@ export default {
           "explanation": "An initializer list has length equal to the number of values listed: 3."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Declaring then creating an array",
+          "caption": "First the reference, then new allocates the slots, all filled with defaults.",
+          "loop": false,
+          "nodes": [
+            { "label": "int[] scores", "sub": "reference", "detail": "This declares a variable that can point to an int array. No array exists yet." },
+            { "label": "new int[5]", "sub": "allocate", "detail": "new builds an array object with exactly five int slots. The size is fixed from here on." },
+            { "label": "Fill defaults", "sub": "all 0", "detail": "Java fills every int slot with the default value 0 before you assign anything." },
+            { "label": "scores points", "sub": "linked", "detail": "The reference now points to the new array, ready for indexing." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "What new int[3] holds at each step",
+          "steps": [
+            { "label": "Declare", "detail": "a is a reference that does not point to an array yet.", "code": "int[] a;" },
+            { "label": "Create", "detail": "new int[3] makes three slots, all set to 0.", "code": "a = new int[3];  // {0, 0, 0}" },
+            { "label": "Assign", "detail": "Writing a[0] = 5 changes only the first slot.", "code": "a[0] = 5;  // {5, 0, 0}" },
+            { "label": "Initializer", "detail": "An initializer list sets values and infers the length.", "code": "int[] p = {2, 3, 5};  // length 3" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The length of an array can grow after it is created.", "correct_answer": "false", "explanation": "Array length is fixed at creation. To hold more, you make a new, larger array and copy over." },
+            { "type": "fill_in", "question": "new int[4] fills every slot with what value?", "correct_answer": "0", "explanation": "int arrays default to 0, double to 0.0, boolean to false, and object arrays to null." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Fixed size", "content": "An array's length is set at creation and cannot change. If you need more room, create a new larger array and copy the data across." }
+      ],
       "challenge_title": "Create and Print an Array",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: create an int array of size n, read n values, print each on its own line\n    }\n}",
@@ -148,6 +184,42 @@ export default {
           "correct_index": 1,
           "explanation": "Without temp, assigning a[i]=a[j] loses the original a[i] before it can be copied to a[j]."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Indices label every slot",
+          "caption": "For length 4, the valid indices run from 0 to 3, and a[i] both reads and writes.",
+          "loop": false,
+          "nodes": [
+            { "label": "a[0] = 10", "sub": "first", "detail": "Index 0 is the first element. Java arrays always start numbering at 0." },
+            { "label": "a[1] = 20", "sub": "second", "detail": "Each slot has its own index one higher than the last." },
+            { "label": "a[2] = 30", "sub": "third", "detail": "You can read a[2] or overwrite it with a[2] = 99 using the same notation." },
+            { "label": "a[3] = 40", "sub": "last", "detail": "For length 4 the last valid index is 3, which is length - 1." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Why a swap needs a temp",
+          "steps": [
+            { "label": "Start", "detail": "Suppose a[0] is 1 and a[1] is 2, and we want them swapped.", "code": "a = {1, 2}" },
+            { "label": "Save", "detail": "Store a[0] in temp so its value is not lost.", "code": "int temp = a[0];  // temp = 1" },
+            { "label": "Copy", "detail": "Put a[1] into a[0].", "code": "a[0] = a[1];  // a = {2, 2}" },
+            { "label": "Restore", "detail": "Put the saved value into a[1]. Without temp, both slots would be 2.", "code": "a[1] = temp;  // a = {2, 1}" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The last element of an array a is at index a.length.", "correct_answer": "false", "explanation": "The last element is at a.length - 1. Index a.length is out of bounds." },
+            { "type": "fill_in", "question": "Swapping two array elements requires an extra ____ variable.", "correct_answer": "temp", "explanation": "A temporary variable holds the first value so the assignment does not overwrite it." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Zero-indexed", "content": "The first element is a[0] and the last is a[a.length - 1]. Off-by-one bugs come from forgetting arrays start at 0, not 1." }
       ],
       "challenge_title": "Swap First and Last",
       "challenge_language": "java",
@@ -226,6 +298,43 @@ export default {
           "explanation": "On the final iteration i equals a.length, an invalid index that throws an exception."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Traversing with i < a.length",
+          "caption": "The index climbs from 0 up to length-1, visiting every slot exactly once.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 0", "sub": "a[0]", "detail": "The loop starts at the first index." },
+            { "label": "i < length ?", "sub": "check", "detail": "The condition keeps i within valid bounds. Using < is what stops at the right place." },
+            { "label": "Use a[i]", "sub": "read slot", "detail": "The body reads or processes the element at the current index." },
+            { "label": "i++", "sub": "advance", "detail": "Move to the next slot, then re-check. When i reaches length, the loop ends." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Summing {5, 10, 15}",
+          "steps": [
+            { "label": "Start", "detail": "sum is 0 and i is 0.", "code": "int sum = 0;" },
+            { "label": "i = 0", "detail": "0 < 3 is true, add a[0]=5, sum is 5.", "code": "sum += a[0];  // 5" },
+            { "label": "i = 1", "detail": "1 < 3 is true, add a[1]=10, sum is 15.", "code": "sum += a[1];  // 15" },
+            { "label": "i = 2", "detail": "2 < 3 is true, add a[2]=15, sum is 30.", "code": "sum += a[2];  // 30" },
+            { "label": "i = 3", "detail": "3 < 3 is false, loop ends. Final sum is 30.", "code": "condition false -> exit" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "You get an array's size with a.length, no parentheses.", "correct_answer": "true", "explanation": "Arrays use the field a.length. Only Strings use the method length() with parentheses." },
+            { "type": "fill_in", "question": "The correct traversal condition uses which comparison operator with a.length?", "correct_answer": "<", "explanation": "i < a.length visits indices 0 to length-1 without going out of bounds." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "length vs length()", "content": "Arrays use a.length with no parentheses. Strings use s.length() with parentheses. Mixing them up is a classic compile error." }
+      ],
       "challenge_title": "Sum and Length Report",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] a = new int[n];\n        for (int i = 0; i < n; i++) a[i] = sc.nextInt();\n        // TODO: print the array length and the sum of all elements on two lines\n    }\n}",
@@ -302,6 +411,42 @@ export default {
           "correct_index": 1,
           "explanation": "Modifying elements or needing positions requires the index that only the standard for loop provides."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "for-each visits each value",
+          "caption": "The loop variable becomes a copy of each element in order, with no index to manage.",
+          "loop": true,
+          "nodes": [
+            { "label": "value = 5", "sub": "copy of a[0]", "detail": "On the first pass, value holds a copy of the first element." },
+            { "label": "value = 10", "sub": "copy of a[1]", "detail": "The loop moves to the next element automatically, no i++ needed." },
+            { "label": "value = 15", "sub": "copy of a[2]", "detail": "Because value is a copy, changing it does not change the array." },
+            { "label": "Done", "sub": "all visited", "detail": "After the last element the loop ends. Great for reading, summing, or counting." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Why assigning value does not change the array",
+          "steps": [
+            { "label": "Array", "detail": "a holds {1, 2, 3}.", "code": "int[] a = {1, 2, 3};" },
+            { "label": "Enter loop", "detail": "value is a copy of a[0], which is 1.", "code": "for (int value : a)" },
+            { "label": "Change copy", "detail": "value = value * 10 makes the copy 10, but a[0] is untouched.", "code": "value = value * 10;  // copy only" },
+            { "label": "After loop", "detail": "a is still {1, 2, 3}. To modify, use an indexed for and a[i] = ...", "code": "a == {1, 2, 3}" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "An enhanced for loop can change array elements by assigning to its loop variable.", "correct_answer": "false", "explanation": "The loop variable is a copy, so assigning to it leaves the array unchanged." },
+            { "type": "fill_in", "question": "In for (int v : nums), what symbol separates the variable from the array?", "correct_answer": ":", "explanation": "The colon reads as in: for each v in nums." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "for-each reads, does not write", "content": "Use the enhanced for loop for summing, counting, or searching. To modify elements or use the index, switch to a standard indexed for loop." }
       ],
       "challenge_title": "Count Even Numbers",
       "challenge_language": "java",
@@ -380,6 +525,42 @@ export default {
           "explanation": "The pattern is identical except the comparison operator flips to < to keep the smallest value."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Tracking a running maximum",
+          "caption": "Start with the first element, then replace max whenever a bigger value appears.",
+          "loop": true,
+          "nodes": [
+            { "label": "max = 4", "sub": "a[0]", "detail": "Assume the first element is the largest so far." },
+            { "label": "see 9", "sub": "9 > 4", "detail": "9 is bigger than max, so max becomes 9." },
+            { "label": "see 2", "sub": "2 > 9 ?", "detail": "2 is not bigger, so max stays 9." },
+            { "label": "see 7", "sub": "7 > 9 ?", "detail": "7 is not bigger either. The final max is 9." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Finding the max of {4, 9, 2, 7}",
+          "steps": [
+            { "label": "Init", "detail": "max starts at a[0] = 4, and the loop begins at index 1.", "code": "int max = a[0];  // 4" },
+            { "label": "i = 1", "detail": "a[1]=9 > 4, so max becomes 9.", "code": "if (a[1] > max) max = 9;" },
+            { "label": "i = 2", "detail": "a[2]=2 is not > 9, so max stays 9.", "code": "2 > 9  // false" },
+            { "label": "i = 3", "detail": "a[3]=7 is not > 9, so max stays 9. Answer is 9.", "code": "7 > 9  // false" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "You should initialize max to 0 before scanning an array for the maximum.", "correct_answer": "false", "explanation": "Initialize max to a[0]. Starting at 0 fails when every value is negative." },
+            { "type": "fill_in", "question": "To find the minimum instead of the maximum, flip the comparison operator to ____.", "correct_answer": "<", "explanation": "The pattern is identical except the > becomes < to keep the smallest value." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Seed with a[0], not 0", "content": "Initialize the running max (or min) to the first element. Seeding with 0 gives a wrong answer when all values are negative." }
+      ],
       "challenge_title": "Largest Element",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] a = new int[n];\n        for (int i = 0; i < n; i++) a[i] = sc.nextInt();\n        // TODO: find and print the maximum value in the array\n    }\n}",
@@ -456,6 +637,43 @@ export default {
           "correct_index": 1,
           "explanation": "== compares references for objects; .equals compares the actual character contents."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Scanning for a target",
+          "caption": "Check each element in order and stop at the first match, or report -1 if none.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 0", "sub": "a[0] = 7", "detail": "Compare the first element with the target. 7 is not 9, so keep going." },
+            { "label": "i = 1", "sub": "a[1] = 3", "detail": "3 is not 9 either, so move to the next index." },
+            { "label": "i = 2", "sub": "a[2] = 9", "detail": "9 equals the target. Record index 2 and break out of the loop." },
+            { "label": "Return 2", "sub": "found", "detail": "The search returns 2. If nothing matched, it would return -1 instead." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Searching for 9 in {7, 3, 9, 4}",
+          "steps": [
+            { "label": "Init", "detail": "found starts at -1, the not-found signal.", "code": "int found = -1;" },
+            { "label": "i = 0", "detail": "a[0]=7 == 9 is false, keep scanning.", "code": "7 == 9  // false" },
+            { "label": "i = 1", "detail": "a[1]=3 == 9 is false, keep scanning.", "code": "3 == 9  // false" },
+            { "label": "i = 2", "detail": "a[2]=9 == 9 is true, set found=2 and break.", "code": "found = 2; break;" },
+            { "label": "Result", "detail": "The loop stops early and returns 2.", "code": "print(found);  // 2" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Linear search only works on arrays that are already sorted.", "correct_answer": "false", "explanation": "Linear search works on any array, sorted or not, by checking each element in turn." },
+            { "type": "fill_in", "question": "What value conventionally means the target was not found?", "correct_answer": "-1", "explanation": "-1 is used because it is never a valid array index." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "== versus .equals", "content": "Use == to compare primitives like int. For objects like String, use .equals, because == only checks whether two references point to the same object, not whether the contents match." }
       ],
       "challenge_title": "Find the Index",
       "challenge_language": "java",
@@ -534,6 +752,42 @@ export default {
           "explanation": "Stopping at length - 1 ensures a[i+1] never exceeds the last valid index."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "The valid index range",
+          "caption": "Only 0 through length-1 are legal. Anything outside throws an exception.",
+          "loop": false,
+          "nodes": [
+            { "label": "a[-1]", "sub": "illegal", "detail": "Negative indices are out of bounds and throw ArrayIndexOutOfBoundsException." },
+            { "label": "a[0]", "sub": "first valid", "detail": "Index 0 is the first legal slot." },
+            { "label": "a[length-1]", "sub": "last valid", "detail": "This is the highest legal index." },
+            { "label": "a[length]", "sub": "illegal", "detail": "One past the end. Accessing it throws the exception. This is the classic off-by-one crash." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Why i <= a.length crashes",
+          "steps": [
+            { "label": "Array", "detail": "a has length 3, so valid indices are 0, 1, 2.", "code": "int[] a = new int[3];" },
+            { "label": "Loop runs", "detail": "With i <= a.length, i reaches 0, 1, 2, then 3.", "code": "for (int i = 0; i <= a.length; i++)" },
+            { "label": "i = 3", "detail": "a[3] does not exist, so Java throws the exception here.", "code": "a[3]  // ArrayIndexOutOfBoundsException" },
+            { "label": "Fix", "detail": "Use i < a.length so i stops at 2, the last valid index.", "code": "for (int i = 0; i < a.length; i++)" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A negative index like a[-1] throws an out-of-bounds exception.", "correct_answer": "true", "explanation": "Both too-high and negative indices are illegal and throw ArrayIndexOutOfBoundsException." },
+            { "type": "fill_in", "question": "When comparing a[i] with a[i+1], the loop should stop at a.length minus what number?", "correct_answer": "1", "explanation": "Stopping at length - 1 keeps a[i+1] from exceeding the last valid index." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Empty arrays have no valid index", "content": "An array of length 0 cannot be indexed at all. Code like int max = a[0] crashes on it, so guard with if (a.length > 0) when the size might be zero." }
+      ],
       "challenge_title": "Count Adjacent Equal Pairs",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] a = new int[n];\n        for (int i = 0; i < n; i++) a[i] = sc.nextInt();\n        // TODO: count how many adjacent pairs a[i], a[i+1] are equal; print the count\n    }\n}",
@@ -610,6 +864,45 @@ export default {
           "correct_index": 2,
           "explanation": "Casting sum to double forces double division, giving 3.5 instead of integer 3."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Two passes over one array",
+          "caption": "First compute the average, then use it in a second pass to count.",
+          "loop": false,
+          "nodes": [
+            { "label": "Pass 1: sum", "sub": "accumulate", "detail": "Traverse once to add up every element into sum." },
+            { "label": "Compute avg", "sub": "cast to double", "detail": "Divide sum by length, casting to double so decimals survive." },
+            { "label": "Pass 2: count", "sub": "compare to avg", "detail": "Traverse again, counting elements strictly greater than the average." },
+            { "label": "Print count", "sub": "result", "detail": "You needed the average before the count, so two separate passes are required." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "medium",
+          "prompt": "Given {1, 2, 3, 4, 5}, count how many elements are strictly greater than the average.",
+          "steps": [
+            "Pass 1: sum = 1 + 2 + 3 + 4 + 5 = 15.",
+            "Average = (double) 15 / 5 = 3.0. The cast keeps it a decimal.",
+            "Pass 2: compare each value to 3.0.",
+            "1, 2, 3 are not greater than 3.0. 4 and 5 are.",
+            "Count the ones above: 4 and 5, which is 2."
+          ],
+          "output": "2"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Computing an average and then counting elements above it needs two passes.", "correct_answer": "true", "explanation": "You must finish the average before comparing each element against it." },
+            { "type": "fill_in", "question": "To keep decimals, cast the sum to ____ before dividing.", "correct_answer": "double", "explanation": "int division truncates, so (double) sum / length preserves the fractional part." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Integer division truncates", "content": "sum / a.length with two ints throws away the fraction: 7 / 2 gives 3, not 3.5. Cast one operand to double, as in (double) sum / a.length, to get 3.5." }
       ],
       "challenge_title": "Count Above Average",
       "challenge_language": "java",

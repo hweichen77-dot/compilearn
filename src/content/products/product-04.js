@@ -60,6 +60,45 @@ Left alone, a chat model gets chatty: "Sure! Here's a strong version:…". That 
 ## The mental model
 
 The prompt is a set of instructions that will run on a thousand tasks you'll never see. Write it precise and a little dull: who the model is, what it does, and the format it returns. Below you'll build the request payload by hand, no network call, so the data shape is locked in before you ever hit the API.`,
+    animated_diagrams: [
+      {
+        title: "Building the rewrite request",
+        caption: "The rules stay put in the system prompt while only the task changes each call.",
+        loop: false,
+        nodes: [
+          { label: "Plain task", sub: "raw input", detail: "The limp task description a user types, like 'did the front desk stuff'." },
+          { label: "System prompt", sub: "the rules", detail: "The persona and rules you write once: rewrite into a verb-first bullet, one line, bullet only." },
+          { label: "User message", sub: "the task", detail: "The task wrapped in a short instruction: 'Rewrite this as a resume bullet: ...'." },
+          { label: "Request payload", sub: "dict to send", detail: "model, max_tokens, system, and messages bundled into one dict the API expects." },
+          { label: "Ready to call", sub: "off to model", detail: "The payload is complete, so the actual network call becomes a one-liner later." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "System prompt", definition: "The standing rules and persona you set once and reuse on every call." },
+      { term: "User message", definition: "The per-call input, here the task you want rewritten." },
+      { term: "Payload", definition: "The bundle of model, max_tokens, system, and messages you hand to the API." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Build the request for the task \"managed the front desk\".",
+        steps: [
+          "Keep the SYSTEM string as the reusable rules.",
+          "Wrap the task: \"Rewrite this as a resume bullet: managed the front desk\".",
+          "Put that string as the content of one user message.",
+          "Bundle model, max_tokens, system, and messages into a dict.",
+        ],
+        output: "{ model, max_tokens: 80, system: SYSTEM, messages: [{ role: 'user', content: 'Rewrite this as a resume bullet: managed the front desk' }] }",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Where do the reusable rules (verb-first, one line, bullet only) belong?", options: ["In the user message", "In the system prompt", "In max_tokens", "In the model name"], correct_index: 1, explanation: "Rules that stay the same for every task go in the system prompt, set once and reused." },
+      { question: "Why add \"Return only the bullet\" to the prompt?", options: ["It makes the model faster", "It stops the model adding a chatty preamble your tool can't parse", "It lowers the token cost to zero", "It is required by the API"], correct_index: 1, explanation: "A precise output shape keeps the reply to a bare bullet, so downstream checks don't choke on 'Sure! Here's...'." },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Prompt for quality, verify later", content: "A precise prompt gets you a clean bullet most of the time. You still add checks in later lessons for the runs where it slips." },
+    ],
     starter_code: `# Build the rewrite request payload by hand (no API call yet).
 # system holds the rules; the user message holds this task.
 
@@ -182,6 +221,42 @@ Cleanup handles formatting noise, not bad content. If the model returns "Here is
 ## The mental model
 
 Think of the reply as a package that sometimes arrives with extra tape and a bow. You're not judging the gift yet, just unwrapping it so what's inside is a plain string you can measure. Below you'll write \`clean_bullet\` and run it over a few messy replies.`,
+    animated_diagrams: [
+      {
+        title: "The cleanup pipeline",
+        caption: "Each step is dull alone; run in order and you always get a predictable bullet.",
+        loop: false,
+        nodes: [
+          { label: "Raw reply", sub: "messy string", detail: "Whatever the model sent: maybe '  - \"Managed the desk\"' with markers and quotes." },
+          { label: "Strip spaces", sub: "trim edges", detail: "Remove leading and trailing whitespace so a stray space can't hide the marker." },
+          { label: "Drop marker", sub: "one only", detail: "Peel off a single '- ', '* ', bullet dot, or numeric '1. ' if present." },
+          { label: "Strip quotes", sub: "both ends", detail: "If the text is wrapped in double quotes on both sides, remove them." },
+          { label: "Clean bullet", sub: "predictable", detail: "A plain string starting with the real first word, ready for later checks." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Normalize", definition: "Rewrite messy input into one predictable shape the rest of your code can rely on." },
+      { term: "Bullet marker", definition: "A leading '- ', '* ', bullet dot, or '1. ' that the model adds to look list-like." },
+      { term: "Pipeline", definition: "A fixed sequence of small steps where order matters and each feeds the next." },
+    ],
+    step_throughs: [
+      {
+        title: "Cleaning '  - Led the team '",
+        steps: [
+          { label: "start", detail: "The raw reply has spaces on both ends and a dash marker.", code: "raw = '  - Led the team '" },
+          { label: "strip()", detail: "Trim the edges so the marker sits at the very front.", code: "'- Led the team'" },
+          { label: "drop marker", detail: "It starts with '- ', so remove those two characters.", code: "'Led the team'" },
+          { label: "strip again", detail: "No quotes to remove; a final strip leaves the clean bullet.", code: "'Led the team'" },
+        ],
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why strip whitespace before looking for a bullet marker?", options: ["It runs faster", "A leading space would hide the marker so startswith misses it", "It removes the quotes", "The API requires it"], correct_index: 1, explanation: "'  - Led' does not start with '- ' until you trim the space first." },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Cleanup is not content repair", content: "Stripping markers fixes formatting noise, not a chatty preamble baked into the sentence. Tighten the prompt for that." },
+    ],
     starter_code: `# Turn a messy model reply into one clean bullet string.
 
 def clean_bullet(raw):
@@ -327,6 +402,41 @@ Two details keep the check honest. **Lowercase both sides** so "Responsible" and
 ## The mental model
 
 The prompt tells the model what good looks like. The verifier double-checks before the line goes on paper. Below you'll build \`starts_weak\` and score a batch of bullets.`,
+    animated_diagrams: [
+      {
+        title: "Checking the opener",
+        caption: "Lowercase the bullet, then test only its first words against the weak list.",
+        loop: false,
+        nodes: [
+          { label: "Bullet", sub: "one line", detail: "The cleaned bullet, like 'Responsible for the monthly budget'." },
+          { label: "Lowercase + strip", sub: "level the field", detail: "Fold case and trim so 'Responsible' and 'responsible' both match." },
+          { label: "startswith?", sub: "opener only", detail: "Test whether it begins with any weak phrase, not whether it contains one." },
+          { label: "Label", sub: "WEAK / STRONG", detail: "Begins weak means WEAK; otherwise it opened with a real action verb." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Action verb", definition: "A past-tense verb you owned: Led, Built, Cut, Grew, Automated." },
+      { term: "Weak opener", definition: "A passive lead-in like 'Responsible for' or 'Helped with' that reads as watching, not doing." },
+      { term: "Verification", definition: "Checking the model's output against a rule instead of trusting it followed the prompt." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Is \"Led a rewrite that helped cut load time\" weak?",
+        steps: [
+          "Lowercase it: 'led a rewrite that helped cut load time'.",
+          "Test startswith against each weak opener.",
+          "It begins with 'led', not 'helped', so no weak opener matches at the start.",
+          "'helped' appears mid-sentence, but startswith only checks the opening.",
+        ],
+        output: "STRONG (the word 'helped' in the middle does not count)",
+      },
+    ],
+    inline_quizzes: [
+      { question: "The prompt already bans weak openers. Why verify the output too?", options: ["Verification is required by law", "A model that obeys 95% of the time still ships a weak bullet one run in twenty", "It makes the model start with a verb", "To lower token cost"], correct_index: 1, explanation: "You prompt for quality and verify for reliability; the check catches the rare miss before it reaches paper." },
+      { question: "Why match with startswith instead of 'in'?", options: ["startswith is faster", "A strong bullet can contain 'helped' mid-sentence; it's only weak when it opens that way", "'in' does not work on strings", "There is no difference"], correct_index: 1, explanation: "The opener is what's weak, so you test the start, not any occurrence." },
+    ],
     starter_code: `# Flag bullets that open with a weak, passive phrase.
 
 WEAK_OPENERS = ["responsible for", "helped", "worked on",
@@ -460,6 +570,42 @@ You don't need a full grammar of "impact." You need a fast, cheap flag that surf
 ## The mental model
 
 Numbers are the load-bearing wall of a resume bullet. Your tool's job here is a metal detector: sweep each bullet, beep on the ones with no metal in them, and tell you to go find the number. Below you'll build \`has_number\` and sort a batch into quantified vs vague.`,
+    animated_diagrams: [
+      {
+        title: "The digit sweep",
+        caption: "Scan each character; one digit anywhere flips the bullet to quantified.",
+        loop: false,
+        nodes: [
+          { label: "Bullet", sub: "one line", detail: "A rewritten bullet, like 'Cut cloud costs by 30%'." },
+          { label: "Scan chars", sub: "one by one", detail: "Walk the string checking each character with .isdigit()." },
+          { label: "Any digit?", sub: "0-9 present", detail: "Stop at the first digit found; 'any' short-circuits once it hits one." },
+          { label: "Label", sub: "QUANTIFIED / VAGUE", detail: "A digit means QUANTIFIED; none means VAGUE, so a human adds the real figure." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Quantify", definition: "Back a claim with a concrete number: percent, count, dollars, or time saved." },
+      { term: "Heuristic", definition: "A fast, cheap rule that's right most of the time without trying to be perfect." },
+      { term: "Placeholder", definition: "A bracketed stand-in like [X%] the model inserts so you know a number is missing." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Does has_number(\"Improved team morale\") return True?",
+        steps: [
+          "Walk each character: I, m, p, r, o, v, e, d, space, t, ...",
+          "None of them satisfy .isdigit().",
+          "any(...) finds no digit, so it returns False.",
+        ],
+        output: "False, so the bullet is labeled VAGUE",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why is a plain digit check good enough here?", options: ["It proves every bullet is strong", "It's a cheap flag that surfaces most vague bullets so a human adds the real figure", "It detects spelled-out numbers like 'ten'", "It rewrites the bullet automatically"], correct_index: 1, explanation: "You want a fast signal, not a proof; a digit scan catches the vast majority of fluffy lines for one line of code." },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "The model can't invent your numbers", content: "It doesn't know your real metrics, so a smart prompt asks for a [X%] placeholder when the task has no numbers, telling you exactly what fact to fill in." },
+    ],
     starter_code: `# Flag bullets that contain no numbers (likely vague).
 
 def has_number(bullet):
@@ -587,6 +733,40 @@ The one bug to avoid: never slice by character count in the middle of a word. \`
 ## The mental model
 
 Think of the bullet as a headline with a fixed budget, like a tweet. When it runs over, you don't shrink the font, you cut words from the end, and if the cut hurt the meaning, you rewrite. Below you'll build \`enforce_length\` and trim to a limit.`,
+    animated_diagrams: [
+      {
+        title: "Trimming to the word budget",
+        caption: "Split into words, keep the first N, and flag whether you had to cut.",
+        loop: false,
+        nodes: [
+          { label: "Bullet", sub: "maybe long", detail: "The cleaned bullet, which might run past the word budget." },
+          { label: "split()", sub: "into words", detail: "Break on whitespace into a list of words; this also collapses double spaces." },
+          { label: "Count vs cap", sub: "compare", detail: "If the word count is within max_words, return it unchanged with flag False." },
+          { label: "Join first N", sub: "word boundary", detail: "Over budget: rejoin the first max_words words so no word is cut in half." },
+          { label: "Return + flag", sub: "bullet, cut?", detail: "Hand back the bullet and a bool saying whether a trim happened." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Word boundary", definition: "The gap between whole words; trimming here never leaves a half-word." },
+      { term: "Truncation", definition: "Cutting text to fit a limit; a bad truncation can drop the number at the end." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "enforce_length(\"Cut cloud costs by thirty percent\", 6)",
+        steps: [
+          "split() gives ['Cut','cloud','costs','by','thirty','percent'], 6 words.",
+          "6 is not greater than the cap of 6, so it fits.",
+          "Return the bullet unchanged with the flag False.",
+        ],
+        output: "('Cut cloud costs by thirty percent', False)",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why trim on words instead of slicing bullet[:100] by characters?", options: ["Character slicing is slower", "A character slice can leave a half-word like 'pipeli'; word slicing stays readable", "The API rejects character slices", "There is no difference"], correct_index: 1, explanation: "Splitting into words and rejoining the first N gives clean output every time." },
+      { question: "Why return a flag saying whether you trimmed?", options: ["The flag is decorative", "A hard cut can lop off the ending number, so the tool should warn you to rewrite shorter", "It doubles the speed", "It is required syntax"], correct_index: 1, explanation: "The flag lets your tool tell you a trim may have damaged meaning instead of silently shipping a chopped line." },
+    ],
     starter_code: `# Enforce a word limit, trimming at a word boundary.
 
 def enforce_length(bullet, max_words):
@@ -715,6 +895,39 @@ The empty case is the one that crashes tools in the wild: a blank line in the in
 ## The mental model
 
 The validator is the bouncer at the door. It checks every rule and either waves the bullet through or hands back the exact list of reasons it's turned away. Below you'll build \`validate\` end to end.`,
+    animated_diagrams: [
+      {
+        title: "Validate, then retry with the reason",
+        caption: "One validator collects every problem; failures feed back into a sharper retry.",
+        loop: true,
+        nodes: [
+          { label: "Bullet", sub: "cleaned reply", detail: "The bullet after cleanup, ready to be judged against all the rules." },
+          { label: "Empty?", sub: "short-circuit", detail: "If it's empty, return ['EMPTY'] alone; the other checks would just add noise." },
+          { label: "Run all checks", sub: "WEAK / NONUM / LONG", detail: "Collect every failing rule into one list in a fixed order." },
+          { label: "Problems?", sub: "list vs empty", detail: "Empty list means it passed and you return the bullet." },
+          { label: "Retry with why", sub: "feed back codes", detail: "Tell the model exactly what failed and call again, capped so it can't loop forever." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Validator", definition: "One function that checks every rule and returns the list of what's wrong (empty means passed)." },
+      { term: "Short-circuit", definition: "Returning early on a decisive case (empty input) so later checks never run." },
+      { term: "Retry with feedback", definition: "Re-calling the model with the failure reasons attached so attempt two is better than a blind redo." },
+    ],
+    step_throughs: [
+      {
+        title: "validate('Responsible for the office supplies', ['responsible for'], 8)",
+        steps: [
+          { label: "strip", detail: "Text is non-empty, so we skip the EMPTY short-circuit.", code: "text = 'Responsible for the office supplies'" },
+          { label: "WEAK?", detail: "Lowercased, it startswith 'responsible for', so append WEAK.", code: "problems = ['WEAK']" },
+          { label: "NONUM?", detail: "No digit anywhere, so append NONUM.", code: "problems = ['WEAK','NONUM']" },
+          { label: "LONG?", detail: "Five words, under the cap of 8, so nothing added.", code: "return ['WEAK','NONUM']" },
+        ],
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why does the EMPTY check return early instead of joining the other codes?", options: ["Empty text is faster to check", "An empty bullet isn't weak or long, it's nothing, so the other codes would just be noise", "The API needs EMPTY first", "It saves memory"], correct_index: 1, explanation: "Empty short-circuits: it's the one decisive case, and every other check would add meaningless codes." },
+    ],
     starter_code: `# One validator that checks all the bullet rules at once.
 
 def validate(bullet, weak_openers, max_words):
@@ -856,6 +1069,41 @@ A demo rewrites the one bullet you tested. A real tool survives the messy input 
 ## The mental model
 
 Think of the batch as a shopping cart. Before checkout you pull out the duplicate items and glance at the total. Dedupe trims the cart, and the token estimate is the price tag you read before you swipe. Below you'll build both and produce a batch report.`,
+    animated_diagrams: [
+      {
+        title: "Trim the cart, then read the price",
+        caption: "Dedupe drops repeated work; the token estimate tells you the bill before you spend.",
+        loop: false,
+        nodes: [
+          { label: "Raw tasks", sub: "messy paste", detail: "Fifteen or twenty lines with duplicates and blanks mixed in." },
+          { label: "Dedupe", sub: "case-insensitive", detail: "Keep the first of each task; 'Managed staff' and 'managed staff' collapse into one." },
+          { label: "Drop blanks", sub: "for free", detail: "An empty stripped key is falsy, so blank lines fall out without extra code." },
+          { label: "Estimate tokens", sub: "~4 chars each", detail: "Sum max(1, len(task) // 4) over the unique tasks for a rough cost." },
+          { label: "Report", sub: "count + cost", detail: "Print 'N unique, about T tokens, continue?' before any call fires." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Deduplicate", definition: "Remove repeated inputs so you don't pay to rewrite the same task twice." },
+      { term: "Token estimate", definition: "A rough character-based guess of cost, about one token per four characters." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "process_batch(['Managed staff', 'managed staff', 'Led sales', '  '])",
+        steps: [
+          "'Managed staff' -> key 'managed staff', new, keep it.",
+          "'managed staff' -> same key, already seen, skip.",
+          "'Led sales' -> key 'led sales', new, keep it.",
+          "'  ' -> empty key, falsy, skip.",
+          "Tokens: max(1, 13//4)=3 for 'Managed staff' plus max(1, 9//4)=2 for 'Led sales'.",
+        ],
+        output: "unique = ['Managed staff', 'Led sales'], total = 5 tokens",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why dedupe before calling the model instead of after?", options: ["The output looks nicer", "Every rewrite is a paid call, so rewriting the same task three times wastes money", "The model rejects duplicates", "It changes the token math"], correct_index: 1, explanation: "Deduping first means you never spend tokens rewriting an input you already handled." },
+    ],
     starter_code: `# Dedupe a batch of tasks (case-insensitive) and estimate token cost.
 
 def process_batch(tasks):
@@ -988,6 +1236,37 @@ Finishing this final lesson records the build in your **Portfolio** tab: the tit
 ## Ship it well
 
 Two finishing touches make it read as done. Print the cost estimate before running so users aren't surprised, and flag any bullet that failed validation instead of hiding it. An honest "[check] add a number here" is worth more than a silently weak line. Below you'll assemble the final section: dedupe, drop blanks, and print the clean list.`,
+    animated_diagrams: [
+      {
+        title: "The whole booster pipeline",
+        caption: "Every lesson's piece lined up: the same input-to-ship loop under most AI tools.",
+        loop: false,
+        nodes: [
+          { label: "Read tasks", sub: "input", detail: "Take the raw list of task descriptions the user pasted in." },
+          { label: "Dedupe", sub: "trim + estimate", detail: "Drop duplicates and blanks, then estimate the token cost before spending." },
+          { label: "Rewrite + retry", sub: "prompt & call", detail: "Rewrite each task, validating and re-asking with the reason when a bullet fails." },
+          { label: "Validate", sub: "verify", detail: "Run the rules once more and flag any bullet that still needs a fix." },
+          { label: "Print section", sub: "ship", detail: "Output a clean bullet list you can paste straight into a resume." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Pipeline", definition: "The assembled stages, input to ship, that every project in this track shares." },
+      { term: "Deliverable", definition: "A tool someone else can run from your instructions alone, not just a one-off demo." },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Is it really shipped?",
+        questions: [
+          { type: "true_false", question: "\"Shipped\" here means the tool is deployed to the cloud.", correct_answer: "false", explanation: "Shipped means it runs from a clean start on a whole list, survives messy input, and someone else could use it from your instructions." },
+          { type: "true_false", question: "A bullet that fails validation should be flagged rather than hidden.", correct_answer: "true", explanation: "An honest '[check] add a number here' is worth more than a silently weak line." },
+          { type: "fill_in", question: "Finishing this lesson records the build in your ____ tab.", correct_answer: "portfolio", explanation: "The Portfolio tab is the shelf of finished tools that is the point of the track." },
+        ],
+      },
+    ],
+    inline_quizzes: [
+      { question: "Which of these is NOT part of what 'done' means for this tool?", options: ["It runs on a whole list from a clean start", "It handles blanks and duplicates without crashing", "It is deployed to a production server", "Someone else could paste tasks and get usable bullets"], correct_index: 2, explanation: "Deployment isn't required; a real, runnable deliverable that survives messy input is the bar here." },
+    ],
     starter_code: `# Ship: assemble a clean resume section from final bullets.
 # Drop blanks, dedupe case-insensitively, print a numbered-free bullet list.
 

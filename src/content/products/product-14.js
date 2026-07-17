@@ -79,6 +79,32 @@ Get this shape wrong (wrong key name, forgotten \`decode\`, mismatched \`media_t
 ## The mental model
 
 Text prompts are one string in a dict. Image prompts are two dicts in a list: a picture wrapped in an envelope labeled with its encoding, next to your instruction. Below, build that envelope in pure Python with no network, so you own the exact structure before you spend an API call on it.`,
+      animated_diagrams: [
+        {
+          title: "Wrapping a screenshot for the API",
+          caption: "Bytes become text, then sit in the same message list as your prompt.",
+          loop: false,
+          nodes: [
+            { label: "PNG bytes", sub: "on disk", detail: "You read the screenshot file as raw bytes, which JSON cannot hold directly." },
+            { label: "b64encode", sub: "bytes to bytes", detail: "base64.b64encode rewrites the bytes as base64, still a bytes object." },
+            { label: "decode utf-8", sub: "to string", detail: ".decode('utf-8') turns that into a normal Python string a dict can store." },
+            { label: "Image block", sub: "source dict", detail: "The string goes into a source dict with type, media_type, and data." },
+            { label: "Messages", sub: "user turn", detail: "Image block plus text block make one user message the model reads." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Content block", definition: "One typed piece of a message, such as an image block or a text block." },
+        { term: "Base64 encoding", definition: "Rewriting raw bytes as plain text characters so they fit inside a JSON string." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does .decode('utf-8') do after base64.b64encode?",
+          options: ["Compresses the image", "Turns the encoded bytes into a str for the dict", "Changes the media_type", "Sends the request"],
+          correct_index: 1,
+          explanation: "b64encode returns a bytes object. decode('utf-8') turns it into a normal string you can put in the content dict.",
+        },
+      ],
       starter_code: `# Build the content-block list a vision message needs, no network call.
 import base64
 
@@ -219,6 +245,32 @@ It works until the day it doesn't: some input, some model version, some case whe
 ## The mental model
 
 Think of \`resp.content\` as an inbox, not a single letter. Most days one letter (a text block) is waiting, so grabbing the first one feels fine. But an inbox can hold more than one item, and code that only ever checks the first slot eventually misses something real. Below, practice reading a content list defensively in pure Python, no network needed.`,
+      animated_diagrams: [
+        {
+          title: "Reading the reply defensively",
+          caption: "Loop the whole content list and keep only the text blocks.",
+          loop: true,
+          nodes: [
+            { label: "resp.content", sub: "list of blocks", detail: "The reply is a list, not a string, even when it usually holds one block." },
+            { label: "Take a block", sub: "loop", detail: "Walk every block instead of grabbing only content[0]." },
+            { label: "type text?", sub: "filter", detail: "Keep the block if its type is text, skip anything else." },
+            { label: "Collect text", sub: "append", detail: "Gather the text from each matching block into a list of parts." },
+            { label: "Join", sub: "one string", detail: "Stitch the parts together in order into the final description." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Content block list", definition: "The reply's content field, a list where each entry has a type like text or tool_use." },
+        { term: "Defensive parsing", definition: "Reading a response by filtering for what you expect instead of assuming its exact shape." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why prefer looping over content instead of just content[0].text?",
+          options: ["It is shorter", "A reply can have extra blocks, and [0] silently drops them", "content[0] does not exist", "It changes the model"],
+          correct_index: 1,
+          explanation: "A vision reply can include more than one block. Grabbing only the first silently loses anything after it and can break on non-text blocks.",
+        },
+      ],
       starter_code: `# The reply's content is a list of blocks. Pull out only the text ones.
 
 def extract_text(blocks):
@@ -373,6 +425,32 @@ Everything from lesson 4 onward reads fields off this dictionary: HTML generatio
 ## The mental model
 
 Prose is for humans. JSON is for the next function in your pipeline. The prompt is where you trade the model's freedom for your code's ability to trust the shape of what it gets. Below, parse a sample structured reply and count what it found, no network call needed.`,
+      animated_diagrams: [
+        {
+          title: "From prose to walkable JSON",
+          caption: "Pin the schema, then slice the object out of whatever wraps it.",
+          loop: false,
+          nodes: [
+            { label: "Design schema", sub: "layout + components", detail: "Decide the exact keys you want back before writing the prompt." },
+            { label: "Prompt", sub: "name the keys", detail: "Tell the model to return only JSON with those exact keys and types." },
+            { label: "Reply", sub: "maybe wrapped", detail: "The JSON may still arrive inside a sentence or a code fence." },
+            { label: "Slice + parse", sub: "first { to last }", detail: "Cut from the first brace to the last, then json.loads that piece." },
+            { label: "Dict", sub: "downstream ready", detail: "Every later lesson reads fields off this clean dictionary." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Schema", definition: "The fixed set of keys and allowed values you require the model's JSON to follow." },
+        { term: "Component", definition: "One UI element the model spotted, with a type like button or heading and its visible text." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why list the exact allowed 'type' values in the prompt?",
+          options: ["To make it longer", "So the model reuses your types instead of inventing a new shape each run", "To slow the model down", "It is required by the API"],
+          correct_index: 1,
+          explanation: "Naming the exact keys and allowed types is what separates a schema the model follows from one it improvises differently every run.",
+        },
+      ],
       starter_code: `# Extract and parse a structured UI description from a raw model reply.
 import json
 
@@ -518,6 +596,43 @@ This step turns "the model described a UI" into "here's a file to edit." A descr
 ## The mental model
 
 A component is data. A tag is its rendering. The map is the whole translation layer between them, and a safe default keeps an unexpected \`type\` from becoming a crash instead of a slightly generic \`<div>\`. Below, build that translation in pure Python.`,
+      animated_diagrams: [
+        {
+          title: "Turning a component into a tag",
+          caption: "Look up the tag, branch on self-closing, emit the markup.",
+          loop: true,
+          nodes: [
+            { label: "Component", sub: "type + text", detail: "Each entry from the parsed description carries a type and its text." },
+            { label: "Look up tag", sub: "TAG_MAP.get", detail: "Map the type to an HTML tag, defaulting to div for unknown types." },
+            { label: "Self-closing?", sub: "input/img", detail: "input and img take no text, so they render as a single self-closing tag." },
+            { label: "Emit HTML", sub: "open/close tag", detail: "Everything else wraps its text in an open and close tag." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Tag map", definition: "A dictionary from component type to HTML tag, replacing a long if/elif chain." },
+        { term: "Self-closing tag", definition: "An HTML tag like input or img that has no closing tag and wraps no text." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Render {\"type\": \"widget\", \"text\": \"Mystery\"} when TAG_MAP has no 'widget' key.",
+          steps: [
+            "TAG_MAP.get('widget', 'div') finds no match, so tag becomes 'div'.",
+            "'div' is not in SELF_CLOSING, so take the normal branch.",
+            "text is 'Mystery', so wrap it in open and close div tags.",
+          ],
+          output: "<div>Mystery</div>",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does TAG_MAP.get(type, 'div') give you for an unknown type?",
+          options: ["A crash", "None", "A generic div fallback", "An empty string"],
+          correct_index: 2,
+          explanation: "The second argument to .get is the default. Unknown types degrade quietly to a div instead of raising a KeyError.",
+        },
+      ],
       starter_code: `# Map each component's type to an HTML tag and render it.
 
 TAG_MAP = {
@@ -702,6 +817,34 @@ You could ask the model for x/y coordinates and hard-code absolute positions, bu
 ## The mental model
 
 A component's type says what it is. Its region says where it roughly belongs. Grid areas are the bridge between "roughly belongs in the sidebar" and working CSS. Below, generate the grid-area rule for a list of components in pure Python, no browser needed to check your work.`,
+      animated_diagrams: [
+        {
+          title: "Placing a component with grid-area",
+          caption: "A region name becomes a CSS rule that positions the element.",
+          loop: false,
+          nodes: [
+            { label: "Component", sub: "has region", detail: "The extended schema tags each element with header, sidebar, main, or footer." },
+            { label: "Resolve region", sub: "or main", detail: "A missing or empty region falls back to main, the safest default." },
+            { label: "Build id", sub: "component-i", detail: "Give the element a 1-indexed id so markup and CSS line up." },
+            { label: "grid-area rule", sub: "CSS out", detail: "Emit a rule that assigns that id to its named grid area." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "grid-area", definition: "A CSS Grid property that assigns an element to a named region of the layout." },
+        { term: "Region", definition: "A coarse page zone like header or sidebar, used instead of exact pixel coordinates." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why name a region instead of hard-coding x/y pixel positions?",
+          options: ["Pixels are slower", "Regions survive resizing and edits; fixed coordinates break", "The model prefers it", "Grid requires pixels"],
+          correct_index: 1,
+          explanation: "Naming a region like sidebar survives window resizes, content changes, and later edits. Absolute coordinates freeze the layout to one screen size.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Default to main", content: "component.get('region') or 'main' handles both a missing key and an empty string in one expression, and most of a screenshot is main content anyway." },
+      ],
       starter_code: `# Generate a CSS grid-area rule for each component, based on its region.
 
 def css_rule(component, index):
@@ -838,6 +981,35 @@ A description tool that throws a \`KeyError\` on a live screenshot isn't a tool.
 ## The mental model
 
 Treat the model's structured output the way you'd treat form input from a stranger on the internet: plausible, usually fine, never fully trusted. Normalize once at the door and every room past it is safe. Below, build that normalizer in pure Python.`,
+      animated_diagrams: [
+        {
+          title: "Normalizing a messy description",
+          caption: "One pass at the door fills every default so downstream code stays simple.",
+          loop: true,
+          nodes: [
+            { label: "Raw description", sub: "maybe broken", detail: "The parsed JSON may miss layout, miss text, or use an unknown type." },
+            { label: "Fill layout", sub: "or single-column", detail: "A missing layout key defaults to single-column." },
+            { label: "Check each type", sub: "allowed set", detail: "A type not in the allowed set is downgraded to div." },
+            { label: "Fill text", sub: "or empty", detail: "A missing text becomes an empty string, never the literal None." },
+            { label: "Clean dict", sub: "safe downstream", detail: "Everything past this point can assume a complete, valid shape." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Normalize", definition: "Fill in defaults and repair fields so every downstream function gets a guaranteed shape." },
+        { term: "Allowed set", definition: "The fixed set of valid type values; anything outside it is replaced with a safe fallback." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does 'x or default' return when x is None, an empty string, or an empty list?",
+          options: ["x unchanged", "default", "None", "It raises"],
+          correct_index: 1,
+          explanation: "All of those are falsy, so 'x or default' returns the default. That is why one expression handles missing, null, and empty cases.",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "Normalize once, at the door", content: "Clean the model's output right after parsing and every later function can use description['layout'] without its own scattered .get() guards." },
+      ],
       starter_code: `# Normalize a messy description dict into a guaranteed-clean shape.
 
 ALLOWED_TYPES = {"button", "heading", "text", "input", "image", "link"}
@@ -1010,6 +1182,44 @@ A describer tool that works fine on your 800px test image but silently costs ten
 ## The mental model
 
 Every extra pixel is tokens you pay for and didn't need to read a button label. Resize down to just enough to read, and both your latency and your bill stop depending on what monitor the user happened to screenshot from. Below, compute the resized dimensions and the resulting token estimate. Pure math, no image library needed.`,
+      animated_diagrams: [
+        {
+          title: "Downscale before you send",
+          caption: "Cap the longest side, then estimate the token bill from pixel area.",
+          loop: false,
+          nodes: [
+            { label: "Screenshot", sub: "maybe 4K", detail: "A modern laptop screenshot can be thousands of pixels wide." },
+            { label: "Fits max_dim?", sub: "check both", detail: "If both sides already fit, keep the image unchanged." },
+            { label: "Scale down", sub: "keep ratio", detail: "Otherwise shrink both sides by the same factor with integer math." },
+            { label: "Estimate tokens", sub: "area / 750", detail: "Token cost is roughly width times height over 750." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Downscaling", definition: "Reducing an image's pixel dimensions before sending it, cutting token cost and latency." },
+        { term: "Aspect ratio", definition: "The width-to-height proportion, kept fixed by scaling both sides by the same factor." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "resize_dimensions(2000, 1000, 1024): cap the longest side to 1024.",
+          steps: [
+            "Both sides are not within 1024, so scaling is needed.",
+            "longest = max(2000, 1000) = 2000.",
+            "new_width = 2000 * 1024 // 2000 = 1024.",
+            "new_height = 1000 * 1024 // 2000 = 512.",
+          ],
+          output: "(1024, 512)",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why resize the image BEFORE base64-encoding, not after?",
+          options: ["Base64 is one-way", "Base64 only re-encodes whatever pixels you give it, so shrinking first is what cuts cost", "Encoding resizes automatically", "Order does not matter"],
+          correct_index: 1,
+          explanation: "Base64 just rewrites bytes. The token cost comes from pixel area, so you must shrink the pixels before encoding to actually save.",
+        },
+      ],
       starter_code: `# Cap an image's dimensions and estimate the resulting token cost.
 
 def resize_dimensions(width, height, max_dim):
@@ -1173,6 +1383,40 @@ Finishing this lesson records the Screenshot Describer in your **Portfolio** tab
 ## The mental model
 
 A shipped tool hides its plumbing behind one flag. The user picks "describe" or "code," and everything about images, JSON, and defaults happens underneath. Below, build that final dispatcher. Last piece, then it's done.`,
+      animated_diagrams: [
+        {
+          title: "One flag, two outputs",
+          caption: "The same pipeline runs; a single mode argument picks the ending.",
+          loop: false,
+          nodes: [
+            { label: "Screenshot", sub: "file in", detail: "Read and encode the image, as in lesson one." },
+            { label: "Model + parse", sub: "extract text", detail: "Send it, pull the text blocks, and parse the JSON." },
+            { label: "Normalize", sub: "clean shape", detail: "Fill defaults so the render step never hits a missing key." },
+            { label: "Dispatch mode", sub: "describe/code", detail: "One argument decides between a summary and starter HTML." },
+            { label: "Output", sub: "text or HTML", detail: "Print the paragraph or the wrapped HTML document." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Dispatcher", definition: "A function that routes to different output logic based on a mode argument." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What do the describe and code modes share?",
+          options: ["Nothing", "Every step up through normalization; only the final render differs", "Only the API key", "The same output"],
+          correct_index: 1,
+          explanation: "Both modes run image encoding, parsing, and normalization identically. Only the last render step branches.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "In code mode, the pipeline calls a different model than in describe mode.", correct_answer: "false", explanation: "Same pipeline and same call. Only the final render step differs." },
+            { type: "fill_in", question: "The function that routes to describe or code based on the mode is called the what?", correct_answer: "dispatcher", explanation: "The dispatcher picks which render function runs." },
+          ],
+        },
+      ],
       starter_code: `# The final dispatcher: pick describe-text or generated-HTML output.
 
 def render_describe(description):

@@ -63,6 +63,57 @@ Packaging is also your first line of defense. Check the input before you call th
 ## The mental model
 
 Think of \`handle_request\` as the front door to your whole app. The web server, a test, future-you debugging at 2am all walk through that same door with a dict and get a dict back. Below, build that validation gate in pure Python. No network yet, just the contract every layer after this depends on.`,
+    key_terms: [
+      { term: "Entry point", definition: "The single function every caller goes through to reach the model, so there is one place to add logging, cost, and guards later." },
+      { term: "Validation gate", definition: "A check on the incoming payload that rejects bad input before any money is spent on a model call." },
+      { term: "Structured response", definition: "Returning a plain dict like ok True with a reply, or ok False with an error, so every caller handles success and failure the same way." },
+    ],
+    animated_diagrams: [
+      {
+        title: "One request through the front door",
+        caption: "Every caller hands handle_request a dict, it validates, calls the model only if the input is good, and returns a dict.",
+        loop: false,
+        nodes: [
+          { label: "Payload in", sub: "plain dict", detail: "A web route, a test, or a CLI passes one dict with a prompt field to handle_request." },
+          { label: "Validate", sub: "check the prompt", detail: "Strip the prompt and reject it if empty, before any API call is made." },
+          { label: "Call model", sub: "only if valid", detail: "A clean prompt reaches call_model, the one place that touches the Anthropic client." },
+          { label: "Dict out", sub: "ok or error", detail: "The result comes back as a structured dict, success or failure in the same shape." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Run handle_request on a payload whose prompt is three spaces.",
+        steps: [
+          "payload.get returns the string of three spaces since the prompt key is present.",
+          "Call .strip() on it, which removes the whitespace and leaves the empty string.",
+          "The empty string is falsy, so the 'if not prompt' check is True.",
+          "Return early with the error dict, never reaching call_model.",
+        ],
+        output: "An ok False dict with error 'missing prompt', and no money spent on a model call.",
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "one door means one fix", content: "When cost tracking and a budget guard get added later, they wrap this single function. Scatter the model call across five files and you patch five places every time." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why should handle_request return an ok False error dict instead of raising an exception on bad input?",
+        options: ["Exceptions are slower", "So every caller (route, test, CLI) handles success and failure in the same shape instead of wrapping each call in try/except", "The API forbids exceptions", "Dicts use less memory"],
+        correct_index: 1,
+        explanation: "A consistent dict shape means callers branch on result['ok'] every time. Raising would force each caller to catch and translate the exception itself.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "An empty or whitespace-only prompt should still reach the model call.", correct_answer: "false", explanation: "You validate first, so a missing prompt returns an error dict and never pays for a failing API call." },
+          { type: "fill_in", question: "What string method turns a padded '  hi  ' into 'hi' before the empty check?", correct_answer: "strip", explanation: "strip() removes surrounding whitespace so a whitespace-only prompt collapses to the falsy empty string." },
+        ],
+      },
+    ],
     starter_code: `def call_model(prompt):
     return f"[stub reply to: {prompt}]"
 
@@ -198,6 +249,54 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ## The mental model
 
 A web framework is a router. It matches an incoming method and path to a Python function and hands back whatever that function returns. Below, build that routing logic in pure Python with no network and no framework: a dict of registered routes and a dispatcher that decides 200 or 404 for each request. That's what a deployed server does under the hood. Here you build it offline first.`,
+    key_terms: [
+      { term: "FastAPI", definition: "A small Python web framework that parses and validates the JSON request body for you before handing it to your function." },
+      { term: "uvicorn", definition: "The server process that listens on a port and forwards incoming requests into your FastAPI app." },
+      { term: "Health route", definition: "A cheap endpoint like GET /health that returns a fixed ok with no model call, so infrastructure can check the service is alive without spending tokens." },
+    ],
+    animated_diagrams: [
+      {
+        title: "How the router dispatches a request",
+        caption: "A request carries a method and path. The router matches them to a handler, or answers 404 if nothing is registered.",
+        loop: false,
+        nodes: [
+          { label: "Request", sub: "method + path", detail: "An incoming request arrives as a method like POST and a path like /generate." },
+          { label: "Look up route", sub: "match the pair", detail: "The router checks its table for a handler registered under that exact (method, path) key." },
+          { label: "Found?", sub: "handler or none", detail: "A hit runs the handler; a miss means no route was registered for that method and path." },
+          { label: "Response", sub: "200 or 404", detail: "Return 200 with the handler's body, or 404 with a not-found error when there is no match." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Route a GET /generate when only POST /generate and GET /health are registered.",
+        steps: [
+          "Build the lookup key as the tuple (\"GET\", \"/generate\").",
+          "Search the routes table: the registered keys are (\"POST\", \"/generate\") and (\"GET\", \"/health\").",
+          "Neither key matches, because the path is right but the method is wrong.",
+          "routes.get returns None, so the dispatcher falls through to the not-found branch.",
+        ],
+        output: "A 404 response with body {'error': 'not found'}, since method and path must both match.",
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "the route is a thin wrapper", content: "The /generate handler does not rewrite your model logic. It parses the body and hands it to the handle_request function you already built. The web layer only adds routing." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why key the routes table on the tuple (method, path) instead of the path alone?",
+        options: ["Tuples are faster than strings", "So GET and POST on the same path map to different handlers instead of colliding", "The path alone is not hashable", "FastAPI requires tuples"],
+        correct_index: 1,
+        explanation: "The same path often supports different methods. Keying on (method, path) keeps GET /generate and POST /generate as separate, non-colliding routes.",
+      },
+      {
+        question: "Why does /health return a fixed status with no model call inside it?",
+        options: ["Model calls are not allowed in GET routes", "So load balancers and monitors can ping it constantly to check the service is up without spending a token each time", "It makes the route load faster in a browser", "Health checks must be POST"],
+        correct_index: 1,
+        explanation: "Infrastructure pings health routes every few seconds. A cheap fixed reply lets them confirm the process is alive without paying for a model call on every ping.",
+      },
+    ],
     starter_code: `routes = {}
 
 def add_route(method, path, handler):
@@ -343,6 +442,57 @@ Without this, "how many requests did we serve today" and "why did the bill spike
 ## The mental model
 
 Every request leaves a receipt behind, even if nobody reads it that day. Below, build the record shape and a small in-memory log. No file or network yet, just the structure you'll aggregate in the coming lessons.`,
+    key_terms: [
+      { term: "Structured logging", definition: "Writing one record per request with a fixed set of fields (tokens, latency, status) that a machine can read back later, instead of free-form print output." },
+      { term: "JSON Lines", definition: "A file format with one JSON object per line, so you can append a record at a time and parse a single line without loading the whole file." },
+      { term: "perf_counter", definition: "A high-resolution clock built for measuring how long something took, unlike time.time which is for wall-clock timestamps and can jump when the clock adjusts." },
+    ],
+    animated_diagrams: [
+      {
+        title: "One request leaves one receipt",
+        caption: "Time the call, build a fixed-shape record from the token counts, and append it. Every later feature reads these records.",
+        loop: true,
+        nodes: [
+          { label: "Start timer", sub: "perf_counter", detail: "Read the high-resolution clock right before the model call so you measure real duration." },
+          { label: "Call model", sub: "get the reply", detail: "The model responds with a reply and reports how many input and output tokens it used." },
+          { label: "Build record", sub: "fixed shape", detail: "Assemble tokens, total, latency, and status into one dict with the same keys every time." },
+          { label: "Append", sub: "one JSON line", detail: "Write the record as a single line to the log, ready for the next request to append after it." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Build a record for a call with 120 input tokens, 45 output tokens, and 850ms latency, then read total tokens back.",
+        steps: [
+          "make_log_record stores input_tokens 120 and output_tokens 45.",
+          "It computes total_tokens once as 120 + 45 = 165 and stores that too.",
+          "latency_ms 850 and status 'ok' (the default) are filled in.",
+          "Later, sum(r['total_tokens'] for r in LOG) reads the stored 165 without recomputing.",
+        ],
+        output: "A record with total_tokens 165, so aggregates are arithmetic over stored fields.",
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "do not log the prompt text", content: "Storing every character of every conversation is a privacy and storage liability. Token counts and timing tell you almost everything about cost and health without keeping what people actually said." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why use time.perf_counter() instead of time.time() to measure latency?",
+        options: ["perf_counter returns a nicer number", "perf_counter is a high-resolution clock built for durations, while time.time can jump around when the system clock adjusts", "time.time is deprecated", "perf_counter is the only one that works on servers"],
+        correct_index: 1,
+        explanation: "Durations need a monotonic high-resolution clock. time.time is a wall-clock timestamp that can shift, which corrupts a measured duration.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A good request log stores the full prompt and reply text for every call.", correct_answer: "false", explanation: "You deliberately leave out the text. Token counts and timing cover cost and health without the privacy and storage cost." },
+          { type: "fill_in", question: "What file format stores one JSON object per line so you can append and stream records?", correct_answer: "jsonl", explanation: "JSON Lines (jsonl) puts one record per line, so appending and parsing a single line is cheap." },
+        ],
+      },
+    ],
     starter_code: `def make_log_record(input_tokens, output_tokens, latency_ms, status="ok"):
     # TODO: return a dict with keys: input_tokens, output_tokens,
     #       total_tokens (input + output), latency_ms, status
@@ -481,6 +631,62 @@ Money math with floats can drift by fractions of a cent over millions of calls. 
 ## The mental model
 
 Token counts are the ingredients, the pricing table is the recipe, and cost is what falls out when you combine them. Below, compute cost per call in pure Python using fixed integer prices (cents per 1,000 tokens) so the arithmetic is exact, with no floating point rounding to fight.`,
+    key_terms: [
+      { term: "Price per million tokens", definition: "The unit providers publish rates in, split into a separate input rate and output rate." },
+      { term: "Input vs output pricing", definition: "Output tokens usually cost several times more than input tokens, because generating text is more expensive than reading it." },
+      { term: "Integer cents", definition: "Tracking cost as whole cents with integer floor division, so rounding errors do not compound over millions of calls the way floats can." },
+    ],
+    animated_diagrams: [
+      {
+        title: "From token counts to a cost",
+        caption: "Look up the model's rates, price the input and output halves separately, then add them.",
+        loop: false,
+        nodes: [
+          { label: "Token counts", sub: "input + output", detail: "The log record already holds how many input and output tokens the call used." },
+          { label: "Look up rates", sub: "per the model", detail: "Find this model's input rate and output rate in the pricing table." },
+          { label: "Price each half", sub: "in and out apart", detail: "Multiply input tokens by the input rate and output tokens by the higher output rate, separately." },
+          { label: "Sum", sub: "cost of the call", detail: "Add the two halves to get one cost, stored on the same record as everything else." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Cost a sonnet call of 2000 input and 2000 output tokens, where sonnet is 300 cents/1000 input and 1500 cents/1000 output.",
+        steps: [
+          "input_cost = 2000 * 300 // 1000. That is 600000 // 1000 = 600 cents.",
+          "output_cost = 2000 * 1500 // 1000. That is 3000000 // 1000 = 3000 cents.",
+          "Notice output costs 5x input here even though the token counts are identical.",
+          "Add the halves: 600 + 3000.",
+        ],
+        output: "3600 cents for the call, dominated by the pricier output tokens.",
+      },
+    ],
+    comparison_tables: [
+      {
+        title: "Per-request cost vs a monthly bill",
+        columns: ["Aspect", "Per-request (this lesson)", "Provider monthly bill"],
+        rows: [
+          ["When you see it", "The moment each call finishes", "Weeks later, at billing time"],
+          ["Catches", "A prompt bug or runaway loop right away", "The damage only after it is done"],
+          ["Granularity", "One number per call, per model", "One lump sum for the period"],
+        ],
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why compute cost per request instead of waiting for the provider's monthly bill?",
+        options: ["The monthly bill is always wrong", "Per-request cost catches a bug the moment it happens (a loop, a bloated prompt, a pricier model) instead of at the end of the month", "Providers charge extra for monthly totals", "It is required to call the API"],
+        correct_index: 1,
+        explanation: "A live per-call number surfaces problems immediately. The monthly total tells you far too late to prevent the spend.",
+      },
+      {
+        question: "Why do production billing systems track cost in integer cents rather than floats?",
+        options: ["Floats are banned in Python", "Float math can drift by fractions of a cent and compound over millions of calls, while integer cents stay exact", "Integers are faster to add", "Cents are easier to display"],
+        correct_index: 1,
+        explanation: "Money math with floats accumulates tiny rounding errors. Integer cents keep the arithmetic exact so it reconciles against a real invoice.",
+      },
+    ],
     starter_code: `PRICING = {
     "haiku": {"input": 25, "output": 125},
     "sonnet": {"input": 300, "output": 1500},
@@ -646,6 +852,57 @@ The point isn't the visual. It's catching problems early: a spike in requests fr
 ## The mental model
 
 One pass over the log, one bucket per group, running totals updated as you go. That's every dashboard you'll ever build, whether it renders as a table, a JSON blob, or a chart. Below, build the same grouped aggregation in pure Python over a small in-memory record list.`,
+    key_terms: [
+      { term: "Aggregation", definition: "Rolling many individual records up into a few summary numbers, like requests and cost per model." },
+      { term: "Grouped pass", definition: "Walking the records once and updating a bucket per group as you go, instead of re-scanning the whole log for each number." },
+      { term: "defaultdict", definition: "A dict that creates a fresh bucket the first time you touch a new key, so you never write a 'have I seen this model before' check." },
+    ],
+    animated_diagrams: [
+      {
+        title: "One pass, one bucket per model",
+        caption: "Walk the records once. Each record finds its model's bucket and adds to the running count, tokens, and cost.",
+        loop: true,
+        nodes: [
+          { label: "Next record", sub: "one at a time", detail: "Take the next request record from the log in a single pass." },
+          { label: "Find bucket", sub: "by model", detail: "Look up (or create) the bucket for that record's model with defaultdict." },
+          { label: "Add to totals", sub: "count, tokens, cost", detail: "Increment the bucket's running count, tokens, and cost with this record's values." },
+          { label: "Summary out", sub: "per model + grand", detail: "After the last record, the buckets plus the flat totals are the dashboard." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Group two haiku records (tokens 100 cost 20, tokens 200 cost 40) and one sonnet record (tokens 500 cost 300).",
+        steps: [
+          "First haiku record: create the haiku bucket, then count 1, tokens 100, cost 20.",
+          "Sonnet record: create the sonnet bucket, then count 1, tokens 500, cost 300.",
+          "Second haiku record: the bucket already exists, so count 2, tokens 300, cost 60.",
+          "total_requests is len(records) = 3; total_cost is 20 + 300 + 40 = 360.",
+        ],
+        output: "haiku bucket {count 2, tokens 300, cost 60}, sonnet {count 1, tokens 500, cost 300}, total 360.",
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "correct first, pretty later", content: "A JSON summary endpoint or a plain HTML table is already a real dashboard. Get the grouping right, and rendering it as a chart later is just formatting." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why do one grouped pass instead of filtering the whole log once per number you need?",
+        options: ["Filtering does not work in Python", "A dashboard needs many numbers, and re-scanning the log for each one is wasteful and easy to make subtly inconsistent", "Grouping uses less memory always", "The log is stored sorted"],
+        correct_index: 1,
+        explanation: "One pass updates every bucket together from the same data, so the numbers stay consistent and you touch each record once instead of many times.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "You need a charting library before you can call something a dashboard.", correct_answer: "false", explanation: "A correct JSON summary or plain table is a real dashboard. The visual polish comes after the numbers are right." },
+          { type: "fill_in", question: "What collections type creates a fresh bucket on first access so you skip the 'is this key new' check?", correct_answer: "defaultdict", explanation: "collections.defaultdict builds the default value the first time a key is touched." },
+        ],
+      },
+    ],
     starter_code: `def build_dashboard(records):
     by_model = {}
     for r in records:
@@ -805,6 +1062,62 @@ Without this, one flaky upstream response takes your whole service down, or half
 ## The mental model
 
 Every failure mode gets caught, classified, and returned in the same shape as success, never left to crash the process. Below, build that classification in pure Python: given a fake call function that raises different exception types, map each one to the right status code.`,
+    key_terms: [
+      { term: "Fail gracefully", definition: "Catching a failure and returning a clean error response, so one bad call degrades instead of crashing the worker that serves other users." },
+      { term: "Status code", definition: "A number like 400, 429, or 504 that tells a caller what kind of failure happened, so it can react without parsing your error text." },
+      { term: "Same-shape response", definition: "Returning ok, status, and either reply or error from every branch, so callers handle success and failure the same way." },
+    ],
+    animated_diagrams: [
+      {
+        title: "Every failure gets caught and classified",
+        caption: "Validate first, then try the call. Each expected exception maps to its own status code, never a raw crash.",
+        loop: false,
+        nodes: [
+          { label: "Request", sub: "payload in", detail: "The incoming payload arrives and its prompt is validated before anything else." },
+          { label: "Try the call", sub: "guarded model call", detail: "The model call runs inside a try block that expects it might fail." },
+          { label: "Classify", sub: "which exception", detail: "A rate limit, a timeout, or another API error each matches its own except branch." },
+          { label: "Status out", sub: "same shape", detail: "Return ok False with the right code (429, 504, 502) or ok True with 200, always the same shape." },
+        ],
+      },
+    ],
+    comparison_tables: [
+      {
+        title: "What each status code means",
+        columns: ["Code", "Whose fault", "What a caller should do"],
+        rows: [
+          ["400", "The caller sent bad input", "Fix the request; do not retry as-is"],
+          ["429", "You are being rate limited", "Back off and retry later"],
+          ["502 / 504", "The upstream provider failed or timed out", "Often safe to retry once"],
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Trace safe_handle when the call raises RateLimitError and the prompt is valid.",
+        steps: [
+          "The prompt is non-empty, so validation passes and execution enters the try block.",
+          "call_fn(prompt) raises RateLimitError before returning a reply.",
+          "Python skips to the first matching except: the RateLimitError branch, checked before the generic Exception.",
+          "That branch returns the same-shaped dict with status 429.",
+        ],
+        output: "An ok False dict with status 429 and error 'rate limited', never a crash.",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why catch specific exception types before a generic except Exception?",
+        options: ["Generic except is slower", "So a rate limit gets a 429 and a timeout a 504, instead of a blanket except hiding real bugs and mislabeling every failure the same way", "Python runs except blocks bottom to top", "Specific excepts are required syntax"],
+        correct_index: 1,
+        explanation: "Specific branches map each known failure to the right code. A lone blanket except would swallow real bugs and give every failure the same meaningless response.",
+      },
+      {
+        question: "Why write a log record for a failed request with status 'error' and cost 0?",
+        options: ["Failures are billed double", "So the dashboard's error rate reflects reality instead of counting only successes", "The API needs a log to retry", "It speeds up the next call"],
+        correct_index: 1,
+        explanation: "An error is still a request that happened. Logging it keeps the error rate honest, and a call that fails before the model responds usually is not billed.",
+      },
+    ],
     starter_code: `class RateLimitError(Exception):
     pass
 
@@ -1001,6 +1314,68 @@ A guard that silently rejects is only half the job. You want to know before you 
 ## The mental model
 
 Every dollar spent clears the guard first. No exceptions, no "just this once." The guard's whole job is saying no consistently so a bug or a loop can't turn into a surprise invoice. Below, build the guard and run it against a sequence of charges.`,
+    key_terms: [
+      { term: "Budget guard", definition: "An object that tracks running spend and refuses any charge that would push the total past a fixed limit, before the call reaches the model." },
+      { term: "Hard cap", definition: "A limit that rejects every further charge once reached, not a warning, until the window (daily, monthly) resets." },
+      { term: "402 Payment Required", definition: "The rarely used HTTP status code that cleanly signals a request was refused because it would exceed the budget." },
+    ],
+    animated_diagrams: [
+      {
+        title: "Every charge clears the guard first",
+        caption: "For each request, check whether spend plus this cost fits the limit. Allow and add, or deny and change nothing.",
+        loop: true,
+        nodes: [
+          { label: "Charge request", sub: "estimated cost", detail: "A new request arrives with an estimated cost to add to the running total." },
+          { label: "Would it fit?", sub: "spent + cost vs limit", detail: "Compare current spend plus this cost against the limit, before updating anything." },
+          { label: "Allow or deny", sub: "under or over", detail: "If it fits, add the cost to spent and allow the call; if not, deny and leave spent untouched." },
+          { label: "Next request", sub: "guard holds", detail: "Once at the limit, every later charge is denied until the window resets." },
+        ],
+      },
+    ],
+    comparison_tables: [
+      {
+        title: "Budget guard vs rate limiter",
+        columns: ["Aspect", "Budget guard", "Rate limiter"],
+        rows: [
+          ["Resource guarded", "A dollar (or cent) amount", "A request count"],
+          ["Window", "Per day or per month", "Per minute or per second"],
+          ["Shared pattern", "Track a running counter, compare to a limit, allow or reject, reset on schedule", "Same pattern, different counter"],
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Run charges 30, 50, 25, 10 against a BudgetGuard with limit 100.",
+        steps: [
+          "Charge 30: 0 + 30 = 30, within 100, so allow and spent becomes 30.",
+          "Charge 50: 30 + 50 = 80, within 100, so allow and spent becomes 80.",
+          "Charge 25: 80 + 25 = 105, over 100, so deny and spent stays 80.",
+          "Charge 10: 80 + 10 = 90, within 100, so allow and spent becomes 90.",
+        ],
+        output: "Allow, allow, deny, allow. Three allowed and one denied, with spend held at 80 during the denial.",
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "check before you charge", content: "Compare spent plus cost to the limit before mutating spent. Update first and a rejected charge still counts against the budget, which defeats the guard." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why must the guard compare spent + cost to the limit BEFORE adding cost to spent?",
+        options: ["It reads cleaner", "So a rejected charge changes nothing; update first and a denied call still eats budget", "Python evaluates the addition lazily", "The limit changes after each charge"],
+        correct_index: 1,
+        explanation: "The check has to happen against the pre-charge total. If you add first and then find it is over, you have already counted a call that never ran.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A budget guard and a rate limiter follow the same track-compare-reset pattern on different resources.", correct_answer: "true", explanation: "One guards a dollar amount and the other a request count, but both track a running counter, compare to a limit, and reset on a schedule." },
+          { type: "fill_in", question: "Which HTTP status code cleanly signals a request refused for exceeding the budget?", correct_answer: "402", explanation: "402 Payment Required is the rarely used but fitting code for a budget rejection." },
+        ],
+      },
+    ],
     starter_code: `class BudgetGuard:
     def __init__(self, limit):
         self.limit = limit
@@ -1147,6 +1522,58 @@ Trace the arc. Lesson 1 packaged the model call into one function. Lesson 2 put 
 Finishing this lesson records Ship & Monitor an LLM App in your Portfolio: a live URL, what it does, and the fact that it's monitored rather than running blind. This is the capstone of the track. Every tool you've built led here, to a deployed, observable AI product with your name on it.
 
 Below, build the final piece: a plain-text render of the dashboard, the same numbers a \`/dashboard\` route hands back as JSON, formatted for a human to read.`,
+    key_terms: [
+      { term: "Thin route", definition: "A web handler that only calls functions built in earlier lessons instead of reimplementing logic, so the whole app is a few routes gluing existing pieces together." },
+      { term: "Environment variable", definition: "A value like ANTHROPIC_API_KEY set outside the code on the deploy platform, so a secret never lives in the source." },
+      { term: "Capstone", definition: "The final project that ties every earlier tool together into one deployed, observable service, recorded in your Portfolio." },
+    ],
+    animated_diagrams: [
+      {
+        title: "The finished request pipeline",
+        caption: "One request flows through validation, the budget guard, the model call, logging, and out, with the dashboard reading what the log recorded.",
+        loop: false,
+        nodes: [
+          { label: "POST /generate", sub: "request in", detail: "A caller hits the live endpoint with a prompt over the public URL." },
+          { label: "Validate + guard", sub: "input then budget", detail: "The packaged handler validates the prompt, then the budget guard clears or refuses the spend." },
+          { label: "Model call", sub: "safe_generate", detail: "The guarded call runs with error handling, returning a reply or a classified failure." },
+          { label: "Log it", sub: "record written", detail: "A structured record with tokens, latency, cost, and status is appended to the log." },
+          { label: "Dashboard", sub: "aggregated view", detail: "GET /dashboard rolls those records into per-model and total numbers anyone can read." },
+        ],
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Render a summary of 20 requests, 2 errors, 450 cents spent, 500 cent budget.",
+        steps: [
+          "error_rate = round(2 / 20 * 100) = round(10.0) = 10.",
+          "budget_used = round(450 / 500 * 100) = round(90.0) = 90.",
+          "Build the four lines: Requests 20, Errors 2 (10%), Cost 450 cents, Budget used 90%.",
+          "Join them with newlines into one string.",
+        ],
+        output: "A four-line report showing a 10% error rate and 90% of the budget used, close enough to alert on.",
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "none of it was scaffolding", content: "Lesson 1 packaged the call, lesson 2 exposed it, lessons 3 to 5 added logging, cost, and the dashboard, and lessons 6 to 7 hardened it. That arc is the shape of a small production LLM service." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why keep each route in the final app thin, calling earlier functions instead of reimplementing logic?",
+        options: ["Thin routes load faster", "Because packaging everything as reusable functions from lesson 1 means the app is just a few routes gluing existing, tested pieces together", "FastAPI rejects long functions", "It reduces the number of routes"],
+        correct_index: 1,
+        explanation: "Every route calls the functions you already built and tested. That is the payoff of the one-entry-point design: no logic gets rewritten for the web layer.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "The ANTHROPIC_API_KEY should be set as an environment variable on the deploy platform, never written in the code.", correct_answer: "true", explanation: "Secrets live in the environment, not the source, so they are not exposed in the repository." },
+          { type: "fill_in", question: "Finishing this capstone records the shipped service in your ______, a live URL with your name on it.", correct_answer: "portfolio", explanation: "The capstone lands in your Portfolio as a deployed, monitored LLM service." },
+        ],
+      },
+    ],
     starter_code: `def render_dashboard(summary):
     requests = summary["requests"]
     errors = summary["errors"]

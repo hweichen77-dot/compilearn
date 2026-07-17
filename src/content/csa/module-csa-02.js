@@ -72,6 +72,45 @@ export default {
           "explanation": "null is a reference value. Primitives store actual values and can never be null."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Value in the box vs arrow to an object",
+          "caption": "A primitive holds its value directly; an object variable holds a reference that points elsewhere.",
+          "loop": false,
+          "nodes": [
+            { "label": "int n = 5", "sub": "value inside", "detail": "The box named n literally contains 5. Nothing is pointed at." },
+            { "label": "String s = \"hi\"", "sub": "an arrow", "detail": "The box named s holds a reference, an arrow, not the text itself." },
+            { "label": "The object", "sub": "lives in memory", "detail": "The actual String object sits somewhere in memory; s points to it." },
+            { "label": "null", "sub": "arrow to nothing", "detail": "A reference can point to no object at all, which primitives can never do." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Capital letter is a hint", "content": "Object types start with a capital letter by convention (String, Integer, Math). Primitives are lowercase keywords (int, double, boolean)." }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Classify each as primitive or object: int, String, boolean, Scanner, double",
+          "steps": [
+            "int is a lowercase keyword, so it is a primitive.",
+            "String starts with a capital letter and is a class, so it is an object.",
+            "boolean is a lowercase keyword, so it is a primitive.",
+            "Scanner is a class, so it is an object.",
+            "double is a lowercase keyword, so it is a primitive."
+          ],
+          "output": "primitive, object, primitive, object, primitive"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A primitive variable can be assigned the value null.", "correct_answer": "false", "explanation": "Only reference types can be null; primitives always hold a real value." },
+            { "type": "fill_in", "question": "A variable of an object type stores a ___ that points to the object.", "correct_answer": "reference", "explanation": "Object variables hold a reference, not the object's bytes." }
+          ]
+        }
+      ],
       "challenge_title": "Classify the Type",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String type = sc.next();\n        // TODO: print \"primitive\" or \"object\" depending on the type name\n    }\n}",
@@ -146,6 +185,41 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Java provides String literals (text in double quotes) as a convenient shortcut that still produces a String object."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "What new does",
+          "caption": "The new operator allocates memory, runs the constructor, and hands back a reference.",
+          "loop": false,
+          "nodes": [
+            { "label": "new", "sub": "allocate memory", "detail": "Java sets aside space for a fresh object." },
+            { "label": "Scanner(System.in)", "sub": "run constructor", "detail": "The constructor initializes the object, here wiring it to standard input." },
+            { "label": "return reference", "sub": "an arrow", "detail": "Construction produces a reference to the new object." },
+            { "label": "sc = ...", "sub": "store the arrow", "detail": "The reference is copied into the variable sc so you can use the object." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Using an object before new crashes", "content": "A reference that was never given an object points to null. Calling a method on it throws a NullPointerException, so construct the object first." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Anatomy of Scanner sc = new Scanner(System.in);",
+          "steps": [
+            { "label": "Declare the variable", "detail": "The left side names a variable sc of type Scanner.", "code": "Scanner sc" },
+            { "label": "Instantiate", "detail": "new Scanner(System.in) builds a Scanner object wired to input.", "code": "new Scanner(System.in)" },
+            { "label": "Store the reference", "detail": "= copies the reference into sc, which now points to the new object.", "code": "sc = <reference>" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A String can be created with a double-quoted literal, without new.", "correct_answer": "true", "explanation": "String literals are a built-in shortcut that still produce a String object." },
+            { "type": "fill_in", "question": "The special method that new calls to initialize an object is called a ___.", "correct_answer": "constructor", "explanation": "A constructor builds and initializes a fresh object." }
+          ]
         }
       ],
       "challenge_title": "Greeting Builder",
@@ -224,6 +298,41 @@ export default {
           "explanation": "Both s.substring(n-3, n) and s.substring(n-3) start at index n-3 and run to the end, yielding the last 3 characters."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "String indices start at 0",
+          "caption": "Each character sits at a numbered position, and the last index is length minus one.",
+          "loop": false,
+          "nodes": [
+            { "label": "index 0", "sub": "'h'", "detail": "Counting starts at 0, so the first character of \"hello\" is at index 0." },
+            { "label": "index 1", "sub": "'e'", "detail": "Each following character gets the next number." },
+            { "label": "index 4", "sub": "'o'", "detail": "The last character of a length-5 String is at index 4, which is length minus one." },
+            { "label": "substring(1, 4)", "sub": "'e','l','l'", "detail": "Start is included, end is excluded, so you get indices 1, 2, 3." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "substring end is exclusive", "content": "substring(3, 6) returns characters at indices 3, 4, 5, not 6. The count returned is end minus start. Also note length() has parentheses for Strings, while arrays use length with none." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing \"computer\".substring(3, 6)",
+          "steps": [
+            { "label": "Find start", "detail": "Index 3 of \"computer\" is 'p'. The start index is included.", "code": "\"computer\"[3] = 'p'" },
+            { "label": "Walk to end - 1", "detail": "Include indices 3, 4, 5: 'p', 'u', 't'.", "code": "indices 3,4,5" },
+            { "label": "Stop before end", "detail": "Index 6 is excluded, so the result is \"put\".", "code": "\"put\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "substring does not change the original String.", "correct_answer": "true", "explanation": "Strings are immutable; substring returns a new String and leaves the source untouched." },
+            { "type": "fill_in", "question": "For a String of length n, the last valid index is n minus what number?", "correct_answer": "1", "explanation": "Indices run 0 to length - 1, so the last index is n - 1." }
+          ]
+        }
+      ],
       "challenge_title": "First and Last Character",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String word = sc.next();\n        // TODO: print the first character, a space, then the last character\n    }\n}",
@@ -298,6 +407,41 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "If the target is absent, indexOf returns -1; passing that to substring throws StringIndexOutOfBoundsException, so guard first."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Search, then slice",
+          "caption": "indexOf finds where a target starts, and substring cuts the String there.",
+          "loop": false,
+          "nodes": [
+            { "label": "\"Ada Lovelace\"", "sub": "the input", "detail": "You want the first name, the text before the first space." },
+            { "label": "indexOf(\" \")", "sub": "returns 3", "detail": "The first space sits at index 3." },
+            { "label": "Guard for -1", "sub": "is it found?", "detail": "If there were no space, indexOf would return -1, so check first." },
+            { "label": "substring(0, 3)", "sub": "\"Ada\"", "detail": "Slice from index 0 up to the space to get the first name." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Always check for -1 first", "content": "When the target is missing, indexOf returns -1. Passing -1 to substring throws StringIndexOutOfBoundsException, so guard the result before slicing." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing first-name extraction on \"Ada Lovelace\"",
+          "steps": [
+            { "label": "Find the space", "detail": "indexOf(\" \") scans left to right and returns 3.", "code": "int space = full.indexOf(\" \"); // 3" },
+            { "label": "Check the guard", "detail": "space is not -1, so a space exists and slicing is safe.", "code": "space != -1" },
+            { "label": "Slice", "detail": "substring(0, 3) returns the characters before the space.", "code": "full.substring(0, 3) -> \"Ada\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "\"apple\".indexOf(\"z\") returns 0.", "correct_answer": "false", "explanation": "'z' is not present, so indexOf returns the sentinel value -1." },
+            { "type": "fill_in", "question": "What value does indexOf return when the target is not found?", "correct_answer": "-1", "explanation": "-1 is the not-found sentinel, since no real index is negative." }
+          ]
         }
       ],
       "challenge_title": "Extract First Name",
@@ -376,6 +520,42 @@ export default {
           "explanation": "Identical Strings are equal, so compareTo returns 0 (an int, not a boolean)."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "== compares arrows, equals compares text",
+          "caption": "Two Strings with the same characters can be different objects, so == can surprise you.",
+          "loop": false,
+          "nodes": [
+            { "label": "a = \"cat\"", "sub": "one object", "detail": "a points to a String holding 'c','a','t'." },
+            { "label": "b = \"cat\"", "sub": "maybe another", "detail": "b may point to a different object with the same characters." },
+            { "label": "a == b", "sub": "same arrow?", "detail": "== asks whether both point to the same object, which is not what you usually want." },
+            { "label": "a.equals(b)", "sub": "same text?", "detail": "equals compares the characters and returns true here." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "== for primitives, .equals() for Strings", "content": "Never use == to compare String contents; it checks references, not characters. Use .equals() for a yes/no match and .compareTo() for ordering." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing \"apple\".compareTo(\"apricot\")",
+          "steps": [
+            { "label": "Compare index 0", "detail": "'a' equals 'a', so move on.", "code": "'a' vs 'a' -> tie" },
+            { "label": "Compare index 1", "detail": "'p' equals 'p', so keep going.", "code": "'p' vs 'p' -> tie" },
+            { "label": "Compare index 2", "detail": "'p' (112) vs 'r' (114): 'p' is smaller.", "code": "'p' < 'r'" },
+            { "label": "Result sign", "detail": "The caller is smaller, so compareTo returns a negative number.", "code": "negative" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "\"Cat\".equals(\"cat\") returns true.", "correct_answer": "false", "explanation": "equals is case-sensitive, and uppercase C differs from lowercase c." },
+            { "type": "fill_in", "question": "Which String method returns 0 when two Strings are equal? (name the method)", "correct_answer": "compareTo", "explanation": "compareTo returns 0 for equal Strings, negative or positive otherwise." }
+          ]
+        }
+      ],
       "challenge_title": "Alphabetical Order",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String a = sc.next();\n        String b = sc.next();\n        // TODO: print the two words on one line separated by a space, in alphabetical order\n    }\n}",
@@ -450,6 +630,42 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "sqrt(50) is about 7.07; casting to int truncates the fraction, giving 7."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Building a random int in a range",
+          "caption": "Scale the fraction to the range size, truncate, then shift by the low bound.",
+          "loop": false,
+          "nodes": [
+            { "label": "Math.random()", "sub": "[0.0, 1.0)", "detail": "You get a double that is at least 0 and strictly less than 1." },
+            { "label": "* range", "sub": "spread it out", "detail": "Multiplying by high - low + 1 spreads the fraction across 0 up to range." },
+            { "label": "(int) cast", "sub": "truncate", "detail": "Casting to int drops the fraction, giving a whole number 0 to range - 1." },
+            { "label": "+ low", "sub": "shift", "detail": "Adding low moves the range to start at your low bound." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "pow and sqrt return double", "content": "Math.pow(2, 3) is 8.0, not 8, and Math.sqrt(64) is 8.0. Cast to int when you need a whole number, and remember the cast truncates rather than rounds." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing a dice roll: (int)(Math.random() * 6) + 1",
+          "steps": [
+            { "label": "Math.random()", "detail": "Say it returns 0.72, a value in [0.0, 1.0).", "code": "0.72" },
+            { "label": "* 6", "detail": "0.72 * 6 is 4.32, spreading it across the range.", "code": "4.32" },
+            { "label": "(int) cast", "detail": "Truncating 4.32 gives the int 4.", "code": "(int) 4.32 -> 4" },
+            { "label": "+ 1", "detail": "Adding 1 shifts 0-5 into 1-6, giving 5.", "code": "4 + 1 -> 5" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "You must write new Math() before calling Math.sqrt.", "correct_answer": "false", "explanation": "Math methods are static; you call them on the class name with no object." },
+            { "type": "fill_in", "question": "Methods you call on the class name rather than an object are called ___ methods.", "correct_answer": "static", "explanation": "Static methods belong to the class and need no instance." }
+          ]
         }
       ],
       "challenge_title": "Hypotenuse Floor",
@@ -528,6 +744,41 @@ export default {
           "explanation": "Double.parseDouble parses a numeric String into a double; parseInt would fail on a decimal point."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Autoboxing and unboxing",
+          "caption": "Java quietly converts between a primitive and its wrapper object as needed.",
+          "loop": false,
+          "nodes": [
+            { "label": "int 5", "sub": "a primitive", "detail": "You start with a plain int value." },
+            { "label": "Integer x = 5", "sub": "autobox", "detail": "Java wraps the primitive into an Integer object automatically." },
+            { "label": "int b = x + 1", "sub": "unbox", "detail": "To do arithmetic, the Integer is unboxed back to an int." },
+            { "label": "result 6", "sub": "a primitive again", "detail": "The math runs on primitives and produces an int." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "== on Integer objects can lie", "content": "Integer m = 1000, n = 1000; m == n may be false because they are separate objects. Use .equals() or unbox to compare values." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing Integer.parseInt(\"45\") + 5",
+          "steps": [
+            { "label": "parseInt(\"45\")", "detail": "The String \"45\" is converted to the int 45.", "code": "Integer.parseInt(\"45\") -> 45" },
+            { "label": "45 + 5", "detail": "Now both operands are ints, so numeric addition runs.", "code": "45 + 5 -> 50" },
+            { "label": "Result", "detail": "The value is the int 50, not the String \"455\".", "code": "50" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Double.parseDouble(\"7.5\") returns the double 7.5.", "correct_answer": "true", "explanation": "parseDouble converts a numeric String into a double." },
+            { "type": "fill_in", "question": "Which wrapper method turns the String \"123\" into an int?", "correct_answer": "parseInt", "explanation": "Integer.parseInt converts a String of digits into an int." }
+          ]
+        }
+      ],
       "challenge_title": "Sum of Parsed Numbers",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String first = sc.next();\n        String second = sc.next();\n        // TODO: parse both Strings to ints and print their sum\n    }\n}",
@@ -602,6 +853,42 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Reassignment changes only the local copy of the reference; the caller's variable still points to the original object."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Passing a copy of the reference",
+          "caption": "The method gets its own arrow, but it points at the same shared object.",
+          "loop": false,
+          "nodes": [
+            { "label": "caller: data", "sub": "arrow to array", "detail": "The caller's variable points to an array {7, 8, 9}." },
+            { "label": "call method", "sub": "copy the arrow", "detail": "Java copies the reference into the parameter, so both point to the same array." },
+            { "label": "arr[0] = 0", "sub": "mutate object", "detail": "Changing the shared array through the copy is visible to the caller." },
+            { "label": "arr = new int[]", "sub": "reassign", "detail": "Pointing the local copy at a new array does NOT change the caller's arrow." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Mutate vs reassign", "content": "Mutating the object an argument points to is visible to the caller. Reassigning the parameter to a new object is not. Primitives never affect the caller at all." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing primitive vs array parameters",
+          "steps": [
+            { "label": "bump(n) with n = 5", "detail": "The method gets a copy of the value 5 and changes only its copy.", "code": "x = x + 1; // caller's n still 5" },
+            { "label": "After bump", "detail": "The caller prints 5 because primitives are passed by value.", "code": "n -> 5" },
+            { "label": "zeroFirst(data)", "detail": "The method gets a copy of the reference to the same array.", "code": "arr[0] = 0;" },
+            { "label": "After zeroFirst", "detail": "The shared array changed, so the caller sees data[0] as 0.", "code": "data[0] -> 0" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Incrementing an int parameter inside a method changes the caller's int.", "correct_answer": "false", "explanation": "Primitives are passed by value, so the caller's variable is unchanged." },
+            { "type": "fill_in", "question": "When two reference variables point to the same object, they are called ___.", "correct_answer": "aliases", "explanation": "Aliases share an object, so a change through one is seen through the other." }
+          ]
         }
       ],
       "challenge_title": "Double Each Element",

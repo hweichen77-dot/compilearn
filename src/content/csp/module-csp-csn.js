@@ -72,6 +72,44 @@ export default {
           "explanation": "IPv4's address space (about 4.3 billion) is too small for the number of internet devices, so IPv6 uses far longer addresses to provide many more."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Loading codeflow.app",
+          "caption": "A name becomes an address, then a request travels out and a response comes back.",
+          "loop": false,
+          "nodes": [
+            { "label": "You type a name", "sub": "codeflow.app", "detail": "Humans use names, but computers route by numeric IP addresses." },
+            { "label": "DNS lookup", "sub": "name to IP", "detail": "DNS acts like a phone book, returning the server's IP address." },
+            { "label": "Request routed", "sub": "IP + TCP", "detail": "IP carries the request to that address; TCP makes sure it arrives complete." },
+            { "label": "Response", "sub": "page returns", "detail": "The server sends the page back over the same protocols." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Is 256.1.1.1 a valid IPv4 address?",
+          "steps": [
+            "Split on dots: there are 4 parts, so the count is fine.",
+            "Each part must be an integer from 0 to 255.",
+            "The first part is 256, which is greater than 255.",
+            "One bad part makes the whole address invalid."
+          ],
+          "output": "invalid"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "DNS translates human-readable names like example.com into numeric IP addresses.", "correct_answer": "true", "explanation": "It works like a phone book for the internet." },
+            { "type": "fill_in", "question": "The newer address format created because IPv4 ran short on addresses is called ___.", "correct_answer": "IPv6", "explanation": "IPv6 uses much longer addresses to support far more devices." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Open standards scale", "content": "Because protocols are open standards, any compliant device can join the network. That is why the internet grows without a central redesign." }
+      ],
       "challenge_title": "Validate an IPv4 Address",
       "challenge_language": "python",
       "challenge_starter_code": "# Read one IPv4 address from input, e.g. 192.168.1.1\n# Print \"valid\" if it is a correct IPv4 address, otherwise \"invalid\".\n# Rules: exactly 4 parts, each an integer 0-255, no leading zeros (except \"0\" itself).\n\naddr = input()\n# TODO: split on '.' and check each part\n",
@@ -147,6 +185,41 @@ export default {
           "correct_index": 1,
           "explanation": "Packet switching lets the receiver request only the lost packet to be resent, rather than retransmitting the whole message."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "A message split into packets",
+          "caption": "Pieces travel independently and are put back in order at the destination.",
+          "loop": false,
+          "nodes": [
+            { "label": "Split", "sub": "message to packets", "detail": "The sender breaks the data into small packets, each with a sequence number." },
+            { "label": "Travel", "sub": "different paths", "detail": "Packets are routed independently, so they may take different routes." },
+            { "label": "Arrive out of order", "sub": "2, 0, 1", "detail": "Because they travel separately, packet 2 might arrive before packet 0." },
+            { "label": "Reassemble", "sub": "sort by seq", "detail": "The receiver sorts by sequence number and joins the payloads back together." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Reassembling three packets",
+          "steps": [
+            { "label": "collect", "detail": "Packets arrive as (2, world), (0, hello), (1, brave).", "code": "packets = [(2,'world'),(0,'hello'),(1,'brave')]" },
+            { "label": "sort", "detail": "Sort by sequence number to restore the original order.", "code": "packets.sort(key=lambda p: p[0])" },
+            { "label": "join", "detail": "Join the payloads to rebuild the message.", "code": "'hello brave world'" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Packets from one message always follow the exact same path.", "correct_answer": "false", "explanation": "Packets are routed independently and may take different paths." },
+            { "type": "fill_in", "question": "The label on each packet that tells the receiver the correct order is the ___ number.", "correct_answer": "sequence", "explanation": "Sequence numbers let the receiver reassemble packets correctly." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Resend only what's lost", "content": "With packet switching, a lost packet is requested again on its own. There is no need to resend the whole file." }
       ],
       "challenge_title": "Reassemble a Packetized Message",
       "challenge_language": "python",
@@ -224,6 +297,41 @@ export default {
           "explanation": "In the graph model, each node is a router or device and each edge is a direct communication link, so routing becomes finding a path between nodes."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A packet routed hop by hop",
+          "caption": "Each router reads the destination and forwards the packet one hop closer.",
+          "loop": true,
+          "nodes": [
+            { "label": "Source", "sub": "packet leaves", "detail": "The packet starts at the sender with a destination address." },
+            { "label": "Router 1", "sub": "read + forward", "detail": "The router reads the destination and picks a good next hop toward it." },
+            { "label": "Router 2", "sub": "next hop", "detail": "The next router repeats the decision, moving the packet closer." },
+            { "label": "Destination", "sub": "delivered", "detail": "After the last hop, the packet reaches its target. Fewer hops usually means lower latency." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "BFS finds the fewest hops to C",
+          "steps": [
+            { "label": "start A", "detail": "Distance to A is 0. Explore its neighbors first.", "code": "dist = {'A': 0}" },
+            { "label": "level 1", "detail": "A connects directly to C, so C is reached in 1 hop.", "code": "dist['C'] = 1" },
+            { "label": "first wins", "detail": "Because BFS explores by distance, the first time it reaches C uses the fewest hops.", "code": "print(dist['C'])  # 1" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Routers reserve a fixed circuit before sending any packets.", "correct_answer": "false", "explanation": "They forward packets hop by hop based on the destination, with no reserved circuit." },
+            { "type": "fill_in", "question": "The number of links a packet crosses from source to destination is the ___ count.", "correct_answer": "hop", "explanation": "Fewer hops usually means lower latency." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Network as a graph", "content": "Model routers as nodes and links as edges, and routing becomes finding a path between two nodes. Breadth-first search finds the path with the fewest hops." }
+      ],
       "challenge_title": "Shortest Hop Count",
       "challenge_language": "python",
       "challenge_starter_code": "# First line: n m  (number of nodes and number of links).\n# Next m lines: each is \"<a> <b>\", an undirected link between routers a and b.\n# Last line: \"<src> <dst>\".\n# Print the fewest number of hops from src to dst, or -1 if unreachable.\n\nimport sys\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0].split())\n# TODO: build the graph and run BFS from src\n",
@@ -299,6 +407,41 @@ export default {
           "correct_index": 1,
           "explanation": "Redundancy improves reliability but requires more cables, hardware, and upkeep, so designers balance reliability against cost."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Rerouting around a failed router",
+          "caption": "When one path breaks, redundant links let packets take another route.",
+          "loop": false,
+          "nodes": [
+            { "label": "Normal path", "sub": "A to B to C", "detail": "Packets from A reach C through router B." },
+            { "label": "B fails", "sub": "link down", "detail": "Router B goes offline, breaking the usual path." },
+            { "label": "Alternate path", "sub": "A to C", "detail": "A redundant direct link from A to C is still available." },
+            { "label": "Still connected", "sub": "delivered", "detail": "Traffic reroutes over the surviving link, so the network keeps working." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Testing tolerance by removing a node",
+          "steps": [
+            { "label": "remove B", "detail": "Pretend router B has failed and skip it during the search.", "code": "if v != failed:" },
+            { "label": "search from A", "detail": "Run BFS from A, never stepping onto the failed node.", "code": "q = deque(['A'])" },
+            { "label": "check C", "detail": "C is still reachable through the A-C link, so the network survives.", "code": "print('C' in seen)  # True" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A single point of failure is a component whose failure alone can break the whole system.", "correct_answer": "true", "explanation": "It has no redundant backup path." },
+            { "type": "fill_in", "question": "Providing more than one path or component so there is a backup is called ___.", "correct_answer": "redundancy", "explanation": "Redundancy is the key technique behind fault tolerance." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Redundancy is a trade-off", "content": "More paths mean higher reliability but also more cables and hardware to maintain. Designers balance reliability against cost." }
       ],
       "challenge_title": "Survive a Router Failure",
       "challenge_language": "python",
@@ -376,6 +519,56 @@ export default {
           "explanation": "Bandwidth is measured in bits per second while files are usually in bytes; since 1 byte = 8 bits, you must convert to get a correct time."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "How long a transfer takes",
+          "caption": "Total time is the start-up delay plus the streaming time.",
+          "loop": false,
+          "nodes": [
+            { "label": "Latency", "sub": "start-up delay", "detail": "Time before the first bit arrives, like the length of the pipe." },
+            { "label": "Convert units", "sub": "bytes to bits", "detail": "File sizes are in bytes, bandwidth is in bits per second. 1 byte = 8 bits." },
+            { "label": "Streaming time", "sub": "size / bandwidth", "detail": "How long the bulk of the data takes to flow through the pipe." },
+            { "label": "Total", "sub": "latency + streaming", "detail": "Add the delay and the streaming time for the full transfer time." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "medium",
+          "prompt": "20 ms latency, 100 Mbps bandwidth, 10 MB file. Find total time.",
+          "steps": [
+            "Convert size to bits: 10 MB * 8 = 80 megabits.",
+            "Streaming time: 80 / 100 = 0.8 seconds = 800 ms.",
+            "Add latency: 20 + 800.",
+            "Total is 820 ms."
+          ],
+          "output": "820 ms"
+        }
+      ],
+      "comparison_tables": [
+        {
+          "title": "Bandwidth vs latency",
+          "columns": ["Aspect", "Bandwidth", "Latency"],
+          "rows": [
+            ["What it measures", "data rate", "start-up delay"],
+            ["Units", "bits per second", "milliseconds"],
+            ["Pipe analogy", "width of the pipe", "length of the pipe"],
+            ["Matters most for", "large downloads", "quick back-and-forth"]
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A connection can have high bandwidth and high latency at the same time.", "correct_answer": "true", "explanation": "The two are independent, like a satellite link with a big pipe but a long delay." },
+            { "type": "fill_in", "question": "1 byte equals ___ bits, which is why you convert before combining size and bandwidth.", "correct_answer": "8", "explanation": "Bandwidth is in bits per second but files are usually in bytes." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Diagnose the right problem", "content": "Buying more bandwidth will not fix a delay caused by latency. Ask both questions: how much per second, and how long until it starts." }
+      ],
       "challenge_title": "Estimate Transfer Time",
       "challenge_language": "python",
       "challenge_starter_code": "# Input is one line: \"<latency_ms> <bandwidth_mbps> <size_MB>\".\n#   latency_ms     = start-up delay in milliseconds (integer)\n#   bandwidth_mbps = megabits per second (number)\n#   size_MB        = file size in megabytes (number)\n# total_ms = latency_ms + (size_MB * 8 / bandwidth_mbps) * 1000\n# Print total_ms rounded to the nearest whole number.\n\nline = input().split()\n# TODO: convert MB to megabits, compute transfer time, add latency\n",
@@ -451,6 +644,41 @@ export default {
           "correct_index": 1,
           "explanation": "The first token of a request line is the method; POST sends data to the server, while the path and version follow it."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "A page request down the stack and back",
+          "caption": "Each layer has one job and trusts the layer below it.",
+          "loop": false,
+          "nodes": [
+            { "label": "HTTP", "sub": "the request", "detail": "The browser writes a request like GET /index.html HTTP/1.1." },
+            { "label": "TCP", "sub": "reliability", "detail": "TCP numbers the packets, acknowledges them, and resends any losses in order." },
+            { "label": "IP", "sub": "addressing", "detail": "IP routes the packets to the right machine, one hop at a time." },
+            { "label": "Server, then back up", "sub": "response returns", "detail": "The server processes the request and the response climbs back up the same stack." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Parsing GET /index.html HTTP/1.1",
+          "steps": [
+            { "label": "split", "detail": "Break the line into three tokens on spaces.", "code": "parts = line.split()" },
+            { "label": "method", "detail": "The first token is the method: GET.", "code": "method = parts[0]" },
+            { "label": "validate", "detail": "Check GET is a known method, then report the method and path.", "code": "GET /index.html" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "HTTP can ignore lost packets because TCP beneath it guarantees reliable, ordered delivery.", "correct_answer": "true", "explanation": "Layering lets HTTP focus on requests and responses." },
+            { "type": "fill_in", "question": "In the request line GET /index.html HTTP/1.1, the first token GET is the ___.", "correct_answer": "method", "explanation": "The method describes the action, followed by the path and version." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "One job per layer", "content": "IP finds the machine, TCP makes delivery reliable, HTTP handles requests and responses. Each layer can improve on its own because it trusts the one below." }
       ],
       "challenge_title": "Parse an HTTP Request Line",
       "challenge_language": "python",
@@ -528,6 +756,55 @@ export default {
           "explanation": "Because the job ends when the busiest worker finishes, an overloaded worker increases parallel time even if others are idle."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Balancing tasks across two workers",
+          "caption": "Assign each task, largest first, to the least-loaded worker.",
+          "loop": true,
+          "nodes": [
+            { "label": "Task 5", "sub": "worker A: 5", "detail": "The biggest task goes to an empty worker." },
+            { "label": "Task 2", "sub": "worker B: 2", "detail": "Worker B is least loaded, so it takes the next task." },
+            { "label": "Task 1", "sub": "worker B: 3", "detail": "Worker B is still lightest, so it takes the last task too." },
+            { "label": "Finish", "sub": "parallel = 5", "detail": "The job ends when the busiest worker (A, load 5) finishes, not the sum of 8." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "medium",
+          "prompt": "Tasks [5, 2, 1] across 2 workers. Find sequential and parallel time.",
+          "steps": [
+            "Sequential time is the sum: 5 + 2 + 1 = 8.",
+            "Assign largest first: task 5 to worker A.",
+            "Worker B is least loaded, so it gets 2, then 1, for a load of 3.",
+            "Parallel time is the busiest worker: max(5, 3) = 5."
+          ],
+          "output": "sequential 8, parallel 5"
+        }
+      ],
+      "comparison_tables": [
+        {
+          "title": "Parallel vs distributed computing",
+          "columns": ["Aspect", "Parallel", "Distributed"],
+          "rows": [
+            ["Where", "cores of one machine", "many networked machines"],
+            ["Shares", "memory on one system", "data over a network"],
+            ["Main cost", "coordination overhead", "network communication"]
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In parallel work, the job finishes when the busiest worker finishes.", "correct_answer": "true", "explanation": "Parallel time equals the load of the most loaded worker." },
+            { "type": "fill_in", "question": "Distributing tasks so no worker is overloaded while others sit idle is called load ___.", "correct_answer": "balancing", "explanation": "Good load balancing keeps parallel time low." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Imbalance costs speed", "content": "One overloaded worker holds up the whole job while others sit idle. The gain from parallelism depends on dividing work evenly." }
+      ],
       "challenge_title": "Compute Sequential vs Parallel Time",
       "challenge_language": "python",
       "challenge_starter_code": "# First line: n, the number of tasks.\n# Second line: n task durations (integers).\n# Third line: k, the number of workers.\n# Assign each task (largest first) to the currently least-loaded worker.\n# Print two integers separated by a space: sequential_time parallel_time\n#   sequential_time = sum of all durations\n#   parallel_time   = load of the busiest worker\n\nimport sys\ndata = sys.stdin.read().split()\nn = int(data[0])\n# TODO: parse durations and k, then balance the load\n",
@@ -603,6 +880,44 @@ export default {
           "correct_index": 1,
           "explanation": "The term p/n shrinks as n grows, but the (1 - p) sequential term never goes away, so speedup levels off near 1 / (1 - p)."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Speedup hits a ceiling",
+          "caption": "The sequential part never goes away, so more processors give diminishing returns.",
+          "loop": false,
+          "nodes": [
+            { "label": "1 processor", "sub": "speedup 1", "detail": "No parallelism yet. The job takes its full sequential time." },
+            { "label": "Add processors", "sub": "p / n shrinks", "detail": "The parallel part is split thinner, so the parallel time drops." },
+            { "label": "Sequential floor", "sub": "1 - p stays", "detail": "The part that must run in order never shrinks, no matter how many processors." },
+            { "label": "Ceiling", "sub": "1 / (1 - p)", "detail": "Speedup levels off at one over the sequential fraction." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "medium",
+          "prompt": "90% parallelizable across 4 processors. Find the speedup.",
+          "steps": [
+            "p = 0.9, so the sequential part is 1 - p = 0.1.",
+            "Parallel part per processor: p / n = 0.9 / 4 = 0.225.",
+            "Denominator: 0.1 + 0.225 = 0.325.",
+            "Speedup = 1 / 0.325, about 3.08."
+          ],
+          "output": "3.08"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "If 20% of a program is strictly sequential, adding processors can eventually make it 100 times faster.", "correct_answer": "false", "explanation": "The ceiling is 1 / (1 - p) = 1 / 0.8 = 5, no matter how many processors." },
+            { "type": "fill_in", "question": "The law stating that maximum speedup is limited by the sequential fraction is ___ Law.", "correct_answer": "Amdahl", "explanation": "Amdahl's Law bounds speedup by the part you cannot parallelize." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Cut the sequential part", "content": "Once the parallel work is split thin, adding hardware barely helps. The best target is often reducing the sequential portion, not buying more processors." }
       ],
       "challenge_title": "Amdahl's Law Speedup",
       "challenge_language": "python",

@@ -72,6 +72,42 @@ export default {
           "explanation": "The type parameter specifies the element type, here String."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Array vs ArrayList when data grows",
+          "caption": "A fixed array must be rebuilt to grow, while an ArrayList resizes on its own.",
+          "loop": false,
+          "nodes": [
+            { "label": "Fixed array", "sub": "new int[5]", "detail": "You lock in five slots. The length never changes after this line runs." },
+            { "label": "Sixth value", "sub": "no room", "detail": "There is no slot 5, so a plain array cannot hold one more element." },
+            { "label": "Copy to bigger", "sub": "manual work", "detail": "With an array you must allocate a larger array and copy every element across yourself." },
+            { "label": "ArrayList.add", "sub": "auto-grows", "detail": "An ArrayList just grows to fit. You call add and size goes up by one." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Building a names list",
+          "steps": [
+            { "label": "Start empty", "detail": "The list has no elements yet, so size() is 0.", "code": "ArrayList<String> names = new ArrayList<String>();" },
+            { "label": "Add Ada", "detail": "Ada is appended at index 0. size() is now 1.", "code": "names.add(\"Ada\");" },
+            { "label": "Add Linus", "detail": "Linus is appended at index 1. size() is now 2.", "code": "names.add(\"Linus\");" },
+            { "label": "Print size", "detail": "size() returns 2, the current element count.", "code": "System.out.println(names.size());" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "An ArrayList grows automatically as you add elements.", "correct_answer": "true", "explanation": "Unlike a fixed array, an ArrayList resizes on its own." },
+            { "type": "fill_in", "question": "Which method returns how many elements an ArrayList holds? Give one word, no parentheses.", "correct_answer": "size", "explanation": "ArrayList uses size(); only arrays use the length field." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": ".length is not .size()", "content": "Arrays use the length field with no parentheses. ArrayList uses the size() method with parentheses. Mixing them up will not compile." }
+      ],
       "challenge_title": "Count the Words",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: read each line into an ArrayList<String>, then print how many were read\n    }\n}\n",
@@ -147,6 +183,42 @@ export default {
           "correct_index": 2,
           "explanation": "Two-argument add inserts at the index and shifts later elements right, giving [p,q,Z,r]."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Inserting with add(index, element)",
+          "caption": "Inserting at an index shifts every later element one slot to the right.",
+          "loop": false,
+          "nodes": [
+            { "label": "[a, b, c]", "sub": "start", "detail": "The list has three elements at indices 0, 1, and 2." },
+            { "label": "add(1, X)", "sub": "make room", "detail": "You ask to place X at index 1, so a gap has to open there." },
+            { "label": "shift right", "sub": "b and c move", "detail": "Elements from index 1 onward slide one slot to the right." },
+            { "label": "[a, X, b, c]", "sub": "size 4", "detail": "X now sits at index 1 and the list grew by one." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Reading with get",
+          "steps": [
+            { "label": "list = [a, b, c]", "detail": "Three elements, so valid indices are 0, 1, and 2.", "code": "// list holds [a, b, c]" },
+            { "label": "get(0)", "detail": "Returns the first element, \"a\".", "code": "String first = list.get(0);" },
+            { "label": "get(size()-1)", "detail": "size() is 3, so this reads index 2, the last element \"c\".", "code": "String last = list.get(list.size() - 1);" },
+            { "label": "get(3)", "detail": "Index 3 is out of range (max is 2), so this throws IndexOutOfBoundsException.", "code": "list.get(3); // error" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "add(index, element) overwrites the element already at that index.", "correct_answer": "false", "explanation": "The two-argument add inserts and shifts later elements right; it does not overwrite." },
+            { "type": "fill_in", "question": "The largest valid index of a list equals size() minus what number?", "correct_answer": "1", "explanation": "Valid indices run from 0 to size() - 1." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Stop before size()", "content": "Loop conditions should use i < list.size(), never i <= list.size(). Reaching index size() throws IndexOutOfBoundsException." }
       ],
       "challenge_title": "Nth Element",
       "challenge_language": "java",
@@ -224,6 +296,42 @@ export default {
           "explanation": "remove(int) removes by index, so index 1 (value 6) is removed."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "remove(index) shifts left",
+          "caption": "Deleting an element pulls every later element one slot to the left.",
+          "loop": false,
+          "nodes": [
+            { "label": "[a, b, c]", "sub": "start", "detail": "Three elements at indices 0, 1, and 2." },
+            { "label": "remove(0)", "sub": "delete a", "detail": "The element at index 0 is removed and returned." },
+            { "label": "shift left", "sub": "b, c move", "detail": "b moves to index 0 and c moves to index 1 to close the gap." },
+            { "label": "[b, c]", "sub": "size 2", "detail": "Size dropped by one and the remaining indices renumbered." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "set then remove",
+          "steps": [
+            { "label": "[10, 20, 30]", "detail": "Start with three integers.", "code": "// nums holds [10, 20, 30]" },
+            { "label": "set(0, 99)", "detail": "Replaces index 0 in place and returns old value 10. Size stays 3.", "code": "nums.set(0, 99); // [99, 20, 30]" },
+            { "label": "remove(1)", "detail": "Removes index 1 (the 20) and shifts 30 left. Returns 20.", "code": "nums.remove(1); // [99, 30]" },
+            { "label": "print", "detail": "The list is now [99, 30].", "code": "System.out.println(nums);" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "set(i, e) changes the size of the list.", "correct_answer": "false", "explanation": "set replaces in place and leaves size unchanged; only add and remove change size." },
+            { "type": "fill_in", "question": "For an ArrayList<Integer>, does remove(1) delete by index or by value? Answer index or value.", "correct_answer": "index", "explanation": "remove(int) removes by position; remove(Object) removes by value." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "remove(int) vs remove(Object)", "content": "On an ArrayList<Integer>, list.remove(2) deletes index 2, not the value 2. To remove the value, write list.remove(Integer.valueOf(2))." }
+      ],
       "challenge_title": "Replace then Remove",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: read n ints, set index 0 to 0, remove the last element, print remaining ints space-separated\n    }\n}\n",
@@ -299,6 +407,44 @@ export default {
           "correct_index": 1,
           "explanation": "== on objects compares references; use .equals() or unbox to compare values."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Autoboxing an int into the list",
+          "caption": "The compiler wraps each int as an Integer going in and unwraps it coming out.",
+          "loop": false,
+          "nodes": [
+            { "label": "int 5", "sub": "primitive", "detail": "You start with a plain primitive int value." },
+            { "label": "add(5)", "sub": "autobox", "detail": "The compiler wraps 5 into an Integer object so the list can store it." },
+            { "label": "stored", "sub": "Integer", "detail": "The list holds an Integer, because ArrayList stores objects only." },
+            { "label": "int x = get(0)", "sub": "unbox", "detail": "Reading into an int unwraps the Integer back to a primitive 5." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Sum the ArrayList<Integer> [2, 4, 6] with an indexed loop.",
+          "steps": [
+            "Start total at 0.",
+            "get(0) unboxes Integer 2 to int, so total becomes 2.",
+            "get(1) unboxes 4, so total becomes 6.",
+            "get(2) unboxes 6, so total becomes 12."
+          ],
+          "output": "12"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "You can declare ArrayList<int> in Java.", "correct_answer": "false", "explanation": "ArrayList stores objects, so you must use the wrapper class Integer." },
+            { "type": "fill_in", "question": "What wrapper class matches the primitive int?", "correct_answer": "Integer", "explanation": "int maps to Integer, double to Double, boolean to Boolean." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Do not compare Integers with ==", "content": "== on two Integer objects compares references, not values, and can give wrong answers. Compare with .equals() or unbox to int first." }
       ],
       "challenge_title": "Sum and Average",
       "challenge_language": "java",
@@ -376,6 +522,42 @@ export default {
           "explanation": "for-each removes index management, avoiding off-by-one errors for read-only traversal."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "for-each walks each element",
+          "caption": "The loop hands you one element per pass, in order, with no index to manage.",
+          "loop": true,
+          "nodes": [
+            { "label": "names", "sub": "[Ada, Grace, Linus]", "detail": "The list you are looping over." },
+            { "label": "name = Ada", "sub": "pass 1", "detail": "The loop variable is set to the first element." },
+            { "label": "name = Grace", "sub": "pass 2", "detail": "Next pass, the variable holds the second element." },
+            { "label": "name = Linus", "sub": "pass 3", "detail": "Last element, then the loop ends automatically." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Summing with for-each",
+          "steps": [
+            { "label": "sum = 0", "detail": "The accumulator starts at zero.", "code": "int sum = 0;" },
+            { "label": "v = 3", "detail": "First element; each Integer unboxes to int. sum becomes 3.", "code": "for (int v : nums) { sum += v; } // v=3" },
+            { "label": "v = 5", "detail": "Second element; sum becomes 8.", "code": "// v=5, sum=8" },
+            { "label": "v = 7", "detail": "Third element; sum becomes 15, then the loop ends.", "code": "// v=7, sum=15" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Reassigning the loop variable inside a for-each changes the list.", "correct_answer": "false", "explanation": "The loop variable is a copy of the reference, so reassigning it only changes the local copy." },
+            { "type": "fill_in", "question": "What exception is thrown if you remove from a list during a for-each? Give one word.", "correct_answer": "ConcurrentModificationException", "explanation": "Structurally modifying a list during a for-each throws ConcurrentModificationException." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "for-each is for reading", "content": "Use the enhanced for loop when you only need to read each element. If you must remove, change by index, or go backward, use an indexed loop instead." }
+      ],
       "challenge_title": "Longest Word",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: read n words, use a for-each loop to find and print the longest word\n    }\n}\n",
@@ -451,6 +633,42 @@ export default {
           "correct_index": 2,
           "explanation": "Increment only when no removal happened; after a removal stay to re-check the shifted element."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Backward removal avoids skips",
+          "caption": "Walking from the end means a removal only disturbs indices you already passed.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = last", "sub": "start at end", "detail": "Begin at index size() - 1 and move down." },
+            { "label": "check cell", "sub": "remove?", "detail": "If this element should go, remove it now." },
+            { "label": "shift is safe", "sub": "above only", "detail": "Removing shifts higher indices, which you already visited, so nothing is skipped." },
+            { "label": "i--", "sub": "step down", "detail": "Move to the next lower index and repeat until i < 0." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Why forward with always i++ skips",
+          "steps": [
+            { "label": "[1, 2, 4]  i=0", "detail": "1 is odd, so keep it and increment i to 1.", "code": "if (even) remove(i); else i++;" },
+            { "label": "i=1", "detail": "Index 1 holds 2 (even). remove(1) leaves [1, 4], and 4 slides into index 1.", "code": "list.remove(1); // [1, 4]" },
+            { "label": "i++ to 2", "detail": "Because you incremented, you jump to index 2 and never check the 4 now sitting at index 1. It got skipped.", "code": "i++; // skips the 4" },
+            { "label": "Fix", "detail": "Either do not increment right after a removal, or loop backward so shifts stay above i.", "code": "for (int i = size()-1; i >= 0; i--)" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Looping backward from size()-1 lets you remove elements without skipping any.", "correct_answer": "true", "explanation": "Removing index i only shifts higher indices, which you already visited." },
+            { "type": "fill_in", "question": "In a forward while loop, you increment i only when you did NOT do what to an element?", "correct_answer": "remove", "explanation": "After a removal you re-check the same index, so you skip the increment that pass." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Never remove inside a for-each", "content": "Removing during an enhanced for loop throws ConcurrentModificationException. Use an indexed loop when you need to delete elements." }
       ],
       "challenge_title": "Remove the Evens",
       "challenge_language": "java",
@@ -528,6 +746,45 @@ export default {
           "explanation": "String content comparison uses .equals(); == compares references."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Linear search scans left to right",
+          "caption": "Check each element in turn and stop at the first match, or return -1.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 0", "sub": "first", "detail": "Start at index 0 and compare to the target." },
+            { "label": "match?", "sub": "get(i) == target", "detail": "If this element equals the target, return i right away." },
+            { "label": "next i", "sub": "i++", "detail": "No match, so move to the next index and check again." },
+            { "label": "return -1", "sub": "not found", "detail": "If the loop ends with no match, the target is absent, so return -1." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Find the maximum of [3, 9, 4, 9, 1] and the index of its first occurrence.",
+          "steps": [
+            "Seed max = 3 at index 0.",
+            "i=1: 9 > 3, so max = 9 and idx = 1.",
+            "i=2: 4 is not greater than 9, no change.",
+            "i=3: 9 is not strictly greater than 9, so index 1 stays the winner.",
+            "i=4: 1 is not greater, no change."
+          ],
+          "output": "max 9 at index 1"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Linear search returns -1 when the target is not found.", "correct_answer": "true", "explanation": "By convention -1 signals that the target is absent." },
+            { "type": "fill_in", "question": "To compare String contents in a search, use which method instead of ==?", "correct_answer": "equals", "explanation": "== compares references; .equals() compares String contents." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Strictly greater keeps the first max", "content": "Using > and not >= when scanning for a maximum means ties do not overwrite the earlier index, so you report the first occurrence." }
+      ],
       "challenge_title": "Find Max and Its Index",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: read n ints, print the maximum value and the index of its FIRST occurrence\n    }\n}\n",
@@ -603,6 +860,43 @@ export default {
           "correct_index": 3,
           "explanation": "In the worst case each element may shift past all prior ones, giving O(n^2)."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Insertion sort grows a sorted prefix",
+          "caption": "Each pass takes the next element and slides it left into the sorted region.",
+          "loop": true,
+          "nodes": [
+            { "label": "sorted prefix", "sub": "index 0", "detail": "Treat the first element as a sorted region of size one." },
+            { "label": "take key", "sub": "list.get(i)", "detail": "Grab the next element as the key to insert." },
+            { "label": "shift right", "sub": "larger move", "detail": "Slide every sorted element greater than the key one slot right." },
+            { "label": "drop key", "sub": "into gap", "detail": "Place the key in the opened gap. The sorted prefix grew by one." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing insertion sort on [3, 1, 2]",
+          "steps": [
+            { "label": "i=1, key=1", "detail": "Compare with 3. Since 3 > 1, shift 3 one slot right.", "code": "list.set(1, list.get(0)); // [3, 3, 2]" },
+            { "label": "place 1", "detail": "j reached -1, so drop the key at index 0.", "code": "list.set(0, 1); // [1, 3, 2]" },
+            { "label": "i=2, key=2", "detail": "Compare with 3. Since 3 > 2, shift 3 one slot right.", "code": "list.set(2, list.get(1)); // [1, 3, 3]" },
+            { "label": "place 2", "detail": "Now list.get(0) is 1, which is not greater than 2, so drop the key at index 1.", "code": "list.set(1, 2); // [1, 2, 3]" },
+            { "label": "done", "detail": "The list is now sorted ascending.", "code": "// [1, 2, 3]" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Insertion sort's worst-case time is O(n^2).", "correct_answer": "true", "explanation": "Each element may shift past all earlier ones, giving O(n^2)." },
+            { "type": "fill_in", "question": "Which ArrayList method shifts elements right during insertion sort? Give one word.", "correct_answer": "set", "explanation": "set(j+1, get(j)) copies each larger element one slot to the right." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Insertion sort shines on nearly sorted data", "content": "If the list is already almost in order, the inner loop barely shifts anything, so insertion sort runs close to O(n)." }
       ],
       "challenge_title": "Insertion Sort",
       "challenge_language": "java",

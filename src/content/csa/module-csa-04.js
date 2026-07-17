@@ -72,6 +72,43 @@ export default {
           "explanation": "If the body never changes the value the condition depends on, the condition stays true forever and the loop never ends."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "One pass of a while loop",
+          "caption": "The condition is tested first, then the body, then the update, and back to the test.",
+          "loop": true,
+          "nodes": [
+            { "label": "Test condition", "sub": "i <= 5 ?", "detail": "Java checks the boolean condition before running the body. If it is false, the loop ends right here." },
+            { "label": "Run body", "sub": "print i", "detail": "Because the condition was true, the statements inside the braces run once." },
+            { "label": "Update", "sub": "i++", "detail": "The body changes the loop variable so the loop makes progress toward stopping." },
+            { "label": "Loop back", "sub": "re-test", "detail": "Control jumps back to the top and the condition is checked again." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing while (i <= 3)",
+          "steps": [
+            { "label": "Start", "detail": "i is initialized to 1 before the loop.", "code": "int i = 1;" },
+            { "label": "Pass 1", "detail": "1 <= 3 is true, so print 1, then i becomes 2.", "code": "while (i <= 3) { print(i); i++; }" },
+            { "label": "Pass 2", "detail": "2 <= 3 is true, so print 2, then i becomes 3.", "code": "i is now 2 -> prints 2" },
+            { "label": "Pass 3", "detail": "3 <= 3 is true, so print 3, then i becomes 4.", "code": "i is now 3 -> prints 3" },
+            { "label": "Stop", "detail": "4 <= 3 is false, so the loop ends. Output was 1 2 3.", "code": "i is now 4 -> condition false" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A while loop always runs its body at least once.", "correct_answer": "false", "explanation": "The condition is tested before the first pass, so if it starts false the body runs zero times." },
+            { "type": "fill_in", "question": "What must the body change so the loop eventually stops?", "correct_answer": "loop variable", "explanation": "The body must move the loop variable toward making the condition false, or the loop runs forever." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Forgetting the update", "content": "If the body never changes the value in the condition, the condition stays true and you get an infinite loop. Always make sure each pass moves toward stopping." }
+      ],
       "challenge_title": "Countdown with while",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: use a while loop to print n, n-1, ..., down to 1, each on its own line\n    }\n}\n",
@@ -147,6 +184,43 @@ export default {
           "correct_index": 0,
           "explanation": "A for loop is ideal for counted iteration where the number of passes is known; while loops fit unknown, condition-based counts."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How a for loop executes",
+          "caption": "Initialization runs once, then the condition, body, and update cycle until the condition is false.",
+          "loop": true,
+          "nodes": [
+            { "label": "Init (once)", "sub": "int i = 1", "detail": "The initialization runs a single time, before anything else in the loop." },
+            { "label": "Condition", "sub": "i <= 5 ?", "detail": "Tested before every pass. If false, the loop ends." },
+            { "label": "Body", "sub": "print i", "detail": "The statements inside the braces run when the condition is true." },
+            { "label": "Update", "sub": "i++", "detail": "Runs after the body, then control goes back to the condition." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing for (int i = 0; i < 3; i++)",
+          "steps": [
+            { "label": "Init", "detail": "i is set to 0 one time.", "code": "int i = 0;" },
+            { "label": "i = 0", "detail": "0 < 3 is true, run body, then update to 1.", "code": "print(0); i++;" },
+            { "label": "i = 1", "detail": "1 < 3 is true, run body, then update to 2.", "code": "print(1); i++;" },
+            { "label": "i = 2", "detail": "2 < 3 is true, run body, then update to 3.", "code": "print(2); i++;" },
+            { "label": "i = 3", "detail": "3 < 3 is false, loop ends. Body ran 3 times.", "code": "condition false -> exit" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The update part of a for loop runs after the body, not before it.", "correct_answer": "true", "explanation": "Order is init, then condition, body, update, back to condition." },
+            { "type": "fill_in", "question": "A for-header variable is accessible only inside the loop because of its limited what?", "correct_answer": "scope", "explanation": "A variable declared in the header has scope limited to the loop and does not exist after it." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Need the final value?", "content": "A variable declared in the for-header disappears when the loop ends. If you need its value afterward, declare it before the loop instead." }
       ],
       "challenge_title": "Sum to N",
       "challenge_language": "java",
@@ -224,6 +298,41 @@ export default {
           "explanation": "Manually checking the first and last passes confirms the loop covers exactly the intended range with no extra or missing iteration."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Counting the iterations",
+          "caption": "For i from 1 to n with i <= n, the loop variable visits every value including n.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 1", "sub": "first pass", "detail": "The loop variable starts at 1, the first value in range." },
+            { "label": "i = 2", "sub": "middle", "detail": "Each pass adds one to i while the condition holds." },
+            { "label": "i = n", "sub": "last pass", "detail": "With i <= n, the value n is included, so this pass still runs." },
+            { "label": "i = n+1", "sub": "stop", "detail": "Now i is greater than n, the condition is false, and the loop ends." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "First and last pass of for (int i = 1; i <= 4; i++)",
+          "steps": [
+            { "label": "First pass", "detail": "i is 1, condition 1 <= 4 is true, so the value 1 is processed.", "code": "i = 1  // 1 <= 4 true" },
+            { "label": "Last true pass", "detail": "i is 4, condition 4 <= 4 is true, so the value 4 is processed. This is the pass an off-by-one bug would skip.", "code": "i = 4  // 4 <= 4 true" },
+            { "label": "Exit", "detail": "i becomes 5, condition 5 <= 4 is false, loop ends. Total passes: 4 - 1 + 1 = 4.", "code": "i = 5  // 5 <= 4 false" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "for (int i = 0; i < 5; i++) runs its body 5 times.", "correct_answer": "true", "explanation": "i takes 0,1,2,3,4, which is 5 - 0 = 5 iterations with the exclusive bound." },
+            { "type": "fill_in", "question": "The reliable way to catch a boundary bug is to trace the first and ____ pass by hand.", "correct_answer": "last", "explanation": "Checking the first and last iterations confirms the loop covers exactly the intended range." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "< versus <=", "content": "Switching between < and <= changes the iteration count by exactly one. Match the operator to whether the limit is inclusive (<=) or exclusive (<)." }
+      ],
       "challenge_title": "Print Range Inclusive",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        // TODO: print every integer from a to b inclusive, one per line\n    }\n}\n",
@@ -299,6 +408,43 @@ export default {
           "correct_index": 1,
           "explanation": "Starting below every possible value guarantees the first element compared becomes the new maximum."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Building a product accumulator",
+          "caption": "The accumulator starts at the identity value 1 and grows with each multiplication.",
+          "loop": true,
+          "nodes": [
+            { "label": "product = 1", "sub": "identity", "detail": "A product accumulator must start at 1 so the first multiply does not zero it out." },
+            { "label": "x 2", "sub": "product = 2", "detail": "Multiply the running total by the next value." },
+            { "label": "x 3", "sub": "product = 6", "detail": "The accumulator keeps the result of every pass so far." },
+            { "label": "x 4 x 5", "sub": "product = 120", "detail": "After the last value the accumulator holds the final answer, 120." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing product *= i for i from 1 to 5",
+          "steps": [
+            { "label": "Start", "detail": "product is initialized to 1, the identity for multiplication.", "code": "int product = 1;" },
+            { "label": "i = 1", "detail": "product becomes 1 * 1 = 1.", "code": "product *= 1;  // 1" },
+            { "label": "i = 2", "detail": "product becomes 1 * 2 = 2.", "code": "product *= 2;  // 2" },
+            { "label": "i = 3", "detail": "product becomes 2 * 3 = 6.", "code": "product *= 3;  // 6" },
+            { "label": "i = 4, 5", "detail": "product becomes 6 * 4 = 24, then 24 * 5 = 120.", "code": "product *= 4; product *= 5;  // 120" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A sum accumulator should be initialized to 1.", "correct_answer": "false", "explanation": "A sum starts at 0. Starting at 1 would add an extra 1 to the total." },
+            { "type": "fill_in", "question": "A counter that tallies matches starts at what number?", "correct_answer": "0", "explanation": "Counting begins at 0 and increases by one for each match." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Match the identity value", "content": "Start a sum at 0 and a product at 1. Starting a product at 0 zeroes out every multiplication, a common silent bug." }
       ],
       "challenge_title": "Factorial",
       "challenge_language": "java",
@@ -376,6 +522,44 @@ export default {
           "explanation": "The last valid index is length()-1, so a backward traversal starts there and counts down to 0."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Walking through a String",
+          "caption": "The index runs from 0 to length-1, and charAt(i) reads one character each pass.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 0", "sub": "charAt(0) = c", "detail": "Index 0 is the first character. For the String code that is c." },
+            { "label": "i = 1", "sub": "charAt(1) = o", "detail": "The loop advances one index and reads the next character." },
+            { "label": "i = 2", "sub": "charAt(2) = d", "detail": "Every valid index is between 0 and length-1." },
+            { "label": "i = 3", "sub": "charAt(3) = e", "detail": "Index 3 is the last valid index because the length is 4." },
+            { "label": "i = 4", "sub": "stop", "detail": "i < length is now false, so the loop ends before touching the missing index 4." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Counting the letter a in banana",
+          "steps": [
+            { "label": "Setup", "detail": "count starts at 0 and i will run from 0 to 5.", "code": "int count = 0;" },
+            { "label": "i = 0", "detail": "charAt(0) is b, not a, so count stays 0.", "code": "s.charAt(0) == 'a'  // false" },
+            { "label": "i = 1", "detail": "charAt(1) is a, so count becomes 1.", "code": "count = 1" },
+            { "label": "i = 3", "detail": "charAt(3) is a again, so count becomes 2.", "code": "count = 2" },
+            { "label": "i = 5", "detail": "charAt(5) is a, count becomes 3, then the loop ends. Result is 3.", "code": "count = 3" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The last valid index of a String is s.length().", "correct_answer": "false", "explanation": "The last valid index is s.length() - 1. Index s.length() is out of bounds." },
+            { "type": "fill_in", "question": "Which String method returns the character at a given position?", "correct_answer": "charAt", "explanation": "charAt(i) returns the char at index i for i from 0 to length()-1." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Off by one with charAt", "content": "Use i < s.length(), never i <= s.length(). Calling charAt(s.length()) throws StringIndexOutOfBoundsException because that index does not exist." }
+      ],
       "challenge_title": "Count Vowels",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine();\n        // TODO: count and print the number of vowels (a, e, i, o, u) in s\n    }\n}\n",
@@ -451,6 +635,43 @@ export default {
           "correct_index": 2,
           "explanation": "Printing a newline after the inner loop completes (but still inside the outer loop) ends each row."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How a nested loop runs",
+          "caption": "For every single outer pass, the inner loop runs all the way through.",
+          "loop": true,
+          "nodes": [
+            { "label": "Outer row = 1", "sub": "start inner", "detail": "The outer loop begins its first pass and hands control to the inner loop." },
+            { "label": "Inner runs fully", "sub": "col 1..4", "detail": "The inner loop completes every one of its iterations before returning to the outer loop." },
+            { "label": "Row done", "sub": "println", "detail": "After the inner loop finishes, the outer body finishes the row, often with a newline." },
+            { "label": "Outer advances", "sub": "row = 2", "detail": "The outer loop moves to its next pass and the inner loop starts over from the beginning." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Output order of a 2 by 2 nested loop",
+          "steps": [
+            { "label": "a = 1", "detail": "Outer starts. Inner runs b = 1 then b = 2.", "code": "for (a=1) { for (b=1..2) print(a+\" \"+b); }" },
+            { "label": "a=1, b=1", "detail": "Prints 1 1.", "code": "1 1" },
+            { "label": "a=1, b=2", "detail": "Prints 1 2, then the inner loop ends.", "code": "1 2" },
+            { "label": "a = 2", "detail": "Outer advances. Inner restarts at b = 1.", "code": "for (b=1..2) ..." },
+            { "label": "a=2, b=1 then b=2", "detail": "Prints 2 1 then 2 2. Full output: 1 1, 1 2, 2 1, 2 2.", "code": "2 1 then 2 2" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "For each outer pass, the inner loop runs exactly once.", "correct_answer": "false", "explanation": "The inner loop runs all of its iterations for every single outer pass." },
+            { "type": "fill_in", "question": "Outer runs m times, inner runs n times each. The inner body runs m times ____ total.", "correct_answer": "n", "explanation": "Total inner-body executions equal m * n." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "The multiplication rule", "content": "If the outer loop runs m times and the inner runs n times per outer pass, the inner body runs m times n times in total. That product is the heart of nested loops." }
       ],
       "challenge_title": "Multiplication Grid",
       "challenge_language": "java",
@@ -528,6 +749,45 @@ export default {
           "explanation": "Starting at i + 1 avoids pairing an element with itself and prevents counting the same pair twice."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A triangle from a dependent bound",
+          "caption": "When the inner limit is col <= row, each row prints one more character than the last.",
+          "loop": true,
+          "nodes": [
+            { "label": "row = 1", "sub": "1 char", "detail": "The inner loop runs col = 1 only, so row 1 prints a single character." },
+            { "label": "row = 2", "sub": "2 chars", "detail": "The inner limit grows with row, so row 2 prints two characters." },
+            { "label": "row = 3", "sub": "3 chars", "detail": "Each row is wider than the last because the inner bound depends on the outer variable." },
+            { "label": "row = 4", "sub": "4 chars", "detail": "The widest row is last. Total characters are 1 + 2 + 3 + 4 = 10, not a rectangle product." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "With for (row = 1; row <= 4; row++) and inner for (col = 1; col <= row; col++), how many characters print in total?",
+          "steps": [
+            "Row 1: inner runs col = 1, so 1 character.",
+            "Row 2: inner runs col = 1, 2, so 2 characters.",
+            "Row 3: inner runs col = 1, 2, 3, so 3 characters.",
+            "Row 4: inner runs col = 1, 2, 3, 4, so 4 characters.",
+            "You cannot multiply here because each row differs. Add the rows: 1 + 2 + 3 + 4."
+          ],
+          "output": "10 characters total"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "When the inner bound depends on the outer variable, you can find total work by multiplying outer times inner.", "correct_answer": "false", "explanation": "The rows differ in size, so you must add them up instead of multiplying." },
+            { "type": "fill_in", "question": "Starting the inner loop at j = i + 1 generates each unique ____ exactly once.", "correct_answer": "pair", "explanation": "It avoids pairing an element with itself and prevents counting the same pair twice." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Add, do not multiply", "content": "A dependent inner bound makes a triangle, not a rectangle. The total 1 + 2 + ... + n equals n * (n + 1) / 2, still roughly n squared for large n." }
+      ],
       "challenge_title": "Number Triangle",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        // TODO: print n rows; row i prints the numbers 1..i separated by spaces\n    }\n}\n",
@@ -603,6 +863,44 @@ export default {
           "correct_index": 1,
           "explanation": "Fewer iterations as n grows means less work, so that solution scales better and runs faster on large inputs."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Single loop versus nested loop",
+          "caption": "As n grows, a nested loop pulls far ahead in total work.",
+          "loop": false,
+          "nodes": [
+            { "label": "Input n", "sub": "problem size", "detail": "Both loops process the same n items, but do a different amount of work." },
+            { "label": "Single loop", "sub": "about n steps", "detail": "One loop over n items does roughly n units of work. Doubling n roughly doubles the work." },
+            { "label": "Nested loop", "sub": "about n*n steps", "detail": "A loop inside a loop over n does roughly n squared work. Doubling n roughly quadruples it." },
+            { "label": "Compare", "sub": "n = 1000", "detail": "At n = 1000 the single loop does about 1,000 steps while the nested loop does about 1,000,000." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "For n = 1000, estimate the steps of a single loop and of a nested (n by n) loop, then compare.",
+          "steps": [
+            "Single loop over n does about n steps: 1,000.",
+            "Nested loop over n inside n does about n * n steps: 1000 * 1000.",
+            "That is 1,000,000 steps for the nested loop.",
+            "Divide: 1,000,000 / 1,000 = 1,000 times more work for the nested version."
+          ],
+          "output": "Single: about 1,000 steps. Nested: about 1,000,000 steps, roughly 1,000 times more."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Doubling n roughly quadruples the work of a nested n by n loop.", "correct_answer": "true", "explanation": "(2n) * (2n) = 4 * n * n, so the work grows by about four times." },
+            { "type": "fill_in", "question": "A single loop over n items does roughly how many units of work (in terms of n)?", "correct_answer": "n", "explanation": "One loop over n items scales linearly, about n steps." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Watch for accidental nesting", "content": "An extra nested loop turns linear work into quadratic work. On large inputs that difference can make a fast program crawl." }
       ],
       "challenge_title": "Count Iterations: Single vs Nested",
       "challenge_language": "java",

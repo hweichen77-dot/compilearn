@@ -92,6 +92,47 @@ print("Consistent dimension:", same_dim)
       "Use all(...) with a generator expression to check every vector matches the first one's length.",
       "This lesson computes nothing about meaning yet. It confirms the data shape is sane before you embed a real corpus.",
     ],
+    animated_diagrams: [
+      {
+        title: "The semantic search pipeline",
+        caption: "Text becomes points on a map, and a query finds its nearest neighbors.",
+        loop: false,
+        nodes: [
+          { label: "Documents", sub: "raw text", detail: "You start with a corpus: a plain list of documents you want to search." },
+          { label: "Embed", sub: "text to vectors", detail: "An embedding model turns each document into a vector that places its meaning as a point in space." },
+          { label: "Index", sub: "store vectors", detail: "Every document now carries its vector. That collection is your searchable index." },
+          { label: "Query", sub: "embed the question", detail: "The search text gets embedded the same way and lands as one more point on the map." },
+          { label: "Rank", sub: "nearest first", detail: "You measure which document points sit closest to the query and sort them best-first." },
+          { label: "Top-k", sub: "best few", detail: "You return only the closest handful, each with a score showing how strong the match is." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Embedding", definition: "A list of numbers from a model that places a piece of text at a point in meaning-space." },
+      { term: "Semantic search", definition: "Finding results by meaning rather than by matching exact words." },
+      { term: "Corpus", definition: "The full set of documents you want to search over." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why does keyword search miss that 'puppy training tips' relates to 'how to teach your dog to sit'?",
+        options: [
+          "The second phrase is too long to index",
+          "The two phrases share almost no literal words, and keyword search only matches words",
+          "Keyword search ignores punctuation",
+          "The documents are in different languages",
+        ],
+        correct_index: 1,
+        explanation: "Keyword search matches literal substrings. With almost no shared words, it never connects the two even though they mean the same thing.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Two texts with similar meaning get embeddings that land close together.", correct_answer: "true", explanation: "That closeness in vector space is exactly what makes semantic search work." },
+        ],
+      },
+    ],
     challenge_title: "Same Dimension or Bust",
     challenge_description:
       "Check that every vector in a corpus has the same dimension before you search it. A mismatched vector silently breaks every similarity score computed downstream.",
@@ -265,6 +306,41 @@ for entry in index:
       "zip(docs, vectors) pairs each original document with its vector in the same order.",
       "build_index calls embed_fn exactly once no matter how many documents there are.",
     ],
+    animated_diagrams: [
+      {
+        title: "Building the index in one batch",
+        caption: "Gather every text first, embed them together, then attach each vector back to its document.",
+        loop: false,
+        nodes: [
+          { label: "Collect", sub: "all texts", detail: "Pull the text out of every document into one list before you call the API." },
+          { label: "One batch", sub: "single request", detail: "Send the whole list in a single embed call instead of one call per document." },
+          { label: "Vectors", sub: "same order", detail: "The API returns one vector per text, in the same order you sent them." },
+          { label: "Attach", sub: "zip back", detail: "Pair each document with its vector so the meaning travels with the text." },
+          { label: "Index", sub: "ready to search", detail: "Every document now carries its vector. That is your index." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Batch call", definition: "Sending many texts to the embeddings API in one request instead of one call each." },
+      { term: "Index", definition: "A corpus where every document also carries its embedding vector." },
+      { term: "input_type", definition: "A flag telling the model whether it is embedding a document to be searched or a query doing the searching." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why embed a corpus in one batch call instead of looping one call per document?",
+        options: [
+          "Looping changes the vectors' meaning",
+          "One batch is fewer network round trips and usually cheaper than one call per document",
+          "The API rejects single-document calls",
+          "Batching sorts the documents for you",
+        ],
+        correct_index: 1,
+        explanation: "Each call is a network round trip and often priced per request, so one batch beats a loop on both speed and cost.",
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Match input_type to the side", content: "Embed documents with input_type document and queries with input_type query. Using the wrong one will not crash. It quietly makes your rankings worse." },
+    ],
     challenge_title: "Batch-Embed the Corpus",
     challenge_description:
       "Embed a corpus in one batch pass with a deterministic vowel-count embedding, then report the index size and each document's vector.",
@@ -410,6 +486,51 @@ print(round(cosine_similarity(v1, v3), 4))
       "sum(x * y for x, y in zip(a, b)) is the dot product in one line.",
       "math.sqrt(sum(x * x for x in a)) is the norm (magnitude) of a.",
       "v3 is v1 scaled by 2, same direction, so its similarity to v1 comes out to exactly 1.0.",
+    ],
+    animated_diagrams: [
+      {
+        title: "Computing cosine similarity",
+        caption: "Line up the vectors, measure each one's length, then divide out the length to leave only the angle.",
+        loop: false,
+        nodes: [
+          { label: "Dot product", sub: "align them", detail: "Multiply matching positions and sum. This is large when the vectors point the same way." },
+          { label: "Norm A", sub: "length of a", detail: "Take the square root of the sum of squares of the first vector." },
+          { label: "Norm B", sub: "length of b", detail: "Do the same for the second vector to get its magnitude." },
+          { label: "Divide", sub: "cancel length", detail: "Divide the dot product by both norms. This removes magnitude and leaves only direction." },
+          { label: "Score", sub: "the angle", detail: "You get a number from -1 to 1: 1 means same direction, 0 means perpendicular." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Cosine similarity", definition: "A score from -1 to 1 measuring the angle between two vectors, ignoring their length." },
+      { term: "Dot product", definition: "The sum of the products of matching positions in two vectors." },
+      { term: "Norm", definition: "A vector's length, the square root of the sum of its squared components." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "cosine_similarity([1, 0, 1], [1, 1, 0])",
+        steps: [
+          "Dot product: 1*1 + 0*1 + 1*0 = 1.",
+          "Norm of the first vector: sqrt(1 + 0 + 1) = sqrt(2), about 1.414.",
+          "Norm of the second vector: sqrt(1 + 1 + 0) = sqrt(2), about 1.414.",
+          "Divide the dot product by both norms: 1 / (1.414 * 1.414) = 1 / 2.",
+        ],
+        output: "0.5",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "What does cosine similarity actually measure between two vectors?",
+        options: [
+          "The straight-line distance between their tips",
+          "The angle between them, ignoring how long each one is",
+          "The number of positions where they share a value",
+          "The sum of their lengths",
+        ],
+        correct_index: 1,
+        explanation: "Dividing by both norms cancels magnitude, so only direction (the angle) is left. Doubling a vector's length leaves its cosine score unchanged.",
+      },
     ],
     challenge_title: "Cosine Similarity from Scratch",
     challenge_description:
@@ -574,6 +695,50 @@ for doc_id, score in ranked:
       "Sort key (-score, id) sorts by score descending and breaks ties by id ascending in one pass.",
       "Documents 1 and 3 point the same direction as the query, so they should tie at the top.",
     ],
+    animated_diagrams: [
+      {
+        title: "From scores to a ranking",
+        caption: "Score every document, collect the pairs, then sort best-first with a fixed tie-break.",
+        loop: false,
+        nodes: [
+          { label: "Score each", sub: "one per doc", detail: "Run cosine similarity between the query and every document in the corpus." },
+          { label: "Collect", sub: "(doc, score)", detail: "Gather every document with its score into one list of pairs." },
+          { label: "Sort", sub: "highest first", detail: "Order the pairs by score descending so the best matches rise to the top." },
+          { label: "Tie-break", sub: "smaller id wins", detail: "When two scores are equal, the smaller document id comes first, so results are deterministic." },
+          { label: "Ranked list", sub: "ordered output", detail: "You now have one stable ordering the next lesson can trim to top-k." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Ranking", definition: "Turning per-document similarity scores into one best-first ordering." },
+      { term: "Tie-break", definition: "A fixed rule that decides order when two documents score the same." },
+      { term: "Stable sort", definition: "A sort that keeps equal items in their original relative order." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Rank three docs by the key (-score, id): doc 1 scores 1.0, doc 3 scores 1.0, doc 2 scores 0.0.",
+        steps: [
+          "Build each key: doc 1 -> (-1.0, 1), doc 3 -> (-1.0, 3), doc 2 -> (0.0, 2).",
+          "Sort by the first value: -1.0 sorts before 0.0, so docs 1 and 3 land ahead of doc 2.",
+          "Docs 1 and 3 tie on -1.0, so the second value breaks it: id 1 before id 3.",
+        ],
+        output: "doc 1, doc 3, doc 2",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why score and sort the whole corpus before trimming to the top few?",
+        options: [
+          "Sorting is faster than scoring",
+          "You cannot know a document is in the top few until you have compared it against everything else",
+          "Trimming first saves an API call",
+          "The embedding model requires it",
+        ],
+        correct_index: 1,
+        explanation: "A document's rank depends on every other document's score. Stop early and you get wrong results the moment the corpus order changes.",
+      },
+    ],
     challenge_title: "Rank the Corpus",
     challenge_description:
       "Score every document in a corpus against a query vector with cosine similarity, then rank them highest-first, breaking ties by the smaller document id.",
@@ -722,6 +887,40 @@ print(top_k(ranked, 10))
       "k = min(k, len(ranked)) is the whole guard, apply it before slicing.",
       "ranked[:k] returns the first k items of an already-sorted list.",
       "Asking for more results than exist should return everything, not raise an error or pad the list.",
+    ],
+    animated_diagrams: [
+      {
+        title: "One search, end to end",
+        caption: "Embed the query once, rank the corpus, then hand back only the best k with their scores.",
+        loop: false,
+        nodes: [
+          { label: "Embed query", sub: "one call", detail: "The search text becomes a vector with a single embedding call, whatever k or corpus size is." },
+          { label: "Rank", sub: "score + sort", detail: "Score the query against every document and sort them best-first." },
+          { label: "Clamp k", sub: "min(k, size)", detail: "Shrink k to the corpus size so asking for more results than exist is safe." },
+          { label: "Slice", sub: "top k", detail: "Take the first k entries off the sorted list." },
+          { label: "Return", sub: "id + score", detail: "Hand back each result with its score so the caller can judge the match." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Top-k", definition: "Keeping only the k highest-ranked results instead of the whole sorted list." },
+      { term: "Clamping", definition: "Capping a value to a safe range, here shrinking k to the corpus size." },
+    ],
+    inline_quizzes: [
+      {
+        question: "What does k = min(k, len(ranked)) protect against?",
+        options: [
+          "Returning duplicate documents",
+          "Asking for more results than the corpus holds, which would otherwise slice past the end",
+          "A slow embedding call",
+          "Ties between two documents",
+        ],
+        correct_index: 1,
+        explanation: "If a caller asks for 10 results from a 3-document corpus, clamping k returns all 3 instead of erroring or padding.",
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "Return the score, not just the id", content: "A score of 0.91 says almost certainly right; a 0.31 on the last item says weak, included only because nothing better ranked. The score lets the caller apply its own cutoff." },
     ],
     challenge_title: "Top-K Search Results",
     challenge_description:
@@ -909,6 +1108,40 @@ print(safe_rank(query, []))
       "Check `if not index: return []` before anything else, so an empty corpus never reaches the scoring loop.",
       "`continue` inside the loop skips a mismatched document without stopping the whole function.",
       "The zero-vector guard already lives inside cosine_similarity, so a zero-vector doc still gets scored, just as 0.0.",
+    ],
+    animated_diagrams: [
+      {
+        title: "Hardened ranking",
+        caption: "Each guard runs before the risky step it protects, so one bad document degrades quietly.",
+        loop: false,
+        nodes: [
+          { label: "Empty?", sub: "no docs", detail: "If the index is empty, return an empty list immediately instead of touching index[0]." },
+          { label: "Dim check", sub: "same length", detail: "Skip any document whose vector length does not match the query's, since zip would silently truncate." },
+          { label: "Zero guard", sub: "norm is 0", detail: "A zero-vector document scores 0.0 instead of dividing by zero and crashing." },
+          { label: "Score", sub: "safe now", detail: "Only clean, matching vectors reach cosine similarity." },
+          { label: "Rank", sub: "best-first", detail: "Sort the survivors with the same deterministic tie-break as before." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Zero vector", definition: "A vector of all zeros, usually left behind when something failed to embed." },
+      { term: "Dimension mismatch", definition: "A vector whose length differs from the rest of the index, breaking similarity math." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why is a silent dimension mismatch worse than a crash?",
+        options: [
+          "It uses more memory",
+          "zip truncates to the shorter vector and returns a plausible-looking but meaningless score",
+          "It always returns zero",
+          "It doubles the API cost",
+        ],
+        correct_index: 1,
+        explanation: "A crash is loud and obvious. A truncated score looks like a real result, so the bug hides in your rankings instead of surfacing.",
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Treat every vector as untrusted", content: "Corpora get updated by many processes over time, and eventually one document's embedding goes wrong. A few lines of guarding turn an outage into one silently skipped row." },
     ],
     challenge_title: "Search That Doesn't Crash",
     challenge_description:
@@ -1106,6 +1339,50 @@ print("Batches needed:", len(batches))
       "batch() is just slicing items in fixed-size steps: items[i:i+batch_size] for i in range(0, len(items), batch_size).",
       "Dedupe BEFORE batching. Batching duplicates wastes a slot in some batch for nothing.",
     ],
+    animated_diagrams: [
+      {
+        title: "Embedding a big corpus without overpaying",
+        caption: "Drop duplicates, skip anything already cached, then embed what's left in fixed-size batches.",
+        loop: false,
+        nodes: [
+          { label: "Dedupe", sub: "unique texts", detail: "Collapse repeated texts to one copy so you never embed the same string twice." },
+          { label: "Cache check", sub: "already have it?", detail: "Filter out any text whose vector is already cached before making a call." },
+          { label: "Batch", sub: "fixed chunks", detail: "Split the remaining texts into chunks that fit the API's per-request limit." },
+          { label: "Embed", sub: "one call each", detail: "Send each batch as one request and store every returned vector in the cache." },
+          { label: "Estimate", sub: "count tokens", detail: "Sum a rough token estimate over the unique texts to predict the bill before you spend." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Cache", definition: "A store keyed by exact text so each unique string is embedded only once." },
+      { term: "Batching", definition: "Splitting a large list into fixed-size chunks that each fit one API request." },
+      { term: "Token estimate", definition: "A rough character-based guess of cost, about 4 characters per token for English." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "A corpus has 10,000 unique documents and the batch size is 128. How many embed calls?",
+        steps: [
+          "Each call carries at most 128 documents.",
+          "Divide and round up: 10000 / 128 = 78.125.",
+          "You cannot send a partial batch, so round up to the next whole call.",
+        ],
+        output: "ceil(10000 / 128) = 79 calls",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Should you dedupe before or after batching, and why?",
+        options: [
+          "After, so batches stay full",
+          "Before, because batching duplicates wastes a slot on a text you will throw away",
+          "It makes no difference",
+          "Before, because the API rejects duplicates",
+        ],
+        correct_index: 1,
+        explanation: "Dedupe first. Every duplicate you carry into a batch spends a slot and possibly a whole extra call on an identical result.",
+      },
+    ],
     challenge_title: "Dedupe, Batch, and Bill",
     challenge_description:
       "Before re-embedding a corpus, dedupe repeated texts (cache hits are free), batch the rest into fixed-size API calls, and estimate the token cost of the unique texts only.",
@@ -1293,6 +1570,42 @@ for index_size, cache, guard, tok, bud in cases:
       "Check the four conditions in a fixed order: index, cache, zero_vector_guard, budget.",
       "index_size < 1 means nothing has been embedded yet, so there's nothing to search.",
       "No failures means the engine is READY to ship.",
+    ],
+    animated_diagrams: [
+      {
+        title: "The assembled engine",
+        caption: "Every earlier lesson becomes one method: add documents, then search them.",
+        loop: false,
+        nodes: [
+          { label: "add_documents", sub: "batch + cache", detail: "Dedupe, batch, and cache embeddings, then store each document with its vector in the index." },
+          { label: "Index", sub: "vectors ready", detail: "The engine holds a list of documents that each carry text and a vector." },
+          { label: "search", sub: "embed query", detail: "Embed the query once, then guard against an empty index before scoring." },
+          { label: "Rank + guard", sub: "skip bad dims", detail: "Score matching vectors, skip mismatched ones, and sort with the id tie-break." },
+          { label: "Top-k", sub: "scored results", detail: "Clamp k, slice, and return each match with its rounded score." },
+        ],
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "In this project, what does 'shipped' mean?",
+        options: [
+          "The code is deployed to a public server",
+          "It runs from a clean start, survives messy input without crashing, and someone else could use it from your instructions",
+          "It passes exactly one test",
+          "The embeddings are stored in a database",
+        ],
+        correct_index: 1,
+        explanation: "No deployment is needed here. Shipped means it runs end to end, handles edge cases, and is usable by someone else.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Trace the engine",
+        questions: [
+          { type: "true_false", question: "The query is embedded once per search, no matter how large k or the corpus is.", correct_answer: "true", explanation: "A search costs one embedding call for the query plus cheap arithmetic to rank." },
+          { type: "fill_in", question: "Which method batches and caches the document embeddings?", correct_answer: "add_documents", explanation: "add_documents dedupes, batches, caches, then appends each document with its vector to the index." },
+        ],
+      },
     ],
     challenge_title: "Ship Checklist",
     challenge_description:

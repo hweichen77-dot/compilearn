@@ -74,6 +74,43 @@ export default {
           "explanation": "Use == for comparison. A single = is assignment, which stores 10 into x instead of asking a question."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Evaluating age >= 18 and has_id",
+          "caption": "Python checks the left side first, and short-circuit lets it stop early.",
+          "loop": false,
+          "nodes": [
+            { "label": "Left compare", "sub": "age >= 18", "detail": "With age = 16, the test 16 >= 18 is False." },
+            { "label": "Short-circuit", "sub": "and sees False", "detail": "Because the left side is already False, Python never checks has_id." },
+            { "label": "Result", "sub": "False", "detail": "An and expression is True only when both sides are True, so the whole thing is False." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Evaluate not (7 <= 4) or False",
+          "steps": [
+            "Start inside the parentheses: 7 <= 4 is False.",
+            "Apply not to that: not False is True.",
+            "Now the expression is True or False.",
+            "An or is True if at least one side is True, and the left side is True."
+          ],
+          "output": "True"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The operator == compares two values, while = stores a value into a variable.", "correct_answer": "true", "explanation": "== asks a yes-or-no question; a single = is assignment." },
+            { "type": "fill_in", "question": "Which logical operator is True only when BOTH sides are True?", "correct_answer": "and", "explanation": "and needs both sides True; or needs only one." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "One equals vs two", "content": "Writing = where you meant == is the most common Boolean bug. Use == to ask a question, = to store a value." }
+      ],
       "challenge_title": "Both Positive?",
       "challenge_language": "python",
       "challenge_starter_code": "# One line contains two space-separated integers a and b.\n# Print True if BOTH are positive (greater than 0), otherwise print False.\n\nline = input().split()\na = int(line[0])\nb = int(line[1])\n# TODO: print whether both a and b are positive\n",
@@ -151,6 +188,41 @@ export default {
           "correct_index": 0,
           "explanation": "Since the first true condition wins, a 95 would wrongly match score >= 80 first if that test came earlier."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Grading score = 82",
+          "caption": "Python checks conditions top to bottom and runs the first one that is True.",
+          "loop": false,
+          "nodes": [
+            { "label": "Start", "sub": "score = 82", "detail": "The input value we are classifying." },
+            { "label": "score >= 90?", "sub": "False", "detail": "82 is not at least 90, so the A branch is skipped." },
+            { "label": "score >= 80?", "sub": "True", "detail": "82 is at least 80, so this branch runs and prints B." },
+            { "label": "Done", "sub": "skip the rest", "detail": "Once a branch matches, the remaining elif and else are never checked." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing the grade chain with score = 82",
+          "steps": [
+            { "label": "if score >= 90", "detail": "82 >= 90 is False, so skip this block.", "code": "if score >= 90:" },
+            { "label": "elif score >= 80", "detail": "82 >= 80 is True, so this block runs.", "code": "elif score >= 80:" },
+            { "label": "print(\"B\")", "detail": "B is printed and the chain ends.", "code": "print(\"B\")" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In one run of an if/elif/else chain, more than one branch can execute.", "correct_answer": "false", "explanation": "Exactly one branch runs: the first whose condition is True, or the else." },
+            { "type": "fill_in", "question": "What keyword adds a middle condition between if and else?", "correct_answer": "elif", "explanation": "elif means 'else if' and chains extra conditions." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Order matters", "content": "Because the first True condition wins, put the strictest test first. Checking score >= 70 before score >= 90 would grade every passing student a C." }
       ],
       "challenge_title": "Letter Grade",
       "challenge_language": "python",
@@ -230,6 +302,43 @@ export default {
           "explanation": "Python uses indentation to show which statements are nested inside which blocks."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Ticket price for age 30, member no",
+          "caption": "The inner membership question is reached only after the outer age check settles.",
+          "loop": false,
+          "nodes": [
+            { "label": "Outer if", "sub": "age < 13?", "detail": "age is 30, so 30 < 13 is False. Skip the child price and enter the else." },
+            { "label": "Inner if", "sub": "member == yes?", "detail": "Inside the adult branch, check membership. Here member is no, so this is False." },
+            { "label": "Inner else", "sub": "price = 12", "detail": "Not a child and not a member, so the price is 12." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Compute the ticket price when age = 10 and member = no",
+          "steps": [
+            "Outer condition age < 13: 10 < 13 is True.",
+            "The True branch runs: price = 5.",
+            "The entire inner if/else lives in the else, which is skipped.",
+            "Membership is never even looked at for a child."
+          ],
+          "output": "5"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In the ticket example, a child's membership status affects their price.", "correct_answer": "false", "explanation": "Children take the outer if branch and never reach the membership test." },
+            { "type": "fill_in", "question": "In Python, what shows how deeply a statement is nested?", "correct_answer": "indentation", "explanation": "Each level of indentation marks another level of nesting." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Nest only when needed", "content": "If the inner question makes sense in every branch, an elif chain is usually clearer. Reach for nesting when the inner question only matters inside one branch." }
+      ],
       "challenge_title": "Ticket Price",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: an integer age.\n# Line 2: the word yes or no (membership status).\n# Rules: age < 13 -> price 5.\n#        otherwise: member yes -> 8, member no -> 12.\n# Print the price.\n\nage = int(input())\nmember = input().strip()\n# TODO: use a nested conditional to compute and print the price\n",
@@ -307,6 +416,42 @@ export default {
           "correct_index": 0,
           "explanation": "When you only know the stopping condition, not the count, a while loop is the right tool (indefinite iteration)."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "One pass of a while loop",
+          "caption": "The loop cycles: test, run the body, update, then test again.",
+          "loop": true,
+          "nodes": [
+            { "label": "Check condition", "sub": "n > 0?", "detail": "If the condition is False, exit the loop right away." },
+            { "label": "Run body", "sub": "print(n)", "detail": "Do the work inside the loop for this pass." },
+            { "label": "Update", "sub": "n = n - 1", "detail": "Change the variable the condition depends on, moving toward False." },
+            { "label": "Back to top", "sub": "test again", "detail": "Return to the condition. Without the update this would repeat forever." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Collatz starting at n = 6",
+          "steps": [
+            { "label": "n = 6", "detail": "6 is even, so halve it. steps becomes 1.", "code": "n = n // 2  # 3" },
+            { "label": "n = 3", "detail": "3 is odd, so 3*3 + 1. steps becomes 2.", "code": "n = 3*n + 1  # 10" },
+            { "label": "n = 10", "detail": "Even, halve it. steps becomes 3.", "code": "n = n // 2  # 5" },
+            { "label": "continue", "detail": "The sequence keeps going 5, 16, 8, 4, 2, 1, reaching 1 after 8 total steps.", "code": "while n != 1: ..." }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A while loop checks its condition before each pass through the body.", "correct_answer": "true", "explanation": "If the condition is False at the start, the body never runs at all." },
+            { "type": "fill_in", "question": "A loop whose condition never becomes False is called a(n) ___ loop.", "correct_answer": "infinite", "explanation": "Usually caused by forgetting the update inside the body." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Always include an update", "content": "Every while loop needs a start value, a condition, and an update in the body that drives the condition toward False. Forget the update and the loop never ends." }
       ],
       "challenge_title": "Collatz Steps",
       "challenge_language": "python",
@@ -386,6 +531,44 @@ export default {
           "explanation": "% is remainder; a remainder of 0 when divided by 2 means v is even."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Accumulating a sum over [88, 92, 75, 100]",
+          "caption": "The for loop hands you each element in turn while total builds up.",
+          "loop": true,
+          "nodes": [
+            { "label": "s = 88", "sub": "total = 88", "detail": "Start with total at 0, add the first score." },
+            { "label": "s = 92", "sub": "total = 180", "detail": "Add the next element to the running total." },
+            { "label": "s = 75", "sub": "total = 255", "detail": "Keep accumulating as the loop visits each value." },
+            { "label": "s = 100", "sub": "total = 355", "detail": "Last element added. The loop ends and total holds the sum." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Count the even numbers in [1, 2, 3, 4, 6]",
+          "steps": [
+            "Start a counter evens at 0.",
+            "1 % 2 is 1, not even, skip.",
+            "2 % 2 is 0, even, evens becomes 1.",
+            "3 is odd, skip. 4 is even, evens becomes 2. 6 is even, evens becomes 3."
+          ],
+          "output": "3"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "range(4) produces the values 0, 1, 2, 3.", "correct_answer": "true", "explanation": "range(n) starts at 0 and stops before n." },
+            { "type": "fill_in", "question": "A variable that builds up a running total across loop passes is called a(n) ___.", "correct_answer": "accumulator", "explanation": "You update it each pass to hold a sum or count." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Values or positions", "content": "Use for v in nums when you want each value. Use for i in range(len(nums)) with nums[i] when you also need the index." }
+      ],
       "challenge_title": "Count the Evens",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: an integer n.\n# Line 2: n space-separated integers.\n# Print how many of them are EVEN.\n\nn = int(input())\nnums = list(map(int, input().split()))\ncount = 0\n# TODO: traverse nums and count the even values\n\nprint(count)\n",
@@ -463,6 +646,41 @@ export default {
           "correct_index": 0,
           "explanation": "Starting at -1 lets the code report 'not found' when the loop ends without a match."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Linear search for 15 in [4, 8, 15, 16, 23]",
+          "caption": "Check each element in order until the target is found.",
+          "loop": true,
+          "nodes": [
+            { "label": "i = 0", "sub": "nums[0] = 4", "detail": "4 is not 15, keep going." },
+            { "label": "i = 1", "sub": "nums[1] = 8", "detail": "8 is not 15, keep going." },
+            { "label": "i = 2", "sub": "nums[2] = 15", "detail": "Match. Record index 2 and break out of the loop." },
+            { "label": "Done", "sub": "found at 2", "detail": "No reason to check the rest once the target is found." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Searching for 9 that is not present",
+          "steps": [
+            { "label": "found = -1", "detail": "Start with the sentinel meaning not found yet.", "code": "found_index = -1" },
+            { "label": "scan all", "detail": "None of the elements equal 9, so no match is recorded.", "code": "if nums[i] == target:" },
+            { "label": "loop ends", "detail": "The sentinel -1 remains, so we report not found.", "code": "print(found_index)  # -1" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Linear search requires the list to be sorted first.", "correct_answer": "false", "explanation": "It works on any list because it makes no ordering assumptions." },
+            { "type": "fill_in", "question": "A special value like -1 that means 'not found' is called a ___ value.", "correct_answer": "sentinel", "explanation": "It signals a condition the loop can report at the end." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Simple but linear", "content": "Linear search always works, but in the worst case it checks all n elements. That cost is what motivates the faster binary search coming next." }
       ],
       "challenge_title": "Find the Index",
       "challenge_language": "python",
@@ -542,6 +760,40 @@ export default {
           "explanation": "If the middle is too small, the target must be among the larger elements to the right, so lo = mid + 1."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Binary search for 16 in [2, 5, 8, 12, 16, 23]",
+          "caption": "Each pass looks at the middle and throws away half the range.",
+          "loop": true,
+          "nodes": [
+            { "label": "lo=0 hi=5", "sub": "mid=2 -> 8", "detail": "Middle is 8, which is less than 16, so the target is to the right. Move lo to 3." },
+            { "label": "lo=3 hi=5", "sub": "mid=4 -> 16", "detail": "Middle is 16. Match found at index 4, stop." },
+            { "label": "Done", "sub": "found at 4", "detail": "Only two comparisons were needed instead of scanning all six." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Why the search space halves",
+          "steps": [
+            { "label": "range = 6", "detail": "Start with all six elements in play.", "code": "lo = 0; hi = 5" },
+            { "label": "compare mid", "detail": "Compare the middle. Too small means discard the left half; too big means discard the right half.", "code": "mid = (lo + hi) // 2" },
+            { "label": "range = 3", "detail": "Half the elements are gone in one step. Repeat until found or the range is empty.", "code": "lo = mid + 1" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Binary search gives correct results even on an unsorted list.", "correct_answer": "false", "explanation": "It relies on order to decide which half to discard, so the list must be sorted." },
+            { "type": "fill_in", "question": "Binary search needs about log base ___ of n comparisons.", "correct_answer": "2", "explanation": "Each step halves the range, giving log base 2 of n steps." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "The trade-off", "content": "Binary search is blazing fast but demands sorted input. Linear search is slower but works on any list. Choosing between them is a classic efficiency decision." }
+      ],
       "challenge_title": "Binary Search Index",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: integer n.\n# Line 2: n space-separated integers in INCREASING (sorted) order.\n# Line 3: an integer target.\n# Use BINARY SEARCH to print the index of target, or -1 if absent.\n\nn = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n# TODO: implement binary search with lo and hi pointers\n",
@@ -619,6 +871,44 @@ export default {
           "correct_index": 0,
           "explanation": "As input grows, a slow algorithm's work can explode, so efficiency determines whether a task finishes in time."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Simulating the walk R R L",
+          "caption": "Each step updates the state (pos) by one rule.",
+          "loop": true,
+          "nodes": [
+            { "label": "Start", "sub": "pos = 0", "detail": "The walker begins at position 0." },
+            { "label": "R", "sub": "pos = 1", "detail": "R moves right, so add 1." },
+            { "label": "R", "sub": "pos = 2", "detail": "Another R, add 1 again." },
+            { "label": "L", "sub": "pos = 1", "detail": "L moves left, so subtract 1. Final position is 1." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Find the final position for the steps L R L R",
+          "steps": [
+            "Start at pos = 0.",
+            "L: pos = -1. R: pos = 0.",
+            "L: pos = -1. R: pos = 0.",
+            "Every left is matched by a right, so the walker ends where it started."
+          ],
+          "output": "0"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The Halting Problem is undecidable: no single algorithm can decide for every program whether it stops.", "correct_answer": "true", "explanation": "It is the classic example of a problem no program can solve in general." },
+            { "type": "fill_in", "question": "A problem solvable in principle but not in any practical time for large inputs is called ___.", "correct_answer": "intractable", "explanation": "Its work explodes too fast to finish, unlike an undecidable problem which has no algorithm at all." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Computing has limits", "content": "Efficiency decides seconds versus centuries, and undecidability marks problems no program can ever solve. Both are real boundaries, not just engineering hurdles." }
       ],
       "challenge_title": "Random Walk Final Position",
       "challenge_language": "python",

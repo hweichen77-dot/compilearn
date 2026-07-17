@@ -21,6 +21,30 @@ export default {
       order: 1,
       title: "The Plan-Then-Act Loop",
       concept: "plan-then-act architecture",
+      animated_diagrams: [
+        {
+          title: "Plan first, then act",
+          caption: "The planner runs once up front, then execution is mechanical.",
+          loop: false,
+          nodes: [
+            { label: "Goal in", sub: "one sentence", detail: "You hand the agent a goal like find Tokyo's population and double it." },
+            { label: "Planner call", sub: "once, up front", detail: "One model call turns the goal into an ordered list of steps as JSON." },
+            { label: "Validate plan", sub: "check shape", detail: "Before spending a tool call, check the steps are numbered right and use real tools." },
+            { label: "Execute steps", sub: "one by one", detail: "Work through the plan mechanically, running each step's tool in order." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Plan-then-act", definition: "An architecture where the model breaks the goal into an ordered plan up front, then the code executes that plan step by step." },
+        { term: "Plan step", definition: "One item in the plan, a dict with a step number, a tool name, and an instruction." },
+      ],
+      inline_quizzes: [
+        { question: "Why plan the whole task before running any tool?", options: ["It uses fewer tokens", "You can inspect the plan, approve risky steps, and report progress against it", "The API requires a plan", "Plans run faster"], correct_index: 1, explanation: "A plan you can read before running lets you check tool names, get approval, and say 'on step 3 of 5' instead of guessing." },
+        { question: "What is the failure mode of a naive step-by-step agent with no plan?", options: ["It costs nothing", "It drifts, redoes work, and loses track of the goal", "It always finishes early", "It cannot use tools"], correct_index: 1, explanation: "Deciding one step at a time with no view of the whole task makes the agent drift and repeat itself." },
+      ],
+      callouts: [
+        { type: "analogy", position: "after", title: "A plan is a recipe", content: "The planner call decides what needs to happen, once. Everything after is mechanical: work the recipe step by step, checking each off." },
+      ],
       explanation: `A chatbot answers one turn at a time. A **multi-step task agent** works differently. You hand it a goal like "research three competitors and write a comparison table," and it has to work out *what steps that takes*, run them in order, and stop once the work is actually finished. This lesson builds the shape everything else hangs on: **plan, then act**.
 
 ## What we're building
@@ -189,6 +213,40 @@ main()
       order: 2,
       title: "Giving the Agent Tools",
       concept: "tool registry and dispatch",
+      animated_diagrams: [
+        {
+          title: "Dispatching through the registry",
+          caption: "A tool name becomes a function call through one lookup.",
+          loop: false,
+          nodes: [
+            { label: "Step names a tool", sub: "e.g. 'search'", detail: "A plan step or a model reply carries a tool name as a plain string." },
+            { label: "In registry?", sub: "guard", detail: "Check the name is a key in the registry, so an invented name returns a clean error, not a KeyError." },
+            { label: "Look up fn", sub: "name to function", detail: "The registry maps the name to the real Python function." },
+            { label: "Call with args", sub: "**args", detail: "Unpack the arguments into the function and return its result." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Tool registry", definition: "A dict mapping each tool name to the Python function that performs it." },
+        { term: "Dispatch", definition: "Turning a tool name plus arguments into an actual function call through a registry lookup." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "dispatch('calculate', {'a': 3, 'b': 4, 'op': 'add'}) against a registry holding calculate.",
+          steps: [
+            "Check calculate is a key in TOOL_REGISTRY. It is, so skip the error.",
+            "Look up the function: TOOL_REGISTRY['calculate'].",
+            "Call it with **args, which becomes calculate(a=3, b=4, op='add').",
+            "op is add, so it returns 3 + 4.",
+          ],
+          output: "7",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why guard the unknown-tool case in dispatch?", options: ["To save tokens", "A planner can hallucinate a tool name, and without the check that becomes a raw KeyError", "The registry needs it to load", "To make the code shorter"], correct_index: 1, explanation: "A made-up name like browse_web hits a KeyError without the guard; with it, dispatch returns a clean error string." },
+        { question: "What does the registry let you avoid writing?", options: ["Any functions", "A growing chain of if tool == 'x' then elif tool == 'y'", "The plan", "The API call"], correct_index: 1, explanation: "One dict lookup replaces an ever-growing if/elif chain as you add tools." },
+      ],
       explanation: `Your plan names a tool on every step: "search," "calculate," "write_file." Right now those names are just strings in a JSON blob. Nothing runs until each name points at real code. This lesson builds the **tool registry**, the map from a tool's name to the Python function that does the work.
 
 ## Defining tools for the model
@@ -385,6 +443,41 @@ main()
       order: 3,
       title: "Decomposing a Goal Into Ordered Steps",
       concept: "task decomposition and dependencies",
+      animated_diagrams: [
+        {
+          title: "Ordering steps by dependency",
+          caption: "Run whatever is ready, mark it done, repeat, until nothing is left or a cycle blocks you.",
+          loop: true,
+          nodes: [
+            { label: "Find ready", sub: "deps satisfied", detail: "Pick every step whose dependencies are all already done." },
+            { label: "Any ready?", sub: "cycle check", detail: "If nothing is ready but steps remain, the leftovers depend on each other in a circle. Reject the plan." },
+            { label: "Run + mark done", sub: "record it", detail: "Add the ready steps to the order and mark them done." },
+            { label: "Repeat", sub: "until empty", detail: "Loop until every step has been placed in a runnable order." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "depends_on", definition: "A list on a step naming the earlier steps whose results it needs before it can run." },
+        { term: "Topological sort", definition: "Ordering steps so every step comes after the steps it depends on; impossible when a cycle exists." },
+        { term: "Dependency cycle", definition: "Two or more steps that depend on each other in a circle, making the plan impossible to order." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Order steps where 1 depends on nothing, 2 and 3 depend on 1, and 4 depends on 2 and 3.",
+          steps: [
+            "Round 1: only step 1 has all deps done (it has none). Run 1, mark it done.",
+            "Round 2: steps 2 and 3 now have their dep (1) done. Run both, mark them done.",
+            "Round 3: step 4 has both its deps (2 and 3) done. Run 4.",
+            "Nothing remains, so the order resolved cleanly.",
+          ],
+          output: "[1, 2, 3, 4]",
+        },
+      ],
+      inline_quizzes: [
+        { question: "How does the topological sort detect a broken plan?", options: ["It counts the steps", "A round finds no ready step while steps still remain", "It checks the tool names", "It times out"], correct_index: 1, explanation: "If nothing is runnable but steps are left, they depend on each other in a cycle, so the plan is rejected." },
+        { question: "Why not just run steps in the order the planner listed them?", options: ["Listed order is always wrong", "A planner can list them out of order, and listed order gives no way to catch an unrunnable plan", "It is slower", "The API forbids it"], correct_index: 1, explanation: "Sorting by dependency keeps execution correct no matter what order the JSON listed, and catches cycles up front." },
+      ],
       explanation: `Steps in a plan lean on each other. "Calculate the total" needs the numbers that "search for prices" found first. So a real plan is a small dependency graph wearing the costume of a numbered list, and your executor has to run steps in an order that respects the graph, even when the planner listed them in a different order.
 
 ## Adding dependencies to the plan
@@ -553,6 +646,40 @@ main()
       order: 4,
       title: "Executing Steps and Passing Results Forward",
       concept: "step execution with result references",
+      animated_diagrams: [
+        {
+          title: "Passing one step's result into the next",
+          caption: "References are swapped for real values just before dispatch.",
+          loop: false,
+          nodes: [
+            { label: "Read args", sub: "per key", detail: "Walk each argument the step wants to pass to its tool." },
+            { label: "Is it a ref?", sub: "starts with $step", detail: "A value like $step1 points at an earlier step's stored result." },
+            { label: "Look up result", sub: "in the ledger", detail: "Find the referenced step in results; if it is missing, return None to abort this step." },
+            { label: "Substitute", sub: "concrete args", detail: "Swap the reference for the real value, leaving literals untouched, then hand concrete args to the tool." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Result reference", definition: "A placeholder like $step1 in a step's arguments that stands for an earlier step's output." },
+        { term: "results ledger", definition: "A dict of step number to stored result, read just before dispatch to resolve references." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "resolve_args({'a': '$step1', 'b': 10}, results={1: 42, 2: 'tokyo'})",
+          steps: [
+            "Key a: value $step1 starts with $step, so it is a reference.",
+            "Parse the step number 1 and look it up in results: 42.",
+            "Key b: value 10 is a plain int, a literal, so copy it as-is.",
+            "Return the resolved dict.",
+          ],
+          output: "{'a': 42, 'b': 10}",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why return None on a missing reference instead of crashing?", options: ["None is faster", "It gives the executor a clean signal to abort the step instead of a KeyError stack trace", "The API needs None", "To skip validation"], correct_index: 1, explanation: "A guard that returns None catches a planner typo or a failed step cleanly, rather than crashing deep in the executor." },
+        { question: "What happens to a literal value like the number 10 during resolution?", options: ["It is looked up in results", "It passes through untouched", "It raises an error", "It becomes a reference"], correct_index: 1, explanation: "Only strings starting with $step are references; literals are copied as-is." },
+      ],
       explanation: `The plan runs in the right order now, but a gap remains. Step 2 needs the actual number step 1 found, not merely the fact that step 1 ran first. This lesson wires real data out of one step's output and into the next step's input.
 
 ## Referencing an earlier step's result
@@ -715,6 +842,41 @@ main()
       order: 5,
       title: "Tracking State Across Steps",
       concept: "agent state and a bounded scratchpad",
+      animated_diagrams: [
+        {
+          title: "Bounding the state log",
+          caption: "Keep the most recent entries in full, fold the rest into one note.",
+          loop: false,
+          nodes: [
+            { label: "Full log", sub: "grows each step", detail: "Every step logged adds a row, and the log grows without bound." },
+            { label: "Over the keep limit?", sub: "compare", detail: "If the log is within the keep window, leave it alone." },
+            { label: "Summarize old", sub: "N omitted", detail: "Fold everything older than the window into one 'N earlier steps omitted' marker." },
+            { label: "Keep recent", sub: "verbatim", detail: "Keep the last few entries in full, since those matter most for the next decision." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Agent state", definition: "Everything the agent has learned so far, held in the results dict and step log." },
+        { term: "Fixed-plan agent", definition: "An agent that plans once and then executes, reaching into state only to resolve arguments." },
+        { term: "Replanning agent", definition: "An agent that asks the model for the next step after each result, which needs a real state summary each turn." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "compress_state_log on a 4-entry log with keep=2.",
+          steps: [
+            "len(log) is 4, which is more than keep=2, so compression applies.",
+            "dropped = 4 - 2 = 2.",
+            "Build one summary tuple: (0, 'summary', '2 earlier steps omitted').",
+            "Return that summary followed by log[2:], the last two entries.",
+          ],
+          output: "[(0,'summary','2 earlier steps omitted'), (3,'search','found GDP figures'), (4,'write_file','saved report.txt')]",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why bound the state log instead of keeping everything?", options: ["Shorter code", "On a long run, resending the full log makes the last call pay for every earlier step's tokens", "The API deletes old entries", "To lose data on purpose"], correct_index: 1, explanation: "A fifty-step agent that resends the whole log each replan makes the final call pay for forty-nine steps of tokens." },
+        { question: "Why slice with log[dropped:] rather than log[-keep:]?", options: ["It is faster", "The negative slice breaks when keep is 0", "They are never equal", "To keep older entries"], correct_index: 1, explanation: "When keep is 0, log[-0:] is the whole list, while log[dropped:] correctly yields nothing." },
+      ],
       explanation: `The \`results\` dict from the last lesson does more than feed argument substitution. It is the agent's **state**: everything the agent has learned so far. This lesson gives that state a shape and, just as importantly, stops it from growing without bound.
 
 ## Two flavors of agent, one state problem
@@ -874,6 +1036,31 @@ main()
       order: 6,
       title: "Handling Step Failures",
       concept: "retries, and required vs. optional steps",
+      animated_diagrams: [
+        {
+          title: "Retry, then decide by required",
+          caption: "A failing step retries a few times; what happens next depends on whether it was load-bearing.",
+          loop: false,
+          nodes: [
+            { label: "Run step", sub: "attempt", detail: "Call the tool. Most failures are transient, so retry a couple of times first." },
+            { label: "Still failing?", sub: "after retries", detail: "If it succeeds on any attempt, move on. If it exhausts every retry, branch on required." },
+            { label: "Required?", sub: "load-bearing", detail: "A required step that failed stops the whole plan: downstream steps need its result." },
+            { label: "Optional?", sub: "skip it", detail: "An optional step that failed is logged and skipped; the plan can still finish successfully." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Required step", definition: "A load-bearing step whose failure, after retries, stops the whole plan." },
+        { term: "Optional step", definition: "A step nothing downstream depends on, which can be skipped on failure without sinking the plan." },
+        { term: "Transient failure", definition: "A temporary error like a network blip or rate limit that often clears on a retry." },
+      ],
+      inline_quizzes: [
+        { question: "What does marking a step optional buy you?", options: ["Faster runs", "One flaky tool call can be skipped instead of sinking the whole task", "Free retries", "It skips validation"], correct_index: 1, explanation: "Optional steps fail quiet and get skipped; required steps fail loud and stop the plan. The split keeps one blip from killing a long task." },
+        { question: "A required step exhausts all its retries. What happens?", options: ["The plan continues with a blank value", "The plan stops and reports failure; later steps never run", "It becomes optional", "It retries forever"], correct_index: 1, explanation: "Everything downstream needs that result, so a failed required step stops the plan rather than handing back a wrong answer." },
+      ],
+      callouts: [
+        { type: "analogy", position: "after", title: "Walls vs decoration", content: "Required steps are load-bearing walls; optional steps are decoration. Lose a wall and you stop and report it. Lose decoration and the building still stands." },
+      ],
       explanation: `Tools fail. A search times out, a calculation gets fed garbage, a file write hits a permissions error. A throwaway script crashes on the first failure and calls it a day. A production agent has to decide, per step, whether a given failure kills the whole plan or barely matters.
 
 ## Retry before giving up
@@ -1028,6 +1215,35 @@ main()
       order: 7,
       title: "Knowing When to Stop",
       concept: "stopping conditions and loop detection",
+      animated_diagrams: [
+        {
+          title: "Three tripwires, checked in order",
+          caption: "Did it declare victory, run out of turns, or just start spinning?",
+          loop: true,
+          nodes: [
+            { label: "finish?", sub: "check first", detail: "If the last action was the finish tool, the agent succeeded. Always check this first." },
+            { label: "max_steps?", sub: "hard ceiling", detail: "If the history has hit the step budget, stop no matter how confident the agent sounds." },
+            { label: "looping?", sub: "repeat check", detail: "If the same tool with the same args repeats too many times, the agent is stuck. Stop early." },
+            { label: "else continue", sub: "next turn", detail: "None tripped, so let the agent take another turn." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Stopping condition", definition: "A rule that ends the agent loop: a finish signal, a step budget, or loop detection." },
+        { term: "Loop detection", definition: "Noticing the same tool and arguments repeating too many times, a sign the agent is stuck, not progressing." },
+        { term: "Step budget", definition: "A hard max_steps cap that ends the loop regardless of what the model claims." },
+      ],
+      inline_quizzes: [
+        { question: "Why check the finish signal before loop detection?", options: ["It is faster", "An agent that just succeeded should not be flagged as looping because its last actions looked similar", "finish is rarer", "The API requires it"], correct_index: 1, explanation: "Checking finish first means a successful ending is never mistaken for a stuck loop." },
+        { question: "What does loop detection save you from?", options: ["Slow tools", "Burning the entire step budget on a query that already failed twice", "Bad plans", "Parse errors"], correct_index: 1, explanation: "Catching a repeat early stops the agent instead of wasting every remaining call spinning on the same action." },
+      ],
+      participation_activities: [
+        { activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "Two search calls with different arguments count as a repeat for loop detection.", correct_answer: "false", explanation: "Loop detection matches on the same tool AND the same arguments. Different args are not a repeat." },
+            { type: "fill_in", question: "Which stop condition is checked first, before the step budget and loop detection?", correct_answer: "finish", explanation: "The finish signal is the intended successful ending, so it is checked before anything else." },
+          ] },
+      ],
       explanation: `A fixed plan stops on its own once it runs out of steps. A replanning agent, the kind that reads results and picks its own next move turn by turn, has no such finish line. Without an explicit stop rule it can spin forever: re-running the same query, forever "almost done," spending tokens with nothing to show for it. This lesson builds the guard that catches that.
 
 ## Three ways to know it's time to stop
@@ -1190,6 +1406,27 @@ main()
       order: 8,
       title: "Ship the Agent",
       concept: "assembling the full plan-execute-track-stop loop",
+      animated_diagrams: [
+        {
+          title: "The shipped task agent",
+          caption: "One call hides the whole plan-execute-track-stop pipeline.",
+          loop: true,
+          nodes: [
+            { label: "Goal in", sub: "run(goal)", detail: "From the outside it is one call: hand it a goal, get back a result." },
+            { label: "Plan + order", sub: "topo sort", detail: "The planner produces steps; topo_order sorts them by dependency or rejects a cycle." },
+            { label: "Execute", sub: "resolve + retry", detail: "Each step resolves its references, runs with retries, and honors required vs optional." },
+            { label: "Track + stop", sub: "bounded state", detail: "State stays bounded, and the loop stops on a finish signal, the budget, or a detected loop." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "TaskAgent", definition: "The assembled class that plans, orders, executes, tracks state, retries, and stops on its own." },
+        { term: "Integration", definition: "Wiring the separate lesson functions into one pipeline that takes a goal and returns a result." },
+      ],
+      inline_quizzes: [
+        { question: "What does shipped mean for this agent?", options: ["It has the most code", "It runs from a clean start, survives a malformed plan, and someone else could run it from your instructions", "It never uses tools", "It skips planning"], correct_index: 1, explanation: "The same three ship tests as every product: clean start, survives bad input, and a stranger can run it." },
+        { question: "Where does most of the run method's logic come from?", options: ["Brand-new code written here", "Functions built in earlier lessons: topo_order, resolve_args, run_step_safe", "The API only", "A third-party library"], correct_index: 1, explanation: "A finished product is usually old code assembled in the right order, not new code." },
+      ],
       explanation: `Every piece is built: a planner that turns a goal into ordered steps, a tool registry, dependency ordering, result references, a bounded state log, retries with required/optional handling, and stop conditions. This lesson wires all of it into one \`TaskAgent\` and ships it.
 
 ## The shape of the finished agent

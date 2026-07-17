@@ -65,6 +65,39 @@ No network yet. First you'll assemble the exact request by hand, a system string
 ## The mental model to keep
 
 A tone rewriter is a volume knob for *style* wired to a lock on *meaning*. You turn the style knob (formal, casual, friendly) while the meaning stays bolted down. The rest of this project is building that knob and making sure the lock holds.`,
+    animated_diagrams: [
+      {
+        title: "The rewrite loop, one dial",
+        caption: "Style turns freely while meaning stays bolted down.",
+        loop: false,
+        nodes: [
+          { label: "Input", sub: "text + tone", detail: "The raw text plus the tone you picked, like 'formal'." },
+          { label: "Build prompt", sub: "rules in system", detail: "System prompt holds the standing rules and the tone; the text rides in a user message." },
+          { label: "Call model", sub: "one request", detail: "Send system + user message to the model in a single API call." },
+          { label: "Read reply", sub: "the rewrite", detail: "Pull the rewritten text out of the response object." },
+          { label: "Ship", sub: "same meaning", detail: "Return the tone-shifted text that still says exactly what the original said." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "System prompt", definition: "The standing rules and tone you set once, constant across every rewrite." },
+      { term: "User message", definition: "The per-call channel that carries the actual text to rewrite." },
+      { term: "Style vs meaning", definition: "Style is word choice and formality (free to change); meaning is facts and intent (must stay fixed)." },
+    ],
+    comparison_tables: [
+      {
+        title: "Two channels, two rates of change",
+        columns: ["Channel", "Holds", "Changes"],
+        rows: [
+          ["system", "rules + chosen tone", "per request (tone) or never (rules)"],
+          ["user message", "the text to rewrite", "every single call"],
+        ],
+      },
+    ],
+    inline_quizzes: [
+      { question: "A rewrite must never change which of these?", options: ["Word choice", "Sentence length", "The facts and intent", "Formality"], correct_index: 2, explanation: "You move only the style axis; a rewriter that changes the meaning is broken." },
+      { question: "Where do the standing rules ('keep meaning, change style') live?", options: ["In the user message", "In the system prompt", "In the model name", "In max_tokens"], correct_index: 1, explanation: "Rules that stay constant go in the system prompt, so you write them once and swap only the text." },
+    ],
     starter_code: `# Assemble a rewrite request by hand (no API yet).
 # A request is a system string (the rules + tone) plus a user message (the text).
 
@@ -193,6 +226,30 @@ The exercise below simulates a model reply, a plain dict like the SDK gives you,
 ## The mental model to keep
 
 The model hands you a *box*, not a *string*. The rewrite is inside the box, sometimes with packing peanuts around it. Your job on every call is the same: open the box, take the rewrite, brush off the peanuts.`,
+    animated_diagrams: [
+      {
+        title: "Open the box, take the rewrite",
+        caption: "The SDK hands you an object; the text sits one level down.",
+        loop: false,
+        nodes: [
+          { label: "Response", sub: "the box", detail: "The object the SDK returns, not a plain string." },
+          { label: "content[0]", sub: "first block", detail: "Reach into the first content block of the reply." },
+          { label: ".text", sub: "the rewrite", detail: "Pull the actual rewritten text out of that block." },
+          { label: ".strip()", sub: "brush off peanuts", detail: "Trim the leading space or trailing newline models often add." },
+          { label: "Clean string", sub: "ready to use", detail: "A plain rewrite you can display or store safely." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Response object", definition: "The structured reply the SDK returns; the text lives at response.content[0].text." },
+      { term: "Preamble", definition: "Extra chatter like 'Here is the rewritten text:' the model sometimes wraps around the answer." },
+    ],
+    inline_quizzes: [
+      { question: "Why call .strip() on the extracted text?", options: ["To translate the tone", "Models often pad replies with a leading space or trailing newline you don't want to store", "It is required to parse JSON", "To lowercase the text"], correct_index: 1, explanation: "Trimming stray whitespace now keeps it from piling up when you display or store the result." },
+    ],
+    callouts: [
+      { type: "analogy", position: "after", title: "A box, not a string", content: "The model hands you a box with the rewrite inside, sometimes with packing peanuts around it. Every call: open the box, take the rewrite, brush off the peanuts." },
+    ],
     starter_code: `# Simulate a model reply and pull the rewritten text out of it.
 # The SDK returns an object; here we mimic it with a plain dict.
 
@@ -326,6 +383,41 @@ You could use an f-string inline. Pulling the template out as a named constant w
 ## The mental model to keep
 
 The template is a rubber stamp with one blank line. You ink in the tone and stamp. The rest of the message, the rules and the format demand, comes out identical every time. One stamp, many tones.`,
+    animated_diagrams: [
+      {
+        title: "One template, many tones",
+        caption: "Ink in the tone, stamp the same rules every time.",
+        loop: false,
+        nodes: [
+          { label: "Template", sub: "one blank", detail: "A constant system string with a {tone} placeholder and all the fixed rules." },
+          { label: "Pick tone", sub: "formal / casual", detail: "Choose which tone to fill in for this call." },
+          { label: ".format(tone=...)", sub: "fill the hole", detail: "str.format drops the tone into the {tone} field." },
+          { label: "System prompt", sub: "tailored", detail: "A finished prompt with the rules intact and the tone set." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Template", definition: "A reusable string with a named placeholder you fill at call time." },
+      { term: "Placeholder", definition: "The {tone} slot str.format replaces with a real value." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "build_system(\"friendly\") on the template 'Rewrite in a {tone} tone. Keep the meaning.'",
+        steps: [
+          "str.format looks for the {tone} field.",
+          "It substitutes 'friendly' into that slot.",
+          "The rest of the string stays byte-for-byte identical.",
+        ],
+        output: "'Rewrite in a friendly tone. Keep the meaning.'",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why pull the template into a named constant instead of an inline f-string?", options: ["f-strings don't work here", "One place to edit the rules, consistent wording across tones, and you can test it alone", "It runs faster", "The API requires .format"], correct_index: 1, explanation: "A prompt reused a thousand times deserves one source of truth." },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Braces are fields to str.format", content: "If a prompt genuinely needs literal braces (asking for JSON), double them as {{ and }} or .format will try to fill them and crash." },
+    ],
     starter_code: `# Fill a system-prompt template with a chosen tone.
 
 SYSTEM_TEMPLATE = (
@@ -443,6 +535,30 @@ Reaching for \`TONE_PRESETS[tone]\` crashes if the tone isn't there. Use \`.get\
 ## The mental model to keep
 
 Presets turn a fuzzy adjective into a recipe. "Formal" is an opinion; a preset is a set of instructions. You're moving the definition of each tone out of the model's imagination and into your own dict, where you control it exactly.`,
+    animated_diagrams: [
+      {
+        title: "A bare tone becomes a recipe",
+        caption: "Look up the preset, drop its full guidance into the template.",
+        loop: false,
+        nodes: [
+          { label: "Tone name", sub: "'formal'", detail: "Just a label the model is free to interpret loosely." },
+          { label: "Preset lookup", sub: "dict by name", detail: "TONE_PRESETS['formal'] returns a concrete description of what formal means." },
+          { label: "Fill template", sub: "tone + guidance", detail: "Drop both the name and the detailed guidance into the system prompt." },
+          { label: "System prompt", sub: "precise", detail: "The model reads a definition, not a guess, so the style is consistent." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Preset", definition: "A named tone paired with a precise instruction, stored as a dict entry." },
+      { term: "Source of truth", definition: "The preset dict, the one place each tone is defined; adding a tone is one new entry, no code change." },
+    ],
+    inline_quizzes: [
+      { question: "Why hand the model a preset instead of the bare word 'formal'?", options: ["Presets are shorter", "A detailed definition produces the same style every time instead of a lone word the model guesses at", "The API rejects single words", "It uses fewer tokens"], correct_index: 1, explanation: "The same detailed guidance means the same result on every call; you control the definition, not the model's imagination." },
+      { question: "What does list(TONE_PRESETS) give you for free?", options: ["The guidance text", "The menu of tone names a UI can show without hardcoding it", "The number of tokens", "The default tone"], correct_index: 1, explanation: "The dict keys are your tone menu, available anywhere without a separate list to keep in sync." },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Look up safely", content: "TONE_PRESETS[tone] crashes on an unknown tone. Use .get with a fallback, or check membership first; you'll build the real fallback in lesson 6." },
+    ],
     starter_code: `# Look up a tone preset and build the system prompt from it.
 
 TONE_PRESETS = {
@@ -574,6 +690,43 @@ This won't catch every meaning change. Paraphrase can lose nuance a regex will n
 ## The mental model to keep
 
 You're a translator, not an author. A translator carries every fact across the language gap untouched and only changes the words that wrap them. Your rewriter does the same across the *tone* gap: every number, name, and date arrives on the other side intact.`,
+    animated_diagrams: [
+      {
+        title: "Did the facts survive?",
+        caption: "Pull the numbers from both sides and check none went missing.",
+        loop: false,
+        nodes: [
+          { label: "Original", sub: "source text", detail: "The text before the rewrite, with facts like '3 boxes by 5pm'." },
+          { label: "Rewrite", sub: "new tone", detail: "The tone-shifted version the model returned." },
+          { label: "Pull numbers", sub: "regex both", detail: "Use re.findall to collect the digits from each side into a set." },
+          { label: "Subset?", sub: "all kept?", detail: "Check that every number in the original also appears in the rewrite." },
+          { label: "Verdict", sub: "PRESERVED / LOST", detail: "A missing number means a fact was dropped and the rewrite needs flagging." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Meaning lock", definition: "The rule that facts, names, numbers, and dates must carry across a rewrite untouched." },
+      { term: "Subset check", definition: "Testing that every original number is also present in the rewrite; if so, none was lost." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Original 'Charge $50 today' vs rewrite 'We will charge your account soon'",
+        steps: [
+          "numbers_in(original) = {'50'}.",
+          "numbers_in(rewrite) = {} (no digits).",
+          "{'50'}.issubset({}) is False.",
+          "Set difference {'50'} - {} = {'50'} shows exactly what went missing.",
+        ],
+        output: "meaning_preserved -> False; lost the number 50",
+      },
+    ],
+    inline_quizzes: [
+      { question: "What does the number check catch, and what does it miss?", options: ["It catches every possible meaning change", "It catches dropped numbers, the most common failure, but misses paraphrase that loses nuance", "It catches tone errors only", "It catches nothing useful"], correct_index: 1, explanation: "A dropped number is the most common and most damaging failure and trivial to detect; deeper paraphrase changes a regex won't see." },
+    ],
+    callouts: [
+      { type: "analogy", position: "after", title: "You're a translator, not an author", content: "A translator carries every fact across untouched and only changes the wrapping words. Your rewriter does the same across the tone gap." },
+    ],
     starter_code: `# Check that a rewrite kept all the numbers from the original.
 import re
 
@@ -719,6 +872,37 @@ Check text first (fatal, stop), then resolve tone (recoverable, fall back). Vali
 ## The mental model to keep
 
 Input validation is the bouncer at the door. Empty text doesn't get in at all. A weird tone gets in but is handed the house default. Everything past the door is clean, so the rest of your code never has to wonder whether the tone is real or the text exists.`,
+    animated_diagrams: [
+      {
+        title: "The bouncer at the door",
+        caption: "Empty text is turned away; a weird tone gets in but on the house default.",
+        loop: false,
+        nodes: [
+          { label: "Raw request", sub: "tone + text", detail: "Whatever the user typed, possibly messy: '  FORMAL ', 'sarcastic', or blank." },
+          { label: "Check text", sub: "fatal first", detail: "Empty or whitespace-only text: stop now, don't call the model." },
+          { label: "Normalize tone", sub: "strip + lower", detail: "'  FORMAL ' becomes 'formal' so it matches the preset." },
+          { label: "Known tone?", sub: "fall back", detail: "Unknown tone like 'sarcastic' degrades to the default instead of crashing." },
+          { label: "Clean request", sub: "trusted", detail: "Past the door everything is clean; the rest of the code never second-guesses." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Normalize", definition: "Strip whitespace and lowercase so '  FORMAL ' and 'formal' resolve to the same tone." },
+      { term: "Graceful fallback", definition: "Recovering from a bad but survivable input (unknown tone) by using a safe default." },
+    ],
+    inline_quizzes: [
+      { question: "Why check the text before resolving the tone?", options: ["It runs faster", "Empty text is fatal (stop), an unknown tone is recoverable (fall back); order them so you fail fast on the unrecoverable one", "The tone check needs the text", "There is no reason"], correct_index: 1, explanation: "Text-first means the tool fails fast on the unrecoverable problem and quietly patches the recoverable one." },
+      { question: "Why reject empty text before calling the model?", options: ["The API bans it", "There's nothing to rewrite, so the call just wastes tokens on a nonsense reply", "It changes the tone", "To save disk space"], correct_index: 1, explanation: "The cheapest call is the one you never make; catch empty input up front." },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Order the guards",
+        questions: [
+          { type: "true_false", question: "An unknown tone should crash the tool.", correct_answer: "false", explanation: "It should fall back to a safe default and, ideally, tell the user 'unknown tone, used neutral'." },
+          { type: "fill_in", question: "You normalize a tone by stripping whitespace and calling ____ on it.", correct_answer: "lower", explanation: "Lowercasing makes 'FORMAL' match the 'formal' preset." },
+        ],
+      },
+    ],
     starter_code: `# Validate a rewrite request: reject empty text, fall back on unknown tones.
 
 ALLOWED = {"formal", "casual", "friendly"}
@@ -877,6 +1061,31 @@ Networks drop and models occasionally return junk. Wrap the call so a failure ha
 ## The mental model to keep
 
 Treat the reply like produce from a market and rinse it before serving. Treat every call like it's on your credit card, because it is. Clean what comes back, cap what goes out, and the tool stays both presentable and affordable.`,
+    animated_diagrams: [
+      {
+        title: "Rinse the reply before serving",
+        caption: "Drop fence lines, trim blank edges, hand back only the rewrite.",
+        loop: false,
+        nodes: [
+          { label: "Raw reply", sub: "wrapped", detail: "The rewrite buried in a preamble and triple-backtick code fences." },
+          { label: "Split lines", sub: "one per line", detail: "Break the reply into a list of lines to inspect each one." },
+          { label: "Drop fences", sub: "keep the rest", detail: "Remove any line whose stripped form starts with the triple-backtick fence." },
+          { label: "Trim blanks", sub: "both ends", detail: "Pop leading and trailing empty lines with two while-loops." },
+          { label: "Clean text", sub: "presentable", detail: "Join what's left; the user sees only their rewrite." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Defensive parsing", definition: "Never trusting the reply to be exactly what you asked; strip the wrapper every time." },
+      { term: "Token estimate", definition: "A rough cost gauge, about one token per four characters, used to cap input length." },
+    ],
+    inline_quizzes: [
+      { question: "You told the model 'return only the rewrite'. Why still clean the reply?", options: ["The instruction is ignored entirely", "'Return only' is a strong nudge, not a guarantee, so you clean whatever slips through", "Cleaning changes the tone", "To lower the token count"], correct_index: 1, explanation: "Belt and suspenders: prompt for clean output and parse defensively anyway." },
+      { question: "Why cap the input length before calling?", options: ["Short text is friendlier", "A user pasting a whole book shouldn't trigger one giant, expensive call", "The API can't handle newlines", "It improves the tone"], correct_index: 1, explanation: "Set a ceiling and refuse or chunk anything past it; cost is length times frequency." },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Fail politely, not silently", content: "When a call errors, hand the user their original text back with a note. A rewriter that returns the original on failure is still useful; one that crashes is not." },
+    ],
     starter_code: `# Clean a messy model reply: strip code fences and blank edges.
 
 def clean_reply(text):
@@ -1020,6 +1229,36 @@ Finishing this final lesson saves the **Tone Rewriter** to your Portfolio tab au
 ## The mental model to keep
 
 You didn't build eight features. You built one pipeline and hardened each stage. Input goes in dirty, flows through validate, resolve, template, call, and clean, and comes out as a tone-shifted rewrite that still means what the original meant. That pipeline is the product. Ship it.`,
+    animated_diagrams: [
+      {
+        title: "The full rewrite pipeline",
+        caption: "Dirty text in, each stage hardened, tone-shifted rewrite out.",
+        loop: false,
+        nodes: [
+          { label: "Validate", sub: "reject empty", detail: "Trim the text; if it's empty, stop before spending anything." },
+          { label: "Resolve preset", sub: "tone -> guidance", detail: "Normalize the tone and look up its concrete guidance, falling back or erroring on unknown." },
+          { label: "Template", sub: "build system", detail: "Drop the tone and guidance into the system-prompt template." },
+          { label: "Call", sub: "one request", detail: "Send the system prompt and the user's text to the model." },
+          { label: "Clean", sub: "strip wrapper", detail: "Scrub fences and preamble so the output is just the rewrite." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Pipeline", definition: "The ordered stages, validate, resolve, template, call, clean, that make up the product." },
+      { term: "Deliverable", definition: "A tool someone else could pick up from a one-line description and run." },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Shipping check",
+        questions: [
+          { type: "true_false", question: "You built eight separate features.", correct_answer: "false", explanation: "You built one pipeline and hardened each stage; the pipeline is the product." },
+          { type: "fill_in", question: "Finishing this lesson saves the tool to your ____ tab.", correct_answer: "portfolio", explanation: "The Portfolio tab records the Tone Rewriter with its title and deliverable." },
+        ],
+      },
+    ],
+    inline_quizzes: [
+      { question: "In the pipeline, what is checked first?", options: ["The tone preset", "Whether the text is empty", "The token cost", "The code fences"], correct_index: 1, explanation: "Validate first: empty text short-circuits before any preset lookup or API call." },
+    ],
     starter_code: `# Run the full rewrite pipeline offline (simulated model, no network).
 
 TONE_PRESETS = {

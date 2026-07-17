@@ -57,6 +57,49 @@ Build the list by hand first and get the data shape right. The network call is t
 ## The mental model
 
 The model has amnesia but can read a whiteboard. Each turn you hand it the entire whiteboard, it reads top to bottom and writes one more line. Lose the whiteboard, lose the memory.`,
+    animated_diagrams: [
+      {
+        title: "How 'memory' really works",
+        caption: "The model keeps nothing between calls; the growing list you resend is the memory.",
+        loop: true,
+        nodes: [
+          { label: "User types", sub: "read input", detail: "The human types a message, for example 'What is my name?'." },
+          { label: "Append user", sub: "add to list", detail: "Append {role: 'user', content: ...} to the history list you keep." },
+          { label: "Send whole list", sub: "resend everything", detail: "Call the API with the entire history, not just the newest line." },
+          { label: "Model reads", sub: "top to bottom", detail: "Stateless, the model re-reads the whole list and answers as if it remembered." },
+          { label: "Append reply", sub: "store + repeat", detail: "Append the assistant turn so the next call has it, then loop." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Stateless", definition: "Every API call is independent; the model keeps nothing from one call to the next." },
+      { term: "Message history", definition: "The running list of every turn so far that you resend on each call so the bot appears to remember." },
+      { term: "Role", definition: "The label on each turn: 'user' for the human, 'assistant' for the model." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why must you resend the whole history on every call?",
+        options: [
+          "To make the reply longer",
+          "Because the model is stateless and remembers nothing between calls",
+          "The API deletes old messages",
+          "To lower the token cost",
+        ],
+        correct_index: 1,
+        explanation: "The model keeps no state. The only way it 'remembers' earlier turns is that you resend them every time.",
+      },
+      {
+        question: "A valid history must start with which role, and how do roles go?",
+        options: [
+          "Start with assistant; roles repeat",
+          "Start with user; roles alternate user/assistant",
+          "Any order is fine",
+          "Start with system; roles alternate",
+        ],
+        correct_index: 1,
+        explanation: "The list starts with a user turn and roles strictly alternate. Two user turns in a row gets rejected.",
+      },
+    ],
     starter_code: `# Build the conversation by hand (no API yet).
 # Each turn is a dict with a role and content.
 
@@ -204,6 +247,60 @@ Mixing them is the most common chatbot bug. Persona in a user turn competes with
 ## The mental model
 
 System prompt = the role the actor is cast in. Message history = the script so far. You hand over both on every call: the role never changes, the script keeps growing.`,
+    animated_diagrams: [
+      {
+        title: "Two channels into one call",
+        caption: "Persona rides in its own system channel; the conversation grows in messages.",
+        loop: false,
+        nodes: [
+          { label: "System", sub: "who the bot is", detail: "The persona string: identity, voice, boundaries, and the stay-in-character rule. Set once, resent every call." },
+          { label: "Messages", sub: "what was said", detail: "The growing user/assistant history, separate from the persona." },
+          { label: "API call", sub: "both together", detail: "Every call carries the same system string plus the whole message list." },
+          { label: "In-character reply", sub: "shaped by system", detail: "The model answers in persona because the system prompt outweighs later user turns." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "System prompt", definition: "A separate instruction string that sets the model's persona, tone, and hard rules; it rides in its own top-level parameter." },
+      { term: "Character drift", definition: "A bot slowly forgetting its persona because the personality was put in a user turn instead of the system prompt." },
+      { term: "Persona", definition: "The character the bot plays, strongest when it pins down identity, voice, boundaries, and an anti-break rule." },
+    ],
+    comparison_tables: [
+      {
+        title: "Two clean channels",
+        columns: ["Aspect", "system", "messages"],
+        rows: [
+          ["Holds", "Who the bot is", "What has been said"],
+          ["Changes over time", "No, stable", "Yes, grows each turn"],
+          ["Resent every call", "Yes", "Yes"],
+          ["Safe to trim later", "Never trim it", "Trim the oldest turns"],
+        ],
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "In the Anthropic Messages API, where does the persona go?",
+        options: [
+          "As the first user message",
+          "In the top-level system parameter, separate from messages",
+          "As the last assistant message",
+          "It cannot be set",
+        ],
+        correct_index: 1,
+        explanation: "The persona rides in its own system parameter. Instructions there outweigh the same words placed in a user turn.",
+      },
+      {
+        question: "What happens if you stuff the persona into a user message instead?",
+        options: [
+          "Nothing, it works identically",
+          "It competes with later user turns and the bot drifts out of character",
+          "The API rejects it",
+          "The bot becomes more consistent",
+        ],
+        correct_index: 1,
+        explanation: "Persona in a user turn loses to later user turns, causing character drift where the bot forgets its accent and rules.",
+      },
+    ],
     starter_code: `# Build a request payload: a system persona plus a growing history.
 # We simulate the model reply so this runs with no network call.
 
@@ -364,6 +461,60 @@ This loop is the product. Everything after this lesson, budgets, streaming, erro
 ## The drill below
 
 You'll simulate the loop with a deterministic stand-in reply (no network), so you can watch the history stay balanced and alternating turn after turn.`,
+    animated_diagrams: [
+      {
+        title: "One turn of the chat loop",
+        caption: "Five steps repeat forever; the append discipline keeps history balanced.",
+        loop: true,
+        nodes: [
+          { label: "Read", sub: "user text", detail: "Read what the user typed this turn." },
+          { label: "Append user", sub: "add user turn", detail: "Push {role: 'user', content: text} onto history." },
+          { label: "Call API", sub: "same system, whole history", detail: "Send the persona and the entire history, then read the reply text off the response object." },
+          { label: "Append assistant", sub: "add reply turn", detail: "Push the reply as an assistant turn so history stays balanced and alternating." },
+          { label: "Print + loop", sub: "back to read", detail: "Show the reply and go back to the top for the next turn." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "The invariant", definition: "Every user append is eventually matched by an assistant append, so roles stay alternating." },
+      { term: "Response object", definition: "The API returns an object, not a string; the reply text lives at resp.content[0].text." },
+    ],
+    inline_quizzes: [
+      {
+        question: "What breaks if you forget to append the assistant reply before the next user turn?",
+        options: [
+          "Nothing changes",
+          "You get two user turns in a row, which the API rejects, and the model loses its own last answer",
+          "The reply prints twice",
+          "The persona is deleted",
+        ],
+        correct_index: 1,
+        explanation: "Skip the assistant append and history has two user turns in a row (rejected) or the model never sees its last answer and repeats itself.",
+      },
+      {
+        question: "Where is the reply text on the response object?",
+        options: [
+          "resp itself is the string",
+          "resp.text",
+          "resp.content[0].text",
+          "resp.messages[-1]",
+        ],
+        correct_index: 2,
+        explanation: "The response is an object; pull the string out once at resp.content[0].text, then store that string in history.",
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Run two turns with an echo bot (reply = user text reversed): 'hello', then 'world'.",
+        steps: [
+          "Append user 'hello'; reply 'olleh'; append assistant 'olleh'. History length 2.",
+          "Append user 'world'; reply 'dlrow'; append assistant 'dlrow'. History length 4.",
+          "Roles read user, assistant, user, assistant, all alternating.",
+        ],
+        output: "4 turns total; last reply is 'dlrow'.",
+      },
+    ],
     starter_code: `# Simulate the chat loop with a deterministic stand-in reply.
 # Real bots call the API here; we fake it so it runs offline.
 
@@ -502,6 +653,50 @@ The context window is the model's **desk, not a warehouse**. Everything it needs
 ## The drill below
 
 You'll sum estimated tokens across a system prompt and a conversation, exactly the number you'd check before every real call.`,
+    animated_diagrams: [
+      {
+        title: "Everything shares one budget",
+        caption: "System prompt, full history, and the reply must all fit in the context window together.",
+        loop: false,
+        nodes: [
+          { label: "System tokens", sub: "persona cost", detail: "Estimate the persona string: about four characters per token. Small, but it counts." },
+          { label: "History tokens", sub: "sum every turn", detail: "Add up each message's content. This grows every turn and dominates a long chat." },
+          { label: "Reply room", sub: "space to answer", detail: "The reply the model is about to write also has to fit in the same window." },
+          { label: "Compare to window", sub: "fits or not", detail: "The total is what you pay for and what must fit. Cross a threshold and it is time to trim." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Context window", definition: "The maximum text, measured in tokens, the model can read in one call; system prompt, history, and reply all share it." },
+      { term: "Token", definition: "A chunk of text, often a word or part of a word; a rough English rule of thumb is about four characters per token." },
+    ],
+    callouts: [
+      {
+        type: "analogy",
+        position: "after",
+        title: "The desk, not a warehouse",
+        content: "The context window is the model's desk: everything it needs to answer must fit on the desk at once. A bigger desk helps, but a long enough chat still runs out of room.",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Roughly how many tokens is a 40-character message under the rule of thumb?",
+        options: ["About 4", "About 10", "About 40", "About 160"],
+        correct_index: 1,
+        explanation: "About four characters per token, so 40 characters is roughly 10 tokens. Estimate first, measure with the real tokenizer when money is on the line.",
+      },
+      {
+        question: "When you trim to save tokens, what must you never drop?",
+        options: [
+          "The most recent user turn",
+          "The system prompt, which holds the persona",
+          "The assistant replies",
+          "Nothing is safe to keep",
+        ],
+        correct_index: 1,
+        explanation: "The system prompt is small and holds the persona. Budget around it and trim the conversation, never the persona.",
+      },
+    ],
     starter_code: `# Estimate how many tokens a conversation will cost per call.
 
 def estimate_tokens(text):
@@ -651,6 +846,58 @@ The system prompt is not in the history list and never gets dropped. Trim it and
 ## The drill below
 
 You'll implement summarize-and-drop as pure arithmetic: keep the last K turns verbatim, and if anything older was dropped, replace it with one fixed-cost summary turn. Then report the resulting token total.`,
+    animated_diagrams: [
+      {
+        title: "Sliding window trim",
+        caption: "While the history is over budget, drop the oldest turn and check again.",
+        loop: true,
+        nodes: [
+          { label: "Measure", sub: "sum tokens", detail: "Add up the tokens of the current history (the persona is not in this list)." },
+          { label: "Over budget?", sub: "compare", detail: "If the total is above the ceiling and more than one turn remains, keep going." },
+          { label: "Pop oldest", sub: "drop front turn", detail: "Remove the front (oldest) turn. Never touch the system prompt, it lives elsewhere." },
+          { label: "Recheck", sub: "loop or stop", detail: "Measure again; stop once you are under budget or down to one turn." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Sliding window", definition: "Keep only the most recent turns and drop the oldest; cheap, predictable, and bounded in cost." },
+      { term: "Summarize-and-drop", definition: "Ask the model to compress the oldest turns into a short paragraph, then replace them with one summary turn." },
+    ],
+    comparison_tables: [
+      {
+        title: "Two ways to stay in budget",
+        columns: ["Aspect", "Sliding window", "Summarize-and-drop"],
+        rows: [
+          ["Cost", "Free, no extra call", "One extra API call to summarize"],
+          ["Keeps old facts", "No, they are dropped", "Yes, compressed into a summary"],
+          ["Best for", "Most bots, recent context", "Long threads where old facts still matter"],
+        ],
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Which strategy should you reach for first?",
+        options: [
+          "Summarize-and-drop, always",
+          "A sliding window, because it is free and bounded",
+          "Never trim; buy a bigger window",
+          "Delete the system prompt",
+        ],
+        correct_index: 1,
+        explanation: "Start with a sliding window. Reach for summarize-and-drop only when losing old facts actually hurts, like a long support or tutoring session.",
+      },
+      {
+        question: "Why does the trim loop stop while len(kept) > 1?",
+        options: [
+          "To keep the loop fast",
+          "So you never send an empty history",
+          "To preserve the system prompt",
+          "It is an arbitrary choice",
+        ],
+        correct_index: 1,
+        explanation: "Keeping at least one turn means you never send an empty message list, which the API would reject.",
+      },
+    ],
     starter_code: `# Summarize-and-drop as arithmetic: keep the last K turns, replace
 # everything older with one summary turn of a fixed cost.
 
@@ -793,6 +1040,49 @@ If you accumulate chunks by hand (say, to send them somewhere else), you concate
 ## The drill below
 
 You'll reassemble a stream: concatenate chunks in order, stop at an end marker, and report the assembled message, exactly the "store to remember" half of the loop.`,
+    animated_diagrams: [
+      {
+        title: "Stream to show, store to remember",
+        caption: "Chunks print live for the human, then the assembled reply is stored for the next call.",
+        loop: true,
+        nodes: [
+          { label: "Chunk arrives", sub: "small piece", detail: "The SDK yields the next text chunk as the model generates it." },
+          { label: "Print live", sub: "flush to screen", detail: "print(chunk, end='', flush=True) shows it immediately, no buffering, no newline." },
+          { label: "Accumulate", sub: "join chunks", detail: "Append the chunk to a buffer; chunks join with no separator since they carry their own spacing." },
+          { label: "Sentinel?", sub: "stop at [END]", detail: "If a stop marker appears, end the stream and do not include the marker in the text." },
+          { label: "Store turn", sub: "append to history", detail: "Save the full assembled reply as an assistant turn so the bot remembers it." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Streaming", definition: "Receiving and showing the reply in small chunks as it is generated, instead of waiting for the whole thing." },
+      { term: "Time-to-first-token", definition: "How long until the first words appear; streaming improves this even though total time barely changes." },
+      { term: "Sentinel", definition: "A special marker chunk that signals the end of a stream and must not be stored as part of the reply." },
+    ],
+    inline_quizzes: [
+      {
+        question: "What does streaming actually improve?",
+        options: [
+          "Total response time drops a lot",
+          "Time-to-first-token, which is what humans perceive as speed",
+          "The token cost",
+          "The model's accuracy",
+        ],
+        correct_index: 1,
+        explanation: "Streaming barely changes total time. It changes how fast something appears, and that is what feels responsive.",
+      },
+      {
+        question: "You stream chunks live but forget to store the final reply in history. What happens?",
+        options: [
+          "Nothing, the reply is remembered automatically",
+          "The bot streams beautifully but forgets each reply the instant it finishes",
+          "The stream never ends",
+          "The persona is lost",
+        ],
+        correct_index: 1,
+        explanation: "Streaming is display only. You must capture the assembled reply and append it as an assistant turn, or the bot goes back to goldfish-brain.",
+      },
+    ],
     starter_code: `# Reassemble a streamed reply from its chunks.
 # Concatenate in order (no separator); stop at the "[END]" marker.
 
@@ -943,6 +1233,56 @@ Every \`try/except\` and every input guard is the difference between a bot that 
 ## The drill below
 
 You'll simulate the retry loop: given a fixed attempt budget and the outcome of each attempt, decide whether the call ultimately succeeds and how many tokens it burned, so the retry budget's cost is visible.`,
+    animated_diagrams: [
+      {
+        title: "Bounded retry with backoff",
+        caption: "Retry a flaky call, but only a fixed number of times, since every attempt costs tokens.",
+        loop: true,
+        nodes: [
+          { label: "Attempt", sub: "call the API", detail: "Try the call. This costs tokens whether it succeeds or fails." },
+          { label: "Success?", sub: "return reply", detail: "If the call returns, you are done, hand back the reply." },
+          { label: "Budget left?", sub: "attempts used", detail: "On failure, check if you still have retries. Total attempts is max_retries + 1." },
+          { label: "Back off", sub: "sleep, then retry", detail: "Wait 2 ** attempt seconds so you do not hammer a struggling server, then loop." },
+          { label: "Give up", sub: "raise the error", detail: "Out of budget: stop and raise, instead of retrying forever and spending endlessly." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Bounded retry", definition: "Retrying a failing call a fixed number of times, never forever, so an outage cannot become an infinite money-spending loop." },
+      { term: "Exponential backoff", definition: "Waiting longer between each retry (1s, 2s, 4s) so you space out attempts on a struggling server." },
+      { term: "Cost cap", definition: "A ceiling on tokens or attempts, because every call spends money whether it succeeds or fails." },
+    ],
+    inline_quizzes: [
+      {
+        question: "With max_retries = 2, how many total attempts do you get?",
+        options: ["2", "3", "1", "Unlimited"],
+        correct_index: 1,
+        explanation: "Total attempts is max_retries + 1: the first try plus two retries, three in all.",
+      },
+      {
+        question: "Why guard input with 'if not user_text' before the API call?",
+        options: [
+          "To make the reply shorter",
+          "An empty user turn causes a class of API errors; validate at the boundary before spending a call",
+          "The API requires it",
+          "To reset the persona",
+        ],
+        correct_index: 1,
+        explanation: "Catching a blank line before you touch history or call the API avoids a whole family of 'why did the API 400' bugs.",
+      },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "max_retries = 2 (3 attempts), each costs 10 tokens, outcomes are Fail, Fail, Success.",
+        steps: [
+          "Attempt 1 fails: spent 10, retries left.",
+          "Attempt 2 fails: spent 20, one retry left.",
+          "Attempt 3 succeeds: spent 30, stop.",
+        ],
+        output: "Succeeds, 30 tokens spent (every attempt is billed, even the failures).",
+      },
+    ],
     starter_code: `# Simulate a bounded retry loop. Each attempt costs 'cost' tokens.
 # outcomes is a list of "F" (fail) / "S" (success) in attempt order.
 
@@ -1112,6 +1452,46 @@ Completing this final lesson records the project in your **Portfolio** with its 
 ## The drill below
 
 You'll build a ship-readiness check: given the session's persona, memory, streaming flag, and token usage, decide if the bot is ready to ship or list exactly what's missing.`,
+    animated_diagrams: [
+      {
+        title: "Inside ChatSession.say()",
+        caption: "One method wraps every lesson: guard, remember, trim, stream, store.",
+        loop: true,
+        nodes: [
+          { label: "Guard input", sub: "empty? skip", detail: "Strip the text; if it is blank, return without touching history (lesson 7)." },
+          { label: "Append user", sub: "add to history", detail: "Push the user turn onto the memory list (lesson 1)." },
+          { label: "Trim", sub: "stay in budget", detail: "Slide the window so the token total stays under budget; never trim the persona (lessons 4-5)." },
+          { label: "Stream", sub: "print live", detail: "Stream the reply chunk by chunk with the persona as system (lessons 2, 6)." },
+          { label: "Append assistant", sub: "store reply", detail: "Save the assembled reply so the next call remembers it (lesson 3)." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Ship-readiness", definition: "A short checklist that must all pass before you ship: persona set, memory working, streaming on, and within budget." },
+    ],
+    inline_quizzes: [
+      {
+        question: "In ChatSession, which piece is deliberately never trimmed?",
+        options: [
+          "The oldest user turn",
+          "self.system, the persona",
+          "The most recent reply",
+          "The token counter",
+        ],
+        correct_index: 1,
+        explanation: "The persona lives in self.system, outside the history list, so the sliding window never drops it.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Ship checklist",
+        questions: [
+          { type: "true_false", question: "'Shipped' means it runs from a clean start with your API key in the environment.", correct_answer: "true", explanation: "Running from scratch with one command is one of the three ship checks." },
+          { type: "true_false", question: "A blank line from the user should crash the session.", correct_answer: "false", explanation: "The input guard should handle empty or weird input without crashing." },
+          { type: "fill_in", question: "Streaming improves time-to-first-______.", correct_answer: "token", explanation: "Streaming lowers time-to-first-token, the delay before the first words appear." },
+        ],
+      },
+    ],
     starter_code: `# Ship-readiness check for the finished chatbot.
 # persona: the system string ("NONE" means no persona set)
 # assistant_turns: how many replies are stored (memory)

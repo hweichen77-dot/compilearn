@@ -72,6 +72,44 @@ export default {
           "explanation": "Whether an effect is beneficial or harmful can depend on perspective; one group may benefit while another is harmed."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "One innovation, two kinds of effect",
+          "caption": "The same innovation can help and harm at the same time.",
+          "loop": false,
+          "nodes": [
+            { "label": "Innovation", "sub": "social media", "detail": "A program or device with a goal in mind." },
+            { "label": "Beneficial", "sub": "connects people", "detail": "It meets its intended goal of helping people communicate." },
+            { "label": "Harmful", "sub": "spreads misinformation", "detail": "A harmful effect, often unintended by the creators." },
+            { "label": "Ask who", "sub": "for whom?", "detail": "An effect can help one group and harm another. Always ask beneficial for whom, harmful for whom." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Effects: beneficial, harmful, beneficial, beneficial. What is the net?",
+          "steps": [
+            "Count beneficial effects: 3.",
+            "Count harmful effects: 1.",
+            "Compare: 3 is greater than 1.",
+            "The tally leans net beneficial, though real analysis weighs who is affected."
+          ],
+          "output": "net beneficial"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Harmful effects of a computing innovation are often unintended by its creators.", "correct_answer": "true", "explanation": "Unintended consequences are a defining theme of Big Idea 5." },
+            { "type": "fill_in", "question": "A program, device, or system that includes a program as a core part is a computing ___.", "correct_answer": "innovation", "explanation": "That is the exam's definition of a computing innovation." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Be specific on the exam", "content": "Name a real innovation, then give one concrete beneficial effect and one concrete harmful effect. Vague claims like 'it is bad for society' earn no credit." }
+      ],
       "challenge_title": "Net Effect Counter",
       "challenge_language": "python",
       "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # First token is N, the number of effect labels that follow.\n    # Each label is either \"beneficial\" or \"harmful\".\n    # TODO: count beneficial and harmful, then print the verdict.\n    pass\n\nmain()",
@@ -147,6 +185,44 @@ export default {
           "correct_index": 1,
           "explanation": "As essential services move online, those without access lose opportunities, deepening existing inequality."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Three levels of the digital divide",
+          "caption": "Having a connection is only the first hurdle.",
+          "loop": false,
+          "nodes": [
+            { "label": "Access", "sub": "device + connection", "detail": "Do you have a device and internet at all?" },
+            { "label": "Quality", "sub": "fast + reliable?", "detail": "A slow or unreliable connection still blocks streaming a class or a video call." },
+            { "label": "Skills", "sub": "know how to use it", "detail": "Digital literacy turns access into real capability." },
+            { "label": "Equity impact", "sub": "gaps compound", "detail": "As services move online, missing any level widens existing inequality." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "92 of 100 urban and 60 of 100 rural households are online. How big is the gap?",
+          "steps": [
+            "Urban access rate: 92 / 100 = 0.92.",
+            "Rural access rate: 60 / 100 = 0.60.",
+            "Subtract: 0.92 - 0.60.",
+            "The gap is 0.32, a sizable divide."
+          ],
+          "output": "0.32"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A town with internet that is too slow to stream classes still faces a digital divide.", "correct_answer": "true", "explanation": "The divide exists at the quality level, not just access." },
+            { "type": "fill_in", "question": "The skills needed to use computing tools effectively, beyond just having access, are called digital ___.", "correct_answer": "literacy", "explanation": "Access without skills does not close the divide." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Both cause and effect", "content": "The digital divide is driven by inequality and also deepens it. As more of life moves online, small access gaps compound into large opportunity gaps." }
       ],
       "challenge_title": "Connectivity Gap",
       "challenge_language": "python",
@@ -224,6 +300,44 @@ export default {
           "explanation": "Large, unexplained differences in approval or success rates across groups can signal bias."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Where bias enters a system",
+          "caption": "Bias can slip in at several points, usually without anyone intending it.",
+          "loop": false,
+          "nodes": [
+            { "label": "Data", "sub": "biased training data", "detail": "A model trained mostly on one group learns to favor that group." },
+            { "label": "Design", "sub": "which features matter", "detail": "Deciding what counts encodes the designer's assumptions." },
+            { "label": "Use", "sub": "applied unfairly", "detail": "Even a fair tool can be used in a biased way." },
+            { "label": "Outcome", "sub": "unequal rates", "detail": "The result is systematically unfair outcomes for some groups." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Group A: 30 approved of 50. Group B: 10 approved of 50. Is the gap a red flag?",
+          "steps": [
+            "Rate for A: 30 / 50 = 0.60.",
+            "Rate for B: 10 / 50 = 0.20.",
+            "The difference is 0.40, a threefold gap.",
+            "A large unexplained gap signals possible bias worth investigating."
+          ],
+          "output": "possible bias"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Computing bias is always intentional.", "correct_answer": "false", "explanation": "The framework stresses bias is frequently unintended, which is why active testing matters." },
+            { "type": "fill_in", "question": "The examples used to build a model, which can encode bias if unrepresentative, are the training ___.", "correct_answer": "data", "explanation": "Biased training data is a common source of bias." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "A gap is a signal, not proof", "content": "A large difference in outcome rates demands scrutiny, but real differences can exist too. Investigate before concluding bias." }
+      ],
       "challenge_title": "Approval Rate Gap",
       "challenge_language": "python",
       "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # Input: aApproved aTotal bApproved bTotal\n    # TODO: print 'biased' if the two approval rates differ by more than 0.20,\n    # otherwise print 'fair'.\n    pass\n\nmain()",
@@ -299,6 +413,44 @@ export default {
           "correct_index": 1,
           "explanation": "Crowd input varies in accuracy and can be gamed, so review and aggregation are needed."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Many contributions become one result",
+          "caption": "The internet lets strangers combine small contributions cheaply.",
+          "loop": false,
+          "nodes": [
+            { "label": "Many people", "sub": "strangers online", "detail": "Contributions come from a large, diverse crowd around the world." },
+            { "label": "Contribute", "sub": "ideas, ratings, funds", "detail": "Each person adds a small piece: a rating, an edit, or a donation." },
+            { "label": "Aggregate", "sub": "average or vote", "detail": "The system combines contributions, for example by averaging ratings." },
+            { "label": "Review", "sub": "keep quality high", "detail": "Voting or reputation filters out low-quality or manipulated input." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Ratings from six contributors: 5, 4, 5, 3, 4, 5. What is the average?",
+          "steps": [
+            "Add them: 5 + 4 + 5 + 3 + 4 + 5 = 26.",
+            "Count them: 6 ratings.",
+            "Divide: 26 / 6.",
+            "Round to two decimals: 4.33."
+          ],
+          "output": "4.33"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The internet is what makes large-scale crowdsourcing practical.", "correct_answer": "true", "explanation": "It lets many people contribute and coordinate cheaply and quickly." },
+            { "type": "fill_in", "question": "Raising money by collecting small amounts from many people online is called ___.", "correct_answer": "crowdfunding", "explanation": "Crowdfunding is crowdsourcing applied to money." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Quality control matters", "content": "Crowd contributions vary in accuracy and the crowd can be manipulated. Good systems add review, voting, or reputation to keep quality high." }
       ],
       "challenge_title": "Average the Crowd",
       "challenge_language": "python",
@@ -376,6 +528,55 @@ export default {
           "explanation": "Unauthorized access breaks the law and is widely considered unethical."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Weighing a data-collection feature",
+          "caption": "Ask both questions: is it legal, and is it right?",
+          "loop": false,
+          "nodes": [
+            { "label": "Legal check", "sub": "follows the law?", "detail": "Does the practice comply with laws on privacy and consent?" },
+            { "label": "Ethical check", "sub": "is it right?", "detail": "Even if legal, is it fair to the people affected?" },
+            { "label": "Stakeholders", "sub": "who is affected?", "detail": "Weigh benefits and harms across every group involved." },
+            { "label": "Verdict", "sub": "acceptable or reconsider", "detail": "A practice can be legal yet still ethically questionable." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "A feature scores benefit 7 and harm 9. What is the simple verdict?",
+          "steps": [
+            "Compare the scores: harm 9 versus benefit 7.",
+            "Harm is greater than benefit.",
+            "The simple model flags this to reconsider.",
+            "Real ethics is richer than arithmetic, but this signals a problem."
+          ],
+          "output": "reconsider"
+        }
+      ],
+      "comparison_tables": [
+        {
+          "title": "Legal vs ethical",
+          "columns": ["Question", "Legal", "Ethical"],
+          "rows": [
+            ["Asks", "does it follow the law?", "is it right or fair?"],
+            ["Set by", "laws and regulations", "values and impact on people"],
+            ["Can diverge?", "yes, legal can still be wrong", "yes, ethical can be unregulated"]
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Something can be perfectly legal yet still ethically questionable.", "correct_answer": "true", "explanation": "Legality and ethics can diverge, like collecting data with a vague consent banner." },
+            { "type": "fill_in", "question": "Gaining access to a computer system without permission is both an ethical concern and a(n) ___ one.", "correct_answer": "legal", "explanation": "Unauthorized access breaks the law and is widely considered unethical." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Say legal, ethical, or both", "content": "On a free-response prompt, state whether a concern is legal, ethical, or both, and explain exactly who is affected." }
+      ],
       "challenge_title": "Benefit vs Harm Verdict",
       "challenge_language": "python",
       "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # Input: two integers, benefit score and harm score.\n    # TODO: print 'reconsider' if harm > benefit, 'acceptable' if benefit > harm,\n    # else 'debate'.\n    pass\n\nmain()",
@@ -451,6 +652,44 @@ export default {
           "correct_index": 1,
           "explanation": "Fair use permits limited unlicensed use for specific purposes such as education, commentary, or parody."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Can I reuse this work?",
+          "caption": "The license tells you what is allowed before you have to ask.",
+          "loop": false,
+          "nodes": [
+            { "label": "Find the license", "sub": "check the tag", "detail": "Look for a license like CC-BY, all-rights-reserved, or public-domain." },
+            { "label": "Public domain?", "sub": "free to use", "detail": "No copyright, so anyone may use it freely." },
+            { "label": "Creative Commons?", "sub": "reuse with conditions", "detail": "Reuse is allowed under stated terms like attribution or non-commercial." },
+            { "label": "All rights reserved?", "sub": "ask permission", "detail": "Default copyright means you generally need permission first." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "A photo is tagged CC-BY. May you reuse it, and what is required?",
+          "steps": [
+            "CC-BY is a Creative Commons license.",
+            "It permits reuse, including modification and sharing.",
+            "The BY part requires attribution.",
+            "So you may reuse it as long as you credit the creator."
+          ],
+          "output": "reuse allowed with attribution"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A work marked public domain can be used freely without permission.", "correct_answer": "true", "explanation": "Public-domain works carry no copyright." },
+            { "type": "fill_in", "question": "Software released with a license permitting others to view, modify, and share the code is called open ___.", "correct_answer": "source", "explanation": "Open source licenses grant those rights in advance." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Always attribute", "content": "Even when reuse is allowed, crediting the creator is often required and is always good practice. Licenses expand what you may legally do with a work." }
       ],
       "challenge_title": "License Checker",
       "challenge_language": "python",
@@ -528,6 +767,44 @@ export default {
           "explanation": "Data minimization reduces exposure: share only what a service truly needs."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "How PII spreads and re-identifies",
+          "caption": "Removing a name is not the same as true anonymity.",
+          "loop": false,
+          "nodes": [
+            { "label": "Direct", "sub": "you type it", "detail": "You enter name, email, and address into forms and profiles." },
+            { "label": "Indirect", "sub": "background collection", "detail": "Apps gather device IDs, search history, and location without you typing them." },
+            { "label": "Remove name", "sub": "looks anonymous", "detail": "A dataset strips obvious identifiers to seem safe." },
+            { "label": "Re-identify", "sub": "combine fields", "detail": "ZIP code plus birthdate plus gender can still pinpoint a person." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Fields: name, favorite_color, ssn, email. How many are PII?",
+          "steps": [
+            "PII fields include name, ssn, email, address, phone.",
+            "name is PII.",
+            "favorite_color is not.",
+            "ssn and email are PII. That is 3 total."
+          ],
+          "output": "3"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Removing a name from a dataset guarantees the people in it stay anonymous.", "correct_answer": "false", "explanation": "Combinations of quasi-identifiers can re-identify individuals." },
+            { "type": "fill_in", "question": "Sharing or collecting only the data actually needed for a purpose is called data ___.", "correct_answer": "minimization", "explanation": "Data minimization reduces exposure of PII." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Anonymized is not anonymous", "content": "Combinations like ZIP code, birthdate, and gender can pinpoint a person even with the name removed. Guard sensitive fields and share the minimum." }
+      ],
       "challenge_title": "PII Filter",
       "challenge_language": "python",
       "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # First token N, then N field names.\n    # PII fields are: name, ssn, email, address, phone.\n    # TODO: print how many of the given fields are PII.\n    pass\n\nmain()",
@@ -603,6 +880,44 @@ export default {
           "correct_index": 1,
           "explanation": "Strong unique passwords combined with multi-factor authentication greatly reduce account compromise."
         }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Layered defenses against a threat",
+          "caption": "No single defense is perfect, so layers back each other up.",
+          "loop": false,
+          "nodes": [
+            { "label": "Threat", "sub": "phishing email", "detail": "An attacker tries to trick you into revealing a password." },
+            { "label": "Strong password", "sub": "hard to guess", "detail": "A long, unique password resists guessing and cracking." },
+            { "label": "MFA", "sub": "second factor", "detail": "Even a stolen password is not enough without the second proof of identity." },
+            { "label": "Encryption", "sub": "unreadable if stolen", "detail": "Data scrambled in transit and at rest cannot be read by an interceptor." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Rate Sky7!cloud: length >= 8, has a digit, has a symbol.",
+          "steps": [
+            "Length is 10, which is at least 8: +1.",
+            "It contains the digit 7: +1.",
+            "It contains the symbol !: +1.",
+            "Score is 3, so this password rates strong."
+          ],
+          "output": "strong"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Multi-factor authentication means a stolen password alone is not enough to log in.", "correct_answer": "true", "explanation": "MFA adds a second factor an attacker also needs." },
+            { "type": "fill_in", "question": "Scrambling data so only authorized parties holding a key can read it is called ___.", "correct_answer": "encryption", "explanation": "Encryption protects data in transit and at rest." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Security is a trade-off", "content": "Stronger protection usually costs some convenience, and no system is perfectly secure. That is why layered defenses matter." }
       ],
       "challenge_title": "Password Strength Meter",
       "challenge_language": "python",

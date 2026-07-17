@@ -57,6 +57,60 @@ This project works with a **small** FAQ, a handful to a few dozen lines. That's 
 ## The mental model to keep
 
 Picture the FAQ as a numbered exhibit list before a trial. Nobody testifies from memory; every claim points at "Exhibit 7." Over the next few lessons you're building the bot that only ever testifies from the exhibit list and says "not in evidence" when the answer isn't there.`,
+      animated_diagrams: [
+        {
+          title: "Raw FAQ to numbered exhibits",
+          caption: "Numbering each line first is what lets the bot cite an exact source later.",
+          loop: false,
+          nodes: [
+            { label: "Raw text", sub: "one blob", detail: "The FAQ arrives as plain text: questions, answers, blank lines, all together." },
+            { label: "Split lines", sub: "one per row", detail: "Break the text on newlines so each line can be handled on its own." },
+            { label: "Drop blanks", sub: "skip empties", detail: "Skip blank lines, but keep the original position so numbers stay honest." },
+            { label: "Numbered pairs", sub: "(num, text)", detail: "Each kept line becomes a (line_number, text) pair, an exhibit the bot can point at." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Grounding", definition: "Forcing every answer to come from text you provide, instead of the model's general knowledge." },
+        { term: "Line numbering", definition: "Tagging each FAQ line with a number so an answer can cite an exact, checkable source." },
+        { term: "Citation", definition: "A pointer from an answer back to the specific FAQ line it came from, which you can verify." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why number the FAQ lines before anything else?",
+          options: [
+            "It makes the text shorter",
+            "A line number is a checkable fact you control, instead of a citation the model invents",
+            "The API requires numbered input",
+            "It removes duplicate questions",
+          ],
+          correct_index: 1,
+          explanation: "Ask a model to cite raw text and it invents a plausible source. A line number you can verify in one line of Python: is it in range, and what does it actually say.",
+        },
+        {
+          question: "Why does this project keep the FAQ small on purpose?",
+          options: [
+            "Small FAQs are more accurate",
+            "So the whole FAQ fits in one prompt and there is no retrieval step to get wrong",
+            "The model cannot read long text",
+            "To save disk space",
+          ],
+          correct_index: 1,
+          explanation: "A small FAQ fits in context every time, so this build is about grounding and refusal, not search. A large knowledge base needs a retrieval step, a different project.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Number these lines: 'Q: hours?' / '' (blank) / 'A: 9-5'",
+          steps: [
+            "Line 1 'Q: hours?' is non-blank: keep as (1, 'Q: hours?').",
+            "Line 2 is blank: skip it, but it still holds position 2.",
+            "Line 3 'A: 9-5' is non-blank: keep as (3, 'A: 9-5'), not renumbered to 2.",
+          ],
+          output: "[(1, 'Q: hours?'), (3, 'A: 9-5')] with 2 entries kept.",
+        },
+      ],
       starter_code: `# Turn a raw FAQ string into numbered (line_number, text) entries.
 # No API call here, just the data shape the rest of the bot depends on.
 
@@ -208,6 +262,56 @@ The FAQ lives in \`system\` because it's the standing reference material for eve
 ## The mental model to keep
 
 Picture handing someone a single-page reference sheet and saying "answer questions using only this page." That's the whole system prompt: FAQ text plus a leash. Later lessons tighten the leash with a strict refusal (lesson 4) and a citation requirement (lesson 5), but the shape never changes: doc in the system prompt, question in messages.`,
+      animated_diagrams: [
+        {
+          title: "Stuffing the FAQ into context",
+          caption: "The whole numbered doc plus strict rules become the system prompt; the question rides in messages.",
+          loop: false,
+          nodes: [
+            { label: "Numbered FAQ", sub: "(num, line) pairs", detail: "Start from the numbered entries you built in lesson 1." },
+            { label: "doc_block", sub: "num: line rows", detail: "Join them into 'num: line' rows so the model sees each line with its number." },
+            { label: "System prompt", sub: "FAQ + rules", detail: "Wrap the doc block with 'answer ONLY from the FAQ' and a 'say so if missing' rule." },
+            { label: "Question", sub: "in messages", detail: "The user's actual question goes in the messages list, not the system prompt." },
+            { label: "API call", sub: "grounded answer", detail: "The model answers using the reference sheet you handed it." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Context stuffing", definition: "Grounding the model by pasting the entire source document into the prompt, with no search step." },
+        { term: "Doc block", definition: "The numbered FAQ joined into 'num: line' rows, dropped into the system prompt as reference material." },
+      ],
+      callouts: [
+        {
+          type: "insight",
+          position: "after",
+          title: "Say ONLY twice on purpose",
+          content: "A single soft instruction gets ignored more often than a rule stated twice. Putting 'ONLY' in the framing and again in the rules is deliberate redundancy that tightens grounding.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does the FAQ go in the system prompt and the question in messages?",
+          options: [
+            "It is an arbitrary style choice",
+            "The FAQ is standing reference material for every question; the question is the one-off live input",
+            "The API rejects FAQs in messages",
+            "It makes the FAQ shorter",
+          ],
+          correct_index: 1,
+          explanation: "Same split as every project: config (the FAQ) on one channel, live input (the question) on the other.",
+        },
+        {
+          question: "What does context stuffing rely on to work?",
+          options: [
+            "A vector database",
+            "The FAQ being small enough to fit in one call",
+            "The model already knowing your product",
+            "A separate search API",
+          ],
+          correct_index: 1,
+          explanation: "Stuffing pastes the whole doc into the prompt, so it only works when the doc fits in a single call. That is the scope of this project.",
+        },
+      ],
       starter_code: `# Build the system prompt that stuffs a numbered FAQ into context.
 # No API call, just the string construction the real bot depends on.
 
@@ -359,6 +463,60 @@ This doesn't replace the model reading the FAQ. It's a cheap, deterministic sani
 ## The mental model to keep
 
 Think of this as the bouncer checking a list before the model ever talks to the customer. The bouncer works on keyword overlap, not real understanding, so it's not perfect, but it stops the cheapest, most obvious mismatches before they cost you a call or produce an invented answer. Real grounding is still the model reading the actual FAQ text. This keyword check is the fast, free layer in front of it.`,
+      animated_diagrams: [
+        {
+          title: "Scoring a question against the FAQ",
+          caption: "A cheap keyword overlap runs before the model, catching obvious misses for free.",
+          loop: false,
+          nodes: [
+            { label: "Question", sub: "raw text", detail: "Take the user's question, for example 'When are you open?'." },
+            { label: "Keywords", sub: "drop stop words", detail: "Lowercase, split into words, drop short words and stop words, keep the meaningful set." },
+            { label: "Overlap each line", sub: "set intersection", detail: "For every FAQ line, count how many keywords it shares with the question." },
+            { label: "Best score", sub: "top line + count", detail: "Return the highest-scoring line and its score. A score of 0 means nothing overlapped." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Pre-check", definition: "A cheap test that runs before the model call to catch obvious problems, here whether the FAQ covers the question at all." },
+        { term: "Keyword overlap", definition: "The number of meaningful words a question and an FAQ line share, used as a rough grounding score." },
+        { term: "Stop words", definition: "Common words like 'the', 'is', and 'you' that carry little meaning and are dropped before scoring." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does a best-match score of 0 tell you?",
+          options: [
+            "The FAQ has no lines",
+            "No FAQ line shares a single meaningful word with the question, a strong sign it is not covered",
+            "The model made an error",
+            "The question is too long",
+          ],
+          correct_index: 1,
+          explanation: "Zero overlap across every line means the FAQ likely does not cover the question, so you can refuse before spending a token.",
+        },
+        {
+          question: "What does this keyword check NOT do?",
+          options: [
+            "Run without a network call",
+            "Replace the model actually reading the FAQ text",
+            "Return a best-guess line",
+            "Cost nothing",
+          ],
+          correct_index: 1,
+          explanation: "It is a fast, free layer in front of the model. Real grounding is still the model reading the actual FAQ; this just stops the cheapest, most obvious mismatches.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Score 'When are you open?' against line 2 'A: We are open 9am-5pm Monday through Friday.'",
+          steps: [
+            "Question keywords after dropping stop words: {open} ('when', 'are', 'you' are stop words or too short).",
+            "Line 2 keywords include {open, 9am, 5pm, monday, friday}.",
+            "Intersection is {open}, size 1, so line 2 scores 1.",
+          ],
+          output: "Best match is line 2 with score 1.",
+        },
+      ],
       starter_code: `# Score how well a question overlaps with each FAQ line, pure Python.
 import re
 
@@ -538,6 +696,57 @@ Everything else here, numbering, stuffing, citing, serves this one behavior: nev
 ## The mental model to keep
 
 Think of the refusal as a circuit breaker. It doesn't prevent every possible mistake; it fails safe. The keyword check trips the breaker on the obvious misses, and the model's own instructions catch subtler ones. Both exist because either one alone would eventually let something through.`,
+      animated_diagrams: [
+        {
+          title: "Two layers of refusal",
+          caption: "The prompt asks nicely; the keyword check enforces, overriding the model when overlap is zero.",
+          loop: false,
+          nodes: [
+            { label: "Question", sub: "user asks", detail: "The question comes in, maybe covered by the FAQ, maybe not." },
+            { label: "best_match", sub: "grounding score", detail: "Score the question against the FAQ lines using the lesson-3 keyword overlap." },
+            { label: "Score 0?", sub: "hard override", detail: "If nothing overlaps, force the fixed REFUSAL string no matter what the model said." },
+            { label: "Answer or refuse", sub: "final output", detail: "A positive score passes the model reply through; a zero score returns the refusal." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Refusal", definition: "The bot recognizing a question is outside its FAQ and returning a fixed honest 'I don't have that' instead of guessing." },
+        { term: "Defense in depth", definition: "Two independent guards (the prompt and the code check) so a failure of one does not let a bad answer through." },
+        { term: "Override", definition: "Your code replacing the model's reply with the refusal string when the grounding score is zero." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why give the model an EXACT refusal string instead of 'say you don't know'?",
+          options: [
+            "It is shorter",
+            "An exact string is recognizable in code (if reply == REFUSAL) and leaves no room for a hedged half-answer",
+            "The API demands it",
+            "It changes the model's tone",
+          ],
+          correct_index: 1,
+          explanation: "A fixed phrase makes refusals detectable in code and stops the model from sneaking a guess into something that only reads like a refusal.",
+        },
+        {
+          question: "The model ignores the system prompt and answers an unsupported question. What stops it?",
+          options: [
+            "Nothing, the answer ships",
+            "The code override: when the keyword score is 0, your code forces the refusal regardless of the reply",
+            "The API blocks it",
+            "The user has to notice",
+          ],
+          correct_index: 1,
+          explanation: "That is the point of defense in depth. The prompt asks; the code enforces. A model that ignores the prompt still cannot get past the zero-score override.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A support bot that confidently answers questions the FAQ never covered is worse than one that refuses.", correct_answer: "true", explanation: "A confident wrong answer misleads the user, who cannot tell which answers to distrust. Clean refusal keeps the bot trustworthy." },
+            { type: "fill_in", question: "When the keyword overlap score is 0, the code forces the fixed ______ string.", correct_answer: "refusal", explanation: "Zero overlap triggers the refusal override, no matter what the model returned." },
+          ],
+        },
+      ],
       starter_code: `# Combine a model reply with a keyword grounding check to enforce refusal.
 import re
 
@@ -729,6 +938,59 @@ Asking the model to cite is a prompting trick. Verifying the citation is a code 
 ## The mental model to keep
 
 Every non-refused answer now carries a receipt. You don't re-read the whole FAQ to trust the bot; you check the receipt. Does this line number exist, and does it say roughly what the bot claimed? That receipt turns "the bot said so" into "the bot said so, and here's exactly where."`,
+      animated_diagrams: [
+        {
+          title: "Parse and verify the citation",
+          caption: "Asking for a citation is a prompting trick; verifying it is a code guarantee.",
+          loop: false,
+          nodes: [
+            { label: "Model reply", sub: "answer + Source line N", detail: "The reply is one sentence plus a citation line like 'Source: line 2'." },
+            { label: "Regex parse", sub: "grab the number", detail: "re.search for 'Source: line (N)' and pull out the digits, or None if the format is missing." },
+            { label: "In FAQ range?", sub: "check the set", detail: "Is that line number one of the lines the model was actually shown?" },
+            { label: "Verified / failed", sub: "trust or reject", detail: "Return the verified line, or the reason: no citation found, or a line that does not exist." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Structured citation", definition: "A citation in a fixed literal format like 'Source: line N' so your code can parse it reliably." },
+        { term: "Verify, don't trust", definition: "Confirming a cited line number actually exists in the FAQ, since an invented citation is as dangerous as an invented fact." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why require the literal format 'Source: line N' instead of 'cite your source'?",
+          options: [
+            "It looks nicer",
+            "A fixed format is parseable; free-text citations come in a dozen phrasings you cannot reliably parse",
+            "The model refuses free text",
+            "It uses fewer tokens",
+          ],
+          correct_index: 1,
+          explanation: "A literal format makes the citation checkable with one regex. Open-ended 'cite your source' gives unparseable variety.",
+        },
+        {
+          question: "Which two citation failures does verify_citation catch?",
+          options: [
+            "Wrong font and wrong color",
+            "No citation at all, and a cited line number that does not exist in the FAQ",
+            "A too-long answer and a too-short answer",
+            "Missing punctuation and extra spaces",
+          ],
+          correct_index: 1,
+          explanation: "Either the model gives no citation, or it hallucinates a line number outside the FAQ. Both are caught before the answer reaches a user.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Verify a reply citing 'Source: line 9' against a 2-line FAQ.",
+          steps: [
+            "Regex finds 'Source: line 9', so cited = 9.",
+            "valid_numbers for this FAQ is {1, 2}.",
+            "9 is not in {1, 2}, so the citation fails.",
+          ],
+          output: "(False, 'line 9 doesn't exist in this FAQ') -> treat the answer as unsupported.",
+        },
+      ],
       starter_code: `# Parse and verify a "Source: line N" citation against the real FAQ.
 import re
 
@@ -893,6 +1155,56 @@ The second return value in \`guarded_answer\`, the reason or citation, isn't for
 ## The mental model to keep
 
 Hardening isn't adding more ways to answer. It's making every way to *not* answer land on one calm, predictable response. The bot should never look confused. It should look like it made a decision, because it did.`,
+      animated_diagrams: [
+        {
+          title: "Every failure lands on one refusal",
+          caption: "Empty input, zero overlap, or a bad citation all converge on the same calm refusal.",
+          loop: false,
+          nodes: [
+            { label: "Empty input?", sub: "blank or spaces", detail: "Check first, before anything expensive. A blank question has no keywords, so refuse right away." },
+            { label: "Score 0?", sub: "off-topic", detail: "Zero keyword overlap means off-topic or unsupported. Same treatment: refuse." },
+            { label: "Citation bad?", sub: "missing/invalid", detail: "If the citation cannot be verified, treat the answer as unsupported and refuse." },
+            { label: "One refusal", sub: "or answer", detail: "Every failure path returns the same REFUSAL string; only a fully clean path answers." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Converge on one path", definition: "Routing every failure to a single consistent refusal message, so the bot looks intentional instead of glitchy." },
+        { term: "Log the reason", definition: "Returning why a refusal happened (empty, score 0, bad citation) for your own debugging, even though the user sees the same message." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why check for empty input before running best_match?",
+          options: [
+            "To make the code shorter",
+            "So best_match never runs on an empty string; validate at the boundary before doing anything expensive",
+            "best_match crashes on any input",
+            "The order does not matter",
+          ],
+          correct_index: 1,
+          explanation: "Guarding empty input first means you never waste work scoring a blank question. Cheap checks go before expensive ones.",
+        },
+        {
+          question: "Why converge every failure on one refusal message?",
+          options: [
+            "It saves memory",
+            "A bot with five different failure messages looks broken; one consistent 'I don't know' looks intentional and earns trust",
+            "The API requires it",
+            "It hides bugs from you",
+          ],
+          correct_index: 1,
+          explanation: "Users trust a firm, consistent refusal far more than a bot that glitches differently every time. The reason is still logged for you.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A whitespace-only question should be treated the same as an empty one and refused.", correct_answer: "true", explanation: "'   '.strip() is empty, so it has no keywords and routes straight to refusal." },
+            { type: "true_false", question: "The second return value (the reason) is shown to the user.", correct_answer: "false", explanation: "The reason is for your debugging. The user always sees the same calm refusal message." },
+          ],
+        },
+      ],
       starter_code: `# Guard the answer path against empty input, low grounding, and bad citations.
 import re
 
@@ -1111,6 +1423,48 @@ A warning gets ignored. A raised exception forces a decision at the moment the F
 ## The mental model to keep
 
 Every call to this bot is billed for the whole reference sheet, not just the question asked. That's fine at FAQ size 20 and a real problem at FAQ size 2000. The budget check is a smoke alarm for that one failure mode. Cheap to install, easy to ignore until it matters, and the one thing standing between "small doc, small bill" and a bill nobody predicted.`,
+      animated_diagrams: [
+        {
+          title: "The budget smoke alarm",
+          caption: "Check the FAQ size once at load time; a too-big doc fails loudly instead of quietly ballooning the bill.",
+          loop: false,
+          nodes: [
+            { label: "FAQ loads", sub: "numbered lines", detail: "The FAQ is read and numbered, once, when it loads, not per question." },
+            { label: "doc_block", sub: "join rows", detail: "Join the numbered lines into the text that gets stuffed into every prompt." },
+            { label: "Estimate tokens", sub: "~4 chars/token", detail: "Size the doc block so you know what every call will cost." },
+            { label: "Over budget?", sub: "compare ceiling", detail: "Compare against a hard ceiling like 2000 tokens." },
+            { label: "Raise or pass", sub: "loud failure", detail: "Over the ceiling raises an error at load time, the signal you have outgrown context stuffing." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Cost scales with the doc", definition: "Every call resends the whole FAQ, so cost tracks how big the FAQ is, not how long the question is." },
+        { term: "Hard ceiling", definition: "A raised exception at load time when the FAQ is too big, forcing a decision instead of a slow-creeping bill." },
+      ],
+      inline_quizzes: [
+        {
+          question: "In a context-stuffing bot, what drives the cost per call?",
+          options: [
+            "The length of the user's question",
+            "The size of the FAQ, since the whole doc is resent every call",
+            "The number of users",
+            "The model's reply speed",
+          ],
+          correct_index: 1,
+          explanation: "A one-word and a ten-word question cost nearly the same because the FAQ dominates the token count. The lever you control is FAQ size.",
+        },
+        {
+          question: "Why raise a hard error instead of printing a soft warning?",
+          options: [
+            "Errors look more professional",
+            "A warning gets ignored; a raised error forces a decision the moment the FAQ is edited, before a surprise bill",
+            "The API needs an exception",
+            "Warnings are slower",
+          ],
+          correct_index: 1,
+          explanation: "Cost bugs are nasty because nothing looks broken, the bot still answers, it just costs ten times more. Failing loudly at load time is the cheap fix.",
+        },
+      ],
       starter_code: `# Estimate token cost per call and enforce a hard FAQ size budget.
 
 def estimate_tokens(text):
@@ -1300,6 +1654,47 @@ This design is right for a small, stable FAQ: a handful to a few dozen entries t
 ## Your Portfolio
 
 Finishing this lesson saves **FAQ Support Bot** to your Portfolio, alongside anything else you've built in this track. You now have a working version of the pattern underneath every "chat with your docs" product: stuff, ground, cite, refuse. Fancier versions add embeddings, vector search, or multi-document retrieval, but they're the same four moves with a smarter first step. You already know the last three.`,
+      animated_diagrams: [
+        {
+          title: "The full guarded pipeline",
+          caption: "Check budget, guard input, pre-check grounding, call the model, verify the citation, all in order.",
+          loop: false,
+          nodes: [
+            { label: "Budget check", sub: "raises if too big", detail: "First: a too-large FAQ fails loudly at load, before any other work (lesson 7)." },
+            { label: "Input guard", sub: "empty? refuse", detail: "Blank or whitespace question returns the refusal right away (lesson 6)." },
+            { label: "Keyword pre-check", sub: "score 0? refuse", detail: "Cheap grounding check before spending a token (lesson 3)." },
+            { label: "Model call", sub: "stuffed FAQ", detail: "Call the model with the FAQ stuffed into the system prompt (lesson 2)." },
+            { label: "Citation verify", sub: "trust or refuse", detail: "Check the cited line is real before trusting the answer (lesson 5)." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Pipeline order", definition: "The fixed sequence of guards, each a cheap early return, so the cheapest checks run before the expensive model call." },
+        { term: "Stuff, ground, cite, refuse", definition: "The four moves under every 'chat with your docs' product; fancier versions just add a smarter retrieval step." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Which check runs first, and why?",
+          options: [
+            "The citation check, because it is most important",
+            "The budget check, so a too-large FAQ fails loudly before any question is even processed",
+            "The model call, to get an answer fast",
+            "The keyword pre-check",
+          ],
+          correct_index: 1,
+          explanation: "check_faq_budget runs first and unguarded. If the FAQ is too big, nothing else should happen, it fails at load time.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Is it shipped?",
+          questions: [
+            { type: "true_false", question: "This bot never answers from outside the FAQ, verified twice: once by keyword pre-check and once by citation verification.", correct_answer: "true", explanation: "Two independent guards enforce grounding, which is the whole point of the bot." },
+            { type: "true_false", question: "This design is the right tool for a large, constantly growing knowledge base.", correct_answer: "false", explanation: "Context stuffing suits a small, stable FAQ. A large base needs a retrieval system, a different project." },
+            { type: "fill_in", question: "The four moves under every 'chat with your docs' product are stuff, ground, cite, and ______.", correct_answer: "refuse", explanation: "Stuff, ground, cite, refuse. Fancier versions add embeddings or search but keep these moves." },
+          ],
+        },
+      ],
       starter_code: `# Assemble the full guarded pipeline, pure Python simulation (no network call).
 import re
 

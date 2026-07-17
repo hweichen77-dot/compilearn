@@ -124,6 +124,39 @@ for p in sources:
         "Use path.split(\"/\") to get every segment, then any(seg in SKIP_DIRS for seg in segments).",
         "list_source_files should filter with is_source_file, then sort the result before returning.",
       ],
+      animated_diagrams: [
+        {
+          title: "Triage at the door",
+          caption: "Every file gets a fast yes or no from its path alone, before you ever open it.",
+          loop: false,
+          nodes: [
+            { label: "Walk repo", sub: "every path", detail: "Recurse the repository, visiting each directory and file." },
+            { label: "Skip dirs", sub: "node_modules, .git", detail: "Prune noisy directories in place so os.walk never descends into them." },
+            { label: "Filter ext", sub: "code only", detail: "Keep only files whose extension is a source language, rejecting images and lockfiles." },
+            { label: "Source list", sub: "ready to chunk", detail: "You are left with just the source files worth reading." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Ingestion", definition: "Reading a repository into memory, keeping source files and dropping everything else." },
+        { term: "Source file", definition: "A file whose extension marks it as code you want to index, like .py or .js." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does the code do dirnames[:] = [...] instead of building a new list?",
+          options: [
+            "It runs faster",
+            "Mutating the list os.walk is iterating in place is the only way to stop it descending into skipped directories",
+            "It sorts the directories",
+            "It avoids a syntax error",
+          ],
+          correct_index: 1,
+          explanation: "Rebind dirnames and os.walk keeps its own copy; mutating in place prunes node_modules before it is entered at all.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Cheapest correctness in the project", content: "Getting the file list right before any chunking or embedding stops you from spending your whole token budget on a package-lock.json." },
+      ],
       challenge_title: "Filter the Repo Tree",
       challenge_description:
         "Keep only source files from a list of repo paths, given allowed extensions and directory names to skip anywhere in the path.",
@@ -319,6 +352,50 @@ for c in chunks:
         "isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) filters for defs and classes only.",
         "node.lineno and node.end_lineno are already 1-indexed; slice with lines[start - 1:end].",
       ],
+      animated_diagrams: [
+        {
+          title: "Chunk at the language's own seams",
+          caption: "Let a real parser find function boundaries instead of guessing with a character count.",
+          loop: false,
+          nodes: [
+            { label: "Source", sub: "raw text", detail: "Start with the full text of one source file." },
+            { label: "ast.parse", sub: "build tree", detail: "Python's ast module turns the source into a tree of nodes." },
+            { label: "tree.body", sub: "top-level nodes", detail: "Walk the top-level statements: functions, classes, imports, and more." },
+            { label: "Def / class", sub: "keep these", detail: "Keep only FunctionDef, AsyncFunctionDef, and ClassDef nodes." },
+            { label: "Chunk", sub: "line range", detail: "Each node knows its start and end line, so you slice out a whole function as one chunk." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "ast", definition: "Python's module that parses source into an abstract syntax tree of nodes." },
+        { term: "Function-level chunking", definition: "Splitting code at function and class boundaries instead of at a fixed character count." },
+        { term: "lineno / end_lineno", definition: "1-indexed line numbers ast computes, marking where a node starts and ends." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Find the top-level definitions in a file where line 2 is 'def load_config(path):' and line 4 is 'def save_config(path):'.",
+          steps: [
+            "Scan for lines that start a def or class with no leading whitespace: line 2 and line 4.",
+            "The first chunk (load_config) runs from line 2 up to the line before the next start, so lines 2 to 3.",
+            "The second chunk (save_config) runs from line 4 to the end of the file.",
+          ],
+          output: "load_config: lines 2-3, save_config: lines 4-end",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does slicing code every N characters make retrieval worse?",
+          options: [
+            "It is slower than parsing",
+            "A fixed window splits a function's signature from its body, so neither half makes sense alone",
+            "It uses more memory",
+            "It cannot handle comments",
+          ],
+          correct_index: 1,
+          explanation: "A function is one unit of meaning whether it runs 3 lines or 300. Cut it mid-body and a retrieved chunk answers nothing cleanly.",
+        },
+      ],
       challenge_title: "Find the Function Boundaries",
       challenge_description:
         "Given raw source lines, find where each top-level def or class starts and print the line range it spans.",
@@ -486,6 +563,40 @@ print(by_id["src/app.py:3-5"]["text"])
         "Loop file_chunks.items() to get (path, chunks) pairs, then loop chunks for each path.",
         "The id is an f-string: f\"{path}:{chunk['start_line']}-{chunk['end_line']}\".",
         "Append one new flat dict per chunk to the corpus list; don't nest lists inside lists.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Stamp every chunk with its source",
+          caption: "Metadata travels with the chunk everywhere, so a citation is recoverable at the end.",
+          loop: false,
+          nodes: [
+            { label: "Chunk", sub: "text + lines", detail: "Each chunk knows its start and end line within one file." },
+            { label: "Add path", sub: "which file", detail: "Attach the file path so the chunk is placed across the whole repo, not just one file." },
+            { label: "Build id", sub: "path:start-end", detail: "Combine path and line range into a readable id like src/app.py:12-18." },
+            { label: "Corpus", sub: "tagged chunks", detail: "Collect every tagged chunk into one flat list: the corpus you will search." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Corpus", definition: "The full collection of tagged, chunked documents you retrieve from." },
+        { term: "Metadata", definition: "The path and line range stored alongside a chunk's text so it stays citable." },
+        { term: "Chunk id", definition: "A readable identifier like path:start-end that shows up as the citation in an answer." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why keep path, line numbers, and text together in one object per chunk?",
+          options: [
+            "It saves memory",
+            "Parallel lists of strings and paths drift out of sync after a filter step, producing confident citations that point at the wrong file",
+            "The model requires a single object",
+            "It makes embedding faster",
+          ],
+          correct_index: 1,
+          explanation: "Separate a chunk's text from its id anywhere in the pipeline and you can never recover the citation correctly.",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "A citation is just an id, shown", content: "Keep the id attached from creation through embedding, retrieval, and the prompt, then print it next to whatever text it produced. That is the whole citation feature." },
       ],
       challenge_title: "Build the Citation Index",
       challenge_description:
@@ -661,6 +772,50 @@ for c in ranked:
         "sorted(..., key=..., reverse=True) sorts the highest score first.",
         "rank_chunks should call the same hybrid_score function the print loop uses, just as the sort key.",
       ],
+      animated_diagrams: [
+        {
+          title: "Two signals, one score",
+          caption: "Semantic similarity finds code that means the same thing; the identifier bonus finds the exact thing named.",
+          loop: false,
+          nodes: [
+            { label: "Query", sub: "the question", detail: "The user's question, which may name a specific function or describe a concept." },
+            { label: "Cosine", sub: "meaning match", detail: "Embed the query and each chunk with a code model and compare directions." },
+            { label: "Identifier bonus", sub: "exact name", detail: "Add a small bonus when the chunk's name appears verbatim in the query." },
+            { label: "Combine", sub: "sum the two", detail: "Add the bonus on top of the cosine score to get the hybrid score." },
+            { label: "Rank", sub: "best first", detail: "Sort chunks by the combined score so both kinds of question find their code." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Hybrid retrieval", definition: "Combining semantic similarity with an exact identifier-match signal to rank code chunks." },
+        { term: "Identifier bonus", definition: "A small score added when a function or variable name in the query appears in the chunk." },
+        { term: "Code embedding", definition: "A vector from a model trained on code, like voyage-code-2, rather than on prose." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Query 'how does load_config work'. Chunk load_config has cosine 0.62; chunk slugify has cosine 0.71. Bonus is 0.25 for a name match.",
+          steps: [
+            "slugify: its name is not in the query, so no bonus. Score stays 0.71.",
+            "load_config: its name appears in the query, so add 0.25. Score becomes 0.62 + 0.25 = 0.87.",
+            "Compare: 0.87 beats 0.71, so the identifier bonus lifts load_config above the higher-cosine slugify.",
+          ],
+          output: "load_config ranks first at 0.87",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why isn't cosine similarity alone enough for code search?",
+          options: [
+            "Cosine is too slow on code",
+            "A specific 'what does X do' question needs an exact-name match, a precision problem that paraphrase-tuned embeddings can miss",
+            "Code has no embeddings",
+            "Cosine only works on prose",
+          ],
+          correct_index: 1,
+          explanation: "Blending both covers a vague conceptual question via embeddings and a specific named-function question via the bonus.",
+        },
+      ],
       challenge_title: "Score and Rank Code Chunks",
       challenge_description:
         "Combine a cosine similarity score with an identifier-match bonus, then rank chunks and return the top K.",
@@ -835,6 +990,38 @@ for c in citations:
         "Use an f-string to rejoin each tuple into the 'path:start-end' shape.",
         "The character class [\\w./-] covers letters, digits, underscore, dot, slash, and hyphen, everything a file path needs.",
       ],
+      animated_diagrams: [
+        {
+          title: "Evidence, rule, receipt",
+          caption: "The context block is the evidence, the system prompt is the rule, and the citation is the receipt.",
+          loop: false,
+          nodes: [
+            { label: "Chunks", sub: "top ranked", detail: "Start with the budget-selected chunks, each carrying its path:start-end id." },
+            { label: "Context block", sub: "labeled code", detail: "Format each chunk with its id label so the model can read and refer back to it." },
+            { label: "System rule", sub: "answer + cite", detail: "The system prompt says answer only from context and cite the exact file:line for every fact." },
+            { label: "Model", sub: "cited reply", detail: "The model writes an answer with bracketed file:line citations." },
+            { label: "Extract", sub: "regex out", detail: "A regex pulls the citations back out of the reply for display or later verification." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Context block", definition: "The labeled, id-tagged code passages handed to the model as its only evidence." },
+        { term: "Grounding", definition: "Restricting the model to answer only from the provided code, never inventing what it cannot see." },
+        { term: "Citation", definition: "A bracketed file:line reference like [src/app.py:3-5] tying a claim to real code." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What do the two system-prompt rules ('answer only from context' and 'cite in brackets') buy you?",
+          options: [
+            "Faster responses",
+            "The first stops the model inventing code it never saw; the second gives a citation format you can check in code later",
+            "Shorter answers",
+            "Support for more languages",
+          ],
+          correct_index: 1,
+          explanation: "Together they turn a 'trust me' assistant into a 'check me' one the user can verify in seconds.",
+        },
+      ],
       challenge_title: "Extract Citations From an Answer",
       challenge_description:
         "Pull every [path:start-end] citation out of a multi-line model reply, in the order it appears.",
@@ -998,6 +1185,50 @@ for c in kept:
         "Build the dedupe key from (path, start_line, end_line) as a tuple, not from the chunk's text.",
         "cost = len(chunk['text']) // 4 matches the same rough token estimate used earlier.",
         "Use continue, not break, when a chunk doesn't fit, a smaller one later might still fit.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Greedily fit what you can afford",
+          caption: "Walk the ranked chunks, skip duplicates, and keep each one that still fits the token budget.",
+          loop: true,
+          nodes: [
+            { label: "Next chunk", sub: "ranked order", detail: "Take the next chunk in best-first order from the retriever." },
+            { label: "Seen before?", sub: "dedupe", detail: "Skip it if its path and line range were already kept." },
+            { label: "Fits budget?", sub: "used + cost", detail: "Estimate its token cost; keep it only if the running total stays under budget." },
+            { label: "Keep or skip", sub: "continue", detail: "Skip a chunk that does not fit, but keep checking later chunks, since a smaller one might." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Retrieval budget", definition: "A token cap on how much retrieved code you send, so a big question cannot blow the context window." },
+        { term: "Greedy selection", definition: "Walking chunks best-first and keeping each one that fits, rather than solving for the perfect set." },
+        { term: "Token estimate", definition: "A rough cost per chunk, about len(text) // 4, good enough for a first pass." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Budget 100. Chunks in order: c1 (40 tokens, app.py:3-5), c2 (50, app.py:3-5), c3 (30, utils.py:1-4), c4 (20, app.py:7-9).",
+          steps: [
+            "c1: new range, 0 + 40 = 40 <= 100. Keep. Used = 40.",
+            "c2: same range as c1, already seen. Skip.",
+            "c3: new range, 40 + 30 = 70 <= 100. Keep. Used = 70.",
+            "c4: new range, 70 + 20 = 90 <= 100. Keep. Used = 90.",
+          ],
+          output: "Kept c1, c3, c4; 90 tokens used",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "When a chunk is too big to fit the budget, why use continue instead of break?",
+          options: [
+            "break would crash",
+            "A high-ranked, expensive chunk might not fit while the next few smaller ones still do, and each one you fit is useful context",
+            "continue is faster",
+            "break skips the dedupe check",
+          ],
+          correct_index: 1,
+          explanation: "Stopping at the first chunk that does not fit wastes budget you could have spent on smaller chunks further down.",
+        },
       ],
       challenge_title: "Fit Chunks in the Retrieval Budget",
       challenge_description:
@@ -1172,6 +1403,49 @@ print(classify_answer(ANSWER, RETRIEVED_IDS))
         "Reuse extract_citations to get the list of ids the model actually cited.",
         "An empty list is falsy in Python: check 'if not cited' first, before anything else.",
         "set(cited) - set(retrieved_ids) gives you exactly the fabricated ones; non-empty means UNGROUNDED.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Extract, then verify",
+          caption: "Extraction tells you what the model claimed; verification tells you whether the claim is true.",
+          loop: false,
+          nodes: [
+            { label: "Answer", sub: "model reply", detail: "The model's answer, with formatted file:line citations that may or may not be real." },
+            { label: "Extract", sub: "cited ids", detail: "Pull every bracketed citation out of the answer text." },
+            { label: "Compare", sub: "to retrieved set", detail: "Check each cited id against the exact set of chunk ids you put in the context." },
+            { label: "Classify", sub: "three outcomes", detail: "No citations, a fabricated one, or all valid decide the answer's status." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Hallucinated citation", definition: "A file:line reference the model formatted confidently that was never in the retrieved set." },
+        { term: "Verification", definition: "A membership check of each cited id against the chunks actually sent to the model." },
+        { term: "Grounded", definition: "An answer whose every citation points at code that was really retrieved." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Retrieved ids: {src/app.py:3-5, src/utils.py:1-4}. Answer cites [src/app.py:3-5] and [src/format.py:9-12].",
+          steps: [
+            "Extract the cited ids: src/app.py:3-5 and src/format.py:9-12.",
+            "The list is non-empty, so it is not NO_CITATIONS.",
+            "src/format.py:9-12 is not in the retrieved set, so the set difference is non-empty.",
+          ],
+          output: "UNGROUNDED",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "For a codebase assistant, why is a wrong citation worse than no citation?",
+          options: [
+            "It costs more tokens",
+            "It sends a developer to the wrong function while they trust the tool, so they lose time before noticing",
+            "It breaks the regex",
+            "It always means the model crashed",
+          ],
+          correct_index: 1,
+          explanation: "Checking every citation against the retrieved set before showing an answer is the cheapest way to keep that trust.",
+        },
       ],
       challenge_title: "Catch the Hallucinated Citation",
       challenge_description:
@@ -1362,6 +1636,42 @@ print(result_id, score)
         "keyword_overlap is already given; just call it once per chunk inside the loop.",
         "Only replace best_score on a STRICTLY greater score, so an earlier tied chunk keeps priority.",
         "If no chunk ever beats a score of 0, there's no real match, return NO_MATCH.",
+      ],
+      animated_diagrams: [
+        {
+          title: "The full pipeline, in order",
+          caption: "Eight lessons compress into a handful of calls, each solving one small piece correctly.",
+          loop: false,
+          nodes: [
+            { label: "Rank", sub: "hybrid score", detail: "Score the corpus against the question with semantic similarity plus the identifier bonus." },
+            { label: "Budget", sub: "dedupe + fit", detail: "Drop duplicate ranges and keep the top chunks that fit the token budget." },
+            { label: "Context", sub: "labeled block", detail: "Format the selected chunks into the id-tagged context block." },
+            { label: "Model", sub: "cited answer", detail: "Call the model with the grounding system prompt and the context." },
+            { label: "Classify", sub: "verify citations", detail: "Check the answer's citations against the retrieved ids and return a status." },
+          ],
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does 'shipped' mean for this project?",
+          options: [
+            "The code is deployed to a cloud server",
+            "It runs on a real repo end to end, refuses honestly when no code matches, and only shows citations you verified are real",
+            "It answers the one example you tested",
+            "It embeds the whole repo at once",
+          ],
+          correct_index: 1,
+          explanation: "Shipping means every link holds, not just the happy path: ingestion, chunking, retrieval, budget, and verification.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Pre-ship checklist",
+          questions: [
+            { type: "true_false", question: "A question with no relevant code in the repo should return NO_CITATIONS rather than a confident guess.", correct_answer: "true", explanation: "Refusing honestly is a shipped behavior; a confident wrong answer is not." },
+            { type: "true_false", question: "Skipping the token budget step is safe because retrieval already limits results.", correct_answer: "false", explanation: "Without a hard budget, a broad question can retrieve a dozen functions that together blow the context window and fail the call." },
+          ],
+        },
       ],
       challenge_title: "Route the Question to the Right Chunk",
       challenge_description:

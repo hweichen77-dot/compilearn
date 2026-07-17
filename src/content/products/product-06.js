@@ -76,6 +76,44 @@ Extracting one clean business card is a demo. Extracting ten thousand is the pro
 ## The drill below
 
 No network here. You'll define a schema and write the check that reports which required fields a record is **missing**. That's the smallest piece of the validation you'll build up over the next seven lessons.`,
+      animated_diagrams: [
+        {
+          title: "Mess in, fixed shape out",
+          caption: "The same six-step loop; the interesting work is prompt and parse.",
+          loop: false,
+          nodes: [
+            { label: "Messy text", sub: "free-form", detail: "A signature block, a pasted receipt, a paragraph of notes." },
+            { label: "Prompt", sub: "the schema", detail: "Ask for exactly these fields, as JSON, and nothing else." },
+            { label: "Call", sub: "send it", detail: "Hand the text and schema instruction to the model." },
+            { label: "Parse", sub: "pull the JSON", detail: "Dig the JSON object out of whatever the reply wrapped it in." },
+            { label: "Validate", sub: "required + type", detail: "Are the required fields present and the values the right type?" },
+            { label: "Ship", sub: "clean record", detail: "A strict object with known keys, ready for a database row." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Schema", definition: "The exact shape you demand back: every field named with its type. A contract between model and code." },
+        { term: "Structured extraction", definition: "Turning messy free text into the same fixed set of fields every time." },
+        { term: "Required field", definition: "A key that must be present with a non-empty value for the record to count as complete." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "missing_fields({'name': 'Ada', 'email': 'ada@x.com', 'phone': ''}, ['name','email','phone'])",
+          steps: [
+            "Check 'name': value 'Ada' is not None or '', so it's present.",
+            "Check 'email': value 'ada@x.com' is present.",
+            "Check 'phone': value '' is the empty string, which counts as missing.",
+          ],
+          output: "['phone']",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why does an empty string count as missing, not just an absent key?", options: ["Empty strings crash json.loads", "A field present but blank carries no data, so it fails the contract just like an absent one", "The API forbids empty strings", "It doesn't; only absent keys are missing"], correct_index: 1, explanation: "record.get(f) in (None, '') treats both an absent key and a blank value as missing." },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "'Every time' is the hard part", content: "Extracting one clean business card is a demo. The schema is what makes ten thousand messy ones survivable." },
+      ],
       starter_code: `# The smallest piece of validation: which required fields are missing?
 
 SCHEMA = ["name", "email", "phone"]
@@ -223,6 +261,32 @@ The prompt is the cheapest reliability you can buy. Every field name you spell o
 ## The drill below
 
 You'll build the system prompt from a schema dict, then parse a clean sample reply with \`json.loads\` and confirm its keys match the schema exactly.`,
+      animated_diagrams: [
+        {
+          title: "Build the prompt from the schema",
+          caption: "One dict drives both the instruction and what your code expects back.",
+          loop: false,
+          nodes: [
+            { label: "Schema dict", sub: "keys + types", detail: "The single source of truth: name is string, phone is string or null." },
+            { label: "List each key", sub: "one per line", detail: "Loop over schema.items() to emit a bullet line naming each field and type." },
+            { label: "Demand JSON", sub: "no prose", detail: "End with 'Return only the JSON object. No prose, no code fences.'" },
+            { label: "Handle missing", sub: "use null", detail: "Add 'If a field is absent, use null. Never guess' to stop invention." },
+            { label: "System prompt", sub: "ready", detail: "A precise instruction that can't drift from the schema it was built from." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Schema-in-the-prompt", definition: "Spelling out the exact keys and types in the instruction so the model returns your shape." },
+        { term: "One-shot prompting", definition: "Including one input and its ideal JSON output so the model pattern-matches the shape." },
+        { term: "Hallucination", definition: "The model inventing data, like a phone number that isn't in the text; 'use null, never guess' heads it off." },
+      ],
+      inline_quizzes: [
+        { question: "What is the most common bug in extraction, and how does the prompt fix it?", options: ["Slow replies, fixed by max_tokens", "Invention: the model makes up absent data, fixed by 'use null, never guess'", "Wrong casing, fixed by lowercasing", "Extra commas, fixed by regex"], correct_index: 1, explanation: "One sentence telling the model to use null for missing fields turns a hallucinating extractor into an honest one." },
+        { question: "Why build the prompt from the schema dict instead of writing it by hand?", options: ["It's shorter to type", "One source of truth: change the schema and the instructions change with it, so they can't drift apart", "The API requires a loop", "It uses fewer tokens"], correct_index: 1, explanation: "Generating the instruction from the dict keeps the prompt and your expectations in sync." },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "The prompt is the cheapest reliability", content: "Every field name you spell out and every 'use null when absent' is a bug you don't have to catch downstream." },
+      ],
       starter_code: `import json
 
 SCHEMA = {"name": "string", "email": "string", "phone": "string or null"}
@@ -356,6 +420,41 @@ The reply is a haystack and the JSON is the needle. Rather than demand a needle-
 ## The drill below
 
 You'll write \`extract_json\` and run it over three messy replies (prefix, code fence, trailing note), parsing each one into a dict.`,
+      animated_diagrams: [
+        {
+          title: "First brace to last brace",
+          caption: "Slice out the object and throw away the chatter on either side.",
+          loop: false,
+          nodes: [
+            { label: "Messy reply", sub: "prose + JSON", detail: "'Here you go: {\"name\": \"Ada\"} thanks!' with text around the object." },
+            { label: "find('{')", sub: "first open", detail: "Locate the first opening brace; everything before it is chatter." },
+            { label: "rfind('}')", sub: "last close", detail: "Locate the last closing brace; everything after it is chatter." },
+            { label: "Slice", sub: "start..end+1", detail: "Keep text[start:end+1], dropping the prose and any code fences outside the braces." },
+            { label: "json.loads", sub: "parse slice", detail: "Parse the clean slice, not the raw reply, into a dict." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "str.find", definition: "Returns the index of the first match, or -1 if none; used to locate the first '{'." },
+        { term: "str.rfind", definition: "Returns the index of the last match; used to locate the closing '}'." },
+        { term: "Defensive parsing", definition: "Assuming the reply is messy and slicing out the object instead of trusting it to be bare JSON." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "extract_json('```json\\n{\"name\": \"Bob\"}\\n```')",
+          steps: [
+            "find('{') lands on the brace after the fence, past the backticks.",
+            "rfind('}') lands on the closing brace, before the trailing fence.",
+            "Slice between them: the backticks sit outside the braces, so they're dropped.",
+          ],
+          output: "'{\"name\": \"Bob\"}'",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why parse the slice instead of the raw reply?", options: ["The slice is shorter", "json.loads chokes on a chatty prefix; the slice has the prefix removed so it parses", "Raw replies aren't strings", "The slice is faster to type"], correct_index: 1, explanation: "json.loads(raw) fails on 'Here is:'; json.loads(extract_json(raw)) works because the prose is gone." },
+        { question: "Why guard against find returning -1 before slicing?", options: ["To fail loudly when there's no object, instead of silently slicing garbage", "-1 speeds up the slice", "It's required by json", "To lowercase the text"], correct_index: 0, explanation: "No brace found means no JSON; raise a clear error rather than slicing nonsense." },
+      ],
       starter_code: `import json
 
 def extract_json(text):
@@ -492,6 +591,42 @@ Every repair rule is a small risk of corrupting good data. Keep the set tiny and
 ## The drill below
 
 You'll write \`repair_json\`, feed it a fenced object with a trailing comma, and confirm it parses cleanly afterward.`,
+      animated_diagrams: [
+        {
+          title: "A small, safe repair pass",
+          caption: "A few boring fixes turn almost-JSON into real JSON before parsing.",
+          loop: false,
+          nodes: [
+            { label: "Almost-JSON", sub: "slice won't parse", detail: "A fenced object with a trailing comma the model left behind." },
+            { label: "Strip fences", sub: "open + close", detail: "Drop the leading '```json' line and the closing '```' line." },
+            { label: "Slice braces", sub: "first..last", detail: "Cut to the first '{' and last '}' to shed anything outside." },
+            { label: "Kill trailing commas", sub: "before } or ]", detail: "Regex out a comma that sits just before a closing brace or bracket." },
+            { label: "json.loads", sub: "or None", detail: "Parse the repaired string; on failure return None so the caller can retry." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Repair pass", definition: "A short set of cheap, safe string fixes applied before json.loads." },
+        { term: "Trailing comma", definition: "A comma before a closing } or ], legal in Python but illegal in JSON." },
+        { term: "Return None on failure", definition: "Signaling a still-broken record so the caller can log, retry, or flag it instead of crashing the whole batch." },
+      ],
+      step_throughs: [
+        {
+          title: "Repairing '```json\\n{\"a\": 1,}\\n```'",
+          steps: [
+            { label: "strip", detail: "Trim surrounding whitespace so the fence anchors line up.", code: "'```json\\n{\"a\": 1,}\\n```'" },
+            { label: "drop fences", detail: "Remove the opening and closing fence lines.", code: "'{\"a\": 1,}'" },
+            { label: "slice braces", detail: "First '{' to last '}' leaves the object unchanged here.", code: "'{\"a\": 1,}'" },
+            { label: "kill comma", detail: "Regex removes the comma before '}'.", code: "'{\"a\": 1}'" },
+          ],
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why keep the repair set tiny instead of adding ten regexes?", options: ["Regexes are slow", "Every repair rule risks corrupting good data; when fences and trailing commas aren't enough, ask the model again", "The API caps regex count", "Bigger sets use more tokens"], correct_index: 1, explanation: "Keep repairs boring and few; the right escalation is a retry, not more fragile string surgery." },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Leave the hard cases to a retry", content: "Single quotes and unquoted keys are hard to fix safely (an apostrophe in a name breaks naive fixes). Retry the model rather than patch them with regex." },
+      ],
       starter_code: `import re, json
 
 def repair_json(text):
@@ -614,6 +749,42 @@ An extractor without validation is a guess with extra steps. What matters is tha
 ## The drill below
 
 You'll validate a parsed record against a schema of required fields and types and report each error, catching a value that came back the wrong type.`,
+      animated_diagrams: [
+        {
+          title: "Presence, then type",
+          caption: "Parsing checks syntax; validation checks meaning against the contract.",
+          loop: false,
+          nodes: [
+            { label: "Parsed record", sub: "well-formed", detail: "A dict that json.loads accepted, which says nothing about correctness." },
+            { label: "Presence check", sub: "required keys", detail: "A required key that's absent or null is a 'missing' error." },
+            { label: "Type check", sub: "right type", detail: "A present value that isn't the expected type is a 'wrong type' error." },
+            { label: "Collect errors", sub: "one list", detail: "Gather every problem; an empty list means the record is valid." },
+            { label: "Ship or retry", sub: "gate", detail: "Valid records go to the database; failing ones get retried or flagged." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Well-formed vs correct", definition: "Well-formed means json.loads accepted it; correct means it meets your schema's fields and types." },
+        { term: "isinstance", definition: "Tests a value's type; accepts a tuple like (int, float) to mean 'either'." },
+        { term: "Normalize", definition: "Give every record the same keys, setting absent optional fields to None so downstream code never hits a KeyError." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "validate({'name': 'Ada', 'email': 'ada@x.com', 'amount': '50'}, schema, required)",
+          steps: [
+            "Presence: name, email, amount are all present, so no 'missing' errors.",
+            "Type name: 'Ada' is a str, ok. Type email: 'ada@x.com' is a str, ok.",
+            "Type amount: '50' is a str, but the schema wants (int, float).",
+            "isinstance('50', (int, float)) is False, so append 'wrong type: amount'.",
+          ],
+          output: "['wrong type: amount']",
+        },
+      ],
+      inline_quizzes: [
+        { question: "json.loads accepted {'name': 'Ada'} but your schema needs three fields. What does that tell you?", options: ["The record is correct", "Parsing success is only syntax; you still have to validate presence and type yourself", "The model failed", "The JSON is broken"], correct_index: 1, explanation: "Well-formed JSON can still be the wrong data; validation is a separate step from parsing." },
+        { question: "Why skip the type check when a value is None?", options: ["None is always valid", "A missing field is already flagged by the presence check; type-checking it too would double-report", "isinstance crashes on None", "To save tokens"], correct_index: 1, explanation: "Guard the type check with 'value is not None' so an absent field isn't also flagged as wrong-type." },
+      ],
       starter_code: `SCHEMA = {"name": str, "email": str, "amount": (int, float)}
 REQUIRED = ["name", "email", "amount"]
 
@@ -756,6 +927,32 @@ The gap between a demo and a tool is exactly this behavior: it fails politely, r
 ## The drill below
 
 You'll simulate the retry loop over a sequence of fake replies, the first invalid and the next fixed, and confirm it stops as soon as a valid one arrives, reporting how many attempts it took.`,
+      animated_diagrams: [
+        {
+          title: "Fail, then ask again with the reason",
+          caption: "Each retry tells the model exactly what broke, capped so it can't loop forever.",
+          loop: true,
+          nodes: [
+            { label: "Input text", sub: "maybe empty", detail: "Empty or whitespace-only text short-circuits to an all-null record, no call made." },
+            { label: "Call + parse", sub: "one attempt", detail: "Extract a record from the model's reply for this attempt." },
+            { label: "Validate", sub: "errors?", detail: "Run presence and type checks; an empty error list means success, return it." },
+            { label: "Add the reason", sub: "feed back", detail: "Append the specific errors ('missing: phone') to the prompt for a sharper retry." },
+            { label: "Cap tries", sub: "give up cleanly", detail: "After max_retries, return the best record with valid: False; never loop forever." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Short-circuit", definition: "Returning early for empty input so you never spend a call on nothing to extract." },
+        { term: "Retry with feedback", definition: "Re-calling with the validation errors attached so attempt two corrects that exact gap." },
+        { term: "Retry cap", definition: "A hard limit (two is a sane default) that stops re-asking for data the text never contained." },
+      ],
+      inline_quizzes: [
+        { question: "Why append the validation errors to the retry prompt?", options: ["To make the reply longer", "So the model corrects the exact gap ('missing: phone') instead of guessing blindly again", "The API requires it", "To lower the token cost"], correct_index: 1, explanation: "Feeding back the specific problems sharpens the second attempt over a blind redo." },
+        { question: "Why cap the retries instead of looping until valid?", options: ["Loops are slow", "Some inputs genuinely lack the data, so no amount of re-asking finds a phone that was never there", "The model bans loops", "To keep the code short"], correct_index: 1, explanation: "Cap attempts and, on final failure, return the best record flagged valid: False for a human to decide." },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "Polite failure is the product", content: "An extractor that surfaces '3 records need review' is trustworthy. One that silently writes garbage or crashes on row 4,000 is not." },
+      ],
       starter_code: `def validate(record, required):
     return [f"missing: {k}" for k in required if not record.get(k)]
 
@@ -906,6 +1103,43 @@ A few practical levers: don't retry more than you must, extract only the fields 
 ## The drill below
 
 You'll validate an invoice: check that the required top-level fields are present, then confirm the line items sum to the stated total. This catches the arithmetic, not just the shape.`,
+      animated_diagrams: [
+        {
+          title: "Do the line items add up?",
+          caption: "Presence and type pass; the arithmetic is the check that earns its keep.",
+          loop: false,
+          nodes: [
+            { label: "Invoice", sub: "nested", detail: "An id, a total, and a list of line items, each with name, qty, and price." },
+            { label: "Required keys", sub: "present?", detail: "Check invoice_id, total, and items exist; return early if any are missing." },
+            { label: "Sum items", sub: "qty x price", detail: "Compute sum(qty * price) across every line item." },
+            { label: "Compare total", sub: "match?", detail: "If the computed sum doesn't equal the stated total, report the mismatch." },
+            { label: "Verdict", sub: "trust or flag", detail: "Matching totals mean the extraction is internally consistent." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Nested schema", definition: "A schema with an array of objects inside it, like an invoice's list of line items." },
+        { term: "Cross-field validation", definition: "A check that spans fields, like line items summing to the stated total, that presence and type checks miss." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Validate an invoice with total 250 and items [(qty 2, price 50), (qty 3, price 50)]",
+          steps: [
+            "invoice_id, total, and items are all present, so no missing errors.",
+            "Compute 2*50 = 100 for the first item.",
+            "Compute 3*50 = 150 for the second item.",
+            "Sum is 250, which equals the stated total, so no mismatch.",
+          ],
+          output: "[] (no errors, the invoice reconciles)",
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why does the total check catch bugs that presence and type checks miss?", options: ["It runs first", "A dropped line item or misread price leaves every field present and typed right but the math wrong", "It's faster", "It uses fewer tokens"], correct_index: 1, explanation: "Cross-field validation catches the model dropping an item, which shape checks alone sail right past." },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Big documents cost more", content: "A contact is a sentence; an invoice can be a page. At about one token per four characters, resending a 4,000-char invoice on two retries triples that record's bill." },
+      ],
       starter_code: `def validate_invoice(inv):
     # TODO: require invoice_id, total, and items. If any are missing, return those errors.
     # TODO: otherwise check sum(qty * price over items) == total; if not, report the mismatch.
@@ -1067,6 +1301,37 @@ Finishing this lesson saves the **Structured JSON Extractor** to your **Portfoli
 ## The drill below
 
 You'll run the whole pipeline in pure Python: repair and parse a fenced, trailing-comma reply, normalize it to the schema, and print the record plus its status.`,
+      animated_diagrams: [
+        {
+          title: "One entry point, three honest outcomes",
+          caption: "Everything collapses into extract(text): a full-shaped record and a status.",
+          loop: false,
+          nodes: [
+            { label: "Text in", sub: "empty check", detail: "Empty input returns an all-null record with status EMPTY, no call made." },
+            { label: "Call model", sub: "schema prompt", detail: "Ask for the contact JSON with null for absent fields." },
+            { label: "Repair + parse", sub: "or PARSE_ERROR", detail: "Slice, repair, json.loads; on failure return an all-null record flagged PARSE_ERROR." },
+            { label: "Normalize", sub: "all keys", detail: "Force every schema key onto the record, using None for anything absent." },
+            { label: "Status", sub: "COMPLETE / INCOMPLETE", detail: "Any missing required field means INCOMPLETE; otherwise COMPLETE." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Full-shaped record", definition: "A record that always carries every schema key, so callers never hit a missing-key error." },
+        { term: "Status", definition: "The honest label on each result: COMPLETE, INCOMPLETE, or PARSE_ERROR, never a silent wrong answer." },
+      ],
+      participation_activities: [
+        {
+          activity_title: "What does 'done' mean?",
+          questions: [
+            { type: "true_false", question: "A bad extraction should be labeled (INCOMPLETE, PARSE_ERROR) rather than silently shipped.", correct_answer: "true", explanation: "Labeling bad records is exactly what separates a trustworthy tool from one that writes garbage." },
+            { type: "true_false", question: "Some inputs can yield a record that's missing a key.", correct_answer: "false", explanation: "Every input yields a full-shaped record; absent fields are set to None, never dropped." },
+            { type: "fill_in", question: "Finishing this lesson saves the tool to your ____ tab.", correct_answer: "portfolio", explanation: "The Portfolio tab records the Structured JSON Extractor as a real deliverable." },
+          ],
+        },
+      ],
+      inline_quizzes: [
+        { question: "Why return a full-shaped record even when parsing fails?", options: ["To hide the error", "So the caller always gets the same keys plus a status, and never a crash mid-batch", "It's faster", "The API requires it"], correct_index: 1, explanation: "A predictable shape plus a status means downstream code handles every outcome the same way." },
+      ],
       starter_code: `import json, re
 
 SCHEMA = ["name", "email", "phone"]

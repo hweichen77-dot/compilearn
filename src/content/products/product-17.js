@@ -107,6 +107,46 @@ for c in result:
         "Use enumerate(paragraphs, start=1) so chunk_id is 1-indexed per note.",
         "Strip blank paragraphs so stray blank lines don't create empty chunks.",
       ],
+      animated_diagrams: [
+        {
+          title: "The RAG loop",
+          caption: "Index your notes once, then for every question retrieve the right chunks and answer with citations.",
+          loop: false,
+          nodes: [
+            { label: "Notes", sub: "raw markdown", detail: "You start with hundreds of notes, far too big to paste into one prompt." },
+            { label: "Chunk", sub: "paragraph pieces", detail: "Split each note into small chunks so retrieval can point at one passage, not a whole day." },
+            { label: "Embed + index", sub: "vectors stored", detail: "Turn each chunk into a vector and store text, metadata, and vector together as the index." },
+            { label: "Retrieve", sub: "relevant chunks", detail: "At question time, pull back only the chunks whose meaning matches the question." },
+            { label: "Answer", sub: "with citations", detail: "Write an answer from those chunks and cite which chunk backed each claim." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "RAG", definition: "Retrieval-Augmented Generation: retrieve relevant text first, then let the model answer from it." },
+        { term: "Chunk", definition: "A small, retrievable piece of a note, usually one paragraph, tagged with where it came from." },
+        { term: "Index", definition: "The stored collection of chunks with their text, metadata, and vectors." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why split each note into chunks instead of retrieving whole notes?",
+          options: [
+            "Chunks embed faster than whole notes",
+            "A whole note mixes many topics, so retrieval wastes tokens on paragraphs the question does not need",
+            "The model cannot read more than one paragraph",
+            "Chunks avoid the need for embeddings",
+          ],
+          correct_index: 1,
+          explanation: "One journal entry might cover breakfast, a work decision, and an appointment. Chunking hands back the one paragraph that matters.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "fill_in", question: "What metadata must each chunk keep so you can cite it later?", correct_answer: "note", explanation: "Each chunk records its note title and chunk_id. Lose that and you can never point back to the source." },
+          ],
+        },
+      ],
       challenge_title: "Chunk the Notes",
       challenge_description:
         "Split a batch of notes into numbered chunks so each piece can be retrieved and cited on its own.",
@@ -259,6 +299,50 @@ for chunk_id, score in rank_by_similarity(query, vectors):
         "Magnitude is math.sqrt of the sum of squares of a vector's components.",
         "sorted(..., key=..., reverse=True) puts the highest similarity first.",
       ],
+      animated_diagrams: [
+        {
+          title: "From words to a ranking",
+          caption: "Every chunk and the question become vectors, and cosine similarity sorts them by meaning.",
+          loop: false,
+          nodes: [
+            { label: "Chunks", sub: "text pieces", detail: "Start with the chunks you built in lesson 1, each still plain text." },
+            { label: "Embed", sub: "text to vectors", detail: "Turn each chunk and the question into a vector of floats capturing its meaning." },
+            { label: "Cosine", sub: "angle score", detail: "Measure the angle between the question vector and each chunk vector." },
+            { label: "Rank", sub: "highest first", detail: "Sort chunks by that score so the closest-in-meaning chunks come first." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Embedding", definition: "A list of floats from a model, built so similar meanings land near each other." },
+        { term: "Cosine similarity", definition: "The cosine of the angle between two vectors, from -1 for opposite to 1 for identical direction." },
+        { term: "Vector space", definition: "The number space where each embedding is a point, and closeness means similar meaning." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "cosine_similarity([1, 0], [1, 1])",
+          steps: [
+            "Dot product: 1*1 + 0*1 = 1.",
+            "Norm of [1, 0]: sqrt(1 + 0) = 1.",
+            "Norm of [1, 1]: sqrt(1 + 1) = sqrt(2), about 1.414.",
+            "Divide: 1 / (1 * 1.414) = about 0.7071.",
+          ],
+          output: "0.7071",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does cosine similarity ignore each vector's length?",
+          options: [
+            "Length is expensive to compute",
+            "A short question and a long chunk can point the same way in meaning-space even when their magnitudes differ",
+            "The model always returns unit vectors",
+            "Length would make the score negative",
+          ],
+          correct_index: 1,
+          explanation: "Dividing by both magnitudes normalizes the score into -1 to 1, so a short query and a long note stay comparable.",
+        },
+      ],
       challenge_title: "Rank Chunks by Similarity",
       challenge_description:
         "Score a set of chunk vectors against a query vector with cosine similarity and rank them highest first.",
@@ -409,6 +493,40 @@ for h in hits:
         "Filter with score >= threshold BEFORE sorting and slicing to k.",
         "sorted(..., reverse=True) then slice [:k] gives the top k above the bar.",
         "An empty result after filtering is a valid, meaningful outcome, not a bug.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Filter, then rank, then cap",
+          caption: "Score every chunk, drop anything below the bar, sort the survivors, and keep only the top few.",
+          loop: false,
+          nodes: [
+            { label: "Score", sub: "all chunks", detail: "Compute cosine similarity between the question and every chunk." },
+            { label: "Filter", sub: "score >= threshold", detail: "Drop chunks below the threshold, even if they would otherwise make the top k." },
+            { label: "Sort", sub: "best first", detail: "Order the survivors by score, highest first." },
+            { label: "Cap at k", sub: "top few", detail: "Keep at most k chunks. An empty result honestly means nothing matched." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "k", definition: "The cap on how many chunks you hand the model, usually 3 to 5." },
+        { term: "Threshold", definition: "A minimum similarity score below which a chunk is dropped as too weak." },
+        { term: "Retrieval", definition: "Selecting the relevant chunks to send, not just ordering all of them." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why filter by threshold before slicing to k, not after?",
+          options: [
+            "Filtering after is slower",
+            "Slice first and you might keep weak chunks just because nothing better existed; filter first and an empty result honestly signals no match",
+            "The threshold changes the sort order",
+            "Slicing first drops the best chunk",
+          ],
+          correct_index: 1,
+          explanation: "Filter-then-slice lets 'nothing was good enough' become an empty result, which a later lesson turns into an honest 'I don't know'.",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "An empty result is information", content: "After filtering, no chunks means the vault has nothing on this question. That is the exact signal used later to skip the model call and refuse honestly." },
       ],
       challenge_title: "Retrieve the Top-K Above Threshold",
       challenge_description:
@@ -595,6 +713,41 @@ print("turns:", len(messages))
         "Join the numbered lines with a newline to build the context block.",
         "The question goes in the SAME user turn as the context, separated by a blank line.",
       ],
+      animated_diagrams: [
+        {
+          title: "Building the cited-answer prompt",
+          caption: "Number the retrieved chunks, keep the rule in the system prompt and the data in the user turn.",
+          loop: false,
+          nodes: [
+            { label: "Retrieved", sub: "top chunks", detail: "Start with the few relevant chunks the retriever handed back." },
+            { label: "Number", sub: "[1], [2], ...", detail: "Give each chunk a bracketed number that becomes its citation marker." },
+            { label: "System rule", sub: "cite or refuse", detail: "The system prompt says cite every claim and refuse to guess when the notes do not answer." },
+            { label: "User turn", sub: "sources + question", detail: "The numbered sources and the actual question go together in the user message." },
+            { label: "Model", sub: "footnoted answer", detail: "The model answers using only the numbered notes and tags each claim with its source." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Grounding", definition: "Forcing the model to answer only from the provided sources rather than its own memory." },
+        { term: "Citation marker", definition: "A bracketed number like [1] that ties a claim to the source that supports it." },
+        { term: "System prompt", definition: "The instruction layer that carries the rules, kept separate from the user's data." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why cite sources by number instead of by their full title?",
+          options: [
+            "Titles are not allowed in prompts",
+            "Numbers are compact and unambiguous; titles get paraphrased inconsistently from one call to the next",
+            "Numbers make the model faster",
+            "The model cannot read titles",
+          ],
+          correct_index: 1,
+          explanation: "You map the number back to the real title and path yourself after the reply, which is the next lesson's job.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Rules and data never mix", content: "The system prompt carries the rule (cite every claim, refuse to guess). The user turn carries the numbered sources plus the question. Keeping them apart is the same discipline across this whole track." },
+      ],
       challenge_title: "Number the Sources",
       challenge_description:
         "Build the numbered context block handed to the model, one bracketed source per line.",
@@ -727,6 +880,50 @@ print("grounded:", len(invalid) == 0)
         "re.findall(r'\\\\[(\\\\d+)\\\\]', text) grabs the digits inside every [n] marker.",
         "dict.fromkeys(...) dedupes a sequence while keeping first-appearance order.",
         "A citation is invalid if it's below 1 or above the number of sources you actually sent.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Extract and verify citations",
+          caption: "Pull the numbers out of the answer, dedupe them, and check each one against the sources you sent.",
+          loop: false,
+          nodes: [
+            { label: "Answer", sub: "model reply", detail: "The model replies with citation markers like [1] scattered through the text." },
+            { label: "Extract", sub: "regex [n]", detail: "A regex grabs every bracketed number from the answer text." },
+            { label: "Dedupe", sub: "unique, in order", detail: "Convert to ints and drop repeats, keeping first-appearance order." },
+            { label: "Verify", sub: "in range?", detail: "Check every cited number points to a source that was actually in the context." },
+            { label: "Result", sub: "valid or flag", detail: "Any out-of-range number is a hallucinated citation to strip or retry." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Citation", definition: "A bracketed source number the model attaches to a claim." },
+        { term: "Hallucinated citation", definition: "A source number the model wrote that was never in the context you sent." },
+        { term: "Regex", definition: "A pattern that matches text, here used to find every [n] marker in the answer." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "extract_citations('This is supported by [1] and also [2], see [1] again.')",
+          steps: [
+            "The regex finds the strings '1', '2', '1' in order.",
+            "Convert each to an int: 1, 2, 1.",
+            "Dedupe with dict.fromkeys, keeping first-appearance order, which drops the repeated 1.",
+          ],
+          output: "[1, 2]",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "The model cited [7] but you gave it only 3 sources. What is that?",
+          options: [
+            "A valid citation you should display",
+            "An out-of-range, hallucinated citation, always a bug to flag or strip",
+            "A request for a 7th source",
+            "A formatting preference",
+          ],
+          correct_index: 1,
+          explanation: "A number above the source count points at a source that never existed. Catch it before the user sees it.",
+        },
       ],
       challenge_title: "Fact-Check the Footnotes",
       challenge_description:
@@ -884,6 +1081,50 @@ for score in [0.8, 0.4, 0.1]:
         "A NO_MATCH label should skip the API call entirely, not send an empty-context prompt and hope.",
         "The hedge line only applies to WEAK; CONFIDENT gets a plain prompt.",
       ],
+      animated_diagrams: [
+        {
+          title: "Pick a gear before answering",
+          caption: "The top retrieval score sorts each question into confident, weak, or no-match.",
+          loop: false,
+          nodes: [
+            { label: "Top score", sub: "best chunk", detail: "Take the highest similarity score from retrieval as the confidence signal." },
+            { label: "Classify", sub: "three bands", detail: "Compare it to two thresholds to pick a band." },
+            { label: "CONFIDENT", sub: "answer normally", detail: "High score: build the cited prompt and answer as usual." },
+            { label: "WEAK", sub: "hedge", detail: "Middle score: still answer, but tell the model to hedge and admit uncertainty." },
+            { label: "NO_MATCH", sub: "skip the call", detail: "Low score: never call the model; return an honest 'not in your notes'." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Confidence band", definition: "One of three ranges (confident, weak, no-match) chosen from the top retrieval score." },
+        { term: "No-match", definition: "A top score so low that the safest move is to skip the model entirely." },
+        { term: "Hedge", definition: "An instruction telling the model to answer cautiously and flag uncertainty on a weak match." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "classify_confidence(0.35, confident_t=0.5, weak_t=0.3)",
+          steps: [
+            "Is 0.35 >= 0.5 (confident bar)? No.",
+            "Is 0.35 >= 0.3 (weak bar)? Yes.",
+            "It clears the weak bar but not the confident bar, so it lands in the middle band.",
+          ],
+          output: "WEAK",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does a NO_MATCH question never reach the API?",
+          options: [
+            "The API is too slow for low scores",
+            "Sending empty or irrelevant context and asking the model to answer anyway invites a hallucination you also pay for",
+            "The model rejects low-score prompts",
+            "NO_MATCH means the notes are corrupted",
+          ],
+          correct_index: 1,
+          explanation: "Skipping the call on NO_MATCH is a cost and correctness decision as much as a UX one.",
+        },
+      ],
       challenge_title: "Pick the Confidence Band",
       challenge_description:
         "Classify a batch of top retrieval scores into CONFIDENT, WEAK, or NO_MATCH before deciding whether to call the model.",
@@ -1039,6 +1280,41 @@ print("tokens to embed:", total_tokens)
         "normalize should make 'Buy milk' and 'BUY   MILK' compare equal.",
         "Track a 'seen' set of normalized keys; only append when a key is new.",
         "Keep the ORIGINAL text (the first occurrence's casing), not the normalized one, in the output.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Dedup before you pay",
+          caption: "Normalize each chunk, drop exact repeats, then estimate the bill on what's left.",
+          loop: false,
+          nodes: [
+            { label: "Chunks", sub: "raw text", detail: "A real vault repeats template boilerplate across dozens of entries." },
+            { label: "Normalize", sub: "lower + collapse", detail: "Lowercase and collapse whitespace so casing and spacing differences compare equal." },
+            { label: "Exact dedup", sub: "keep first", detail: "Keep only the first occurrence of each normalized text, dropping the copies." },
+            { label: "Near-dup", sub: "high cosine", detail: "Optionally, after embedding, drop pairs whose cosine similarity is above about 0.98." },
+            { label: "Estimate", sub: "token cost", detail: "Sum a rough token estimate over the unique chunks to predict the embedding bill." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Normalize", definition: "Lowercasing and collapsing whitespace so trivially different texts compare as equal." },
+        { term: "Exact duplicate", definition: "Two chunks with the same content after normalizing, differing only in case or spacing." },
+        { term: "Near-duplicate", definition: "Two chunks that mean almost the same thing in different words, caught by comparing embeddings." },
+      ],
+      inline_quizzes: [
+        {
+          question: "When you dedup, which version of the text should you keep?",
+          options: [
+            "The normalized lowercase version",
+            "The first occurrence's original text, using the normalized version only as the comparison key",
+            "The longest version",
+            "A merged version of all copies",
+          ],
+          correct_index: 1,
+          explanation: "Keep the original casing so display looks natural; the normalized key is only for detecting the duplicate.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Dedup is a real cost lever", content: "At a thousand notes with a shared daily template, duplicate chunks can be a third of your index. Dropping them lowers embedding cost directly." },
       ],
       challenge_title: "Dedup Before You Pay to Embed",
       challenge_description:
@@ -1221,6 +1497,42 @@ print("Notes Brain built. Saved to your Portfolio.")
         "Reuse the CONFIDENT/WEAK/NO_MATCH classifier from the hardening lesson; shipping is where the pieces meet.",
         "READY requires all three: a real match (not NO_MATCH), at least one retrieved chunk, and valid citations.",
         "Order matters: index summary line, then retrieval line, then citations line, then the final status.",
+      ],
+      animated_diagrams: [
+        {
+          title: "One question, the whole pipeline",
+          caption: "Every lesson collapses into one answer that comes with receipts, or an honest refusal.",
+          loop: false,
+          nodes: [
+            { label: "Retrieve", sub: "top chunks", detail: "Embed the question and pull back the most relevant chunks from the index." },
+            { label: "Gate", sub: "confidence band", detail: "Classify the top score. NO_MATCH returns early without calling the model." },
+            { label: "Prompt", sub: "numbered sources", detail: "Build the cited prompt from the retrieved chunks and call the model." },
+            { label: "Verify", sub: "check citations", detail: "Extract the citations and confirm each points at a source you actually sent." },
+            { label: "Answer", sub: "with footnotes", detail: "Return the answer plus a clean footnote list, or an empty list if verification fails." },
+          ],
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What three things must all hold for the final report to print STATUS: READY?",
+          options: [
+            "A large vault, no duplicates, and a fast model",
+            "A real match (not NO_MATCH), at least one retrieved chunk, and valid citations",
+            "A cached index, a short answer, and zero cost",
+            "Any answer at all plus a citation",
+          ],
+          correct_index: 1,
+          explanation: "READY requires a genuine match, retrieved chunks, and citations that passed verification. Anything less is NEEDS_REVIEW.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Trace the shipped tool",
+          questions: [
+            { type: "true_false", question: "If citation verification fails, the tool hands back an empty footnote list rather than a broken citation.", correct_answer: "true", explanation: "An empty footnote list beats showing a citation you could not confirm." },
+            { type: "true_false", question: "A shipped RAG tool re-embeds every note on every question.", correct_answer: "false", explanation: "Real tools embed once, cache by a hash of each chunk's text, and re-embed only what changed." },
+          ],
+        },
       ],
       challenge_title: "Assemble the Final Report",
       challenge_description:

@@ -72,6 +72,41 @@ export default {
           "explanation": "It declares an int variable named x and initializes it with the value 5 using the assignment operator."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Declaring a variable",
+          "caption": "A declaration names a type, then a value is copied into that memory box.",
+          "loop": false,
+          "nodes": [
+            { "label": "Choose type", "sub": "int, double, boolean", "detail": "You pick the type first. It fixes what values fit and what operations are allowed." },
+            { "label": "Name it", "sub": "the identifier", "detail": "You give the variable a name, like score, that you use to refer to it later." },
+            { "label": "Reserve memory", "sub": "a labeled box", "detail": "Java sets aside a slot in memory sized for that type." },
+            { "label": "Store value", "sub": "= copies in", "detail": "The assignment operator copies the value on the right into the box." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Types do not mix freely", "content": "You cannot store 3.14 in an int. The compiler rejects it, so match each value to the type you declared." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing three declarations",
+          "steps": [
+            { "label": "int score = 100;", "detail": "Reserve an int box named score and copy 100 into it.", "code": "int score = 100;" },
+            { "label": "double price = 9.99;", "detail": "Reserve a double box named price and copy 9.99 into it.", "code": "double price = 9.99;" },
+            { "label": "boolean passed = true;", "detail": "Reserve a boolean box named passed and copy true into it.", "code": "boolean passed = true;" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A boolean variable can hold the value 1.", "correct_answer": "false", "explanation": "A boolean holds only true or false, never a number." },
+            { "type": "fill_in", "question": "Which primitive type stores a whole number like 42?", "correct_answer": "int", "explanation": "int stores whole numbers; double stores decimals." }
+          ]
+        }
+      ],
       "challenge_title": "Echo Three Types",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: read an int, a double, and a boolean, then print each on its own line\n    }\n}\n",
@@ -146,6 +181,45 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "A final variable is a constant; reassigning it causes a compile-time error."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How a literal gets its type",
+          "caption": "The way you write a value decides whether it is an int, double, or boolean.",
+          "loop": false,
+          "nodes": [
+            { "label": "Read the text", "sub": "the raw characters", "detail": "Java looks at exactly how you typed the value in the source code." },
+            { "label": "Decimal point?", "sub": "check for a dot", "detail": "A dot or exponent, like 3.14 or 1.5e3, marks it as a double." },
+            { "label": "true or false?", "sub": "reserved words", "detail": "The words true and false are boolean literals." },
+            { "label": "Assign the type", "sub": "int by default", "detail": "Plain digits with no dot become an int literal." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Name it after the data", "content": "studentCount tells a reader far more than x. Clear camelCase names make bugs easier to spot and are rewarded on the exam." }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Decide the type of each literal: 10, 0.25, true, 7.0, 42",
+          "steps": [
+            "10 has no decimal point, so it is an int literal.",
+            "0.25 has a decimal point, so it is a double literal.",
+            "true is a reserved word, so it is a boolean literal.",
+            "7.0 has a decimal point even though the fraction is zero, so it is a double literal.",
+            "42 has no decimal point, so it is an int literal."
+          ],
+          "output": "int, double, boolean, double, int"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "totalScore and TotalScore refer to the same variable.", "correct_answer": "false", "explanation": "Identifiers are case-sensitive, so those are two different names." },
+            { "type": "fill_in", "question": "What keyword makes a variable a constant that cannot be reassigned?", "correct_answer": "final", "explanation": "final locks the value after initialization." }
+          ]
         }
       ],
       "challenge_title": "Rectangle Constant Area",
@@ -224,6 +298,41 @@ export default {
           "explanation": "2 + 3 is computed first as int addition giving 5, then 5 + \"pts\" concatenates to \"5pts\"."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Building output left to right",
+          "caption": "The + operator evaluates one step at a time, and a String on either side switches it to joining text.",
+          "loop": false,
+          "nodes": [
+            { "label": "Start", "sub": "\"x\" + 2 + 3", "detail": "Java reads the expression from left to right." },
+            { "label": "First +", "sub": "\"x\" + 2", "detail": "A String is on the left, so 2 becomes text and joins to give \"x2\"." },
+            { "label": "Second +", "sub": "\"x2\" + 3", "detail": "The left side is now a String, so 3 also joins as text." },
+            { "label": "Result", "sub": "\"x23\"", "detail": "The final value is the joined String \"x23\"." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "The + operator has two jobs", "content": "With two numbers it adds. With a String on either side it joins text. 2 + 3 + \"x\" is \"5x\", but \"x\" + 2 + 3 is \"x23\"." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing 2 + 3 + \"pts\"",
+          "steps": [
+            { "label": "2 + 3", "detail": "Both operands are ints, so this is numeric addition giving 5.", "code": "2 + 3 -> 5" },
+            { "label": "5 + \"pts\"", "detail": "Now a String is on the right, so 5 becomes text and joins.", "code": "5 + \"pts\" -> \"5pts\"" },
+            { "label": "Result", "detail": "The printed line is 5pts.", "code": "\"5pts\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "System.out.print does NOT move to a new line after printing.", "correct_answer": "true", "explanation": "print stays on the same line; println advances to the next line." },
+            { "type": "fill_in", "question": "Which method prints its argument and then moves to a new line?", "correct_answer": "println", "explanation": "System.out.println adds a newline after the output." }
+          ]
+        }
+      ],
       "challenge_title": "Labeled Sum",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: read two ints a and b, print \"Sum: \" followed by a+b on one line\n    }\n}\n",
@@ -298,6 +407,41 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Making an operand a double (5.0 / 2) promotes the expression to double division, yielding 2.5."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Which kind of division?",
+          "caption": "The operand types, not the variable you store into, decide whether the fraction survives.",
+          "loop": false,
+          "nodes": [
+            { "label": "Look at operands", "sub": "left and right of /", "detail": "Check the types on both sides of the division." },
+            { "label": "Both int?", "sub": "integer division", "detail": "If both are int, Java truncates the fraction toward zero." },
+            { "label": "Any double?", "sub": "double division", "detail": "If either operand is a double, the whole expression uses double arithmetic." },
+            { "label": "Result type", "sub": "int or double", "detail": "The result matches the arithmetic that was used, not the variable it lands in." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Storing in a double does not help", "content": "double r = 7 / 2; gives 3.0, not 3.5. The right side is computed as int division first, then widened. Make an operand a double before dividing." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing double r = 7 / 2;",
+          "steps": [
+            { "label": "Evaluate 7 / 2", "detail": "Both operands are int, so integer division runs and truncates to 3.", "code": "7 / 2 -> 3" },
+            { "label": "Widen to double", "detail": "The int 3 is copied into the double variable, becoming 3.0.", "code": "double r = 3.0" },
+            { "label": "Fix it", "detail": "Writing 7.0 / 2 makes the left operand a double, so the division keeps the fraction.", "code": "7.0 / 2 -> 3.5" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "9 / 2 with both operands int evaluates to 4.", "correct_answer": "true", "explanation": "Integer division truncates the 0.5, so the result is the int 4." },
+            { "type": "fill_in", "question": "Integer division discarding the fraction toward zero is called what?", "correct_answer": "truncation", "explanation": "Truncation drops the fractional part instead of rounding." }
+          ]
         }
       ],
       "challenge_title": "True Average of Two",
@@ -376,6 +520,43 @@ export default {
           "explanation": "8 goes into 5 zero times with remainder 5, so 5 % 8 is 5."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Splitting a number with / and %",
+          "caption": "Integer division gives the high part, modulus gives the leftover low part.",
+          "loop": false,
+          "nodes": [
+            { "label": "Start", "sub": "total = 137", "detail": "You have 137 pennies and want dollars and cents." },
+            { "label": "total / 100", "sub": "the quotient", "detail": "Integer division gives 1, the number of whole dollars." },
+            { "label": "total % 100", "sub": "the remainder", "detail": "Modulus gives 37, the pennies left over." },
+            { "label": "Reassemble", "sub": "1 dollar, 37 cents", "detail": "Quotient times 100 plus remainder rebuilds the original 137." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "n % 10 is the last digit", "content": "For any non-negative int, n % 10 peels off the ones digit and n / 10 removes it. Repeating this pattern lets you walk through a number one digit at a time." }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Break 137 seconds into minutes and seconds.",
+          "steps": [
+            "Minutes is the whole part: 137 / 60 is 2 (integer division).",
+            "Seconds is the leftover: 137 % 60 is 17.",
+            "Check: 2 minutes times 60 plus 17 equals 137."
+          ],
+          "output": "2 minutes and 17 seconds"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "n % 2 == 0 is true exactly when n is even.", "correct_answer": "true", "explanation": "An even number leaves no remainder when divided by 2." },
+            { "type": "fill_in", "question": "What is 23 % 10?", "correct_answer": "3", "explanation": "23 divided by 10 leaves a remainder of 3, the last digit." }
+          ]
+        }
+      ],
       "challenge_title": "Split Into Tens and Ones",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: read an int n (0..99), print tens digit then ones digit on separate lines\n    }\n}\n",
@@ -450,6 +631,42 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Without parentheses, only b would be divided by 2.0 due to precedence; the parentheses force the sum first."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Reducing an expression by precedence",
+          "caption": "Repeatedly apply the highest-precedence operator, leftmost on ties, until one value remains.",
+          "loop": true,
+          "nodes": [
+            { "label": "4 + 6 / 2 * 3 - 1", "sub": "the full expression", "detail": "Scan for the highest-precedence operator that is furthest left." },
+            { "label": "6 / 2 -> 3", "sub": "multiplicative first", "detail": "Division and multiplication outrank + and -, and / is leftmost, so do it first." },
+            { "label": "3 * 3 -> 9", "sub": "still multiplicative", "detail": "The remaining * is next, giving 4 + 9 - 1." },
+            { "label": "4 + 9 - 1 -> 12", "sub": "additive, left to right", "detail": "Now only + and - remain; evaluate left to right to get 12." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Parentheses remove all doubt", "content": "Even when not required, wrapping (a + b + c) before dividing makes your intent obvious and prevents the classic bug where only the last value gets divided." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing 4 + 6 / 2 * 3 - 1",
+          "steps": [
+            { "label": "6 / 2", "detail": "Highest precedence, leftmost. Result 3.", "code": "4 + 3 * 3 - 1" },
+            { "label": "3 * 3", "detail": "Next multiplicative operator. Result 9.", "code": "4 + 9 - 1" },
+            { "label": "4 + 9", "detail": "Additive, left to right. Result 13.", "code": "13 - 1" },
+            { "label": "13 - 1", "detail": "Final subtraction gives 12.", "code": "12" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In 2 + 3 * 4, the multiplication happens before the addition.", "correct_answer": "true", "explanation": "* has higher precedence than +, so 3 * 4 is computed first." },
+            { "type": "fill_in", "question": "For operators of equal precedence, Java evaluates in which left-right direction? (one word)", "correct_answer": "left", "explanation": "Java arithmetic uses left-to-right associativity." }
+          ]
         }
       ],
       "challenge_title": "Evaluate the Expression",
@@ -528,6 +745,41 @@ export default {
           "explanation": "2.9 + 0.5 is 3.4, and casting to int truncates to 3, this is the round-half-up trick for positive values."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Casting to force double division",
+          "caption": "A cast binds tighter than /, so it changes one operand before the division runs.",
+          "loop": false,
+          "nodes": [
+            { "label": "total = 7, count = 2", "sub": "both ints", "detail": "Without a cast, total / count would truncate to 3." },
+            { "label": "(double) total", "sub": "cast binds first", "detail": "The cast applies to total alone, turning 7 into 7.0." },
+            { "label": "7.0 / count", "sub": "now double division", "detail": "One double operand promotes the whole division to keep the fraction." },
+            { "label": "Result 3.5", "sub": "no truncation", "detail": "The fraction survives because the cast happened before the divide." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Cast binds tighter than /", "content": "(double) total / count casts total first, giving 3.5. But (double)(total / count) divides first as ints, truncates to 3, then widens to 3.0. The parentheses placement matters." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing (double) total / count with total 7, count 2",
+          "steps": [
+            { "label": "Apply the cast", "detail": "The cast binds tighter than /, so it acts on total first, making 7.0.", "code": "(double) total -> 7.0" },
+            { "label": "Divide", "detail": "7.0 / 2 is double division because one operand is a double.", "code": "7.0 / 2 -> 3.5" },
+            { "label": "Compare the trap", "detail": "(double)(7 / 2) would truncate to 3 first, then widen to 3.0.", "code": "(double)(7 / 2) -> 3.0" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "(int) 7.89 evaluates to 8.", "correct_answer": "false", "explanation": "Casting a double to int truncates, so the result is 7, not a rounded 8." },
+            { "type": "fill_in", "question": "Converting a double to an int is a narrowing conversion that requires an explicit what?", "correct_answer": "cast", "explanation": "A narrowing conversion needs an explicit cast because it can lose information." }
+          ]
+        }
+      ],
       "challenge_title": "Percentage Score",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: read ints earned and total, print the percentage as a double (earned/total*100)\n    }\n}\n",
@@ -602,6 +854,41 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "n *= 2 makes n = 10, then n -= 3 makes n = 7."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Accumulating a running total",
+          "caption": "Each += reads the current value, adds the next number, and stores it back, over and over.",
+          "loop": true,
+          "nodes": [
+            { "label": "total = 0", "sub": "start empty", "detail": "The accumulator begins at zero before any values arrive." },
+            { "label": "total += 1", "sub": "now 1", "detail": "Read 0, add 1, store 1 back into total." },
+            { "label": "total += 2", "sub": "now 3", "detail": "Read 1, add 2, store 3 back into total." },
+            { "label": "total += 3", "sub": "now 6", "detail": "The same read-add-store step repeats for each new value." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Compound operators inherit int division", "content": "x /= 5 means x = x / 5, so if x is an int it still truncates. int x = 8; x /= 3; leaves x as 2, not 2.67." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing int n = 5; n *= 2; n -= 3;",
+          "steps": [
+            { "label": "n = 5", "detail": "The variable starts at 5.", "code": "int n = 5;" },
+            { "label": "n *= 2", "detail": "Same as n = n * 2, so n becomes 10.", "code": "n = 10" },
+            { "label": "n -= 3", "detail": "Same as n = n - 3, so n becomes 7.", "code": "n = 7" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "x += 5 is equivalent to x = x + 5.", "correct_answer": "true", "explanation": "Compound assignment expands to reading, operating, and storing back." },
+            { "type": "fill_in", "question": "Which operator adds exactly 1 to a variable? (write the two-character operator)", "correct_answer": "++", "explanation": "x++ increments x by 1, the same as x += 1." }
+          ]
         }
       ],
       "challenge_title": "Running Total",

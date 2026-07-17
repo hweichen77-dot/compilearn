@@ -74,6 +74,45 @@ export default {
           "explanation": "The left-arrow is the assignment operator; it places the value on the right into the variable on the left."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "How assignment flows",
+          "caption": "The right side is evaluated first, then the result is stored in the name on the left.",
+          "loop": false,
+          "nodes": [
+            { "label": "score = 0", "sub": "create box", "detail": "Make a variable named score and store the value 0 in it." },
+            { "label": "Evaluate right", "sub": "score + 10", "detail": "Read the current score (0) and compute 0 + 10, which is 10." },
+            { "label": "Store left", "sub": "score gets 10", "detail": "Write the result 10 back into score, overwriting the old value." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing x = 5 then x = x + 3",
+          "steps": [
+            { "label": "x = 5", "detail": "Store 5 in x.", "code": "x = 5" },
+            { "label": "evaluate x + 3", "detail": "Read the current x (5) and add 3 to get 8.", "code": "x + 3  # 8" },
+            { "label": "store back", "detail": "Write 8 into x, replacing the old 5.", "code": "x = 8" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "input() always returns text",
+          "content": "Forgetting int() is the most common beginner bug. \"7\" * 2 gives \"77\", not 14, because you are repeating a string instead of doing math."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In an assignment, the expression on the right is evaluated before the value is stored on the left.", "correct_answer": "true", "explanation": "Python computes the right side first, then stores it in the variable on the left." },
+            { "type": "fill_in", "question": "To turn the string \"7\" from input() into a number you use the ____() function.", "correct_answer": "int", "explanation": "int() converts a string of digits into an integer for arithmetic." }
+          ]
+        }
+      ],
       "challenge_title": "Running Total",
       "challenge_language": "python",
       "challenge_starter_code": "# Read an integer n, then read n more integers (one per line).\n# Print their sum.\n\nn = int(input())\ntotal = 0\n# TODO: loop n times, read each integer, add it to total\n\nprint(total)\n",
@@ -150,6 +189,47 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "`for v in data` is a traversal that binds v to each element in turn; adding v each pass accumulates the sum."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Traversing a list to build a total",
+          "caption": "A loop visits each element in turn and adds it to a running total.",
+          "loop": true,
+          "nodes": [
+            { "label": "total = 0", "sub": "start", "detail": "Begin with a running total of 0 before visiting any element." },
+            { "label": "s = 88", "sub": "total = 88", "detail": "The loop binds s to the first element, 88, and adds it." },
+            { "label": "s = 92", "sub": "total = 180", "detail": "s becomes the next element, 92, so total grows to 180." },
+            { "label": "s = 75", "sub": "total = 255", "detail": "Add 75, giving 255." },
+            { "label": "s = 100", "sub": "total = 355", "detail": "Add the last element, 100, for a final total of 355." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Indexing nums = [4, 8, 15, 16]",
+          "steps": [
+            { "label": "nums[0]", "detail": "Index 0 is the first element.", "code": "nums[0]  # 4" },
+            { "label": "nums[1]", "detail": "Index 1 is the second element.", "code": "nums[1]  # 8" },
+            { "label": "nums[2]", "detail": "Index 2 is the third element, since counting starts at 0.", "code": "nums[2]  # 15" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "AP pseudocode counts from 1",
+          "content": "Python lists start at index 0, but AP exam pseudocode starts at 1, so LIST[1] is the first element there. The idea is the same; only the starting number differs."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In Python, the first element of a list is at index 0.", "correct_answer": "true", "explanation": "Python lists are zero-indexed, so the first element is index 0 and the last is len(list) - 1." },
+            { "type": "fill_in", "question": "The function that returns how many elements a list holds is ____().", "correct_answer": "len", "explanation": "len(list) returns the count of elements." }
+          ]
         }
       ],
       "challenge_title": "Largest in the List",
@@ -230,6 +310,46 @@ export default {
           "explanation": "`//` is integer (floor) division, so `7 // 2` is 3. `/` gives 3.5 and `%` gives the remainder."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Evaluating 2 + 3 * 4",
+          "caption": "Precedence rules decide the order: multiplication runs before addition.",
+          "loop": false,
+          "nodes": [
+            { "label": "2 + 3 * 4", "sub": "full expression", "detail": "Two operators appear, so precedence decides which runs first." },
+            { "label": "3 * 4", "sub": "higher precedence", "detail": "Multiplication happens before addition, so compute 3 * 4 = 12." },
+            { "label": "2 + 12", "sub": "then add", "detail": "Now add 2 to the result 12." },
+            { "label": "14", "sub": "final value", "detail": "The expression evaluates to 14, not 20." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Splitting 287 cents",
+          "steps": [
+            { "label": "287 // 100", "detail": "Integer division drops the fraction, giving whole dollars.", "code": "dollars = 287 // 100  # 2" },
+            { "label": "287 % 100", "detail": "Modulo returns the remainder, the leftover cents.", "code": "leftover = 287 % 100  # 87" },
+            { "label": "print", "detail": "Report the two pieces together.", "code": "print(dollars, \"dollars and\", leftover, \"cents\")" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "tip",
+          "position": "after",
+          "title": "When unsure, add parentheses",
+          "content": "Parentheses cost nothing and make your intent obvious. (2 + 3) * 4 is 20, while 2 + 3 * 4 is 14. Spell out the order you mean."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "7 / 2 gives 3.5 while 7 // 2 gives 3.", "correct_answer": "true", "explanation": "The single slash is true division (a float); the double slash is floor division." },
+            { "type": "fill_in", "question": "The operator that returns the remainder of a division is called ____.", "correct_answer": "modulo", "explanation": "Modulo (%) gives the remainder, so 17 % 5 is 2." }
+          ]
+        }
+      ],
       "challenge_title": "Cents to Dollars",
       "challenge_language": "python",
       "challenge_starter_code": "# Read an integer: a total number of cents.\n# Print it as: <dollars> dollars and <cents> cents\n# Example: 287 -> 2 dollars and 87 cents\n\ncents = int(input())\n# TODO: use // and % to split into dollars and leftover cents, then print\n",
@@ -306,6 +426,46 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "Strings are immutable. To 'change' a string you build a new one rather than modifying it in place."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Traversing a string to count a letter",
+          "caption": "A loop visits each character in turn, and you accumulate a count as you go.",
+          "loop": true,
+          "nodes": [
+            { "label": "count = 0", "sub": "start", "detail": "Begin with a count of 0 before reading any character." },
+            { "label": "'b','n','n'", "sub": "not 'a'", "detail": "These characters of banana are not 'a', so the count stays the same." },
+            { "label": "each 'a'", "sub": "count += 1", "detail": "Every time the character is 'a', add 1 to the count." },
+            { "label": "count = 3", "sub": "done", "detail": "banana has three a's, so the final count is 3." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Indexing s = \"PYTHON\"",
+          "steps": [
+            { "label": "s[0]", "detail": "Index 0 is the first character.", "code": "s[0]  # 'P'" },
+            { "label": "s[-1]", "detail": "Negative indexes count from the end, so -1 is the last character.", "code": "s[-1]  # 'N'" },
+            { "label": "s[::-1]", "detail": "A slice with step -1 walks the string backward, reversing it.", "code": "s[::-1]  # 'NOHTYP'" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "Strings are immutable",
+          "content": "You cannot change a character in place. name[0] = \"A\" raises an error. To change a string you build a new one instead."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "\"ab\" * 3 produces \"ababab\".", "correct_answer": "true", "explanation": "The * operator repeats a string, joining the copies with no spaces." },
+            { "type": "fill_in", "question": "Joining two strings end to end with the + operator is called ____.", "correct_answer": "concatenation", "explanation": "Concatenation combines strings, so \"Ada\" + \" Lovelace\" is \"Ada Lovelace\"." }
+          ]
         }
       ],
       "challenge_title": "Reverse and Count Vowels",
@@ -386,6 +546,47 @@ export default {
           "explanation": "insert(1, 9) places 9 at index 1, shifting 2 to the right, giving [5, 9, 2]."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Filtering into a new list",
+          "caption": "Traverse the original and append only the values you want to keep.",
+          "loop": true,
+          "nodes": [
+            { "label": "kept = []", "sub": "empty result", "detail": "Start a fresh empty list to hold the values you keep." },
+            { "label": "v = 4", "sub": "skip", "detail": "The value equals the target 4, so do not append it." },
+            { "label": "v = 2", "sub": "keep", "detail": "2 is not the target, so append it to kept." },
+            { "label": "v = 1", "sub": "keep", "detail": "1 is not the target, so append it too." },
+            { "label": "kept = [2, 1]", "sub": "result", "detail": "After visiting every value, kept holds only the survivors." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing data = [5, 2]; data.insert(1, 9)",
+          "steps": [
+            { "label": "start", "detail": "The list holds 5 at index 0 and 2 at index 1.", "code": "data = [5, 2]" },
+            { "label": "insert(1, 9)", "detail": "Place 9 at index 1, shifting 2 to the right.", "code": "data.insert(1, 9)" },
+            { "label": "result", "detail": "The list is now [5, 9, 2].", "code": "# [5, 9, 2]" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "sort() returns None",
+          "content": "Never write nums = nums.sort(). sort() reorders the list in place and hands back None, so that line would replace your list with None."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Python lists are mutable, so you can change them in place after creating them.", "correct_answer": "true", "explanation": "Unlike strings, lists can be modified in place with methods like append and sort." },
+            { "type": "fill_in", "question": "The list method that adds a single element to the end of a list is ____.", "correct_answer": "append", "explanation": "append(x) adds x to the end, the most common list operation." }
+          ]
+        }
+      ],
       "challenge_title": "Remove All Occurrences",
       "challenge_language": "python",
       "challenge_starter_code": "# First line: an integer n.\n# Second line: n space-separated integers.\n# Third line: a target integer.\n# Print the list with EVERY occurrence of the target removed,\n# as a space-separated line (print an empty line if nothing remains).\n\nn = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n# TODO: build a new list without the target and print it space-separated\n",
@@ -462,6 +663,46 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "Arguments are matched by position, so area(5, 2) sets w=5 and h=2."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How a call passes data in",
+          "caption": "The argument at the call is copied into the parameter, then the body runs with it.",
+          "loop": false,
+          "nodes": [
+            { "label": "square(5)", "sub": "the call", "detail": "You call square with the argument 5." },
+            { "label": "num = 5", "sub": "copy in", "detail": "The argument 5 is copied into the parameter num for this call." },
+            { "label": "num * num", "sub": "run body", "detail": "The body computes 5 * 5 using num." },
+            { "label": "prints 25", "sub": "result", "detail": "The procedure prints 25, its output for this argument." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Calling rectangle_area(3, 4)",
+          "steps": [
+            { "label": "match by position", "detail": "The first argument fills the first parameter.", "code": "width = 3" },
+            { "label": "second parameter", "detail": "The second argument fills the second parameter.", "code": "height = 4" },
+            { "label": "run body", "detail": "Compute width * height with those values.", "code": "print(3 * 4)  # 12" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "Same code, different behavior",
+          "content": "One procedure serves many cases because the arguments change what it works on. square(5) prints 25 and square(9) prints 81 from the exact same three lines."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Arguments are matched to parameters by position, so the first argument fills the first parameter.", "correct_answer": "true", "explanation": "Positional arguments fill parameters left to right." },
+            { "type": "fill_in", "question": "The named placeholder listed in a procedure's definition is called a ____.", "correct_answer": "parameter", "explanation": "A parameter is the placeholder; the value passed at the call is the argument." }
+          ]
         }
       ],
       "challenge_title": "Rectangle Stats",
@@ -542,6 +783,50 @@ export default {
           "explanation": "return ends the procedure at once; any code after it in the procedure is skipped."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "What return does",
+          "caption": "return hands a value back so the call expression becomes that value.",
+          "loop": false,
+          "nodes": [
+            { "label": "square(6)", "sub": "the call", "detail": "You call square with the argument 6." },
+            { "label": "return 36", "sub": "hand back", "detail": "The body computes 6 * 6 and returns 36, ending the procedure at once." },
+            { "label": "result = 36", "sub": "becomes value", "detail": "The call square(6) becomes 36, which is stored in result." },
+            { "label": "result + 4", "sub": "keep computing", "detail": "Because you got the value back, you can keep working: 36 + 4 = 40." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing max_of_three(3, 9, 5)",
+          "steps": [
+            { "label": "largest = a", "detail": "Start by assuming the first value, 3, is largest.", "code": "largest = 3" },
+            { "label": "check b", "detail": "9 > 3 is True, so update largest to 9.", "code": "largest = 9" },
+            { "label": "check c", "detail": "5 > 9 is False, so largest stays 9.", "code": "# largest still 9" },
+            { "label": "return", "detail": "Hand back the largest value.", "code": "return 9" }
+          ]
+        }
+      ],
+      "comparison_tables": [
+        {
+          "title": "return vs print",
+          "columns": ["Aspect", "return x", "print(x)"],
+          "rows": [
+            ["What it does", "Hands x back to the program", "Shows x on the screen"],
+            ["Can you reuse the value?", "Yes, store or compute with it", "No, it is gone after display"],
+            ["Value of the call", "Becomes x", "Becomes None"]
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A procedure with no return statement hands back the value None.", "correct_answer": "true", "explanation": "Without an explicit return, Python returns None." },
+            { "type": "fill_in", "question": "The statement that ends a procedure and sends a value back to the caller is the ____ statement.", "correct_answer": "return", "explanation": "return ends the procedure immediately and passes a value back." }
+          ]
+        }
+      ],
       "challenge_title": "Max of Three",
       "challenge_language": "python",
       "challenge_starter_code": "# Read one line with three space-separated integers.\n# Use a procedure that RETURNS the largest of three numbers, then print it.\n# Do not use the built-in max().\n\ndef max_of_three(a, b, c):\n    # TODO: return the largest of a, b, c\n    pass\n\na, b, c = map(int, input().split())\nprint(max_of_three(a, b, c))\n",
@@ -618,6 +903,36 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "Local variables are private to their procedure, so two same-named locals never interfere."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "The life of a local variable",
+          "caption": "A variable made inside a procedure is born at the call and gone when it ends.",
+          "loop": true,
+          "nodes": [
+            { "label": "call add_tax", "sub": "scope opens", "detail": "Calling the procedure creates a fresh private scope for this call." },
+            { "label": "rate = 0.10", "sub": "local born", "detail": "rate is created inside the procedure and only exists here." },
+            { "label": "return result", "detail": "The procedure computes its answer and hands it back.", "sub": "hand back" },
+            { "label": "scope closes", "sub": "local gone", "detail": "When the call ends, rate disappears. Outside code cannot see it." }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "Isolation makes abstraction safe",
+          "content": "Because a procedure's locals stay private, two procedures can both use a variable named total without interfering. That is what lets you build big programs from small independent pieces."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A variable created inside a procedure can be read by code outside that procedure.", "correct_answer": "false", "explanation": "Local variables exist only inside their procedure during its call; outside code cannot see them." },
+            { "type": "fill_in", "question": "The region of a program where a variable name is valid and accessible is called its ____.", "correct_answer": "scope", "explanation": "Scope is the region where a name is valid, either local or global." }
+          ]
         }
       ],
       "challenge_title": "Countdown Procedure",

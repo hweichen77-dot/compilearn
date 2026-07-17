@@ -72,6 +72,36 @@ export default {
           "explanation": "A shared interface contract defines what data flows in and out, so members can build pieces independently."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "The pair programming cycle",
+          "caption": "Two developers share one screen and trade roles so both learn the whole program.",
+          "loop": true,
+          "nodes": [
+            { "label": "Driver types", "sub": "writes code", "detail": "One person controls the keyboard and turns the current idea into actual code." },
+            { "label": "Navigator reviews", "sub": "thinks ahead", "detail": "The other person watches for bugs, edge cases, and the next step to take." },
+            { "label": "Discuss", "sub": "talk it out", "detail": "They agree on the approach out loud before committing to it." },
+            { "label": "Swap roles", "sub": "trade seats", "detail": "They switch driver and navigator so knowledge spreads across both people." }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "tip",
+          "position": "after",
+          "title": "Agree on the contract first",
+          "content": "Before splitting work, write down what data goes in and what comes out. Then two people can build their halves at the same time without stepping on each other."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In pair programming, the driver and navigator keep the same roles for the entire session.", "correct_answer": "false", "explanation": "They swap roles regularly so both developers understand the whole program." },
+            { "type": "fill_in", "question": "An agreement about what input a piece of code receives and what output it produces is called an interface ____.", "correct_answer": "contract", "explanation": "An interface contract lets teammates build parts in parallel." }
+          ]
+        }
+      ],
       "challenge_title": "Team Contribution Total",
       "challenge_language": "python",
       "challenge_starter_code": "# Read a line of space-separated integers (each teammate's count).\n# Print the team total.\nline = input()\n# TODO: split, convert to ints, sum, and print the total\n",
@@ -146,6 +176,50 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "Design defines what the program takes in, what it produces, and the steps in between."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "From need to working code",
+          "caption": "Good software moves from understanding the problem to a plan and only then to code.",
+          "loop": false,
+          "nodes": [
+            { "label": "Investigate", "sub": "study the need", "detail": "Talk to users, find constraints, and figure out what problem you are really solving." },
+            { "label": "Requirements", "sub": "testable goals", "detail": "Write clear statements the finished program must satisfy, like the exact output expected." },
+            { "label": "Design", "sub": "plan I/O + steps", "detail": "Decide the inputs, the outputs, and the plain-language steps that connect them." },
+            { "label": "Code", "sub": "carry out plan", "detail": "Translate the design into Python, using the plan as a guide." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Design first, then trace it: find the largest value in the input \"3 5 2\".",
+          "steps": [
+            "Design in plain words: read the numbers, track the biggest so far, print it at the end.",
+            "Start: largest = 3 (the first value).",
+            "Next value 5: since 5 > 3, update largest to 5.",
+            "Next value 2: since 2 is not greater than 5, leave largest as 5.",
+            "No more values, so print largest."
+          ],
+          "output": "5"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "The comment records intent",
+          "content": "Writing the design as a short comment before the loop keeps the plan and the code side by side, so anyone reading it sees what you meant to do."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "You should start coding before investigating the problem so you save time.", "correct_answer": "false", "explanation": "Skipping investigation risks building a program that works but solves the wrong problem." },
+            { "type": "fill_in", "question": "A clear, testable statement of what the finished program must do is called a ____.", "correct_answer": "requirement", "explanation": "Requirements are the goals the design and code must satisfy." }
+          ]
         }
       ],
       "challenge_title": "Largest Contribution",
@@ -224,6 +298,36 @@ export default {
           "explanation": "Small increments are checked individually, so errors surface early when they are easy to fix."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "The iterative development loop",
+          "caption": "The four phases repeat, with feedback from each cycle guiding the next.",
+          "loop": true,
+          "nodes": [
+            { "label": "Investigate", "sub": "understand", "detail": "Revisit the problem and the users with what you learned in the last cycle." },
+            { "label": "Design", "sub": "plan a step", "detail": "Plan the small piece of functionality you will add this time." },
+            { "label": "Prototype", "sub": "build a bit", "detail": "Add just that increment of working code, nothing more." },
+            { "label": "Test", "sub": "check it", "detail": "Confirm the new piece works before starting the next loop, so mistakes stay small." }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "analogy",
+          "position": "after",
+          "title": "Build it like climbing stairs",
+          "content": "Add one step, make sure it holds your weight, then add the next. If a step is weak you find out right away, not at the top."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Iterative development means you cycle through the phases more than once.", "correct_answer": "true", "explanation": "Iterative means repeating the phases to refine the program, rather than doing them once." },
+            { "type": "fill_in", "question": "Adding functionality a little at a time and checking each piece is called ____ development.", "correct_answer": "incremental", "explanation": "Incremental development adds small pieces step by step." }
+          ]
+        }
+      ],
       "challenge_title": "Sum of Even Numbers",
       "challenge_language": "python",
       "challenge_starter_code": "# Read a line of space-separated integers.\n# Print the sum of only the even numbers.\nparts = input().split()\n# TODO: add up values that are even and print the total\n",
@@ -298,6 +402,36 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "An MVP is the smallest version that still does something useful and can collect real feedback."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How a prototype grows",
+          "caption": "A small first version collects feedback that drives each next version.",
+          "loop": true,
+          "nodes": [
+            { "label": "Build MVP", "sub": "smallest useful", "detail": "Make the smallest version that does something real, like a flat discount only." },
+            { "label": "Show users", "sub": "get reactions", "detail": "Put the partial version in front of real users to see what they think." },
+            { "label": "Gather feedback", "sub": "learn cheaply", "detail": "Collect what works and what fails while changes are still inexpensive." },
+            { "label": "Iterate", "sub": "add features", "detail": "Feed the feedback into the next increment, growing toward the full program." }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "Knowing the limits is the point",
+          "content": "A prototype leaves things out on purpose. Being clear about what it does not do yet is part of using it well."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A prototype must include every planned feature before you show it to anyone.", "correct_answer": "false", "explanation": "A prototype is intentionally partial. Its goal is learning, not completeness." },
+            { "type": "fill_in", "question": "The smallest version of a program that still does something useful is called the minimum viable ____.", "correct_answer": "product", "explanation": "The minimum viable product (MVP) is the smallest useful version you can show users." }
+          ]
         }
       ],
       "challenge_title": "Discount Prototype",
@@ -376,6 +510,46 @@ export default {
           "explanation": "Covering typical, boundary, and unusual inputs exposes the widest range of possible errors."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "How one test case runs",
+          "caption": "Testing compares what the program actually produced against what you expected.",
+          "loop": false,
+          "nodes": [
+            { "label": "Pick input", "sub": "known answer", "detail": "Choose an input whose correct output you already know." },
+            { "label": "Run program", "sub": "produce output", "detail": "Feed the input in and capture what the program actually prints." },
+            { "label": "Compare", "sub": "actual vs expected", "detail": "Check the actual output against the expected output." },
+            { "label": "Pass or fail", "sub": "verdict", "detail": "Matching means pass. Differing means fail, which points you at a bug." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Testing the boundary value 60",
+          "steps": [
+            { "label": "input 60", "detail": "The rule says pass at 60 or above, so 60 should print PASS.", "code": "score = 60" },
+            { "label": "check score >= 60", "detail": "60 >= 60 is True, so we take the PASS branch.", "code": "if score >= 60:" },
+            { "label": "output", "detail": "Prints PASS. If someone had written > instead of >=, this test would wrongly print FAIL and catch the bug.", "code": "print(\"PASS\")" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "tip",
+          "position": "after",
+          "title": "Always test the boundary",
+          "content": "Off-by-one mistakes hide exactly at the edge. Testing the value right on the boundary catches a stray > that should have been >=."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A single typical test case is enough to be confident a program is correct.", "correct_answer": "false", "explanation": "Good coverage needs typical, boundary, and unusual cases, not just one value." },
+            { "type": "fill_in", "question": "A test at the edge of allowed values, where off-by-one errors hide, is called a ____ case.", "correct_answer": "boundary", "explanation": "Boundary cases catch common off-by-one logic errors." }
+          ]
+        }
+      ],
       "challenge_title": "Pass or Fail",
       "challenge_language": "python",
       "challenge_starter_code": "# Read an integer score.\n# Print PASS if the score is at least 60, otherwise print FAIL.\nscore = int(input())\n# TODO: print PASS or FAIL based on the boundary of 60\n",
@@ -450,6 +624,47 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Logic errors give no crash or message; the program runs but returns wrong results, so testing is needed to expose them."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Classifying an error",
+          "caption": "Where a program breaks tells you which of the three error types you have.",
+          "loop": false,
+          "nodes": [
+            { "label": "Does it run?", "sub": "syntax check", "detail": "If the code breaks the language rules it will not run at all. That is a syntax error." },
+            { "label": "Does it crash?", "sub": "runtime check", "detail": "If it starts but crashes midway, like dividing by zero, that is a runtime error." },
+            { "label": "Right answer?", "sub": "logic check", "detail": "If it runs and finishes but the result is wrong, that is a logic error." },
+            { "label": "Fix and retest", "sub": "confirm", "detail": "Correct the cause and run your known-answer tests again to confirm the fix." }
+          ]
+        }
+      ],
+      "step_throughs": [
+        {
+          "title": "Spotting a logic error in a sum loop",
+          "steps": [
+            { "label": "nums = [4, 6]", "detail": "We expect the total to be 10.", "code": "total = 0" },
+            { "label": "first pass n = 4", "detail": "The buggy line overwrites total instead of adding, so total becomes 4.", "code": "total = n" },
+            { "label": "second pass n = 6", "detail": "total is overwritten again, becoming 6, losing the 4.", "code": "total = n" },
+            { "label": "output 6", "detail": "It runs with no crash but prints 6, not 10. The fix is total += n.", "code": "print(total)" }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "Logic errors stay silent",
+          "content": "A logic error gives no crash and no message. The program looks fine and just returns the wrong answer, so only a known-answer test reveals it."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A syntax error stops a program from running at all.", "correct_answer": "true", "explanation": "Syntax errors break the language rules, so the program cannot run until fixed." },
+            { "type": "fill_in", "question": "A program that runs without crashing but prints the wrong result has a ____ error.", "correct_answer": "logic", "explanation": "Logic errors come from flawed reasoning and only testing reveals them." }
+          ]
         }
       ],
       "challenge_title": "Count Positive Numbers",
@@ -528,6 +743,50 @@ export default {
           "explanation": "Documentation describes the purpose and reasoning behind code so others can understand and maintain it."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "The debugging loop",
+          "caption": "Once you know a bug exists, you locate it, fix it, and confirm with a test.",
+          "loop": true,
+          "nodes": [
+            { "label": "Reproduce", "sub": "make it fail", "detail": "Find an input that triggers the wrong behavior every time." },
+            { "label": "Inspect", "sub": "print values", "detail": "Add print statements or check boundary cases to see the real values flowing through." },
+            { "label": "Locate", "sub": "find the line", "detail": "Read the error message or compare values to pinpoint the failing line." },
+            { "label": "Fix and retest", "sub": "confirm", "detail": "Correct the cause and rerun the known-answer test to be sure it passes now." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Trace the safe average on empty input, then on \"4 6\".",
+          "steps": [
+            "Empty input: parts = [] so len(parts) is 0.",
+            "The guard len(parts) == 0 is True, so print 0 instead of dividing. No crash.",
+            "Input \"4 6\": parts = ['4', '6'], len is 2, so the else branch runs.",
+            "total = 4 + 6 = 10, then 10 // 2 = 5.",
+            "Prints 5."
+          ],
+          "output": "0 for empty input, 5 for \"4 6\""
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "A stale comment lies",
+          "content": "A comment that no longer matches the code is worse than none, because it misleads the next reader. Update comments whenever the code changes."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Good documentation should explain why the code does something, not just restate the obvious.", "correct_answer": "true", "explanation": "Comments that capture intent help readers far more than ones repeating what the code plainly says." },
+            { "type": "fill_in", "question": "A check that handles unusual input like an empty line to prevent a crash is called an input ____.", "correct_answer": "guard", "explanation": "An input guard turns a potential runtime error into sensible behavior." }
+          ]
+        }
+      ],
       "challenge_title": "Safe Average",
       "challenge_language": "python",
       "challenge_starter_code": "# Read a line of space-separated integers (the line may be empty).\n# Print the integer average using floor division.\n# If the line is empty, print 0 (guard against dividing by zero).\nline = input()\nparts = line.split()\n# TODO: handle the empty case, then print the floor-division average\n",
@@ -602,6 +861,49 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Programs typically take input, process it into a result, and produce output."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Input, process, output",
+          "caption": "Most programs receive input, transform it, and produce an output that fulfills their purpose.",
+          "loop": false,
+          "nodes": [
+            { "label": "Input", "sub": "receive data", "detail": "Take in data from a user, file, or sensor, such as the list of scores." },
+            { "label": "Process", "sub": "apply logic", "detail": "Transform the input into a result, like computing the class average." },
+            { "label": "Output", "sub": "return result", "detail": "Produce what the user needs, such as the average and a pass or fail line." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Trace the grade reporter on the scores \"50 40 30\".",
+          "steps": [
+            "Input: parts = ['50', '40', '30'].",
+            "Process: total = 50 + 40 + 30 = 120.",
+            "average = 120 // 3 = 40.",
+            "Print 40 on the first line.",
+            "Since 40 >= 60 is False, print FAIL on the second line."
+          ],
+          "output": "40\nFAIL"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "Every phase shows up here",
+          "content": "This final program folds in everything: a clear purpose, an input-process-output design, a boundary you can test, and a guardable average. That is creative development in one place."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A program functions correctly only when its outputs match requirements across typical, boundary, and unusual inputs.", "correct_answer": "true", "explanation": "Correctness is judged across the full range of expected inputs, not just one case." },
+            { "type": "fill_in", "question": "The problem a program solves or the value it provides to users is its ____.", "correct_answer": "purpose", "explanation": "Functionality is the input-process-output behavior that fulfills the program's purpose." }
+          ]
         }
       ],
       "challenge_title": "Grade Reporter",

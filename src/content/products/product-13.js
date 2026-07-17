@@ -82,6 +82,39 @@ If the file is actually a PNG but you label it \`image/jpeg\`, decoding can fail
 ## What to hold onto
 
 There is no special "vision endpoint" here. It's the message-list shape you already know, with one block that happens to be a photo instead of a sentence. The send-and-parse loop around it works exactly as it did for text.`,
+    animated_diagrams: [
+      {
+        title: "How a photo reaches the model",
+        caption: "A picture rides inside the same messages list you already use for text.",
+        loop: false,
+        nodes: [
+          { label: "Photo file", sub: "receipt.jpg", detail: "You start with raw image bytes on disk, which JSON cannot carry directly." },
+          { label: "Base64", sub: "bytes to text", detail: "Encoding turns those bytes into a long plain-text string that fits in a JSON field." },
+          { label: "Image block", sub: "type + source", detail: "The base64 string goes into a content block tagged type image, with its media_type." },
+          { label: "Messages", sub: "user turn", detail: "The image block and a text block sit together in one user message's content list." },
+          { label: "Model", sub: "reads + replies", detail: "The API receives the same shape as a text chat, and the model reads the picture." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Content block", definition: "One typed item inside a message's content list, such as an image block or a text block." },
+      { term: "Base64", definition: "A way to write raw bytes as plain text so they can travel inside a JSON string." },
+      { term: "media_type", definition: "The MIME label you attach to image bytes, like image/jpeg, so the API decodes them correctly." },
+    ],
+    inline_quizzes: [
+      {
+        question: "In a multimodal message, what type is the content field?",
+        options: ["A single string", "A list of typed blocks", "A base64 string", "A file path"],
+        correct_index: 1,
+        explanation: "Text-only messages use a plain string, but a message with an image uses a list of blocks, each carrying its own type.",
+      },
+      {
+        question: "Why must media_type match the real image format?",
+        options: ["It changes the price", "Nothing sniffs the real bytes, so a wrong label can break decoding", "It picks the model", "It sets the resolution"],
+        correct_index: 1,
+        explanation: "You are declaring what the bytes are. Label a PNG as image/jpeg and decoding can fail or the model can misread the picture.",
+      },
+    ],
     starter_code: `def build_image_message(image_b64, media_type, question):
     # TODO: return a messages list with one user turn whose "content" is
     # a list containing an image block first, then a text block with
@@ -251,6 +284,45 @@ missing = [k for k in required if k not in data]
 ## What to hold onto
 
 Treat the model's reply as an envelope, not the package itself. There might be a sticky note stuck to it or a rubber band around it. Your job is to find the package inside (the JSON object), open it, and check nothing is missing before you use what's in there.`,
+    animated_diagrams: [
+      {
+        title: "Pulling JSON out of a chatty reply",
+        caption: "Slice from the first brace to the last, then parse only that piece.",
+        loop: false,
+        nodes: [
+          { label: "Model reply", sub: "prose + JSON", detail: "The text often wraps the JSON in a greeting or a code fence you did not ask for." },
+          { label: "Find first {", sub: "index", detail: "text.index('{') marks where the JSON object starts, dropping any lead-in text." },
+          { label: "Find last }", sub: "rindex", detail: "text.rindex('}') marks where it ends, ignoring any trailing chatter." },
+          { label: "json.loads", sub: "slice to dict", detail: "Parsing just that slice turns the JSON text into a real Python dict." },
+          { label: "Check keys", sub: "required present", detail: "Confirm every required key showed up before trusting the data." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Schema", definition: "The exact set of keys and value formats you tell the model to return." },
+      { term: "json.loads", definition: "The function that parses a JSON string into a Python dict or list." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Extract the JSON object from: Here you go: {\"merchant\": \"Cafe Luna\", \"total\": 12.5} thanks!",
+        steps: [
+          "text.index('{') finds the first brace at the start of the object.",
+          "text.rindex('}') finds the last brace, so the trailing 'thanks!' is dropped.",
+          "Slice text[start:end] to get just the {\"merchant\": ..., \"total\": ...} part.",
+          "json.loads on that slice returns a dict.",
+        ],
+        output: "{'merchant': 'Cafe Luna', 'total': 12.5}",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why use rindex to find the LAST closing brace instead of the first?",
+        options: ["It is faster", "Nested JSON has inner braces, so the object ends at the last one", "index does not exist", "To skip whitespace"],
+        correct_index: 1,
+        explanation: "Once line items add nested objects, the receipt's JSON contains its own braces. The last closing brace is where the whole object really ends.",
+      },
+    ],
     starter_code: `import json
 
 RAW_REPLY = 'Sure thing! Here is what I found on the receipt: {"merchant": "Cafe Luna", "date": "2026-07-01", "total": 12.5} Let me know if you need anything else.'
@@ -421,6 +493,45 @@ Once you know which items are valid and which aren't, you get to choose. Drop th
 ## What to hold onto
 
 A flat field is there or it isn't. A list of objects is a stack of independent verdicts, some passing and some failing. Your validator sorts them into two piles. It doesn't hand down one ruling for the entire receipt.`,
+    animated_diagrams: [
+      {
+        title: "Sorting line items into two piles",
+        caption: "Each item gets its own verdict, not one ruling for the whole list.",
+        loop: true,
+        nodes: [
+          { label: "Items list", sub: "from JSON", detail: "The parsed receipt hands you a variable-length list of item objects." },
+          { label: "Take one item", sub: "loop", detail: "Walk the list one entry at a time, checking each on its own." },
+          { label: "Run 3 checks", sub: "name/qty/price", detail: "Name is a non-empty string, quantity a positive int, price a number zero or more." },
+          { label: "Valid pile", sub: "keep", detail: "Entries that pass all three checks go into the list you keep." },
+          { label: "Invalid indexes", sub: "flag", detail: "Entries that fail have their index recorded for a human to review." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Nested schema", definition: "A schema where a field is itself a list of objects, each with its own required fields." },
+      { term: "isinstance", definition: "A Python check that asks whether a value is of a given type, like str or int." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Is {\"name\": \"Latte\", \"quantity\": True, \"price\": 4.5} a valid item?",
+        steps: [
+          "name is 'Latte', a non-empty string, so that check passes.",
+          "quantity is True, and isinstance(True, int) is True because bool subclasses int in Python.",
+          "But the extra not isinstance(quantity, bool) check catches it and fails.",
+          "The item is invalid, so its index gets recorded.",
+        ],
+        output: "invalid (quantity was a bool, not a real integer)",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why add 'not isinstance(x, bool)' when checking quantity?",
+        options: ["Bools are slow", "In Python bool subclasses int, so True passes an int check", "To reject zero", "It is required syntax"],
+        correct_index: 1,
+        explanation: "True and False quietly pass isinstance(x, int). Without the extra check, a stray True slides through as a quantity of 1.",
+      },
+    ],
     starter_code: `def validate_items(items):
     valid = []
     invalid = []
@@ -605,6 +716,45 @@ This one arithmetic check catches a large share of misreads for almost no extra 
 ## What to hold onto
 
 Trust, but verify with a calculator. The model read the receipt. A few lines of arithmetic check that reading against itself before you write anything down as fact.`,
+    animated_diagrams: [
+      {
+        title: "Checking the arithmetic",
+        caption: "The receipt's own numbers should agree with each other within a cent.",
+        loop: false,
+        nodes: [
+          { label: "Line items", sub: "price x qty", detail: "Multiply each item's price by its quantity so two lattes count as two." },
+          { label: "Sum items", sub: "items_sum", detail: "Add those products into one number, the expected subtotal." },
+          { label: "Compare subtotal", sub: "within tolerance", detail: "abs(items_sum - subtotal) <= tolerance instead of an exact equals." },
+          { label: "Compare total", sub: "sub + tax", detail: "Check that subtotal plus tax lands within a cent of the printed total." },
+          { label: "Verdict", sub: "ok or flag", detail: "Any mismatch marks the receipt needs_review and names which check failed." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Tolerance", definition: "A small allowed gap so near-equal floats count as matching instead of demanding exact equality." },
+      { term: "Floating-point error", definition: "Tiny inaccuracies from storing decimals in binary, which is why 0.1 + 0.2 is not exactly 0.3." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "items: 2 lattes at 4.5, subtotal 9.0, tax 0.5, total 9.5. Does it reconcile?",
+        steps: [
+          "items_sum = 4.5 * 2 = 9.0.",
+          "abs(9.0 - 9.0) = 0.0, within the 0.01 tolerance, so subtotal is OK.",
+          "subtotal + tax = 9.0 + 0.5 = 9.5.",
+          "abs(9.5 - 9.5) = 0.0, within tolerance, so total is OK.",
+        ],
+        output: "both checks pass, the receipt reconciles",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why compare money with abs(a - b) <= tolerance instead of a == b?",
+        options: ["== is deprecated", "Floats and cent rounding make exact equality unreliable", "abs is faster", "Tolerance rejects negatives"],
+        correct_index: 1,
+        explanation: "Binary floats cannot store every decimal exactly, and receipts round to the cent. A tolerance lets near-equal values match.",
+      },
+    ],
     starter_code: `def check_totals(items, subtotal, tax, total, tolerance=0.01):
     items_sum = sum(item["price"] * item["quantity"] for item in items)
     # TODO: compute whether items_sum matches subtotal within \`tolerance\`,
@@ -752,6 +902,45 @@ Normalize right after you extract the JSON and before you run last lesson's tota
 ## What to hold onto
 
 The model reads a receipt the way a person would, in whatever format the paper happens to print. Your code speaks exactly one dialect: floats for money, ISO strings for dates. Normalization is the translator sitting between how the model wrote it and how your program needs it.`,
+    animated_diagrams: [
+      {
+        title: "Normalizing a currency string",
+        caption: "One messy string becomes one predictable float, or None if it cannot.",
+        loop: false,
+        nodes: [
+          { label: "Raw value", sub: "$1,234.56", detail: "The model returns money in whatever shape the receipt printed it." },
+          { label: "Strip symbol", sub: "leading $", detail: "Remove one currency symbol anchored to the front of the string." },
+          { label: "Drop commas", sub: "thousands", detail: "Replace commas so 1,234.56 becomes 1234.56, which float can read." },
+          { label: "float()", sub: "convert", detail: "Convert the cleaned string to a real number for math and storage." },
+          { label: "float or None", sub: "safe result", detail: "If conversion fails, return None to flag the field instead of crashing." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Normalization", definition: "Rewriting varied inputs into one consistent type and format your code can rely on." },
+      { term: "strptime", definition: "A datetime function that parses a date string according to a format you supply." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "normalize_date(\"Jan 5, 2026\") trying formats %m/%d/%Y, then %Y-%m-%d, then %b %d, %Y",
+        steps: [
+          "Try %m/%d/%Y: 'Jan 5, 2026' does not match, strptime raises, move on.",
+          "Try %Y-%m-%d: still no match, move on.",
+          "Try %b %d, %Y: %b matches 'Jan', so parsing succeeds.",
+          "strftime('%Y-%m-%d') rewrites it into one consistent output.",
+        ],
+        output: "2026-01-05",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "What does normalize_amount return when the value cannot be parsed?",
+        options: ["0.0", "An empty string", "None", "It raises an error"],
+        correct_index: 2,
+        explanation: "Returning None flags the one bad field for review instead of crashing the whole receipt.",
+      },
+    ],
     starter_code: `import re
 
 def normalize_amount(raw):
@@ -903,6 +1092,35 @@ A model allowed to say "I don't know" for one blurry field gives you far better 
 ## What to hold onto
 
 Any real system that leans on an unreliable process needs two things: a bounded retry count and a defined give-up state that downstream code can check. \`scan_receipt\` returns a receipt or returns \`None\`. There is no third outcome where it hangs or crashes. That is exactly what makes it safe to point at a whole folder of photos and walk away.`,
+    animated_diagrams: [
+      {
+        title: "Bounded retry loop",
+        caption: "Try again a few times, then give up on purpose instead of hanging.",
+        loop: true,
+        nodes: [
+          { label: "Call model", sub: "attempt n", detail: "Send the photo and ask for the JSON, one attempt at a time." },
+          { label: "Try parse", sub: "extract_json", detail: "Attempt to pull a clean JSON object out of the reply." },
+          { label: "Parsed?", sub: "yes or no", detail: "If it parsed, return the data right away and stop looping." },
+          { label: "Retry", sub: "under cap", detail: "If it failed and attempts remain, reword the ask and try once more." },
+          { label: "Give up", sub: "return None", detail: "Once the cap is hit, return None so this receipt goes to manual review." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Retry cap", definition: "A hard limit on attempts so a hopeless input cannot loop forever burning API calls." },
+      { term: "Graceful degradation", definition: "Failing in a defined, checkable way, like returning None, instead of crashing." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why does scan_receipt return None instead of raising when it gives up?",
+        options: ["None is faster", "So one bad receipt does not take down the whole batch", "To save tokens", "Raising is not allowed"],
+        correct_index: 1,
+        explanation: "None is a checkable signal meaning 'needs a human'. One doomed photo should not stop the other forty-nine.",
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Always cap retries", content: "Without max_retries, a photo that will never parse (a picture of a cat) retries forever. That is an unbounded bill, not just a slow one." },
+    ],
     starter_code: `def parse_attempt(reply):
     # A "successful" reply looks like "OK:<merchant name>".
     # A failed attempt is exactly "BAD".
@@ -1057,6 +1275,44 @@ At the end of a batch run you want two numbers: how many receipts succeeded, and
 ## What to hold onto
 
 Every image carries a price tag before the model reads a word of it, set by pixel count and not by whether the extraction eventually works. Resize before you send. Cap the retries. Count the cost of the failures next to the successes, because they land on the same bill.`,
+    animated_diagrams: [
+      {
+        title: "What one photo costs",
+        caption: "Pixel count sets the token price before the model reads a word.",
+        loop: false,
+        nodes: [
+          { label: "Photo", sub: "W x H pixels", detail: "Cost comes from pixel area, not the file size in bytes." },
+          { label: "Estimate tokens", sub: "area / 750", detail: "A rough rule: about one token per 750 pixels, rounded up." },
+          { label: "Resize?", sub: "cap longest side", detail: "Shrinking a 4000px photo to 1200px cuts the bill and keeps text readable." },
+          { label: "Batch loop", sub: "each receipt", detail: "Scan a folder, and one bad image should not stop the rest." },
+          { label: "Tally", sub: "success + cost", detail: "Report how many succeeded and the token cost across successes and failures." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Image tokens", definition: "The token cost of an image, billed by pixel area rather than file size." },
+      { term: "Batching", definition: "Processing many inputs in one run, letting failures be recorded instead of stopping everything." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Estimate tokens for a 900 x 1600 photo at one token per 750 pixels.",
+        steps: [
+          "Pixel area = 900 * 1600 = 1,440,000.",
+          "Divide by 750: 1,440,000 / 750 = 1920.",
+          "math.ceil rounds up, and here it is already a whole number.",
+        ],
+        output: "1920 tokens",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "A receipt fails after 3 retries. What did it cost?",
+        options: ["Nothing, it failed", "One call", "Three image-token charges", "Only text tokens"],
+        correct_index: 2,
+        explanation: "You pay per call whether or not it worked. Three retries on a bad photo is three image-token charges, which is why the cap matters.",
+      },
+    ],
     starter_code: `import math
 
 def estimate_image_tokens(width, height):
@@ -1252,6 +1508,40 @@ Finish this lesson and the Receipt Scanner is recorded in your **Portfolio** tab
 ## What to hold onto
 
 A shipped product isn't more code than a rough prototype. It's the same code with the gaps filled in: what happens when a call fails, when a field is missing, when the math doesn't reconcile. You already wrote all of that. Today you connected the wires.`,
+    animated_diagrams: [
+      {
+        title: "The whole scanner, end to end",
+        caption: "Every step you built, wired into one function that returns a trustworthy result.",
+        loop: false,
+        nodes: [
+          { label: "Photo", sub: "file in", detail: "Read the image and base64-encode it, as in lesson one." },
+          { label: "Model", sub: "with retries", detail: "Send it and pull JSON out, retrying on a bad reply." },
+          { label: "Normalize", sub: "clean fields", detail: "Turn messy amounts and dates into floats and ISO strings." },
+          { label: "Totals check", sub: "arithmetic", detail: "Confirm the items, subtotal, tax, and total reconcile." },
+          { label: "Result", sub: "ok or review", detail: "Return merchant, total, and a status you can actually trust." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Pipeline", definition: "A chain of steps where each one's output feeds the next, from raw input to final result." },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why does process_receipt normalize amounts BEFORE the totals check?",
+        options: ["To save tokens", "abs() on a string and a float would crash", "The model requires it", "To sort the items"],
+        correct_index: 1,
+        explanation: "The totals check does arithmetic. Feeding it '$12.00' as a string instead of the float 12.0 crashes, so clean the fields first.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Shipping this scanner mostly meant writing brand-new logic, not wiring up existing functions.", correct_answer: "false", explanation: "Shipping was assembly. Every function came from an earlier lesson." },
+          { type: "fill_in", question: "A receipt whose numbers do not reconcile is marked with what status (one word, underscore allowed)?", correct_answer: "needs_review", explanation: "needs_review flags it for a human instead of silently accepting or rejecting it." },
+        ],
+      },
+    ],
     starter_code: `import json, re
 
 def extract_json(text):

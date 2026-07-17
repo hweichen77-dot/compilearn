@@ -65,6 +65,54 @@ Prompts drift. You tweak a system prompt to fix one bad answer and quietly break
 ## The mental model to keep
 
 An eval harness is a test suite where the assertions come from comparing model output to an expected answer. The real engineering lives in the grader, not the loop. Below, wire up the loop against a stand-in for the model so you can see the whole shape before any network call enters the picture.`,
+      key_terms: [
+        { term: "Test set", definition: "A collection of inputs paired with what a correct answer looks like, used to score your AI feature the same way every run." },
+        { term: "Grader", definition: "A small function that decides pass or fail for one test case by comparing the model's output to the expected answer." },
+        { term: "Runner", definition: "The loop that sends every test case through your feature and the grader, then tallies the results." },
+      ],
+      animated_diagrams: [
+        {
+          title: "The scored loop",
+          caption: "The runner walks every case through your feature and the grader, keeping a running tally.",
+          loop: true,
+          nodes: [
+            { label: "Test case", sub: "input + expected", detail: "One case holds the input to send and what a correct answer looks like." },
+            { label: "Run feature", sub: "call the model", detail: "The runner sends the input to your AI feature and gets back an actual output." },
+            { label: "Grade it", sub: "compare to expected", detail: "The grader checks the actual output against the expected answer and returns pass or fail." },
+            { label: "Tally", sub: "count the pass", detail: "A running counter adds one for each pass, then the loop moves to the next case." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Grade case t2: input 'This is terrible.', expected 'negative', and the feature returned 'negative'.",
+          steps: [
+            "Call run_model('This is terrible.'), which returns 'negative'.",
+            "Compare actual == expected: 'negative' == 'negative' is True.",
+            "That is a pass, so add one to the running count.",
+            "Print 't2 PASS' and move on to the next case.",
+          ],
+          output: "t2 PASS, and the pass counter goes up by one.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Where does the real engineering in an eval harness live?",
+          options: ["In the runner loop", "In the grader that decides pass or fail", "In the print statements", "In the model call itself"],
+          correct_index: 1,
+          explanation: "The loop is trivial. Deciding what counts as a correct answer for a given case is the hard part, which is why later lessons are all about graders.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "An eval harness turns 'does it work?' from a feeling into a number you can watch.", correct_answer: "true", explanation: "That is the whole point: run the test set, get a score, and track it instead of trusting a hunch." },
+            { type: "fill_in", question: "The three parts of the harness are a test set, a runner, and a ____ that decides pass or fail per case.", correct_answer: "grader", explanation: "The grader is the piece that judges one case; the runner just loops and the test set just holds data." },
+          ],
+        },
+      ],
       starter_code: `# Simulated AI feature: a canned lookup standing in for a real API call.
 
 FAKE_MODEL_OUTPUTS = {
@@ -214,6 +262,54 @@ There's no universal number. A feature where mistakes are cheap, like a fun chat
 ## The mental model to keep
 
 Per-case grading tells you *what* broke. The pass rate and gate tell you *whether to ship*. Below, build both pieces in pure Python. Turn a list of results into a percentage, then turn that percentage into a pass or fail verdict against a threshold.`,
+      key_terms: [
+        { term: "Pass rate", definition: "The fraction of test cases that passed, computed as pass count divided by total, usually shown as a percentage." },
+        { term: "Threshold", definition: "The minimum pass rate you decide is acceptable for a feature, chosen once as a product decision." },
+        { term: "Gate", definition: "A pass or fail verdict produced by comparing the current pass rate to the threshold, so the decision is automatic." },
+      ],
+      animated_diagrams: [
+        {
+          title: "From results to a verdict",
+          caption: "A list of booleans becomes one rate, and the threshold turns that rate into a gate decision.",
+          loop: false,
+          nodes: [
+            { label: "Results", sub: "list of pass/fail", detail: "Every case has already been graded into a True or False result." },
+            { label: "Sum + divide", sub: "count over total", detail: "Summing booleans counts the passes, and dividing by the total gives the pass rate." },
+            { label: "Compare", sub: "rate vs threshold", detail: "Check whether the pass rate reaches the minimum you set for this feature." },
+            { label: "Verdict", sub: "passed or failed", detail: "At or above the threshold the harness passes; below it, the build fails." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Compute the pass rate for [True, True, False, True] and gate it against a threshold of 0.8.",
+          steps: [
+            "sum([True, True, False, True]) is 3, because True counts as 1 and False as 0.",
+            "Divide by len, which is 4: the pass rate is 3 / 4 = 0.75.",
+            "Compare 0.75 >= 0.8: that is False.",
+            "The gate returns HARNESS FAILED because the rate fell below the bar.",
+          ],
+          output: "Pass rate 75%, HARNESS FAILED.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does sum(results) give the pass count directly when results is a list of booleans?",
+          options: ["Python rounds booleans to integers randomly", "True counts as 1 and False as 0 when summed", "sum only works on booleans", "It counts the length instead"],
+          correct_index: 1,
+          explanation: "In Python True is 1 and False is 0, so summing a list of booleans adds up exactly the number of passes.",
+        },
+        {
+          question: "A fun chatbot persona and a refund-amount extractor should use the same threshold.",
+          options: ["True, thresholds are universal", "False, cheap-mistake features can ship lower and expensive-mistake features need a higher bar", "True, 80% is always correct", "False, thresholds must always be 100%"],
+          correct_index: 1,
+          explanation: "The threshold is a product decision tied to how costly a mistake is. A refund extractor might need 98% where a persona ships fine at 70%.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "encode the threshold once", content: "Pick the bar deliberately and write it into the harness. Then every future run is judged by the same standard instead of whatever felt okay that day." },
+      ],
       starter_code: `results = [True, True, False, True, True, False, True, True, True, True]  # 8 of 10 passed
 
 def pass_rate(results):
@@ -333,6 +429,55 @@ An overall pass rate can hide exactly the thing you need to see. A feature that'
 ## The mental model to keep
 
 Think of your test set as a map of the territory your feature has to survive, not a highlight reel of what it's good at. Categories keep the map honest. They turn "it works" into "it works here, and not yet there." Below, build the category breakdown in pure Python over a small set of already-graded results.`,
+      key_terms: [
+        { term: "Golden test case", definition: "A real input paired with a human-verified expected answer, often pulled from production usage." },
+        { term: "Known failure case", definition: "A real mistake the model made, turned into a permanent regression test so that bug can never silently return." },
+        { term: "Category", definition: "A tag on each test case that lets you break one overall pass rate into per-topic scores." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Rolling up scores by category",
+          caption: "Each graded case updates the running (passed, total) tally for its own category.",
+          loop: true,
+          nodes: [
+            { label: "Graded case", sub: "has a category tag", detail: "Each case carries a category plus whether it passed or failed." },
+            { label: "Find bucket", sub: "look up category", detail: "Read the current (passed, total) tally for that case's category." },
+            { label: "Update tally", sub: "add pass and total", detail: "Add one to total always, and one to passed only if the case passed." },
+            { label: "Report", sub: "rate per category", detail: "After the loop, each category shows its own pass count out of its total." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Roll up these graded cases by category: greeting PASS, greeting PASS, refund FAIL, refund PASS.",
+          steps: [
+            "Start with an empty report dict.",
+            "greeting PASS: report['greeting'] becomes (1, 1).",
+            "greeting PASS: report['greeting'] becomes (2, 2).",
+            "refund FAIL: report['refund'] becomes (0, 1), because total goes up but passed does not.",
+            "refund PASS: report['refund'] becomes (1, 2).",
+          ],
+          output: "greeting: 2/2, refund: 1/2. The overall 3/4 hides that refunds are only at 50%.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What can a single overall pass rate hide?",
+          options: ["Nothing, it captures everything", "That a great small-talk score is masking a weak score on the task customers actually rely on", "The total number of cases", "The names of the categories"],
+          correct_index: 1,
+          explanation: "An 85% overall can be 100% greetings and 40% refunds. Category breakdowns surface exactly that gap.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The best source of test cases is real production usage, including inputs that got complaints.", correct_answer: "true", explanation: "Real traffic, especially the failures, makes a test set that actually catches regressions instead of a highlight reel." },
+            { type: "fill_in", question: "A real production mistake turned into a permanent test so the bug cannot silently return is called a known ____ case.", correct_answer: "failure", explanation: "Known failure cases lock in past bugs as regression tests." },
+          ],
+        },
+      ],
       starter_code: `test_cases = [
     {"id": "t1", "category": "greeting", "expected": "hello", "actual": "hello"},
     {"id": "t2", "category": "greeting", "expected": "hi", "actual": "hi"},
@@ -496,6 +641,63 @@ A harness that only does exact match will reject perfectly good free-form answer
 ## The mental model to keep
 
 The runner doesn't know what "correct" means for a given case. It calls whichever grader that case declares. Below, wire up the dispatcher and three of these graders over a small mixed test set.`,
+      key_terms: [
+        { term: "Grader function", definition: "A small function with the signature grader(actual, expected) -> bool, swapped in per test case to decide pass or fail." },
+        { term: "Dispatcher", definition: "A dictionary that maps a grader name to its function, so the runner can look up the right grader for each case." },
+        { term: "Tolerance", definition: "A small allowed difference for numeric graders, so 9.8 can still pass when you meant 10.0 without letting real errors through." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Routing a case to its grader",
+          caption: "The runner reads the grader name on a case and dispatches to the matching function.",
+          loop: true,
+          nodes: [
+            { label: "Test case", sub: "names its grader", detail: "Each case records which grader it needs, like exact, contains, or range." },
+            { label: "Look up", sub: "GRADERS[name]", detail: "A dictionary lookup turns the grader name into the actual function object." },
+            { label: "Call grader", sub: "actual vs expected", detail: "The chosen grader compares the model output to the expected value its own way." },
+            { label: "Pass / fail", sub: "one boolean", detail: "Every grader returns the same shape, a single pass or fail, back to the runner." },
+          ],
+        },
+      ],
+      comparison_tables: [
+        {
+          title: "Which grader fits which task",
+          columns: ["Grader", "Best for", "Passes when"],
+          rows: [
+            ["exact_match", "Classifiers, short labels", "actual equals expected exactly"],
+            ["contains", "Free-form text with a required fact", "expected appears somewhere in actual"],
+            ["in_range", "Numeric extraction", "actual is within tolerance of expected"],
+            ["has_keys", "JSON-shaped output", "every required key is present"],
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Grade case t3 with the range grader: actual 9.8, expected 10.0, default tolerance 0.5.",
+          steps: [
+            "Look up GRADERS['range'], which is the in_range function.",
+            "Call in_range(9.8, 10.0) with the default tolerance of 0.5.",
+            "Compute abs(9.8 - 10.0), which is 0.2.",
+            "Check 0.2 <= 0.5: that is True, so the case passes.",
+          ],
+          output: "t3 PASS, because the extracted number is within tolerance of the expected value.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why route to a grader per case instead of hard-coding one comparison everywhere?",
+          options: ["It runs faster", "One harness can then grade a classifier, a reply generator, and a price extractor through the same loop", "The API requires it", "Exact match is always wrong"],
+          correct_index: 1,
+          explanation: "Naming the grader per case makes the harness reusable across a whole product. Only the grader entry changes, not the runner.",
+        },
+        {
+          question: "Which grader fits a support reply that just has to mention the refund amount somewhere?",
+          options: ["exact_match", "contains", "in_range", "has_keys"],
+          correct_index: 1,
+          explanation: "contains passes when the expected fact appears anywhere in the free-form text, which is exactly this case.",
+        },
+      ],
       starter_code: `def exact_match(actual, expected):
     return actual == expected
 
@@ -665,6 +867,55 @@ An LLM judge lets you grade tone, helpfulness, or faithfulness to a source docum
 ## The mental model to keep
 
 A rule-based grader answers "did it match a pattern?" A judge answers "would a careful reader say this is good?" Both hand your harness the same thing in the end, a pass/fail or a score, just computed differently. Below, build the defensive parser and watch it reject a malformed verdict the way a real one would.`,
+      key_terms: [
+        { term: "LLM-as-judge", definition: "Grading a subjective output with a second model call that reads the input, the output, and a rubric, then returns a verdict." },
+        { term: "Rubric", definition: "The scoring instructions in the judge prompt, pinning down what to score and what shape of answer to return." },
+        { term: "Defensive parsing", definition: "Slicing the JSON from the first brace to the last and validating the score is in range, since the judge reply can be malformed." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Grading with a judge call",
+          caption: "Show the judge the input, output, and rubric, then extract and validate its verdict.",
+          loop: false,
+          nodes: [
+            { label: "Input + output", sub: "what to grade", detail: "The original customer message and the reply you want scored." },
+            { label: "Judge call", sub: "score with rubric", detail: "A second model call scores the reply against your rubric and returns JSON." },
+            { label: "Extract JSON", sub: "first { to last }", detail: "Slice out the JSON object even if the judge added a preamble or a code fence." },
+            { label: "Validate", sub: "score in 1-5?", detail: "Reject anything where the score is missing, not an int, or outside the 1 to 5 scale." },
+            { label: "Verdict", sub: "score or None", detail: "A clean verdict passes through; a broken one becomes None instead of a fake score." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Parse the judge reply 'Here is my verdict:\\n{\"score\": 2, \"reasoning\": \"Too terse.\"}'.",
+          steps: [
+            "Find the first '{' with index and the last '}' with rindex, then add 1 to the end.",
+            "Slice out just that span, dropping the 'Here is my verdict:' preamble.",
+            "json.loads the slice into {'score': 2, 'reasoning': 'Too terse.'}.",
+            "Check isinstance(score, int) and 1 <= 2 <= 5: both hold, so the verdict is valid.",
+          ],
+          output: "{'score': 2, 'reasoning': 'Too terse.'} is returned as a clean verdict.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why check that the judge's score is an int between 1 and 5?",
+          options: ["To make parsing faster", "A score of 9 on a 1-5 scale is a broken verdict, not a real one, so it should be rejected", "The API rejects large numbers", "It converts the score to text"],
+          correct_index: 1,
+          explanation: "The judge is still an LLM and can return out-of-range values. Validating the range keeps a nonsense score from polluting your results.",
+        },
+        {
+          question: "Should you trust the LLM judge as ground truth?",
+          options: ["Yes, it is always correct", "No, it can be miscalibrated or fooled, so spot-check it against human ratings now and then", "Yes, judges never make mistakes", "No, never use a judge at all"],
+          correct_index: 1,
+          explanation: "A judge is a useful second opinion, not an oracle. Spot-checking against a handful of human ratings keeps it honest.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "the judge is not ground truth", content: "An LLM judge can be inconsistent or fooled by a confident wrong answer. Treat its score as a signal to watch, and sanity-check it against real human ratings from time to time." },
+      ],
       starter_code: `import json
 
 def parse_judgment(raw_reply):
@@ -819,6 +1070,65 @@ An eval harness that crashes on a malformed judge reply, or reports a false regr
 ## The mental model to keep
 
 Never let the grader's own flakiness look like the feature's flakiness. Retry judge calls before giving up, vote across repeats to smooth real noise, and label total failure as \`NO_VERDICT\` rather than a silent zero. Below, build the aggregator over a small batch of repeated judge scores, some of them missing entirely.`,
+      key_terms: [
+        { term: "Judge error", definition: "A distinct outcome recorded when a judge reply never parses, kept separate from the feature failing so you can tell noise from a real bad answer." },
+        { term: "Median vote", definition: "Running the judge several times and taking the middle score, which barely moves when one call returns an outlier." },
+        { term: "NO_VERDICT", definition: "The label for a case where every judge attempt failed, a visible signal to investigate rather than a silent quality failure." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Retry, then vote out the noise",
+          caption: "Retry a failed judge call a few times, then take the median across repeats to smooth real wobble.",
+          loop: true,
+          nodes: [
+            { label: "Judge call", sub: "one attempt", detail: "Ask the judge to score this case; the reply may parse or may fail." },
+            { label: "Parsed?", sub: "retry if not", detail: "If the reply does not parse, try again a couple of times before giving up." },
+            { label: "Collect scores", sub: "drop the failures", detail: "Gather the scores that did parse, ignoring the attempts that returned nothing." },
+            { label: "Median", sub: "or NO_VERDICT", detail: "Take the median of the valid scores, or report NO_VERDICT if none survived." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Aggregate the repeated scores [4, 5, None, 4] for one case.",
+          steps: [
+            "Filter out the None entries, leaving [4, 5, 4].",
+            "The list is not empty, so a median exists.",
+            "statistics.median([4, 5, 4]) sorts to [4, 4, 5] and takes the middle value, 4.",
+            "round(4) is 4, the reported score for this case.",
+          ],
+          output: "4, and the single outlier None never dragged the score around.",
+        },
+      ],
+      comparison_tables: [
+        {
+          title: "Why median, not mean",
+          columns: ["Situation", "Mean", "Median"],
+          rows: [
+            ["One outlier call (say a 1 among 4s)", "Dragged down toward the outlier", "Barely moves"],
+            ["Reports as", "A shifted average", "The typical score"],
+            ["Near your threshold", "Can flip the gate on noise", "Stays stable"],
+          ],
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why record a judge error separately instead of counting it as a fail?",
+          options: ["It makes the report shorter", "So you can tell 'the feature failed' apart from 'the judge glitched'", "Fails are not allowed", "The API needs it"],
+          correct_index: 1,
+          explanation: "A judge that times out or returns garbage is a grader problem, not a feature problem. Labeling it distinctly keeps your quality numbers honest.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "If every judge attempt for a case comes back unparseable, that case should be reported as NO_VERDICT.", correct_answer: "true", explanation: "All-failed attempts mean the judge is broken for that input, which is worth investigating on its own rather than counting as a silent zero." },
+            { type: "fill_in", question: "To smooth out a judge that wobbles between a 3 and a 4 across runs, take the ____ of several attempts.", correct_answer: "median", explanation: "The median resists outliers where an average would drift toward them." },
+          ],
+        },
+      ],
       starter_code: `import statistics
 
 def aggregate_judge_scores(scores):
@@ -964,6 +1274,54 @@ Without a baseline, "68%" is a number with no context. With one, it's a decision
 ## The mental model to keep
 
 Composite scoring answers "how good was this run overall, across every signal we have?" The regression gate answers "is that worse than what we already trusted?" Below, compute both over a small batch of graded cases.`,
+      key_terms: [
+        { term: "Composite score", definition: "A single 0-to-1 number per case that blends the rule result and the judge score, weighted by how much you trust each signal." },
+        { term: "Baseline", definition: "The last known-good overall score, stored so you can tell whether today's run got better or worse." },
+        { term: "Regression gate", definition: "A check that fails the build when today's score drops below the baseline by more than a small tolerance." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Blend the signals, then compare to baseline",
+          caption: "Each case blends rule and judge into one composite, and the run's overall is checked against the baseline.",
+          loop: false,
+          nodes: [
+            { label: "Rule + judge", sub: "two signals", detail: "Each case has a cheap rule pass/fail and, sometimes, a nuanced judge score." },
+            { label: "Composite", sub: "weighted blend", detail: "Blend the two into one 0-to-1 score, weighted by how much you trust each." },
+            { label: "Overall", sub: "average the cases", detail: "Average every case's composite into one number for the whole run." },
+            { label: "vs baseline", sub: "regression?", detail: "Fail the build only if the overall dropped below the baseline by more than the tolerance." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Compute the composite for a case with rule_pass True and judge_score 3, using weights 0.4 and 0.6.",
+          steps: [
+            "rule_part is 1.0 because rule_pass is True.",
+            "judge_part is 3 / 5 = 0.6, since a judge score exists.",
+            "Weighted sum: 0.4 * 1.0 + 0.6 * 0.6 = 0.4 + 0.36.",
+            "Add them to get the composite for this case.",
+          ],
+          output: "0.76, the blended score for that one case.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why fail only on a drop bigger than a small tolerance instead of any drop at all?",
+          options: ["To make the harness slower", "A point or two of noise is expected, so a tiny drop should not block the build", "Tolerance is required by Python", "Any drop is always a bug"],
+          correct_index: 1,
+          explanation: "Scores wobble slightly run to run. The tolerance lets normal noise through and only blocks a real, meaningful regression.",
+        },
+        {
+          question: "What happens in the composite when a case has no judge score?",
+          options: ["The composite is zero", "It falls back to the rule result instead of silently zeroing out", "The case is skipped", "The build fails"],
+          correct_index: 1,
+          explanation: "Cheap runs might skip judging. The composite falls back to the rule part so an unjudged case is not unfairly scored as a failure.",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "sample the judge to control cost", content: "Run the cheap rule grader on the full set every commit, but run the judge only on a random sample in CI and on the full set nightly. You trade a little precision for a much smaller bill on the runs that happen most often." },
+      ],
       starter_code: `cases = [
     {"id": "c1", "rule_pass": True, "judge_score": 5},
     {"id": "c2", "rule_pass": True, "judge_score": 3},
@@ -1131,6 +1489,54 @@ Finishing this lesson records the AI Evals Harness in your **Portfolio** tab. It
 ## The mental model to keep
 
 A finished harness hides its machinery behind one clean report. Underneath sit a test set, graders, a judge with retries and voting, a weighted composite, and a baseline comparison. The person reading the output sees a pass rate, a category breakdown, and a verdict. Below, build that final report function, the last piece.`,
+      key_terms: [
+        { term: "Final report", definition: "A compact summary answering three questions at once: the overall score, the per-category breakdown, and the pass/fail verdict." },
+        { term: "run_harness", definition: "The one-call entry point that runs every case through your feature and grader, builds the report, and adds a regression flag." },
+        { term: "Zero-total guard", definition: "The check that returns 0.0 instead of dividing by zero when the test set is empty, so an empty run does not crash." },
+      ],
+      animated_diagrams: [
+        {
+          title: "One command, one report",
+          caption: "The harness runs every case, grades it, and packages everything into a single readable report.",
+          loop: true,
+          nodes: [
+            { label: "Test case", sub: "from the file", detail: "Each case is read from the test-set file the harness was pointed at." },
+            { label: "Run + grade", sub: "feature then grader", detail: "Send the input through the feature, grade the output, and record whether it passed." },
+            { label: "Roll up", sub: "overall + by category", detail: "After the loop, tally the overall pass rate and the per-category breakdown." },
+            { label: "Report", sub: "score + verdict", detail: "Emit one report: overall, categories, and a regression flag against the baseline." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Build the report for two refund cases (PASS, FAIL) and two greeting cases (PASS, PASS).",
+          steps: [
+            "total is 4, and passed counts the True cases: 3.",
+            "Roll up by category: refunds becomes (1, 2), greetings becomes (2, 2).",
+            "overall is round(3 / 4, 2) = 0.75.",
+            "Format each category as 'p/t': refunds '1/2', greetings '2/2'.",
+          ],
+          output: "{'overall': 0.75, 'total': 4, 'passed': 3, 'categories': {'refunds': '1/2', 'greetings': '2/2'}}",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does the round(passed / total, 2) if total else 0.0 guard protect against?",
+          options: ["Slow performance", "A divide-by-zero crash when the test set is empty", "Wrong category names", "Judge errors"],
+          correct_index: 1,
+          explanation: "An empty test set has total 0. The guard returns 0.0 instead of dividing by zero, so the harness runs cleanly from a clean start.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A good final report answers overall score, per-category breakdown, and pass/fail without anyone opening a log file.", correct_answer: "true", explanation: "Those three questions are the whole job of the report, readable in about five seconds." },
+            { type: "fill_in", question: "Finishing this lesson records the AI Evals Harness in your ____ tab.", correct_answer: "portfolio", explanation: "The harness lands in your Portfolio as the tool that answers 'does it still work?' for everything else you build." },
+          ],
+        },
+      ],
       starter_code: `cases = [
     {"id": "c1", "category": "refunds", "passed": True},
     {"id": "c2", "category": "refunds", "passed": False},

@@ -21,6 +21,44 @@ export default {
       order: 1,
       title: "Give the Model a Tool",
       concept: "defining a tool schema",
+      animated_diagrams: [
+        {
+          title: "From function to tool the model can request",
+          caption: "You never send code, only a description the model reads like a menu.",
+          loop: false,
+          nodes: [
+            { label: "Your Python fn", sub: "real code", detail: "The actual calculator function lives in your program, and only your code can run it." },
+            { label: "Write schema", sub: "name + description + input_schema", detail: "You describe the function as a dict: what it is called, what it does, and what arguments it takes." },
+            { label: "tools=[...]", sub: "pass in the call", detail: "The schema goes into the tools parameter of the API request, alongside your messages." },
+            { label: "Model reads menu", sub: "decides if it fits", detail: "The model scans the description and decides whether this tool matches the question." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Tool schema", definition: "A dict describing a function to the model: its name, a plain-English description, and an input_schema for its arguments." },
+        { term: "input_schema", definition: "A JSON Schema object that pins down which arguments a tool takes and their types." },
+        { term: "required", definition: "A list inside input_schema naming which arguments the model must supply for a valid call." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Write a tool schema for a function get_weather(city) that returns the current weather for a city.",
+          steps: [
+            "Pick a clear name the model will refer to: get_weather.",
+            "Write a description that says when to use it, not just what it is: Get the current weather for a named city.",
+            "Build input_schema as an object with one property, city, of type string.",
+            "List city in required, since the function cannot run without it.",
+          ],
+          output: "{ name: get_weather, description: Get the current weather for a named city., input_schema: { type: object, properties: { city: { type: string } }, required: [city] } }",
+        },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "The description is the model's only clue", content: "The model decides whether to reach for a tool based on its description alone. Write it like you are briefing a new hire, a full sentence, not a terse code comment." },
+      ],
+      inline_quizzes: [
+        { question: "What does the model actually receive about your calculator function?", options: ["The Python source code", "A JSON schema describing its name, purpose, and arguments", "A compiled binary", "Nothing until it runs the function"], correct_index: 1, explanation: "You send a description, not code. The model reads the schema and asks you to run the real function." },
+        { question: "What is the job of the required list inside input_schema?", options: ["It runs the function", "It names which arguments must be present for a valid call", "It sets default values", "It picks the model"], correct_index: 1, explanation: "required lists the argument names the model must supply, which is what catches a call with a missing argument." },
+      ],
       explanation: `A plain chatbot can only talk. Ask it "what's 847 times 293?" and it does the arithmetic in its head, sometimes wrong. Ask it "what's the weather in Tokyo right now?" and it has no way to know, because it was trained on old text, not a live feed. Tool use (also called function calling) fixes both problems. You hand the model a menu of functions it is allowed to ask for. When it needs one, it tells you which one and with what arguments, and you run the real function. The model never runs code itself.
 
 ## What we're building
@@ -193,6 +231,35 @@ main()
       order: 2,
       title: "The Model Asks for a Tool",
       concept: "reading a tool_use block",
+      animated_diagrams: [
+        {
+          title: "Reading the model's tool request",
+          caption: "A tool_use reply is a request form, not a final answer.",
+          loop: false,
+          nodes: [
+            { label: "You ask", sub: "847 * 293?", detail: "You send the question along with the calculator tool schema." },
+            { label: "Model replies", sub: "stop_reason", detail: "The reply carries stop_reason. If it is tool_use, the model is asking you to run something." },
+            { label: "Scan content", sub: "text + tool_use blocks", detail: "The content list can hold a text block of narration next to the tool_use block." },
+            { label: "Read the block", sub: "id, name, input", detail: "Pull out which tool it wants (name), the arguments (input), and the tracking id." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "tool_use block", definition: "A content block where the model requests a tool, carrying an id, a name, and an input dict." },
+        { term: "stop_reason", definition: "A field on the reply that says why the model stopped: end_turn for a final answer, tool_use when it wants a tool." },
+        { term: "block.input", definition: "The arguments the model chose, already parsed into a Python dict matching your input_schema." },
+      ],
+      inline_quizzes: [
+        { question: "How do you tell a final answer apart from a request to run a tool?", options: ["Count the content blocks", "Check stop_reason", "Read the first character of the text", "Look at max_tokens"], correct_index: 1, explanation: "stop_reason is end_turn for a normal answer and tool_use when the model is paused waiting on you." },
+        { question: "The model writes 'Let me calculate that' before the tool_use block. What is that text?", options: ["An error", "Narration you can show or ignore; the tool_use block is what you run", "The tool result", "A second tool call"], correct_index: 1, explanation: "Text and tool_use blocks can share one content list. For running the tool you only need the tool_use block." },
+      ],
+      participation_activities: [
+        { activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "When stop_reason is tool_use, the model has already run the function for you.", correct_answer: "false", explanation: "Nothing has run yet. The model is asking you to run it and is waiting on the result." },
+            { type: "fill_in", question: "Which field on a tool_use block is the tracking number that matches your answer back to the request?", correct_answer: "id", explanation: "The id tags the specific request so your tool_result can point back to it." },
+          ] },
+      ],
       explanation: `You sent the model a calculator tool and asked "what's 847 * 293?" The model doesn't answer with a number. It answers with a request: run the calculator tool with this expression. This lesson is about reading that request.
 
 ## What comes back isn't plain text
@@ -347,6 +414,43 @@ main()
       order: 3,
       title: "Run It and Answer Back",
       concept: "executing a tool and sending tool_result",
+      animated_diagrams: [
+        {
+          title: "The tool round trip",
+          caption: "Ask, run, answer back with the matching id, then get the final reply.",
+          loop: false,
+          nodes: [
+            { label: "tool_use", sub: "model asks", detail: "The assistant's turn holds the tool_use block requesting the calculator." },
+            { label: "Run the fn", sub: "your Python", detail: "Your code evaluates the expression and gets a real result." },
+            { label: "tool_result", sub: "tag with id", detail: "You append a user turn with a tool_result block carrying the same tool_use_id." },
+            { label: "Final reply", sub: "model answers", detail: "The model reads the result and folds it into a plain-language answer." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "tool_result", definition: "A content block, sent in a user-role message, that carries the output of a tool run back to the model." },
+        { term: "tool_use_id", definition: "The id copied from the tool_use block onto the tool_result, so the model knows which request this answer belongs to." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "The model sent a tool_use block with id toolu_01 asking for calculator on '6 * 7'. Build the two messages to append.",
+          steps: [
+            "Append the assistant turn: role assistant, content set to the exact content list the model sent, tool_use block included.",
+            "Run the calculator on 6 * 7 to get 42.",
+            "Append a user turn whose content is a list with one tool_result block.",
+            "Set tool_use_id to toolu_01 and content to the string 42.",
+          ],
+          output: "messages now ends with { role: user, content: [ { type: tool_result, tool_use_id: toolu_01, content: 42 } ] }",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "tool_result content must be text", content: "Always wrap the result with str() before putting it in the tool_result. The content field is a string, even when your function returned a number." },
+      ],
+      inline_quizzes: [
+        { question: "Why does the tool_result go in a user-role message when your code wrote it?", options: ["It is a bug", "From the API's view, anything that is not the assistant is the other side of the conversation", "User messages are cheaper", "The model ignores assistant messages"], correct_index: 1, explanation: "The API treats non-assistant turns as the other party, so tool results ride in a user-role message." },
+        { question: "What connects a tool_result to the request it answers?", options: ["The order in the list", "The tool_use_id", "The tool name", "The timestamp"], correct_index: 1, explanation: "The tool_use_id stitches each result to its request, which matters when several tools run in one turn." },
+      ],
       explanation: `The model asked for the calculator. You found the request. Now comes the part that makes this an agent instead of a fancy parser: you run the function, and you send the answer back in a specific shape the model can use.
 
 ## Step 1: run your own Python function
@@ -538,6 +642,34 @@ main()
       order: 4,
       title: "Choosing Among Several Tools",
       concept: "routing to the right tool",
+      animated_diagrams: [
+        {
+          title: "Routing to the right tool",
+          caption: "The model picks by reading descriptions; your dispatch dict runs the match.",
+          loop: false,
+          nodes: [
+            { label: "Question", sub: "any topic", detail: "A question arrives that could need math, weather, or a fact lookup." },
+            { label: "Model picks", sub: "reads descriptions", detail: "The model compares the question to each tool's description and chooses one." },
+            { label: "tool_use.name", sub: "e.g. get_weather", detail: "The reply names the chosen tool in the tool_use block." },
+            { label: "Dispatch dict", sub: "name to function", detail: "You look up the name in a dict and call the matching Python function with the input unpacked." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Dispatch table", definition: "A dict mapping tool names to functions, so routing a call is one lookup instead of a chain of if/elif." },
+        { term: "Argument unpacking", definition: "Using **block['input'] to spread a dict into keyword arguments for the matching function." },
+      ],
+      comparison_tables: [
+        { title: "if/elif chain vs dispatch dict", columns: ["Aspect", "if/elif chain", "Dispatch dict"], rows: [
+          ["Adding a tool", "Add another branch", "Add one dict entry"],
+          ["Unknown tool", "Silent fall-through", "One clean 'not in' check"],
+          ["Readability at 10 tools", "Long and ugly", "Still one lookup"],
+        ] },
+      ],
+      inline_quizzes: [
+        { question: "How does the model decide which of three tools to call?", options: ["You tell it in code", "It reads each tool's description and matches the question", "It always calls the first tool", "Random choice"], correct_index: 1, explanation: "The model routes by reading the descriptions you wrote, which is why clear descriptions pay off here." },
+        { question: "What does **block['input'] do in execute_tool?", options: ["Doubles the input", "Unpacks the dict into keyword arguments for the function", "Converts it to a string", "Checks the type"], correct_index: 1, explanation: "The ** spreads the dict so run_weather(city='Tokyo') is called with the right keyword arguments." },
+      ],
       explanation: `One tool is a demo. A real agent has a toolbox, and the model has to pick the right tool for each question on its own. This lesson adds a weather tool and a search tool next to the calculator, then shows how you route each request to the matching Python function once the model picks one.
 
 ## Register more than one tool
@@ -729,6 +861,37 @@ main()
       order: 5,
       title: "The Agent Loop",
       concept: "looping until the model is done",
+      animated_diagrams: [
+        {
+          title: "The think-act-observe loop",
+          caption: "The agent keeps running tools until the model stops asking for them.",
+          loop: true,
+          nodes: [
+            { label: "Model turn", sub: "think", detail: "The model looks at the conversation so far and decides its next move." },
+            { label: "tool_use?", sub: "check stop_reason", detail: "If stop_reason is tool_use, there is work to do. If it is end_turn, break and print the answer." },
+            { label: "Run tool", sub: "act", detail: "Execute the requested tool and get a real result." },
+            { label: "Append result", sub: "observe", detail: "Add the tool_result to messages so the model sees it, then loop back." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Agent loop", definition: "A loop that repeatedly calls the model, runs any tool it asks for, and feeds the result back until the model gives a final answer." },
+        { term: "end_turn", definition: "The stop_reason that means the model is done and its content holds the final answer." },
+      ],
+      step_throughs: [
+        { title: "One question, two tools",
+          steps: [
+            { label: "Pass 1", detail: "Model asks for get_weather on Tokyo.", code: "stop_reason == 'tool_use'" },
+            { label: "Run + append", detail: "You run it, get 24, append the tool_result.", code: "content: '24'" },
+            { label: "Pass 2", detail: "Model now asks calculator to convert to Fahrenheit.", code: "stop_reason == 'tool_use'" },
+            { label: "Run + append", detail: "You run it, get 75.2, append the tool_result.", code: "content: '75.2'" },
+            { label: "Pass 3", detail: "Model has what it needs and writes the answer.", code: "stop_reason == 'end_turn'" },
+          ] },
+      ],
+      inline_quizzes: [
+        { question: "Why use a loop instead of a fixed number of round trips?", options: ["Loops are faster", "You cannot know in advance how many tool calls a question needs", "The API requires it", "To save tokens"], correct_index: 1, explanation: "Some questions need zero tools, some need three chained together. A loop handles all of them with one piece of code." },
+        { question: "What ends the agent loop?", options: ["A fixed timer", "stop_reason being something other than tool_use", "The first tool call", "Running out of tools"], correct_index: 1, explanation: "When stop_reason is no longer tool_use, the model has a final answer and the loop breaks." },
+      ],
       explanation: `Real questions sometimes need more than one tool call before the model has enough to answer. "What's the weather in Tokyo, and what's that in Fahrenheit if it's given in Celsius" might call \`get_weather\` first, then \`calculator\` once it has a number. A single request/execute/respond round trip won't cover that. You need a loop that keeps running tools until the model says it's done.
 
 ## The loop, precisely
@@ -906,6 +1069,43 @@ main()
       order: 6,
       title: "Don't Trust the Arguments",
       concept: "validating tool calls",
+      animated_diagrams: [
+        {
+          title: "Guarding a tool call before it runs",
+          caption: "Each check turns a possible crash into a clean error the model can read.",
+          loop: false,
+          nodes: [
+            { label: "tool_use in", sub: "unverified", detail: "Treat the incoming call like a form submission from the internet." },
+            { label: "Known tool?", sub: "name check", detail: "If the name is not in your registry, return an unknown-tool error instead of a KeyError." },
+            { label: "Args complete?", sub: "required check", detail: "If a required argument is missing, return a clear message naming it." },
+            { label: "Run it", sub: "or return error", detail: "Only once the checks pass do you execute, wrapping the call so a raised exception becomes an error string." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Tool-call validation", definition: "Checking a tool_use block for a known name, complete arguments, and correct types before executing it." },
+        { term: "Recoverable error", definition: "An error returned as a tool_result string, which the model can read and correct, rather than a crash." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "safe_execute gets a call to get_weather with only {city: 'Tokyo'} when the schema requires city and days. What happens?",
+          steps: [
+            "The name get_weather is in the registry, so the unknown-tool check passes.",
+            "Loop the required list: city is present, days is not.",
+            "Return the error string for the first missing argument, days.",
+            "That string flows back as a tool_result, so the model can retry with days included.",
+          ],
+          output: "error: missing required argument 'days'",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Never eval untrusted text blindly", content: "Restrict the calculator to arithmetic characters with a regex before eval. A model output that reaches eval unchecked is a real security risk." },
+      ],
+      inline_quizzes: [
+        { question: "What should happen when the model asks for a tool you never registered?", options: ["The program crashes", "You return a clean unknown-tool error string", "You run the closest tool", "You ignore it silently"], correct_index: 1, explanation: "An unknown tool becomes a clear error the model can read and correct, not a KeyError deep in your executor." },
+        { question: "Where does a validation error message go?", options: ["To a log file only", "Back to the model as a normal tool_result", "It is raised and stops the agent", "Nowhere"], correct_index: 1, explanation: "The error rides back as a tool_result string, which a well-behaved model reads, apologizes for, and fixes." },
+      ],
       explanation: `The loop works when everything goes right. It doesn't yet handle a model that asks for a tool that doesn't exist, or hands you an argument that's missing or the wrong type. Models are usually good at following a schema, but "usually" is not a word you want near code that runs \`eval()\`. This lesson hardens \`execute_tool\` before it runs anything.
 
 ## Three ways a tool call can be bad
@@ -1136,6 +1336,34 @@ main()
       order: 7,
       title: "Stop the Runaway Agent",
       concept: "capping iterations and recovering from tool errors",
+      animated_diagrams: [
+        {
+          title: "A capped, error-tolerant loop",
+          caption: "A leash on iterations and a helmet around execution keep one bad turn from becoming a runaway.",
+          loop: true,
+          nodes: [
+            { label: "Loop turn", sub: "count it", detail: "Each pass counts against MAX_ITERATIONS, the hard ceiling on how many tool calls you allow." },
+            { label: "Under cap?", sub: "leash", detail: "If you have hit the cap, stop with a clear message instead of looping forever." },
+            { label: "Run tool", sub: "helmet", detail: "Wrap the call in try/except so a failing tool returns an error string instead of crashing." },
+            { label: "Feed back", sub: "continue", detail: "Append the result or error and go around again, until the model answers or the cap trips." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "MAX_ITERATIONS", definition: "A hard cap on loop passes that doubles as a cost ceiling per question." },
+        { term: "Tool-error recovery", definition: "Catching an exception raised during a tool run and returning it as an error string so the agent keeps going." },
+      ],
+      inline_quizzes: [
+        { question: "Why cap the agent loop with MAX_ITERATIONS?", options: ["To make it faster", "An uncapped loop against a paid API is a runaway bill waiting to happen", "The API needs it", "To use fewer tools"], correct_index: 1, explanation: "Nothing guarantees the model ever reaches end_turn, so a hard cap stops an infinite, expensive loop." },
+        { question: "A weather API times out mid-call. With the try/except in place, what happens?", options: ["The whole agent crashes", "The failure comes back as an error string and the model can adapt", "The loop restarts from zero", "The result is silently blank"], correct_index: 1, explanation: "The caught exception becomes a tool_result error, so the model can try another tool or answer without it." },
+      ],
+      participation_activities: [
+        { activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A FINAL turn that lands exactly on the cap iteration still counts as done.", correct_answer: "true", explanation: "You check for the final answer before checking the cap, so a final on the cap iteration is DONE, not CAPPED." },
+            { type: "fill_in", question: "What Python construct catches an exception raised while a tool runs?", correct_answer: "try/except", explanation: "Wrapping the tool call in try/except turns a raised exception into a recoverable error string." },
+          ] },
+      ],
       explanation: `A validated tool call still isn't a safe agent. Two failure modes remain, and both are about the loop, not a single call. The loop can run forever, and a tool can raise an exception mid-execution instead of returning a bad result.
 
 ## Failure 1: the loop never stops
@@ -1309,6 +1537,33 @@ main()
       order: 8,
       title: "Ship the Tool-Using Agent",
       concept: "assembling and shipping the agent",
+      animated_diagrams: [
+        {
+          title: "The shipped agent, end to end",
+          caption: "One call in, a final answer out, with every earlier lesson wired inside.",
+          loop: true,
+          nodes: [
+            { label: "Question in", sub: "one call", detail: "The user hands the agent a question through a single run_agent call." },
+            { label: "Model + tools", sub: "think", detail: "The model, given the tool schemas, decides whether to answer or call a tool." },
+            { label: "safe_execute", sub: "act", detail: "A requested tool runs through validation and error handling before executing." },
+            { label: "Answer or cap", sub: "stop", detail: "The loop returns the final answer, or a clean give-up message once MAX_ITERATIONS trips." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Shipped agent", definition: "An assembled loop, good manners and all, around a handful of real functions: it asks before acting, reports errors honestly, and knows when to stop." },
+        { term: "Cost ceiling", definition: "MAX_ITERATIONS read as a per-question spend limit, since every tool call is another full round trip." },
+      ],
+      inline_quizzes: [
+        { question: "What is a tool-using agent, boiled down?", options: ["A model that runs code itself", "A loop with guardrails around a few real functions", "A bigger language model", "A database query"], correct_index: 1, explanation: "It is a loop that asks before acting, handles errors, and stops on its own, wrapped around a handful of tools." },
+        { question: "Why keep both a tool-needing and a tool-free example question as proof?", options: ["To use more tokens", "To show the routing works both ways: it calls a tool when needed and answers directly when not", "The API requires two examples", "For faster runs"], correct_index: 1, explanation: "One question that needs a live tool and one that needs none together prove the model routes correctly." },
+      ],
+      participation_activities: [
+        { activity_title: "Shipped means",
+          questions: [
+            { type: "true_false", question: "An agent is shippable only once weird input produces a graceful message instead of a stack trace.", correct_answer: "true", explanation: "Surviving bad input gracefully is one of the three ship checks, alongside a clean start and someone else being able to run it." },
+          ] },
+      ],
       explanation: `Every piece is built: schemas, reading a request, execution, routing across tools, the loop, validation, and a hard cap with error recovery. This lesson wires all of it into one script you can run, and finishing it lands the build in your Portfolio.
 
 ## The finished shape

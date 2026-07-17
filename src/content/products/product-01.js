@@ -120,6 +120,64 @@ print("article chars:", len(req["messages"][0]["content"]))
         "messages is a list with exactly one item: {\"role\": \"user\", \"content\": article}.",
         "Use model 'claude-sonnet-4-6' and a max_tokens like 300.",
       ],
+      animated_diagrams: [
+        {
+          title: "One summarize run",
+          caption: "Every call walks the same five steps, from raw text to printed summary.",
+          loop: false,
+          nodes: [
+            { label: "Read input", sub: "article text", detail: "You start with a block of text: a pasted article or a piped file." },
+            { label: "Build request", sub: "system + messages", detail: "You put the rules in system and the article in messages as one user turn." },
+            { label: "Call model", sub: "messages.create", detail: "You send the request to the Anthropic Messages API and wait for the reply." },
+            { label: "Parse reply", sub: "content[0].text", detail: "You pull the summary text out of the reply object." },
+            { label: "Print", sub: "short summary", detail: "You print the finished summary for the user or the next command." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "System prompt", definition: "The standing rules the model follows every call, written once and reused." },
+        { term: "Messages", definition: "The channel that carries the actual input, here the article, as a user turn." },
+        { term: "max_tokens", definition: "A cap on how many tokens the model may generate in its reply." },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Rules go in system, data goes in messages", content: "Keep the article out of the system prompt. System is your config, messages is the data, and mixing them makes prompts hard to reuse." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Where does the article you want summarized belong in the request?",
+          options: ["In the system prompt", "In messages as a user turn", "In max_tokens", "In the model name"],
+          correct_index: 1,
+          explanation: "The system prompt holds reusable rules; the article is data, so it rides in messages as a single user turn.",
+        },
+        {
+          question: "Why name an exact length like \"3 short sentences\" instead of \"be brief\"?",
+          options: ["It uses fewer tokens", "It is required by the API", "Vague words like brief get vague results", "It changes the model"],
+          correct_index: 2,
+          explanation: "\"Be concise\" still leaves room for three paragraphs. A precise count gives the model a clear target.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Build a summarizer request dict for the article \"The council approved three new parks.\"",
+          steps: [
+            "Set model to a Claude model id and max_tokens to a safe ceiling like 300.",
+            "Put the summarize rules in the system field.",
+            "Wrap the article in a messages list with one user turn: {\"role\": \"user\", \"content\": article}.",
+            "Return the dict with keys model, max_tokens, system, messages.",
+          ],
+          output: "{\"model\": \"claude-sonnet-4-6\", \"max_tokens\": 300, \"system\": SYSTEM, \"messages\": [{\"role\": \"user\", \"content\": article}]}",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The system prompt should contain the article you want summarized.", correct_answer: "false", explanation: "The article goes in messages. System holds only the reusable rules." },
+            { type: "fill_in", question: "Which request field is a safety cap on how much text the model can generate?", correct_answer: "max_tokens", explanation: "max_tokens caps the generated length so a runaway reply cannot balloon the cost." },
+          ],
+        },
+      ],
       challenge_title: "Summarize or Keep",
       challenge_description:
         "Decide whether a block of text is long enough to bother summarizing by counting its sentences against a target.",
@@ -273,6 +331,64 @@ print("lines:", len(cleaned.splitlines()))
         "A code-fence line is one whose stripped value equals three backticks.",
         "Check the first line with .rstrip().endswith(':') before dropping it.",
       ],
+      animated_diagrams: [
+        {
+          title: "Opening the envelope",
+          caption: "The reply arrives wrapped, and the cleaning pass strips the wrapping off in order.",
+          loop: false,
+          nodes: [
+            { label: "Raw reply", sub: "message object", detail: "The API returns a message object, not a bare string." },
+            { label: "Get text", sub: "content[0].text", detail: "The summary text lives in the first content block." },
+            { label: "Drop fences", sub: "remove ``` lines", detail: "You filter out any line that is just a code fence." },
+            { label: "Drop label", sub: "\"Here is...:\"", detail: "If the first line ends with a colon, it is a preamble label, so you drop it." },
+            { label: "Trim blanks", sub: "top and bottom", detail: "You remove leading and trailing blank lines and join what is left." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Content block", definition: "One item in the reply's content list; the summary text sits in the first block's text field." },
+        { term: "Preamble", definition: "Polite scaffolding the model adds, like \"Here is a summary:\", that your program does not want." },
+        { term: "Code fence", definition: "A line of three backticks the model uses to wrap output; harmless to a human, noise to a program." },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "Prompt for it, then clean anyway", content: "Telling the model \"output only the summary\" helps, but models still slip. A tiny cleaning pass is cheap insurance on top." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why can't you print resp directly and get the summary?",
+          options: ["The API is broken", "resp is a message object, and the text is inside content[0].text", "You forgot max_tokens", "The summary is encrypted"],
+          correct_index: 1,
+          explanation: "The reply is a structured message object. The summary text lives in the first content block's text field.",
+        },
+        {
+          question: "What makes a line a leading label the cleaner should drop?",
+          options: ["It is blank", "It ends with a colon", "It starts with a dash", "It is longer than 80 characters"],
+          correct_index: 1,
+          explanation: "A label line like \"Here is a summary:\" ends with a colon, which is the signal to drop the first line.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Clean the reply \"Here is a summary:\\n```\\nParks approved.\\n```\"",
+          steps: [
+            "Split the reply into lines.",
+            "Remove every line whose stripped value is three backticks, dropping both fence lines.",
+            "The first remaining line is \"Here is a summary:\", which ends with a colon, so drop it.",
+            "Trim any blank lines from the top and bottom, then join the rest with newlines.",
+          ],
+          output: "Parks approved.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A cleaning pass is unnecessary if you tell the model to output only the summary.", correct_answer: "false", explanation: "Models still slip in a preamble or fence sometimes, so keep the cleaning pass as a backstop." },
+            { type: "fill_in", question: "Which string method turns the reply into a list of lines you can filter?", correct_answer: "splitlines", explanation: "text.splitlines() gives you the list of lines to filter and slice." },
+          ],
+        },
+      ],
       challenge_title: "Clean the Model's Reply",
       challenge_description:
         "Strip the preamble and code fences a model wraps around a summary so only the summary text remains.",
@@ -411,6 +527,62 @@ print("word count:", len(summary.split()))
         "text.split() with no argument splits on any whitespace into words.",
         "Compare len(words) to the limit before deciding to trim.",
         "Join the first 'limit' words with spaces and add ' ...' to signal truncation.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Three layers of length control",
+          caption: "Each layer does one job, from asking for a length to enforcing a hard cap.",
+          loop: false,
+          nodes: [
+            { label: "Prompt", sub: "\"in 3 sentences\"", detail: "The prompt is where you actually ask for the length, and the model plans to fit it." },
+            { label: "max_tokens", sub: "safety ceiling", detail: "max_tokens stops a runaway reply from ballooning your cost, set well above the target." },
+            { label: "Word cap", sub: "your own trim", detail: "For a truly hard limit, you count the words yourself and trim the overflow." },
+            { label: "Final text", sub: "fits the budget", detail: "The result respects the exact limit no matter how chatty the model got." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "max_tokens", definition: "A hard ceiling on generated tokens; a safety cap, not a way to dial in a precise length." },
+        { term: "Word cap", definition: "Your own post-check that trims a summary to an exact word count and marks the cut." },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Don't use max_tokens as your length control", content: "Set it too low and the model gets cut off mid-sentence. Ask for the length in the prompt and keep max_tokens comfortably above it." },
+      ],
+      inline_quizzes: [
+        {
+          question: "You need a summary of exactly 40 words for a fixed UI field. What is the reliable approach?",
+          options: ["Set max_tokens to 40", "Ask for about 40 words in the prompt and trim the result yourself", "Trust the model to count exactly", "Lower the temperature"],
+          correct_index: 1,
+          explanation: "Models are good at \"about 40 words\" but not exact counts, so you prompt for the length and enforce the hard cap in code.",
+        },
+        {
+          question: "What does the trailing \" ...\" on a trimmed summary signal?",
+          options: ["The summary is complete", "The text was cut off at the word budget", "An error occurred", "The model is still typing"],
+          correct_index: 1,
+          explanation: "The marker warns readers that the summary was truncated, so a cut-off summary is not mistaken for a finished one.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "cap_words(\"one two three four five\", 3)",
+          steps: [
+            "Split the text into words: [\"one\", \"two\", \"three\", \"four\", \"five\"], which is 5 words.",
+            "5 is greater than the limit of 3, so the text needs trimming.",
+            "Keep the first 3 words: \"one two three\".",
+            "Append \" ...\" to mark that text was cut.",
+          ],
+          output: "one two three ...",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "Setting a low max_tokens is a good way to get a short, well-formed summary.", correct_answer: "false", explanation: "A low max_tokens cuts the reply off mid-sentence. Ask for the length in the prompt instead." },
+            { type: "fill_in", question: "Which string method splits a summary into a list of words on whitespace?", correct_answer: "split", explanation: "text.split() with no argument splits on any whitespace into words." },
+          ],
+        },
       ],
       challenge_title: "Trim to the Word Budget",
       challenge_description:
@@ -551,6 +723,64 @@ render(points, "bullets")
         "An f-string like f\"{i}. {p}\" builds the numbered line.",
         "Default anything that isn't 'numbered' to bullet style.",
       ],
+      animated_diagrams: [
+        {
+          title: "Prompt shapes it, parser reads it",
+          caption: "The prompt sets the format, and structured output gets a defensive parse before your code trusts it.",
+          loop: false,
+          nodes: [
+            { label: "Choose format", sub: "prose or JSON", detail: "You decide whether you want text to read or data to process." },
+            { label: "Prompt the shape", sub: "pin the keys", detail: "For JSON you name each key exactly so the shape is the same every run." },
+            { label: "Model replies", sub: "maybe fenced", detail: "The reply may arrive wrapped in prose or a code fence." },
+            { label: "Extract object", sub: "first { to last }", detail: "You slice from the first brace to the last, throwing away any wrapping." },
+            { label: "json.loads", sub: "clean dict", detail: "Now json.loads gets a clean object your code can rely on." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Structured output", definition: "A summary returned as data, like JSON with fixed keys, so your program can read fields." },
+        { term: "Fixed schema", definition: "A named, unchanging set of keys you pin in the prompt so your parser can trust the shape." },
+        { term: "Defensive parse", definition: "Pulling the JSON object out of any surrounding text before calling json.loads, so stray prose does not crash it." },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Name every key you want", content: "\"Return name, email, phone\" is reliable. \"Return the relevant fields\" invites a different shape each run and breaks your parser." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why slice from the first { to the last } before json.loads?",
+          options: ["It is faster", "It throws away preamble or code fences the model may add around the JSON", "json.loads requires it", "It sorts the keys"],
+          correct_index: 1,
+          explanation: "Models sometimes wrap JSON in chatty text or a fence, so extracting the object first hands json.loads clean input.",
+        },
+        {
+          question: "Which format needs no parsing on your side?",
+          options: ["JSON with fixed keys", "A bullet list or paragraph of prose", "A nested object", "A list of records"],
+          correct_index: 1,
+          explanation: "Prose formats like bullets and paragraphs are used as-is. Only structured output needs a parser.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Extract the object from the reply 'Sure! ```{\"headline\": \"Parks approved\"}```'",
+          steps: [
+            "Find the first { with text.index(\"{\").",
+            "Find the last } with text.rindex(\"}\") and add 1 to include it.",
+            "Slice the text between those positions, dropping \"Sure!\" and both fences.",
+            "Pass the clean slice to json.loads to get a Python dict.",
+          ],
+          output: "{\"headline\": \"Parks approved\"}",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "Asking for \"the relevant fields\" gives you a stable JSON shape to parse.", correct_answer: "false", explanation: "Vague field requests invite a different shape each run. Pin every key by name." },
+            { type: "fill_in", question: "Which json function turns a clean JSON string into a Python dict?", correct_answer: "loads", explanation: "json.loads parses a JSON string into a Python object." },
+          ],
+        },
+      ],
       challenge_title: "Format the Summary",
       challenge_description:
         "Render a set of summary points as either a bullet list or a numbered list, controlled by a format flag.",
@@ -687,6 +917,64 @@ for c in result:
         "The fit test is len(current) + 1 + len(word) <= max_chars (the +1 is the space).",
         "After the loop, append 'current' if it still holds a chunk.",
       ],
+      animated_diagrams: [
+        {
+          title: "Greedy word packing",
+          caption: "Each word is either added to the current chunk or rolls over to a new one, word by word.",
+          loop: true,
+          nodes: [
+            { label: "Next word", sub: "from text.split()", detail: "You take the next whole word from the input." },
+            { label: "Fits?", sub: "len + 1 + word", detail: "You check if the word plus a joining space still fits under max_chars." },
+            { label: "Add to chunk", sub: "current += word", detail: "If it fits, you append it to the current chunk and grab the next word." },
+            { label: "Roll over", sub: "start new chunk", detail: "If it does not fit, you push the current chunk and start a fresh one with this word." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Context window", definition: "The maximum text, measured in tokens, a model can read in a single call." },
+        { term: "Token", definition: "The unit models read text in, roughly 4 characters of English, so len(text) // 4 is a rough token estimate." },
+        { term: "Chunking", definition: "Splitting a long input into pieces small enough to send, packed on whole-word boundaries." },
+        { term: "Overlap", definition: "Repeating a sentence or two between adjacent chunks so an idea spanning a boundary is not lost." },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Never split mid-word", content: "A blind \"every 2000 characters\" cut slices words in half and garbles chunks. Pack whole words until the next one will not fit." },
+      ],
+      inline_quizzes: [
+        {
+          question: "About how many tokens is a 100,000-character English article?",
+          options: ["About 1,000", "About 25,000", "About 100,000", "About 400,000"],
+          correct_index: 1,
+          explanation: "A token is roughly 4 characters, so 100,000 // 4 is about 25,000 tokens.",
+        },
+        {
+          question: "In the greedy packer, when do you start a new chunk?",
+          options: ["After every word", "When the next word plus a space would exceed max_chars", "When you hit a period", "Never, it is one chunk"],
+          correct_index: 1,
+          explanation: "You add whole words while they fit and roll to a new chunk only when the next word would overflow max_chars.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "chunk_words(\"the quick brown\", max_chars=10)",
+          steps: [
+            "current is empty, so start it with \"the\".",
+            "\"quick\" needs len(\"the\") + 1 + len(\"quick\") = 3 + 1 + 5 = 9, which is <= 10, so current becomes \"the quick\".",
+            "\"brown\" needs 9 + 1 + 5 = 15, which is > 10, so push \"the quick\" and start a new chunk with \"brown\".",
+            "The loop ends, so append the final chunk \"brown\".",
+          ],
+          output: "[\"the quick\", \"brown\"]",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A word longer than max_chars still gets its own chunk rather than being cut in half.", correct_answer: "true", explanation: "The packer never splits a word, so an oversized word simply becomes its own chunk." },
+            { type: "fill_in", question: "The fit test adds 1 to the length to account for the joining what?", correct_answer: "space", explanation: "The +1 reserves room for the single space that joins words inside a chunk." },
+          ],
+        },
+      ],
       challenge_title: "Chunk Without Splitting Words",
       challenge_description:
         "Pack words greedily into chunks no longer than a character budget, never cutting a word in half.",
@@ -821,6 +1109,63 @@ print("10 chunks, group 3:", total_calls(10, 3))
         "Start calls at n for the map phase, one summary call per chunk.",
         "Each reduce pass makes ceil(level / g) calls, then that becomes the new level.",
         "Stop the loop when only one summary is left.",
+      ],
+      animated_diagrams: [
+        {
+          title: "Map then reduce to one",
+          caption: "Map summarizes each chunk, then reduce collapses the summaries round after round until one remains.",
+          loop: true,
+          nodes: [
+            { label: "Chunks", sub: "60 pieces", detail: "You start with the chunks from the previous lesson, too many to send at once." },
+            { label: "Map", sub: "summarize each", detail: "You summarize every chunk on its own, turning 60 chunks into 60 short summaries." },
+            { label: "Group", sub: "g at a time", detail: "You group the current summaries, here 5 per group." },
+            { label: "Reduce", sub: "summarize groups", detail: "You summarize each group down to one, so the count shrinks each pass." },
+            { label: "One left?", sub: "loop or stop", detail: "If more than one summary remains, you group and reduce again; otherwise you are done." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Map", definition: "The phase that summarizes each chunk independently, one model call per chunk." },
+        { term: "Reduce", definition: "The phase that groups summaries and summarizes each group, repeating until a single summary is left." },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "Reduce synthesizes, it does not glue", content: "Stacking chunk summaries end to end just rebuilds the length problem. The reduce pass compresses again and finds the through-line across chunks." },
+      ],
+      inline_quizzes: [
+        {
+          question: "In the map phase, how many model calls does a 60-chunk document make?",
+          options: ["1", "5", "60", "It depends on the reduce group size"],
+          correct_index: 2,
+          explanation: "Map summarizes each chunk independently, so 60 chunks means 60 map calls before any reducing.",
+        },
+        {
+          question: "What are the two levers that keep map-reduce cost down?",
+          options: ["Lower temperature and shorter prompts", "Bigger chunks and a bigger reduce group size", "More retries and smaller max_tokens", "Fewer keys and more fences"],
+          correct_index: 1,
+          explanation: "Bigger chunks mean fewer map calls, and a bigger reduce group means fewer reduce passes.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Count total calls for 5 chunks with reduce group size 2.",
+          steps: [
+            "Map phase: 5 calls, one per chunk. Running total is 5.",
+            "Reduce pass 1: ceil(5 / 2) = 3 group calls. Total 8, and 3 summaries remain.",
+            "Reduce pass 2: ceil(3 / 2) = 2 group calls. Total 10, and 2 summaries remain.",
+            "Reduce pass 3: ceil(2 / 2) = 1 group call. Total 11, and 1 summary remains, so stop.",
+          ],
+          output: "11 calls",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A single-chunk document needs no reduce calls at all.", correct_answer: "true", explanation: "One chunk means one map call and no reducing, since only one summary already exists." },
+            { type: "fill_in", question: "Each reduce pass makes ceil(level / g) calls, where g is the group ____?", correct_answer: "size", explanation: "g is the reduce group size, how many summaries are combined per call." },
+          ],
+        },
       ],
       challenge_title: "Count the Map-Reduce Calls",
       challenge_description:
@@ -969,6 +1314,63 @@ for inp, out, attempts in runs:
         "Only the final successful attempt produces output tokens, so add out once.",
         "Per call the bill is attempts * input + output; sum it across every call.",
       ],
+      animated_diagrams: [
+        {
+          title: "Retry with backoff",
+          caption: "A call that fails waits a little longer and tries again, up to a limit, then raises.",
+          loop: true,
+          nodes: [
+            { label: "Attempt", sub: "call the model", detail: "You try the call inside a try block." },
+            { label: "Succeeded?", sub: "return or catch", detail: "On success you return the result. On an error you fall through to the wait." },
+            { label: "Last try?", sub: "raise if so", detail: "If this was the final attempt, you re-raise so the failure is loud, not silent." },
+            { label: "Back off", sub: "1s, 2s, 4s", detail: "Otherwise you sleep for a growing wait, 2 to the power of the attempt, then loop." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Backoff", definition: "Waiting a growing amount between retries, like 1s then 2s then 4s, to ride out transient failures." },
+        { term: "Retry billing", definition: "Every attempt re-bills its input tokens even when it fails, because you paid to send the input." },
+        { term: "Graceful degradation", definition: "Substituting a placeholder for one failed chunk so a long run finishes instead of crashing." },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Failed attempts still cost money", content: "Each retry re-sends the input, so it re-bills the input tokens. On a long map-reduce, a few retries per chunk add up fast." },
+      ],
+      inline_quizzes: [
+        {
+          question: "In the retry helper, what happens on the final failed attempt?",
+          options: ["It returns None", "It re-raises the exception", "It retries forever", "It sleeps and stops"],
+          correct_index: 1,
+          explanation: "On the last attempt it re-raises, because failing loudly beats returning a silent lie.",
+        },
+        {
+          question: "One chunk fails all its retries during a 60-chunk run. What is the resilient move?",
+          options: ["Crash the whole run", "Substitute a placeholder and keep going", "Retry that chunk forever", "Skip billing"],
+          correct_index: 1,
+          explanation: "Substituting \"[section could not be summarized]\" lets the other 59 sections still produce a summary.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "One call sends 200 input tokens, needs 3 attempts, and the success returns 30 output tokens. What is billed?",
+          steps: [
+            "Every attempt re-bills the 200 input tokens, and there were 3 attempts.",
+            "Input cost is 3 * 200 = 600 tokens.",
+            "Only the successful attempt adds output tokens: 30.",
+            "Total billed is 600 + 30.",
+          ],
+          output: "630 tokens",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A blank or trivially short input should still be sent to the model to summarize.", correct_answer: "false", explanation: "The cheapest call is the one you skip. Guard empty and very short input with an early return." },
+            { type: "fill_in", question: "Growing the wait between retries, like 1s then 2s then 4s, is called exponential ____?", correct_answer: "backoff", explanation: "Exponential backoff spaces retries out so a flaky network gets time to recover." },
+          ],
+        },
+      ],
       challenge_title: "Tally the Real Bill with Retries",
       challenge_description:
         "Compute the true token cost of a summarization run where failed attempts still bill their input tokens.",
@@ -1115,6 +1517,62 @@ print("Summarizer built. Saved to your Portfolio.")
         "Check the smallest threshold first and return early.",
         "The boundaries are inclusive: length == single_max is still single-shot.",
         "Anything past chunk_max falls through to map-reduce.",
+      ],
+      animated_diagrams: [
+        {
+          title: "The size dispatcher",
+          caption: "The tool measures the input and quietly routes it to the right strategy.",
+          loop: false,
+          nodes: [
+            { label: "Read input", sub: "file or stdin", detail: "You read text from a file argument or from standard input, so both a path and a pipe work." },
+            { label: "Measure", sub: "len(text)", detail: "You take the length of the stripped input to decide the route." },
+            { label: "Route", sub: "compare thresholds", detail: "You compare the length against the single-shot and chunk thresholds, smallest first." },
+            { label: "Run strategy", sub: "single / chunk / map-reduce", detail: "Short goes single-shot, medium gets chunked and stitched, very long runs full map-reduce." },
+            { label: "Print", sub: "one summary", detail: "The user typed one command and gets one summary back." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Dispatcher", definition: "The function that picks single-shot, chunked, or map-reduce based on the input length." },
+        { term: "Standard input", definition: "The stream a piped command feeds in, read with sys.stdin.read() when no file argument is given." },
+      ],
+      callouts: [
+        { type: "tip", position: "after", title: "Check the smallest threshold first", content: "Compare against single_max, then chunk_max, and let anything larger fall through to map-reduce. Returning early keeps the routing clear." },
+      ],
+      inline_quizzes: [
+        {
+          question: "With single_max = 2000 and chunk_max = 20000, which strategy does a length of exactly 2000 get?",
+          options: ["single-shot", "chunked", "map-reduce", "It errors"],
+          correct_index: 0,
+          explanation: "The thresholds are inclusive, so length <= single_max is true at exactly 2000 and it routes to single-shot.",
+        },
+        {
+          question: "How does the CLI accept input both ways?",
+          options: ["Only from a file", "Only from a pipe", "From a file argument if given, otherwise from standard input", "From an environment variable"],
+          correct_index: 2,
+          explanation: "If sys.argv has a path it opens the file, otherwise it reads sys.stdin, so both a path and a pipe work.",
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "choose_strategy(8000, single_max=2000, chunk_max=20000)",
+          steps: [
+            "Is 8000 <= 2000? No, so it is not single-shot.",
+            "Is 8000 <= 20000? Yes, so it falls in the chunked range.",
+            "Return \"chunked\".",
+          ],
+          output: "chunked",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "The user has to tell the tool which strategy to use.", correct_answer: "false", explanation: "The dispatcher measures the input and picks the strategy, so the user just hands it text." },
+            { type: "fill_in", question: "Which sys stream does the tool read when no file argument is passed?", correct_answer: "stdin", explanation: "With no path argument the tool reads sys.stdin, so piped input works." },
+          ],
+        },
       ],
       challenge_title: "Pick the Summarization Strategy",
       challenge_description:

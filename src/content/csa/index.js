@@ -8,7 +8,8 @@ import csa_07 from './module-csa-07.js'
 import csa_08 from './module-csa-08.js'
 import csa_09 from './module-csa-09.js'
 import csa_10 from './module-csa-10.js'
+import csa_11 from './module-csa-11.js'
 
-export const MODULES = [csa_01, csa_02, csa_03, csa_04, csa_05, csa_06, csa_07, csa_08, csa_09, csa_10]
+export const MODULES = [csa_01, csa_02, csa_03, csa_04, csa_05, csa_06, csa_07, csa_08, csa_09, csa_10, csa_11]
 
 export { default as BRIEFS } from './briefs.js'

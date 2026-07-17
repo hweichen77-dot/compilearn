@@ -138,6 +138,63 @@ print("answer:", card["answer"])
       "splitlines() turns the reply into a list of its two lines.",
       "str.removeprefix(\"Q:\") drops the label; follow it with .strip() to clean the spaces.",
     ],
+    animated_diagrams: [
+      {
+        title: "The flashcard loop",
+        caption: "One note goes in, the model shapes it, your code parses it into a card.",
+        loop: false,
+        nodes: [
+          { label: "Note", sub: "raw text", detail: "A single sentence of study notes, like a line about the mitochondria." },
+          { label: "Prompt", sub: "Q:/A: rules", detail: "The system prompt tells the model to reply in a fixed two-line format." },
+          { label: "Model reply", sub: "two lines", detail: "The model returns a Q: line and an A: line and nothing else." },
+          { label: "Parse", sub: "strip labels", detail: "Split on newlines, remove the Q: and A: prefixes, and trim the spaces." },
+          { label: "Card", sub: "dict", detail: "A dict with question and answer keys, ready to join a deck." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Flashcard", definition: "A pair of strings, a question and its answer, stored as a dict with question and answer keys." },
+      { term: "Deck", definition: "A list of card dicts, which is what the whole tool produces before writing to disk." },
+      { term: "Structured output", definition: "Forcing the model to reply in a fixed shape (here Q:/A: lines) so your code can parse it reliably." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "Parse this reply into a card: \"Q: What is the powerhouse of the cell?\\nA: The mitochondria\"",
+        steps: [
+          "Call reply.strip() to drop any leading or trailing whitespace, then splitlines() to get [\"Q: What is the powerhouse of the cell?\", \"A: The mitochondria\"].",
+          "Take line 0, call removeprefix(\"Q:\") to get \" What is the powerhouse of the cell?\", then strip() to trim the space.",
+          "Take line 1, call removeprefix(\"A:\") to get \" The mitochondria\", then strip().",
+          "Put both into a dict with keys question and answer.",
+        ],
+        output: "{\"question\": \"What is the powerhouse of the cell?\", \"answer\": \"The mitochondria\"}",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why does the system prompt force the reply into a rigid Q:/A: layout?",
+        options: [
+          "It makes the model answer faster",
+          "So the parsing code can split lines and strip labels reliably",
+          "It reduces the cost of the call",
+          "Anki requires the Q:/A: format",
+        ],
+        correct_index: 1,
+        explanation: "A fixed shape means your parser always knows where the question and answer are. Ask vaguely and you get prose no parser can read.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A single flashcard is stored as a Python dict with question and answer keys.", correct_answer: "true", explanation: "Yes, one card is just {\"question\": ..., \"answer\": ...}." },
+          { type: "fill_in", question: "Which string method turns the two-line reply into a list of its lines?", correct_answer: "splitlines", explanation: "reply.splitlines() gives you the list of lines to parse." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Constrain the output", content: "The more rigidly you pin the reply format, the simpler your parser gets. A vague ask for \"some flashcards\" gives you chatty text no code can read." },
+    ],
     challenge_title: "Count Well-Formed Cards",
     challenge_description:
       "Given candidate flashcards in question|answer form, count how many are well-formed (exactly one pipe, both sides non-empty).",
@@ -285,6 +342,62 @@ for i, c in enumerate(result):
       "Build candidate as (current + ' ' + s).strip() when current is non-empty, else just s.",
       "If candidate fits within max_chars, that becomes the new current; otherwise flush current to chunks and restart from s.",
       "After the loop, append the leftover current if it isn't empty, that's the final chunk.",
+    ],
+    animated_diagrams: [
+      {
+        title: "Greedy sentence packing",
+        caption: "Sentences flow in one at a time; each is added to the current chunk until the next would overflow.",
+        loop: true,
+        nodes: [
+          { label: "Next sentence", sub: "from the split", detail: "Take the next sentence off the list of sentences split from the notes." },
+          { label: "Build candidate", sub: "current + s", detail: "Join the current chunk and this sentence to see how long they would be together." },
+          { label: "Fits?", sub: "<= max_chars", detail: "If the candidate stays under the limit, it becomes the new current chunk." },
+          { label: "Overflow", sub: "flush + restart", detail: "If it would exceed the limit, push current to the list of chunks and start fresh from this sentence." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Chunking", definition: "Breaking a long block of notes into smaller pieces so the model reads each one carefully." },
+      { term: "Greedy packer", definition: "An algorithm that keeps adding items to the current group until the next one would break a limit, then starts a new group." },
+      { term: "Coverage", definition: "How many of the real facts in your notes actually become cards; small chunks improve it." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Pack these sentences into chunks of at most 40 chars: [\"The sky is blue\", \"Water boils at 100C\", \"Cells have a nucleus\"]",
+        steps: [
+          "Start with current empty. Candidate for sentence 1 is \"The sky is blue\" (15 chars), which fits, so current becomes it.",
+          "Candidate for sentence 2 is \"The sky is blue Water boils at 100C\" (35 chars), still under 40, so current grows.",
+          "Candidate for sentence 3 is \"The sky is blue Water boils at 100C Cells have a nucleus\" (55 chars), over 40, so flush current as a chunk and restart from sentence 3.",
+          "After the loop, current holds \"Cells have a nucleus\", so append it as the final chunk.",
+        ],
+        output: "[\"The sky is blue Water boils at 100C\", \"Cells have a nucleus\"]",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why do smaller chunks improve flashcard coverage?",
+        options: [
+          "The model reads a short focused chunk carefully instead of summarizing a long one",
+          "Smaller inputs are always free",
+          "The json module runs faster on short text",
+          "Anki only accepts short cards",
+        ],
+        correct_index: 0,
+        explanation: "A model reading ten pages tends to keep the highlights and drop the small facts. A short chunk gets full attention.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Making chunks as tiny as possible is always best because coverage keeps improving.", correct_answer: "false", explanation: "Tiny chunks mean more API calls, so more cost and time. A few hundred chars is a sane default." },
+          { type: "fill_in", question: "The packing strategy that adds sentences until the next would overflow is called a _____ packer.", correct_answer: "greedy", explanation: "It greedily fills the current chunk before starting a new one." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "More chunks costs more", content: "Every extra chunk is another API call. Balance coverage against cost; do not shrink chunks past the point where they still hold real context." },
     ],
     challenge_title: "Pack Notes into Chunks",
     challenge_description:
@@ -440,6 +553,63 @@ for c in valid:
       "A field is good only if it's a str and non-empty after .strip().",
       "isinstance(card, dict) guards against the model returning a stray string or number in the array.",
     ],
+    animated_diagrams: [
+      {
+        title: "Structured extraction",
+        caption: "One chunk becomes many cards, returned as a JSON array your code can loop over.",
+        loop: false,
+        nodes: [
+          { label: "Chunk", sub: "several facts", detail: "A packed chunk holding a few sentences worth of study material." },
+          { label: "JSON prompt", sub: "schema + example", detail: "The system prompt pins the exact keys and shows one example array." },
+          { label: "JSON array", sub: "text reply", detail: "The model replies with a JSON array of question/answer objects as a string." },
+          { label: "json.loads", sub: "one line", detail: "Parse the string into a real Python list of dicts." },
+          { label: "Validate", sub: "keep good", detail: "Keep only elements that are dicts with non-empty question and answer strings." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Structured extraction", definition: "Asking the model to return data in a fixed machine-readable shape, here a JSON array of card objects." },
+      { term: "JSON array", definition: "A list of objects written in JSON text, which json.loads turns into a Python list of dicts." },
+      { term: "Schema", definition: "The exact set of keys and types each object must have, spelled out in the prompt so the reply is predictable." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Decide which of these parsed elements are valid cards: [{\"question\": \"Q?\", \"answer\": \"A\"}, {\"question\": \"\", \"answer\": \"x\"}, \"oops\"]",
+        steps: [
+          "Element 1 is a dict; question and answer are both non-empty strings, so it is valid.",
+          "Element 2 is a dict, but question is an empty string, so q.strip() is empty and it fails.",
+          "Element 3 is a plain string, so isinstance(card, dict) is False and it fails before any key lookup.",
+          "Filter keeps only element 1.",
+        ],
+        output: "1 valid card",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why ask for a JSON array instead of the Q:/A: format from lesson 1?",
+        options: [
+          "JSON is shorter to type",
+          "JSON is a standard shape for a list of objects, and json.loads parses it in one line",
+          "The Q:/A: format costs more tokens",
+          "Models cannot produce Q:/A: text anymore",
+        ],
+        correct_index: 1,
+        explanation: "Q:/A: worked for one card. For many cards you want a real list, and JSON is the standard format the json module reads for free.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Including one example array in the prompt helps the model match the exact shape you want.", correct_answer: "true", explanation: "One line of sample output teaches the shape better than a paragraph of rules." },
+          { type: "fill_in", question: "Which json function turns the reply string into a Python list?", correct_answer: "loads", explanation: "json.loads(reply) parses the JSON text into Python objects." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Use .get, not brackets", content: "Read fields with card.get(\"question\") so a missing key returns None instead of raising KeyError on a malformed element." },
+    ],
     challenge_title: "Cards Per Note",
     challenge_description:
       "The extractor makes one card per sentence that has at least K words. Count how many cards a note produces.",
@@ -593,6 +763,63 @@ for r in replies:
       "reply.rindex(\"]\") finds the LAST closing bracket; add 1 so the slice includes it.",
       "Guard json.loads with except json.JSONDecodeError so malformed JSON returns [] instead of crashing.",
     ],
+    animated_diagrams: [
+      {
+        title: "Safe extract-then-parse",
+        caption: "Slice out the array span, try to parse it, and fall back to an empty deck if anything breaks.",
+        loop: false,
+        nodes: [
+          { label: "Noisy reply", sub: "chatter + fences", detail: "The model reply may have a preamble, code fences, or trailing text around the array." },
+          { label: "Find brackets", sub: "index / rindex", detail: "Locate the first [ and the last ]. If either is missing, return an empty deck." },
+          { label: "Slice span", sub: "first [ to last ]", detail: "Take just that substring, dropping every character outside the array." },
+          { label: "json.loads", sub: "in try/except", detail: "Parse the slice; catch JSONDecodeError so malformed JSON returns [] instead of crashing." },
+          { label: "Deck or []", sub: "list guard", detail: "Return the list if the parse succeeded and gave a list, otherwise an empty deck." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "JSONDecodeError", definition: "The exception json.loads raises when the string is not valid JSON; you catch it to avoid crashing the run." },
+      { term: "Fallback", definition: "A safe default (here an empty list) returned when parsing fails, so one bad chunk does not sink the rest." },
+      { term: "Retry", definition: "Calling the model again on a chunk that came back empty, since a second attempt often returns clean JSON." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Parse this reply safely: 'Here are your cards:\\n[{\"question\": \"Q?\", \"answer\": \"A\"}]\\nHope that helps!'",
+        steps: [
+          "reply.index(\"[\") finds the first bracket at the start of the array, after the preamble.",
+          "reply.rindex(\"]\") finds the last bracket; add 1 so the slice includes it.",
+          "Slice from that start to that end to get exactly '[{\"question\": \"Q?\", \"answer\": \"A\"}]', dropping the preamble and the trailing chatter.",
+          "json.loads on the slice succeeds and returns a list, so return it.",
+        ],
+        output: "[{\"question\": \"Q?\", \"answer\": \"A\"}]",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "What does parse_cards return when the reply has no square brackets at all?",
+        options: [
+          "It raises ValueError",
+          "It returns None",
+          "It returns an empty list []",
+          "It returns the raw reply string",
+        ],
+        correct_index: 2,
+        explanation: "index raises ValueError when the bracket is absent; the except catches it and returns [], an empty deck, so the run continues.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A bare json.loads(reply) is safe even when the model wraps the array in a code fence.", correct_answer: "false", explanation: "Any extra character before or after the array makes json.loads raise JSONDecodeError. You slice the span first." },
+          { type: "fill_in", question: "Which string method finds the LAST closing bracket in the reply?", correct_answer: "rindex", explanation: "reply.rindex(\"]\") searches from the right for the last ]." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "One bad chunk should not sink the run", content: "Returning [] on a parse failure keeps the other chunks flowing. A single crash would otherwise throw away every card in the whole run." },
+    ],
     challenge_title: "Strip the Fence and Extract",
     challenge_description:
       "Given a noisy line, print the substring from the first '[' to the last ']' inclusive, or NONE if there's no array.",
@@ -739,6 +966,62 @@ for c in result:
       "\" \".join(q.split()) collapses any run of spaces or tabs into single spaces.",
       "Track seen keys in a set and append a card only when its key is new, preserving first-seen order.",
     ],
+    animated_diagrams: [
+      {
+        title: "Normalize then seen-set dedup",
+        caption: "Each card's question is normalized to a key; the first card for a key stays, later repeats are skipped.",
+        loop: true,
+        nodes: [
+          { label: "Next card", sub: "from the deck", detail: "Walk the deck one card at a time, in extraction order." },
+          { label: "Normalize", sub: "lower + trim", detail: "Lowercase, strip, drop trailing punctuation, and collapse whitespace to build a comparison key." },
+          { label: "Seen?", sub: "check the set", detail: "Look the key up in the seen set, an instant check even for a big deck." },
+          { label: "Keep or skip", sub: "first wins", detail: "New key: add it to seen and keep the card. Already seen: skip this repeat." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Normalization", definition: "Reducing a string to a canonical form (lowercased, trimmed, punctuation dropped) so equivalent questions compare equal." },
+      { term: "Seen-set dedup", definition: "Walking a list once while tracking keys in a set, keeping only the first item for each key." },
+      { term: "Canonical key", definition: "The normalized string used to decide whether two cards count as the same fact." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Normalize and dedup these questions: [\"What is the powerhouse of the cell?\", \"what is the POWERHOUSE of the cell\", \"What year did WWII end?\"]",
+        steps: [
+          "Normalize question 1: lower and strip give \"what is the powerhouse of the cell?\", rstrip(\"?.!\") drops the ?, giving key A. Not seen, keep it.",
+          "Normalize question 2: lowercasing and dropping the missing ? give the same key A. Already seen, skip it.",
+          "Normalize question 3 to key B. Not seen, keep it.",
+          "Two cards survive, in their original order.",
+        ],
+        output: "2 unique cards",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why compare a normalized key instead of the raw question string?",
+        options: [
+          "Raw strings are slower to compare",
+          "The model phrases the same fact with different casing and punctuation, so == misses real duplicates",
+          "Normalization saves API tokens",
+          "A set cannot store long strings",
+        ],
+        correct_index: 1,
+        explanation: "\"What is X?\" and \"what is X\" are the same card to a human but different strings to ==. Normalizing collapses them to one key.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Keeping the first occurrence of each key preserves the order cards were extracted in.", correct_answer: "true", explanation: "You append a card only the first time its key appears, so surviving cards stay in extraction order." },
+          { type: "fill_in", question: "Which data structure gives an instant \"have I seen this key?\" check?", correct_answer: "set", explanation: "A Python set does membership tests in constant time on average." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "warning", position: "after", title: "Do not over-normalize", content: "Aggressive normalization (stripping filler words or matching by meaning) can merge two genuinely different cards and silently lose a fact. Stay conservative." },
+    ],
     challenge_title: "Count Unique Cards",
     challenge_description:
       "Given a list of questions, normalize each (lowercase, trim, drop trailing ? and .) and count the distinct ones.",
@@ -878,6 +1161,63 @@ for i, b in enumerate(batches):
       "estimate_tokens(chunk) is just len(chunk) // 4 (with a floor of 1).",
       "Close the current batch when it's non-empty AND adding the next chunk would exceed budget.",
       "After the loop, append the leftover current batch if it has any chunks.",
+    ],
+    animated_diagrams: [
+      {
+        title: "Batching chunks under a token budget",
+        caption: "Chunks pack into batches until the token budget fills, so fewer calls pay the system-prompt overhead.",
+        loop: true,
+        nodes: [
+          { label: "Next chunk", sub: "estimate cost", detail: "Estimate the chunk's tokens as len(text) // 4, a rough character-based count." },
+          { label: "Budget check", sub: "used + cost", detail: "If the current batch is non-empty and adding this chunk would exceed the budget, close the batch." },
+          { label: "New batch", sub: "reset used", detail: "Start a fresh batch and reset the running token total to zero." },
+          { label: "Add chunk", sub: "used += cost", detail: "Append the chunk to the current batch and add its cost to the running total." },
+          { label: "One call", sub: "per batch", detail: "Each finished batch becomes a single API call, so the system prompt is resent fewer times." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Token", definition: "The unit of model cost, roughly 4 characters of English; you pay for tokens sent and received." },
+      { term: "Token budget", definition: "A per-call cap on total tokens that decides when a batch is full and a new one must start." },
+      { term: "Batching", definition: "Packing several small chunks into one call so the fixed system-prompt overhead is paid fewer times." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Batch four chunks of ~10 tokens each under a budget of 25 tokens.",
+        steps: [
+          "Chunk 1 (10 tokens): batch empty, so add it. Running total 10.",
+          "Chunk 2 (10 tokens): 10 + 10 = 20, still under 25, so add it. Running total 20.",
+          "Chunk 3 (10 tokens): 20 + 10 = 30, over 25, so close the batch, start a new one, add chunk 3. Running total 10.",
+          "Chunk 4 (10 tokens): 10 + 10 = 20, under 25, so add it. After the loop, flush the second batch.",
+        ],
+        output: "2 batches (2 API calls instead of 4)",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why does batching reduce cost even when the total note text is unchanged?",
+        options: [
+          "It compresses the notes",
+          "The system prompt is resent once per call, so fewer calls means less repeated prompt overhead",
+          "Batched calls are billed at half price",
+          "The model skips the system prompt on batched calls",
+        ],
+        correct_index: 1,
+        explanation: "You resend the system prompt on every call. Fewer, larger calls pay that fixed overhead fewer times.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "Batching every chunk into one giant call is always the cheapest and best choice.", correct_answer: "false", explanation: "A batch that is too big is the lesson-2 problem again: the model skims and misses facts. Batch small related chunks." },
+          { type: "fill_in", question: "Roughly how many characters of English make up one token?", correct_answer: "4", explanation: "The estimator len(text) // 4 uses about 4 characters per token." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Measure before you ship", content: "Print the estimated token total for a run so the cost shows up in your terminal, not later on your billing dashboard." },
     ],
     challenge_title: "Count the API Calls",
     challenge_description:
@@ -1039,6 +1379,64 @@ for c in good:
       "Compare q.lower() == a.lower() so \"Cell\" and \"cell\" still count as identical.",
       "dropped is just len(deck) - len(good); print it so thin runs are visible.",
     ],
+    animated_diagrams: [
+      {
+        title: "The is_good validator",
+        caption: "Each card runs the cheap checks first; the first failure drops it before the costlier tests.",
+        loop: false,
+        nodes: [
+          { label: "Card", sub: "from the deck", detail: "One candidate card, which might be junk the model produced." },
+          { label: "Type check", sub: "dict + str fields", detail: "Reject anything that is not a dict with string question and answer, so a stray number cannot crash the run." },
+          { label: "Emptiness", sub: "non-blank", detail: "Strip both fields and reject the card if either is empty." },
+          { label: "Q != A", sub: "case-insensitive", detail: "Reject cards where the question equals the answer, which teach nothing." },
+          { label: "Length cap", sub: "<= max_len", detail: "Reject a field longer than the cap, which usually means the model dumped the whole note." },
+          { label: "Keep", sub: "passed all", detail: "A card that clears every gate is worth studying and joins the good deck." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Validator", definition: "A predicate that returns True only for cards worth keeping, used to filter the deck before export." },
+      { term: "Predicate", definition: "A function that returns a boolean, here is_good(card), which decides pass or fail for one item." },
+      { term: "Guard clause", definition: "An early return that rejects a bad case up front (like a non-dict) so later code can assume clean input." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Run is_good on {\"question\": \"Photosynthesis\", \"answer\": \"Photosynthesis\"} with max_len 200.",
+        steps: [
+          "It is a dict, so the type check passes.",
+          "Both fields are strings, so the field-type check passes.",
+          "After strip, both are non-empty, so the emptiness check passes.",
+          "q.lower() == a.lower() is True (both \"photosynthesis\"), so the identical-fields rule rejects it before the length check ever runs.",
+        ],
+        output: "False (card dropped)",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why put the cheap type and emptiness checks before the length comparison?",
+        options: [
+          "Length checks are not allowed to run first in Python",
+          "Cheap, most-likely-to-fail checks reject bad cards early and guard against crashes on the later checks",
+          "It makes the deck sort itself",
+          "The order does not matter at all",
+        ],
+        correct_index: 1,
+        explanation: "Checking isinstance first stops a non-string field from crashing len() or .lower() later, and cheap checks catch most junk up front.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A validator that silently discards half the deck is better than one that prints how many it dropped.", correct_answer: "false", explanation: "Printing the dropped count tells you the notes were thin or a chunk failed. A silent validator hides the problem." },
+          { type: "fill_in", question: "You compare q.lower() to a.lower() so that \"Cell\" and \"cell\" count as _____.", correct_answer: "identical", explanation: "Lowercasing both sides makes the question-equals-answer check case-insensitive." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "Report, do not hide", content: "Print kept versus dropped every run. A deck that comes back short is a signal about your notes, and you want to see it, not wonder about it." },
+    ],
     challenge_title: "Keep Valid Cards",
     challenge_description:
       "Given question|answer cards, keep those with both fields non-empty and question != answer, and print kept and dropped counts.",
@@ -1186,6 +1584,63 @@ print("cards exported:", len(deck))
       "Loop the cards and call writer.writerow([card[\"question\"], card[\"answer\"]]) for each.",
       "csv.writer handles all the escaping; never build the comma-joined line yourself.",
       "io.StringIO() gives csv.writer a file-like buffer so you can capture the text with getvalue().",
+    ],
+    animated_diagrams: [
+      {
+        title: "The finished pipeline",
+        caption: "Notes flow through every stage you built and land as an Anki-ready CSV file.",
+        loop: false,
+        nodes: [
+          { label: "Load notes", sub: "read the file", detail: "Read the raw study notes from disk as one block of text." },
+          { label: "Chunk", sub: "lesson 2", detail: "Split the notes into study-sized chunks on sentence boundaries." },
+          { label: "Batch + extract", sub: "lessons 3, 4, 6", detail: "Pack chunks into budgeted batches, call the model, and safely parse each JSON reply." },
+          { label: "Dedup + validate", sub: "lessons 5, 7", detail: "Drop repeats by normalized key, then keep only cards that pass is_good." },
+          { label: "Export CSV", sub: "csv.writer", detail: "Write one escaped row per card so the file imports straight into Anki." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "CSV", definition: "Comma-separated values: one card per row, question in the first column and answer in the second." },
+      { term: "RFC 4180", definition: "The CSV standard: a field with a comma, double-quote, or newline is wrapped in double-quotes with interior quotes doubled." },
+      { term: "csv.writer", definition: "The stdlib writer that applies RFC 4180 escaping for you, so you never hand-build a comma-joined line." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Escape this field for CSV: Say \"hi\", ok?",
+        steps: [
+          "The field contains both a comma and double-quotes, so it must be quoted per RFC 4180.",
+          "Double every interior double-quote: Say \"hi\" becomes Say \"\"hi\"\".",
+          "Wrap the whole field in outer double-quotes.",
+          "csv.writer does all of this automatically when you pass the raw string in a row.",
+        ],
+        output: "\"Say \"\"hi\"\", ok?\"",
+      },
+    ],
+    inline_quizzes: [
+      {
+        question: "Why let csv.writer build the row instead of joining fields with commas yourself?",
+        options: [
+          "csv.writer is faster than string joins",
+          "It applies RFC 4180 escaping, so commas, quotes, and newlines inside a field land in one column",
+          "Anki rejects manually built rows",
+          "String joins are deprecated in Python",
+        ],
+        correct_index: 1,
+        explanation: "Flashcard text is full of commas and quotes. csv.writer quotes and doubles them correctly so a field like Say \"hi\", ok? stays in one column.",
+      },
+    ],
+    participation_activities: [
+      {
+        activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "You should pass newline=\"\" to open() when writing a CSV file.", correct_answer: "true", explanation: "Without newline=\"\" you get blank rows between cards on some platforms." },
+          { type: "fill_in", question: "Which stdlib module handles CSV escaping correctly?", correct_answer: "csv", explanation: "The csv module implements RFC 4180 so you never escape fields by hand." },
+        ],
+      },
+    ],
+    callouts: [
+      { type: "tip", position: "after", title: "Shipped means it survives junk", content: "It is shipped when a clean start with one command handles an empty or junk notes file without crashing, writing a header-only or empty file instead of throwing." },
     ],
     challenge_title: "Escape the CSV Row",
     challenge_description:

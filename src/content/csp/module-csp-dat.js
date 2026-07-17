@@ -72,6 +72,50 @@ export default {
           "explanation": "Each additional bit doubles the count of representable values because each place is a power of 2."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Reading binary 1011 left to right",
+          "caption": "Each step doubles the running total and adds the next bit, which is how place value works.",
+          "loop": true,
+          "nodes": [
+            { "label": "value = 0", "sub": "start", "detail": "Begin with a running total of 0 before reading any bits." },
+            { "label": "bit 1", "sub": "0*2 + 1 = 1", "detail": "Double the total (still 0) and add the bit 1, giving 1." },
+            { "label": "bit 0", "sub": "1*2 + 0 = 2", "detail": "Double 1 to get 2 and add 0, giving 2." },
+            { "label": "bit 1", "sub": "2*2 + 1 = 5", "detail": "Double 2 to get 4 and add 1, giving 5." },
+            { "label": "bit 1", "sub": "5*2 + 1 = 11", "detail": "Double 5 to get 10 and add 1, giving the final value 11." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Convert the binary number 1011 to decimal using place values.",
+          "steps": [
+            "Write the place values right to left: 8, 4, 2, 1.",
+            "Line them up with the bits: 1->8, 0->4, 1->2, 1->1.",
+            "Add the places where a 1 appears: 8 + 2 + 1.",
+            "0 sits in the 4s place, so 4 is not added."
+          ],
+          "output": "11"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "One more bit doubles everything",
+          "content": "Adding a single bit doubles the number of values you can represent. That is why storage capacity grows so fast: 8 bits give 256 values, 9 bits give 512."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "A byte is made of 8 bits and can represent 256 different values.", "correct_answer": "true", "explanation": "2 to the 8th power is 256, the values 0 through 255." },
+            { "type": "fill_in", "question": "The smallest unit of data, holding either a 0 or a 1, is called a ____.", "correct_answer": "bit", "explanation": "A bit is a single binary digit." }
+          ]
+        }
+      ],
       "challenge_title": "Binary to Decimal",
       "challenge_language": "python",
       "challenge_starter_code": "# Read a binary number as a string of 0s and 1s.\n# Print its decimal (base-10) value.\nbits = input()\n# TODO: convert the binary string to a decimal integer and print it\n",
@@ -146,6 +190,50 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Each hex digit equals exactly four bits, making it a short, readable way to write binary."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Decimal to binary by repeated division",
+          "caption": "Divide by 2 over and over, collect the remainders, then read them in reverse.",
+          "loop": true,
+          "nodes": [
+            { "label": "n = 11", "sub": "11 % 2 = 1", "detail": "11 divided by 2 is 5 remainder 1. Record the 1." },
+            { "label": "n = 5", "sub": "5 % 2 = 1", "detail": "5 divided by 2 is 2 remainder 1. Record the 1." },
+            { "label": "n = 2", "sub": "2 % 2 = 0", "detail": "2 divided by 2 is 1 remainder 0. Record the 0." },
+            { "label": "n = 1", "sub": "1 % 2 = 1", "detail": "1 divided by 2 is 0 remainder 1. Record the 1." },
+            { "label": "Reverse", "sub": "1011", "detail": "Remainders came out as 1,1,0,1. Read in reverse to get 1011." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Convert the hexadecimal number 2A to decimal.",
+          "steps": [
+            "In base 16 the places are 1, 16, 256, and so on.",
+            "The digit 2 is in the 16s place: 2 * 16 = 32.",
+            "The digit A means 10, in the 1s place: 10 * 1 = 10.",
+            "Add them: 32 + 10."
+          ],
+          "output": "42"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "tip",
+          "position": "after",
+          "title": "One hex digit is four bits",
+          "content": "Because 16 is 2 to the 4th power, each hex digit maps exactly to four bits. So the byte 11111111 is just FF, which is why hex is a compact shorthand for binary."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Hexadecimal is base 16 and uses the letters A through F for the values 10 through 15.", "correct_answer": "true", "explanation": "Hex digits run 0-9 then A-F, where A is 10 and F is 15." },
+            { "type": "fill_in", "question": "The number of distinct digits a number system uses is called its base, also known as the ____.", "correct_answer": "radix", "explanation": "Radix is another word for the base of a number system." }
+          ]
         }
       ],
       "challenge_title": "Decimal to Binary",
@@ -224,6 +312,49 @@ export default {
           "explanation": "More bits raise the maximum representable value and add precision, reducing both overflow and round-off errors."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A 4-bit counter overflowing",
+          "caption": "With only 4 bits the largest value is 15, so adding 1 wraps back to 0.",
+          "loop": true,
+          "nodes": [
+            { "label": "1101 = 13", "sub": "room left", "detail": "13 fits fine in 4 bits, which can hold 0 through 15." },
+            { "label": "1110 = 14", "sub": "add 1", "detail": "Adding 1 gives 14, still within range." },
+            { "label": "1111 = 15", "sub": "at the max", "detail": "15 is the largest value 4 bits can hold." },
+            { "label": "0000 = 0", "sub": "overflow!", "detail": "Adding 1 to 15 needs a 5th bit that does not exist, so it wraps around to 0." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "A 4-bit counter holds 15 and you add 1. What does it show?",
+          "steps": [
+            "4 bits can hold 2 to the 4th = 16 values, from 0 to 15.",
+            "15 + 1 = 16 in true math.",
+            "But 16 needs a 5th bit that does not exist.",
+            "Using modulo: 16 % 16 = 0, so the counter wraps to 0."
+          ],
+          "output": "0"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "More bits help but never fully fix round-off",
+          "content": "Adding bits raises the maximum value and adds precision, reducing both errors. But some fractions like 0.1 never have an exact binary form, so round-off can always creep in."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "0.1 + 0.2 can print as 0.30000000000000004 because those decimals have no exact binary form.", "correct_answer": "true", "explanation": "That is a round-off error from storing the closest representable value." },
+            { "type": "fill_in", "question": "An error that happens when a value is too large for the available bits is called ____.", "correct_answer": "overflow", "explanation": "Overflow often causes the value to wrap around." }
+          ]
+        }
+      ],
       "challenge_title": "Fixed-Width Counter",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: number of bits.\n# Line 2: starting value.\n# Line 3: amount to add.\n# Print the result as it would appear in a fixed-width counter (with wraparound).\nbits = int(input())\nstart = int(input())\nadd = int(input())\n# TODO: compute (start + add) wrapped to fit in 'bits' bits, then print it\n",
@@ -298,6 +429,49 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Text and code require exact reconstruction; any lost data would corrupt them, so lossless is needed."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Run-length encoding AAAB",
+          "caption": "Walk the string, count each run of identical characters, and write the character plus its count.",
+          "loop": true,
+          "nodes": [
+            { "label": "See A", "sub": "start a run", "detail": "The first character is A, so begin counting a run of A." },
+            { "label": "Count AAA", "sub": "run of 3", "detail": "Keep counting while the character stays A. Three in a row gives A3." },
+            { "label": "See B", "sub": "new run", "detail": "The character changes to B, so close the A run and start a B run." },
+            { "label": "Emit A3B1", "sub": "output", "detail": "One B gives B1, so the full encoding is A3B1, which rebuilds the original exactly." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Run-length encode the string WWWWWWB.",
+          "steps": [
+            "Start at the first character W and count its run.",
+            "There are six W's in a row, so that run is W6.",
+            "The next character is B, a run of one, so B1.",
+            "Join the runs together."
+          ],
+          "output": "W6B1"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "RLE can make random data bigger",
+          "content": "Run-length encoding only shrinks data with long repeated runs. On data with no repetition, adding a count after every character actually grows the file."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Lossless compression lets you perfectly reconstruct the original data.", "correct_answer": "true", "explanation": "Lossless methods lose nothing, so the original is fully restored." },
+            { "type": "fill_in", "question": "The lossless technique that replaces runs of repeated values with a value and a count is called run-length ____.", "correct_answer": "encoding", "explanation": "Run-length encoding collapses repeated runs into a value plus a count." }
+          ]
         }
       ],
       "challenge_title": "Run-Length Encode",
@@ -376,6 +550,51 @@ export default {
           "explanation": "Lossy methods drop less-perceptible detail, exploiting the limits of human senses to shrink data."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Why lossy compression is one-way",
+          "caption": "Rounding many values to the nearest ten shrinks the data but throws away the exact originals.",
+          "loop": false,
+          "nodes": [
+            { "label": "Originals", "sub": "47, 48, 52", "detail": "Three distinct brightness values, each stored precisely." },
+            { "label": "Round to 10s", "sub": "discard detail", "detail": "Each rounds to the nearest multiple of ten: 47 and 48 and 52 all become 50." },
+            { "label": "Stored", "sub": "smaller, repetitive", "detail": "The data is now more repetitive and easier to store." },
+            { "label": "Cannot undo", "sub": "50 stays 50", "detail": "From 50 you cannot tell if it came from 47, 48, or 52. The original is gone for good." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Apply lossy rounding to the nearest 10 for the values 47 and 12.",
+          "steps": [
+            "For 47: divide by 10 to get 4.7, round to 5, multiply back to 50.",
+            "For 12: divide by 10 to get 1.2, round to 1, multiply back to 10.",
+            "The exact 47 and 12 are lost. Only 50 and 10 remain."
+          ],
+          "output": "50 10"
+        }
+      ],
+      "comparison_tables": [
+        {
+          "title": "Lossy vs lossless compression",
+          "columns": ["Aspect", "Lossless", "Lossy"],
+          "rows": [
+            ["Can restore original?", "Yes, exactly", "No, detail is discarded"],
+            ["File size", "Larger", "Smaller"],
+            ["Best for", "Text, code, records", "Photos, music, video"]
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "After lossy compression you can perfectly recover the original data.", "correct_answer": "false", "explanation": "Lossy compression permanently discards information, so the exact original cannot be restored." },
+            { "type": "fill_in", "question": "A photograph for a website is a good candidate for which kind of compression, lossy or lossless?", "correct_answer": "lossy", "explanation": "Photos tolerate minor quality loss for big size savings." }
+          ]
+        }
+      ],
       "challenge_title": "Lossy Round to Tens",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: count of values n.\n# Line 2: n space-separated integers (brightness values).\n# Print each value rounded to the nearest multiple of 10, space-separated.\nn = int(input())\nvals = input().split()\n# TODO: round each value to the nearest 10 and print them space-separated\n",
@@ -450,6 +669,50 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "Selecting rows that meet a condition is filtering."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Finding the maximum with a running best",
+          "caption": "Keep a running best and update it whenever you see something larger.",
+          "loop": true,
+          "nodes": [
+            { "label": "best = 3", "sub": "first value", "detail": "Start by assuming the first value, 3, is the largest so far." },
+            { "label": "see 9", "sub": "9 > 3", "detail": "9 is larger than 3, so update best to 9." },
+            { "label": "see 2", "sub": "2 < 9", "detail": "2 is not larger, so best stays 9." },
+            { "label": "see 7", "sub": "7 < 9", "detail": "7 is not larger either, so best stays 9. After the last value, best is the answer." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Find the maximum of the list 3 9 2 7 4.",
+          "steps": [
+            "best starts at 3, the first value.",
+            "9 > 3, so best becomes 9.",
+            "2 is not greater than 9, best stays 9.",
+            "7 is not greater than 9, best stays 9.",
+            "4 is not greater than 9, best stays 9."
+          ],
+          "output": "9"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "insight",
+          "position": "after",
+          "title": "The scale is the point",
+          "content": "This same running-best loop finds the maximum in five values or five billion. Programs turn datasets far too large to read into a single answer in seconds."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Information is the meaning we extract from raw data through processing.", "correct_answer": "true", "explanation": "Data is raw symbols; information is the meaning derived from it." },
+            { "type": "fill_in", "question": "Keeping only the rows that meet a condition, like sales above 100, is called ____.", "correct_answer": "filtering", "explanation": "Filtering selects only data that meets a condition." }
+          ]
         }
       ],
       "challenge_title": "Find the Maximum",
@@ -528,6 +791,36 @@ export default {
           "explanation": "Metadata like GPS location or document authorship can unintentionally expose private details."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Pulling one field from metadata",
+          "caption": "The program scans labeled key=value fields and keeps only the one it needs.",
+          "loop": true,
+          "nodes": [
+            { "label": "date=2024", "sub": "not it", "detail": "Split into key 'date' and value '2024'. The key is not 'size', so skip it." },
+            { "label": "size=1024", "sub": "match!", "detail": "Split into key 'size' and value '1024'. This matches, so remember 1024." },
+            { "label": "name=cat", "sub": "not it", "detail": "Key 'name' is not 'size', so skip it too." },
+            { "label": "Print 1024", "sub": "result", "detail": "After scanning all fields, print the size value we found." }
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "type": "warning",
+          "position": "after",
+          "title": "Metadata can leak private facts",
+          "content": "A photo's GPS metadata can reveal where you live, and document metadata can expose authors or edit history you never meant to share."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The date a photo was taken is an example of metadata, not the image data itself.", "correct_answer": "true", "explanation": "Metadata describes the data. The pixels are the actual image; the date describes it." },
+            { "type": "fill_in", "question": "Data that describes other data, such as a file's size or date, is called ____.", "correct_answer": "metadata", "explanation": "Metadata is data about data." }
+          ]
+        }
+      ],
       "challenge_title": "Read a Metadata Field",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: number of metadata lines n.\n# Next n lines: each is key=value.\n# Print the value of the 'size' field, or 'unknown' if it is missing.\nn = int(input())\n# TODO: scan the n lines and print the value paired with key 'size'\n",
@@ -602,6 +895,49 @@ export default {
           ],
           "correct_index": 0,
           "explanation": "Using a representative sample helps ensure the data reflects the whole population, reducing bias."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "How bias enters and spreads",
+          "caption": "Skewed collection leads to skewed data, and programs repeat that bias at scale.",
+          "loop": false,
+          "nodes": [
+            { "label": "Skewed sample", "sub": "who is missing", "detail": "Data is gathered from a group that does not represent the whole population." },
+            { "label": "Biased data", "sub": "misrepresents", "detail": "The dataset systematically misrepresents reality." },
+            { "label": "Model learns it", "sub": "repeats pattern", "detail": "A program trained on that data absorbs the same skew." },
+            { "label": "Harm at scale", "sub": "many people", "detail": "Because programs apply decisions to millions, a small bias can cause wide harm quickly." }
+          ]
+        }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Group response counts are 10, 4, 5. Is the dataset flagged as biased? (biased if the largest is more than double the smallest)",
+          "steps": [
+            "Largest count is 10, smallest is 4.",
+            "Double the smallest: 2 * 4 = 8.",
+            "Is 10 more than 8? Yes.",
+            "So the dataset is flagged biased."
+          ],
+          "output": "biased"
+        }
+      ],
+      "callouts": [
+        {
+          "type": "tip",
+          "position": "after",
+          "title": "Ask who is missing",
+          "content": "The fastest bias check is not about the data you have but the data you do not. Ask which groups were never sampled before you trust a conclusion."
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "Bias in data is more dangerous when used by programs because decisions are applied at scale.", "correct_answer": "true", "explanation": "Automated systems repeat a bias across many people quickly." },
+            { "type": "fill_in", "question": "A survey taken only on a college campus to estimate a whole country suffers from ____ bias.", "correct_answer": "sampling", "explanation": "Sampling bias arises when the data does not represent the whole population." }
+          ]
         }
       ],
       "challenge_title": "Detect Imbalanced Data",

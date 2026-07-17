@@ -72,6 +72,42 @@ export default {
           "explanation": "Relational operators always produce a boolean value."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A comparison yields a boolean",
+          "caption": "A relational operator takes two values and produces true or false.",
+          "loop": false,
+          "nodes": [
+            { "label": "a = 7, b = 10", "sub": "two values", "detail": "You have two numbers to compare." },
+            { "label": "a < b", "sub": "apply operator", "detail": "The less-than operator asks whether 7 is smaller than 10." },
+            { "label": "evaluate", "sub": "7 < 10 holds", "detail": "The relationship is checked and the answer is yes." },
+            { "label": "true", "sub": "a boolean", "detail": "The result is the boolean value true, which you can store or print." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "One = assigns, two == compares", "content": "A single = stores a value into a variable. Double == asks whether two values are equal and returns a boolean. Mixing them up is the classic beginner bug." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing comparisons with a = 7, b = 10",
+          "steps": [
+            { "label": "a < b", "detail": "7 is less than 10, so this is true.", "code": "7 < 10 -> true" },
+            { "label": "a >= b", "detail": "7 is not greater than or equal to 10, so this is false.", "code": "7 >= 10 -> false" },
+            { "label": "a == 7", "detail": "a holds 7, so equality is true.", "code": "7 == 7 -> true" },
+            { "label": "a != b", "detail": "7 and 10 differ, so not-equal is true.", "code": "7 != 10 -> true" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "The expression 5 < 5.5 evaluates to true.", "correct_answer": "true", "explanation": "Relational operators accept mixed numeric types, and 5 is less than 5.5." },
+            { "type": "fill_in", "question": "What is the type of the expression (5 < 8)?", "correct_answer": "boolean", "explanation": "Relational operators always produce a boolean." }
+          ]
+        }
+      ],
       "challenge_title": "Compare Two Integers",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        // TODO: print whether a is less than b (true/false),\n        // then whether a equals b (true/false), each on its own line\n    }\n}",
@@ -146,6 +182,42 @@ export default {
           ],
           "correct_index": 2,
           "explanation": "Java requires the condition to be a boolean expression."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "An if is a gate",
+          "caption": "The boolean condition decides whether execution passes through the body.",
+          "loop": false,
+          "nodes": [
+            { "label": "Reach the if", "sub": "score = 85", "detail": "Execution arrives at the if statement." },
+            { "label": "Test condition", "sub": "score >= 60", "detail": "The boolean expression is evaluated." },
+            { "label": "true: enter", "sub": "run the body", "detail": "Since it is true, the body runs and prints the message." },
+            { "label": "Continue after", "sub": "next statement", "detail": "Whether the body ran or was skipped, execution continues below the if." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "No semicolon after the condition", "content": "if (x > 0); ends the if with an empty body, so the next block runs every time. Connect the condition straight to a brace, and always use braces around the body." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing the if for two scores",
+          "steps": [
+            { "label": "score = 85", "detail": "The condition score >= 60 is true.", "code": "if (85 >= 60) // true" },
+            { "label": "run body", "detail": "It prints You passed! then falls through.", "code": "print \"You passed!\"" },
+            { "label": "score = 40", "detail": "Now score >= 60 is false, so the body is skipped.", "code": "if (40 >= 60) // false" },
+            { "label": "after the if", "detail": "Either way, Done prints because it is outside the if.", "code": "print \"Done\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "When an if condition is false, its body is skipped.", "correct_answer": "true", "explanation": "A false condition means the body does not run and execution continues after it." },
+            { "type": "fill_in", "question": "The boolean expression inside an if's parentheses is called the ___.", "correct_answer": "condition", "explanation": "The condition determines whether the body runs." }
+          ]
         }
       ],
       "challenge_title": "Pass or Silent",
@@ -224,6 +296,42 @@ export default {
           "explanation": "Because the first true condition wins, a too-broad earlier condition can mask later ones."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A chain stops at the first true test",
+          "caption": "Java checks each condition in order and runs only the first one that is true.",
+          "loop": false,
+          "nodes": [
+            { "label": "grade = 82", "sub": "start the chain", "detail": "Execution enters the if/else if chain." },
+            { "label": "grade >= 90?", "sub": "false", "detail": "82 is not at least 90, so skip this branch." },
+            { "label": "grade >= 80?", "sub": "true", "detail": "82 is at least 80, so this branch runs and prints B." },
+            { "label": "skip the rest", "sub": "chain ends", "detail": "Once a branch runs, all remaining conditions are ignored." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Order the conditions carefully", "content": "Only the first true branch runs. If you put grade >= 70 first, then 82 would match it and wrongly print C. Arrange ranges so an earlier test cannot swallow a later one." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing grade = 82 through the grading chain",
+          "steps": [
+            { "label": "grade >= 90", "detail": "82 >= 90 is false, so move to the next test.", "code": "82 >= 90 -> false" },
+            { "label": "grade >= 80", "detail": "82 >= 80 is true, so this branch runs.", "code": "82 >= 80 -> true" },
+            { "label": "print B", "detail": "It prints B and the chain is done.", "code": "print \"B\"" },
+            { "label": "skip remainder", "detail": "The >= 70 and else branches are never checked.", "code": "skipped" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In an if/else if/else chain, more than one branch can run for a single input.", "correct_answer": "false", "explanation": "Only the first true branch runs; the rest are skipped." },
+            { "type": "fill_in", "question": "The final catch-all branch that runs when no condition is true is the ___ clause.", "correct_answer": "else", "explanation": "The else clause covers every case the conditions missed." }
+          ]
+        }
+      ],
       "challenge_title": "Letter Grade",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int g = sc.nextInt();\n        // TODO: print A for g>=90, B for g>=80, C for g>=70, else F\n    }\n}",
@@ -298,6 +406,43 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "AND is true only when both are true, so it is false whenever at least one operand is false."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Combining conditions with && and ||",
+          "caption": "Logical operators fold several boolean checks into a single answer.",
+          "loop": false,
+          "nodes": [
+            { "label": "age >= 18", "sub": "first check", "detail": "One condition is evaluated to true or false." },
+            { "label": "hasLicense", "sub": "second check", "detail": "A second boolean is evaluated." },
+            { "label": "&&", "sub": "both must hold", "detail": "AND is true only when both operands are true." },
+            { "label": "final boolean", "sub": "may drive?", "detail": "The combined result decides whether the if body runs." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Precedence: !, then &&, then ||", "content": "! binds tightest, then &&, then ||. So a || b && c means a || (b && c). Add parentheses to make your intent obvious." }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "easy",
+          "prompt": "Evaluate (false || true) && !false",
+          "steps": [
+            "Evaluate the parentheses first: false || true is true.",
+            "Evaluate !false, which is true.",
+            "Combine with &&: true && true is true."
+          ],
+          "output": "true"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "a && b is true only when both a and b are true.", "correct_answer": "true", "explanation": "AND requires both operands to be true." },
+            { "type": "fill_in", "question": "Which operator is true when at least one operand is true? (write the two-character symbol)", "correct_answer": "||", "explanation": "Logical OR is true when either or both operands are true." }
+          ]
         }
       ],
       "challenge_title": "Eligible to Vote and Drive",
@@ -376,6 +521,41 @@ export default {
           "explanation": "Nesting shines when each outer branch leads to distinct further decisions."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "A decision refined in stages",
+          "caption": "The inner if is only reached once the outer condition is already true.",
+          "loop": false,
+          "nodes": [
+            { "label": "age >= 18?", "sub": "outer test", "detail": "First decide whether the person is an adult." },
+            { "label": "true: go inside", "sub": "enter inner if", "detail": "Only adults reach the membership check." },
+            { "label": "member?", "sub": "inner test", "detail": "Now refine the decision based on membership." },
+            { "label": "false: else path", "sub": "Minor", "detail": "A non-adult skips the inner test entirely and takes the outer else." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "warning", "position": "after", "title": "Watch the dangling else", "content": "Without braces, an else pairs with the nearest unmatched if, not with whatever the indentation suggests. Always use braces so the pairing is explicit." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing age = 20, member = true",
+          "steps": [
+            { "label": "age >= 18", "detail": "20 >= 18 is true, so enter the outer if body.", "code": "if (20 >= 18) // true" },
+            { "label": "member", "detail": "member is true, so take the inner if branch.", "code": "if (member) // true" },
+            { "label": "print", "detail": "It prints Full access. A minor would never reach this test.", "code": "print \"Full access\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In a nested if, the inner condition is checked only when the outer condition is true.", "correct_answer": "true", "explanation": "The inner if lives inside the outer body, so it runs only after the outer test passes." },
+            { "type": "fill_in", "question": "The ambiguity where an else attaches to the nearest unmatched if is called the ___ else problem.", "correct_answer": "dangling", "explanation": "The dangling else pairs with the nearest unmatched if regardless of indentation." }
+          ]
+        }
+      ],
       "challenge_title": "Ticket Pricing",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int age = sc.nextInt();\n        int isMember = sc.nextInt(); // 1 = member, 0 = not\n        // TODO: if age < 13 print CHILD\n        // else if member (isMember==1) print MEMBER else print ADULT\n    }\n}",
@@ -450,6 +630,42 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "If x is 0, the false left operand short-circuits so 10/x is never computed, avoiding a crash."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Short-circuit stops early",
+          "caption": "Once the result is certain, Java skips the rest of the expression.",
+          "loop": false,
+          "nodes": [
+            { "label": "x != 0 && 10 / x > 2", "sub": "the condition", "detail": "A guard on the left protects a risky operation on the right." },
+            { "label": "x = 0", "sub": "evaluate left", "detail": "x != 0 is false when x is zero." },
+            { "label": "false && ...", "sub": "already false", "detail": "AND with a false left operand can only be false, so the result is settled." },
+            { "label": "skip 10 / x", "sub": "no crash", "detail": "The right side is never evaluated, avoiding divide-by-zero." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "insight", "position": "after", "title": "Guard order protects you", "content": "With &&, put the check that can rule things out first, like x != 0 before 10 / x. With ||, put the check that can confirm early first, like s == null before s.length()." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing x != 0 && 10 / x > 2 with x = 0",
+          "steps": [
+            { "label": "x != 0", "detail": "x is 0, so this operand is false.", "code": "0 != 0 -> false" },
+            { "label": "false && ...", "detail": "AND with a false left side is already false.", "code": "false && X" },
+            { "label": "skip right", "detail": "10 / x is never computed, so no ArithmeticException.", "code": "10 / x // not evaluated" },
+            { "label": "result", "detail": "The whole condition is false and the body is skipped.", "code": "false" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "In false && method(), the method is never called.", "correct_answer": "true", "explanation": "A false left operand short-circuits &&, so the right side is skipped." },
+            { "type": "fill_in", "question": "For a || b, the right side b is skipped when a is what? (true or false)", "correct_answer": "true", "explanation": "If a is true, the OR is already true, so b is not evaluated." }
+          ]
         }
       ],
       "challenge_title": "Safe Average Check",
@@ -528,6 +744,44 @@ export default {
           "explanation": "De Morgan's Law turns !(a && b) into !a || !b."
         }
       ],
+      "animated_diagrams": [
+        {
+          "title": "Distributing a NOT with De Morgan",
+          "caption": "Negate each operand and flip the operator between && and ||.",
+          "loop": false,
+          "nodes": [
+            { "label": "!(a && b)", "sub": "the target", "detail": "You want the opposite of an AND condition." },
+            { "label": "negate each", "sub": "!a and !b", "detail": "Apply the NOT to each operand separately." },
+            { "label": "flip operator", "sub": "&& becomes ||", "detail": "AND turns into OR when the negation is distributed." },
+            { "label": "!a || !b", "sub": "equivalent", "detail": "The rewritten form matches the original for every input." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Negate the relational operator too", "content": "!(x >= 5) is x < 5, and !(a == b) is a != b. When you push a NOT inward, flip each comparison to its opposite." }
+      ],
+      "worked_examples": [
+        {
+          "difficulty": "medium",
+          "prompt": "Rewrite !(age >= 18 && citizen) without the outer NOT.",
+          "steps": [
+            "De Morgan turns !(a && b) into !a || !b.",
+            "So it becomes !(age >= 18) || !citizen.",
+            "Negate the relational operator: !(age >= 18) is age < 18.",
+            "The clean equivalent is (age < 18) || !citizen."
+          ],
+          "output": "(age < 18) || !citizen"
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "!(a || b) is equivalent to !a && !b.", "correct_answer": "true", "explanation": "By De Morgan's Law, negating an OR gives the AND of the negations." },
+            { "type": "fill_in", "question": "!(x >= 5) is equivalent to x ___ 5. (write the operator)", "correct_answer": "<", "explanation": "The negation of >= is <." }
+          ]
+        }
+      ],
       "challenge_title": "Outside the Range",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int x = sc.nextInt();\n        // The value is IN range when (x >= 10 && x <= 20).\n        // TODO: using De Morgan's Law, print OUT if x is NOT in range, else IN\n    }\n}",
@@ -602,6 +856,42 @@ export default {
           ],
           "correct_index": 1,
           "explanation": "A truth table enumerates every input combination, confirming the outputs always match."
+        }
+      ],
+      "animated_diagrams": [
+        {
+          "title": "Classifying an integer through a chain",
+          "caption": "Mutually exclusive branches, ordered so zero is handled before the sign checks.",
+          "loop": false,
+          "nodes": [
+            { "label": "n == 0?", "sub": "handle zero first", "detail": "Check the special zero case before looking at sign." },
+            { "label": "n > 0 && even?", "sub": "positive even", "detail": "Only positive numbers reach the modulo test, which short-circuits otherwise." },
+            { "label": "n > 0?", "sub": "positive odd", "detail": "A positive number that failed the even test must be odd." },
+            { "label": "else", "sub": "negative", "detail": "Anything left over is negative." }
+          ]
+        }
+      ],
+      "callouts": [
+        { "type": "tip", "position": "after", "title": "Spot tautologies and contradictions", "content": "score >= 60 || score < 60 is always true (a tautology), and a && !a is always false (a contradiction). Recognizing these lets you simplify or catch buggy conditions fast." }
+      ],
+      "step_throughs": [
+        {
+          "title": "Tracing n = -4 through the classifier",
+          "steps": [
+            { "label": "n == 0", "detail": "-4 is not 0, so skip the ZERO branch.", "code": "-4 == 0 -> false" },
+            { "label": "n > 0 && n % 2 == 0", "detail": "-4 > 0 is false, so && short-circuits and skips the modulo test.", "code": "false && ... -> false" },
+            { "label": "n > 0", "detail": "-4 > 0 is false, so skip POS-ODD.", "code": "-4 > 0 -> false" },
+            { "label": "else", "detail": "The final else runs and prints NEGATIVE.", "code": "print \"NEGATIVE\"" }
+          ]
+        }
+      ],
+      "participation_activities": [
+        {
+          "activity_title": "Check yourself",
+          "questions": [
+            { "type": "true_false", "question": "a && !a is always false for any boolean a.", "correct_answer": "true", "explanation": "An operand and its negation cannot both be true, so the AND is a contradiction." },
+            { "type": "fill_in", "question": "A boolean expression that is always true, like a || !a, is called a ___.", "correct_answer": "tautology", "explanation": "A tautology is true for every combination of inputs." }
+          ]
         }
       ],
       "challenge_title": "Classify the Integer",

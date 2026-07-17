@@ -2,6 +2,7 @@ import React from "react";
 import { ConceptCallout, KeyTerms, ConceptDiagram } from "./ConceptCallout";
 import InlineQuiz from "./InlineQuiz";
 import ConceptVideo from "./ConceptVideo";
+import AnimatedDiagram from "./AnimatedDiagram";
 
 export default function LessonEnhancements({ lesson }) {
   if (!lesson) return null;
@@ -10,9 +11,10 @@ export default function LessonEnhancements({ lesson }) {
   const keyTerms = lesson.key_terms || [];
   const diagram = lesson.concept_diagram;
   const inlineQuizzes = lesson.inline_quizzes || [];
+  const animatedDiagrams = lesson.animated_diagrams || [];
   const videoId = lesson.video_id;
 
-  const hasAnything = videoId || keyTerms.length || diagram || callouts.length || inlineQuizzes.length;
+  const hasAnything = videoId || keyTerms.length || diagram || callouts.length || inlineQuizzes.length || animatedDiagrams.length;
   if (!hasAnything) return null;
 
   return (
@@ -42,6 +44,17 @@ export default function LessonEnhancements({ lesson }) {
       {diagram?.steps?.length > 0 && (
         <ConceptDiagram steps={diagram.steps} title={diagram.title} />
       )}
+
+      {animatedDiagrams.map((d, i) => (
+        <AnimatedDiagram
+          key={`anim-${i}`}
+          title={d.title}
+          nodes={d.nodes}
+          caption={d.caption}
+          loop={d.loop}
+          interval={d.interval}
+        />
+      ))}
 
       {inlineQuizzes.map((q, i) => (
         <InlineQuiz

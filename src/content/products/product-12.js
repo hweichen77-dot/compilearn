@@ -21,6 +21,31 @@ const lessons = [
     order: 1,
     title: "Sending an Image to a Vision Model",
     concept: "image encoding for vision APIs",
+    animated_diagrams: [
+      {
+        title: "From photo file to vision payload",
+        caption: "Binary bytes become text-safe characters, then ride next to your prompt.",
+        loop: false,
+        nodes: [
+          { label: "Read bytes", sub: "open the file", detail: "Read the image file in binary mode to get its raw bytes." },
+          { label: "base64 encode", sub: "bytes to text", detail: "JSON is text, so the bytes are base64-encoded into a long safe string." },
+          { label: "Image block", sub: "type + source + data", detail: "Wrap the string in a content block with a type of image and a source describing the encoding." },
+          { label: "Send with prompt", sub: "two blocks", detail: "The image block and a text block go in the same message, and the model reads both together." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Base64 encoding", definition: "A way to turn raw binary bytes into text-safe characters so they fit inside a JSON request." },
+      { term: "Content block", definition: "One item in a message's content list; a vision call has an image block and a text block." },
+      { term: "media_type", definition: "A label like image/jpeg or image/png that tells the model how to decode the bytes." },
+    ],
+    inline_quizzes: [
+      { question: "Why is the image base64-encoded before sending?", options: ["To shrink the file", "A JSON request is text and cannot carry raw binary", "To hide the contents", "The model prefers it"], correct_index: 1, explanation: "JSON is text, so binary bytes are turned into a safe string of characters first." },
+      { question: "What breaks if you label a PNG as image/jpeg?", options: ["Nothing", "Decoding can fail quietly or the model misreads the picture", "The file gets smaller", "The prompt is ignored"], correct_index: 1, explanation: "media_type tells the model how to decode the bytes, so a wrong label leads to a failed or misread image. Take it from the file's real format." },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "Two payloads, one message", content: "Every vision call is a picture translated into text-safe characters plus a sentence telling the model what to do with it. The rest of this product sits on top of this one content block." },
+    ],
     explanation:
       "A vision model never opens a photo file. It reads bytes that have been base64-encoded into text and packed into a JSON content block next to your prompt. This lesson builds that payload. Every later lesson reuses it.\n\n## What multimodal input means\n\nA normal text call sends one string. A vision call sends a list of content blocks: one block holds the image, another holds your text instruction. The model reads both as parts of the same message and reasons over them together.\n\n## Turning a file into base64\n\nA JSON request is text, so it can't carry raw binary. The image bytes get base64-encoded first, which turns them into a long string of safe characters.\n\n```python\nimport base64\n\nwith open(\"photo.jpg\", \"rb\") as f:\n    image_bytes = f.read()\n\nimage_b64 = base64.b64encode(image_bytes).decode(\"utf-8\")\n```\n\n## Building the content block\n\nThe block needs three parts: a `type` of \"image\", a `source` dict that says how the data is encoded, and the base64 string.\n\n```python\ncontent = [\n    {\n        \"type\": \"image\",\n        \"source\": {\n            \"type\": \"base64\",\n            \"media_type\": \"image/jpeg\",\n            \"data\": image_b64,\n        },\n    },\n    {\"type\": \"text\", \"text\": \"Describe this image in one sentence.\"},\n]\n```\n\n## Sending it\n\n```python\nimport os\nfrom anthropic import Anthropic\n\nclient = Anthropic(api_key=os.environ[\"ANTHROPIC_API_KEY\"])\n\nresponse = client.messages.create(\n    model=\"claude-sonnet-4-6\",\n    max_tokens=200,\n    messages=[{\"role\": \"user\", \"content\": content}],\n)\nprint(response.content[0].text)\n```\n\n## Why media_type matters\n\n`media_type` tells the model how to decode the bytes. The common formats are `image/jpeg`, `image/png`, `image/webp`, and `image/gif`. Label a PNG as JPEG and decoding either fails quietly or the model misreads the picture. Take this value from the file's real format. Don't guess it.\n\n## The mental model to keep\n\nEvery vision call is two payloads riding together: a picture translated into text-safe characters, and a sentence that tells the model what to do with it. Captions, alt text, and validation all sit on top of this one content block.",
     starter_code: `import base64
@@ -108,6 +133,34 @@ main()
     order: 2,
     title: "The Smallest Caption Call",
     concept: "request/response round trip",
+    animated_diagrams: [
+      {
+        title: "The smallest caption round trip",
+        caption: "Send the payload, get a Message back, read the first text block.",
+        loop: false,
+        nodes: [
+          { label: "Send message", sub: "image + prompt", detail: "You send the content list with the image and the instruction." },
+          { label: "Model replies", sub: "Message object", detail: "The reply is a Message whose content is a list of blocks mirroring the request." },
+          { label: "content[0]", sub: "first block", detail: "A plain text reply almost always has one block of type text at index 0." },
+          { label: ".text", sub: "the caption", detail: "Pull the caption string out of that first block and print it." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Message object", definition: "The SDK's parsed reply, whose content is a list of blocks just like the request." },
+      { term: "content[0].text", definition: "The text of the first content block, where a plain caption reply sits." },
+    ],
+    inline_quizzes: [
+      { question: "Why is the reply's content a list, not a single string?", options: ["A bug in the SDK", "It mirrors the request shape so replies mixing text with other block types still fit", "To save memory", "It is always empty"], correct_index: 1, explanation: "The SDK keeps the list shape so any reply, plain or mixed, uses the same structure. You read content[0].text." },
+      { question: "This lesson is the whole six-step loop. Which step is content[0].text?", options: ["Input", "Prompt", "Parse", "Ship"], correct_index: 2, explanation: "Reading content[0].text is the parse step: input, prompt, call, parse, verify, ship." },
+    ],
+    participation_activities: [
+      { activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A caption is just a text reply where the input happened to include a picture.", correct_answer: "true", explanation: "Once you can pull content[0].text, you build the rest by changing what you ask for, not how you ask." },
+          { type: "fill_in", question: "What attribute holds the text of a reply block in the SDK object?", correct_answer: "text", explanation: "response.content[0].text is where the caption string lives." },
+        ] },
+    ],
     explanation:
       "Once the payload is built, the round trip is short: send it, get text back, print it. This lesson is the smallest version of the whole product. It captions one image in about ten lines.\n\n## The request/response shape\n\nYou already know what a message with an image looks like from the last lesson. The reply comes back as a `Message` object, and the text you want sits at `response.content[0].text`, the first content block of the reply.\n\n```python\nresponse = client.messages.create(\n    model=\"claude-sonnet-4-6\",\n    max_tokens=200,\n    messages=[{\n        \"role\": \"user\",\n        \"content\": [\n            {\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/jpeg\", \"data\": image_b64}},\n            {\"type\": \"text\", \"text\": \"Describe this image in one sentence.\"},\n        ],\n    }],\n)\n\ncaption = response.content[0].text\nprint(caption)\n```\n\n## Why content[0], not just content\n\nThe reply's `content` is a list of blocks that mirrors the request. A plain text reply almost always has exactly one block of type \"text\", but the SDK keeps the list shape so replies mixing text with other block types fit the same structure. You'll write `content[0].text` in nearly every product in this track.\n\n## What the raw response looks like\n\nUnderneath the SDK object, the API returns JSON shaped roughly like this:\n\n```python\n{\n    \"content\": [{\"type\": \"text\", \"text\": \"A golden retriever runs across a grassy park.\"}],\n    \"usage\": {\"input_tokens\": 1204, \"output_tokens\": 12},\n}\n```\n\nThe SDK parses this for you. Knowing the shape still helps, because when a bad key or a malformed reply breaks something, this exact structure is what you debug.\n\n## Why this is the whole loop already\n\nThis is the same six-step loop from the setup module: input (an image), prompt (the instruction), call (the API), parse (content[0].text), verify (lesson 6), ship (print it). Everything from here refines steps 2 through 5 for this one product.\n\n## The mental model to keep\n\nA caption is a text reply where the input happened to include a picture. Once you can pull `content[0].text` from a response, you build the rest of this product by changing what you ask for, not how you ask for it.",
     starter_code: `import json
@@ -204,6 +257,36 @@ main()
     order: 3,
     title: "Caption vs Alt Text: Two Different Jobs",
     concept: "task-specific prompting",
+    animated_diagrams: [
+      {
+        title: "One image, two jobs",
+        caption: "The picture stays the same; branch the prompt by mode.",
+        loop: false,
+        nodes: [
+          { label: "Same image", sub: "one input", detail: "Both outputs describe the exact same picture." },
+          { label: "Pick mode", sub: "caption or alt_text", detail: "get_prompt(mode) chooses which instruction to send." },
+          { label: "Caption prompt", sub: "for a sighted reader", detail: "Vivid, a little editorial, there to add context or personality." },
+          { label: "Alt-text prompt", sub: "for a screen reader", detail: "Plain, complete, short, and free of 'image of' since the screen reader already says 'image'." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Caption", definition: "A vivid sentence for a sighted reader scanning a page, meant to add context or personality." },
+      { term: "Alt text", definition: "A plain, short description that replaces the image for a screen reader user." },
+      { term: "Task-specific prompt", definition: "A separate instruction written for each job, rather than one describe-this prompt reused twice." },
+    ],
+    comparison_tables: [
+      { title: "Caption vs alt text", columns: ["Aspect", "Caption", "Alt text"], rows: [
+        ["Reader", "Sighted, scanning", "Screen reader user"],
+        ["Tone", "Vivid, editorial", "Plain, literal"],
+        ["Length", "One natural sentence", "Under 125 characters"],
+        ["Starts with 'image of'?", "Does not matter", "Never, the reader already says it"],
+      ] },
+    ],
+    inline_quizzes: [
+      { question: "Why must alt text not start with 'image of'?", options: ["It is too long", "Screen readers already announce 'image' first, so it doubles up", "It is grammatically wrong", "The model cannot write it"], correct_index: 1, explanation: "The screen reader says 'image' before reading the alt text, so 'image of' wastes the listener's time." },
+      { question: "When a product needs two outputs from one input, what should you branch?", options: ["The whole pipeline", "The prompt", "The model", "The image encoding"], correct_index: 1, explanation: "One get_prompt(mode) function is cheaper than two near-duplicate call functions." },
+    ],
     explanation:
       "A caption and alt text describe the same picture, but they serve different readers doing different jobs. That means two prompts, not one prompt reused twice.\n\n## Two jobs, one image\n\n- A **caption** is for a sighted reader scanning a page. It can be vivid and a little editorial, there to add context or personality (\"A golden retriever bounds through morning fog.\").\n- **Alt text** is for a screen reader user who cannot see the image. It has to replace the picture: plain, complete, and short enough to read aloud without wearing out its welcome (\"A dog running through a foggy field.\").\n\nSend the same \"describe this image\" prompt for both and you get one mediocre result trying to do two jobs. The fix is two separate instructions, picked by mode.\n\n## Writing task-specific prompts\n\n```python\nCAPTION_PROMPT = (\n    \"Write one vivid, natural sentence captioning this image, \"\n    \"as if for a photo essay. No hashtags, no emoji.\"\n)\n\nALT_TEXT_PROMPT = (\n    \"Write concise alt text for this image for a screen reader. \"\n    \"Describe only what is visibly present. Do not start with \"\n    \"'image of' or 'picture of'. Keep it under 125 characters.\"\n)\n\ndef get_prompt(mode):\n    if mode == \"caption\":\n        return CAPTION_PROMPT\n    if mode == \"alt_text\":\n        return ALT_TEXT_PROMPT\n    raise ValueError(f\"unknown mode: {mode}\")\n```\n\n## Calling with the right prompt\n\n```python\ndef caption_image(client, image_content, mode):\n    prompt = get_prompt(mode)\n    response = client.messages.create(\n        model=\"claude-sonnet-4-6\",\n        max_tokens=150,\n        messages=[{\"role\": \"user\", \"content\": [image_content, {\"type\": \"text\", \"text\": prompt}]}],\n    )\n    return response.content[0].text\n```\n\n## Why \"do not start with 'image of'\" is in the prompt\n\nScreen reader software already announces \"image\" before it reads alt text. Alt text that starts with \"image of\" doubles that up and wastes the listener's time. A sighted person would never think to ask for this rule. It comes from knowing the audience, not the picture.\n\n## The mental model to keep\n\nThe picture doesn't change between the two calls. The audience does. When a product needs two outputs from one input, branch the prompt, not the pipeline. One `get_prompt(mode)` function is cheaper than two near-duplicate call functions.",
     starter_code: `CAPTION_PROMPT = "Write one vivid sentence caption for this image."
@@ -305,6 +388,43 @@ main()
     order: 4,
     title: "Alt Text Has Rules",
     concept: "accessibility validation",
+    animated_diagrams: [
+      {
+        title: "Validating alt text",
+        caption: "Empty check first, then length, then banned phrases.",
+        loop: false,
+        nodes: [
+          { label: "Empty?", sub: "return early", detail: "If the alt text is blank, record 'empty' and stop; there is nothing to measure." },
+          { label: "Too long?", sub: "over 125 chars", detail: "Past the ~125 character guideline it turns into a monologue read aloud." },
+          { label: "Redundant phrase?", sub: "image of / picture of", detail: "Flag phrasing the screen reader would double up on." },
+          { label: "Issues list", sub: "the contract", detail: "Return the list of problems; an empty list means the alt text passes." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Alt-text validator", definition: "Code that checks alt text against the empty, length, and redundant-phrase rules before it ships." },
+      { term: "Redundant phrase", definition: "Wording like 'image of' or 'picture of' that a screen reader would announce twice." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "easy",
+        prompt: "validate_alt_text('Image of a cat sitting on a windowsill.')",
+        steps: [
+          "The string is not empty, so skip the early return.",
+          "Its length is well under 125, so no too_long issue.",
+          "Lowercase it and check the banned phrases: image of is present.",
+          "Append redundant_phrase and return the issues list.",
+        ],
+        output: "['redundant_phrase']",
+      },
+    ],
+    callouts: [
+      { type: "insight", position: "after", title: "Prompt is a suggestion, validator is the contract", content: "Models are probabilistic, so a prompt only lowers how often a rule breaks. Anything you can write as an if statement belongs in code, not just in the instructions." },
+    ],
+    inline_quizzes: [
+      { question: "Why validate alt text in code when the prompt already asks for the rules?", options: ["Prompts are ignored", "Models are probabilistic, so the validator is what keeps a broken result from ever shipping", "It is faster", "The API requires it"], correct_index: 1, explanation: "A prompt lowers how often the rule breaks; the validator enforces it. Treat the prompt as a suggestion and the validator as the contract." },
+      { question: "Why does the empty check return right away?", options: ["To raise an error", "There is no point measuring the length of nothing", "Empty alt text is always fine", "To skip the retry"], correct_index: 1, explanation: "An empty string has nothing to measure, so the check returns ['empty'] immediately." },
+    ],
     explanation:
       "Ask a model for \"alt text under 125 characters\" and it will sometimes ignore you. Screen reader software doesn't check the model's manners, so your product has to. This lesson builds the validator that catches bad alt text before it ships.\n\n## The three rules that matter most\n\n1. **Length.** Screen readers read alt text aloud in full. A widely used guideline caps useful alt text near 125 characters. Past that it turns into a monologue.\n2. **No redundant phrasing.** Screen readers already announce \"image\" or \"graphic\" before the alt text plays, so text starting with \"image of\" or \"picture of\" makes the user hear it twice.\n3. **Not empty.** Empty alt text is correct only for a truly decorative image. For a content image the reader gets nothing, which is a broken experience.\n\n## Writing the validator\n\n```python\nMAX_ALT_LENGTH = 125\nREDUNDANT_PHRASES = (\"image of\", \"picture of\", \"photo of\")\n\ndef validate_alt_text(alt_text):\n    issues = []\n    if not alt_text.strip():\n        issues.append(\"empty\")\n        return issues\n    if len(alt_text) > MAX_ALT_LENGTH:\n        issues.append(\"too_long\")\n    lowered = alt_text.lower()\n    if any(p in lowered for p in REDUNDANT_PHRASES):\n        issues.append(\"redundant_phrase\")\n    return issues\n```\n\nThe empty check returns right away. There's no point measuring the length of nothing.\n\n## What you do with a failing validator\n\nA validator that only prints \"bad\" doesn't help a product. Retry instead: call again and check the new attempt.\n\n```python\ndef get_valid_alt_text(client, image_content, retries=2):\n    for _ in range(retries + 1):\n        alt = caption_image(client, image_content, \"alt_text\")\n        if not validate_alt_text(alt):\n            return alt\n    return alt  # last attempt, even if imperfect\n```\n\n## Why validation lives outside the prompt\n\nYou could tighten the prompt forever and still get an occasional miss. Models are probabilistic, not compilers. A prompt lowers how often the rule breaks. The validator is what keeps a broken result from ever shipping. Treat the prompt as a suggestion and the validator as the contract.\n\n## The mental model to keep\n\nAccessibility rules are numeric and checkable, so don't leave them to hope. Anything you can write as an `if` statement (length, banned phrases, emptiness) belongs in code, not only in the instructions you send the model.",
     starter_code: `MAX_ALT_LENGTH = 125
@@ -402,6 +522,40 @@ main()
     order: 5,
     title: "Structuring the Output as JSON",
     concept: "parsing structured captions",
+    animated_diagrams: [
+      {
+        title: "One call, both fields, safe parse",
+        caption: "Ask for JSON with two keys, then extract only the braces.",
+        loop: false,
+        nodes: [
+          { label: "Combined prompt", sub: "caption + alt_text", detail: "One prompt asks for a JSON object with both fields, saving a second round trip." },
+          { label: "Raw reply", sub: "maybe fenced", detail: "The model sometimes wraps the JSON in a markdown code fence or preamble." },
+          { label: "Find braces", sub: "index / rindex", detail: "Locate the first open brace and the last close brace so surrounding text does not break the parse." },
+          { label: "json.loads", sub: "the slice", detail: "Parse only the slice between the braces into a dict with both keys." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Combined prompt", definition: "A single instruction that asks for both the caption and alt text as one JSON object." },
+      { term: "Defensive parser", definition: "Code that extracts the JSON between the outermost braces instead of trusting the reply to be clean." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Parse a reply where a markdown json fence wraps {\"caption\": \"A cat sits.\", \"alt_text\": \"A gray cat.\"}",
+        steps: [
+          "Do not call json.loads on the whole string; the backticks are not valid JSON.",
+          "index of the first open brace finds it, skipping the fence and the word json.",
+          "rindex of the last close brace marks the end; add 1 because slicing is exclusive.",
+          "json.loads the slice between them into a dict.",
+        ],
+        output: "{'caption': 'A cat sits.', 'alt_text': 'A gray cat.'}",
+      },
+    ],
+    inline_quizzes: [
+      { question: "Why one combined call instead of two separate ones?", options: ["It is more accurate", "Every request pays for the image tokens, so sending the picture twice pays that cost twice", "Two calls are not allowed", "To get longer captions"], correct_index: 1, explanation: "One structured reply with both fields is cheaper and faster; the only cost is a slightly more careful parser." },
+      { question: "Why find the braces instead of calling json.loads directly?", options: ["It is shorter", "The model may wrap the JSON in a fence or preamble that would crash a direct parse", "rindex is faster", "To validate the keys"], correct_index: 1, explanation: "Treat the raw text as untrusted and extract the outermost braces before parsing." },
+    ],
     explanation:
       "Two separate calls, one for a caption and one for alt text, means two round trips: twice the latency and twice the cost. This lesson merges them into one call that returns both fields as JSON, then builds a parser that survives the model's habit of wrapping JSON in extra text.\n\n## Asking for both fields at once\n\n```python\nCOMBINED_PROMPT = \"\"\"Look at this image and return ONLY a JSON object with two keys:\n- \"caption\": one vivid sentence for a photo caption\n- \"alt_text\": screen-reader alt text, under 125 characters, not starting with 'image of'\nReturn no other text.\"\"\"\n\nresponse = client.messages.create(\n    model=\"claude-sonnet-4-6\",\n    max_tokens=200,\n    messages=[{\"role\": \"user\", \"content\": [image_content, {\"type\": \"text\", \"text\": COMBINED_PROMPT}]}],\n)\nraw_text = response.content[0].text\n```\n\n## What actually comes back\n\nModels are inconsistent about \"return no other text.\" Sometimes you get clean JSON:\n\n```python\n{\"caption\": \"A dog runs in a park.\", \"alt_text\": \"A brown dog running through green grass.\"}\n```\n\nOther times the object arrives wrapped in a markdown fence: three backticks, the word json, a newline, the object, then three backticks again. Call `json.loads()` on that wrapped text and it crashes, because the backticks aren't valid JSON.\n\n## The defensive parser\n\nRather than trust the wrapper, find the outermost braces and parse only what's between them.\n\n```python\nimport json\n\ndef parse_caption_response(raw_text):\n    start = raw_text.index(\"{\")\n    end = raw_text.rindex(\"}\") + 1\n    return json.loads(raw_text[start:end])\n\nresult = parse_caption_response(raw_text)\nprint(result[\"caption\"])\nprint(result[\"alt_text\"])\n```\n\n`index(\"{\")` finds the first opening brace no matter what came before it, whether a fence or a sentence of preamble. `rindex(\"}\")` finds the last closing brace, so nested structure inside the JSON doesn't throw it off.\n\n## Why one call beats two\n\nEvery request pays a fixed cost for the image tokens. Send the same picture twice, once for a caption and again for alt text, and you pay that cost twice for no reason. One structured reply with both fields is cheaper and faster. The only price is a slightly more careful parser.\n\n## The mental model to keep\n\nTreat the model's raw text as untrusted input, the way you'd treat text a user typed. Don't call `json.loads()` and hope. Extract the part that looks like your format first.",
     starter_code: `import json
@@ -478,6 +632,34 @@ main()
     order: 6,
     title: "When the Upload or the Reply Breaks",
     concept: "error handling and retries",
+    animated_diagrams: [
+      {
+        title: "Guards at both boundaries",
+        caption: "Cheap local checks before the call, retries after the reply.",
+        loop: false,
+        nodes: [
+          { label: "Validate upload", sub: "before the call", detail: "Reject an empty, wrong-type, or oversized file locally, instantly and free." },
+          { label: "Call the model", sub: "spend a token", detail: "Only a file that passed the cheap checks reaches the API." },
+          { label: "Parse reply", sub: "may fail", detail: "The model occasionally ignores the format, so the parse can throw." },
+          { label: "Retry or fall back", sub: "safe result", detail: "Retry a couple of times, then hand back a safe fallback rather than crashing." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Upload guard", definition: "Local checks for an empty file, an unsupported type, or an oversized image, run before any API call." },
+      { term: "Retry with fallback", definition: "Re-calling the model on a bad reply a few times, then returning a safe default if all attempts fail." },
+    ],
+    inline_quizzes: [
+      { question: "Why validate the upload before calling the API?", options: ["The API cannot check it", "A cheap local check catches a bad file in a microsecond instead of paying for a failed round trip", "To resize the image", "It is required by JSON"], correct_index: 1, explanation: "An oversized or wrong-type file fails on the API side too, but failing locally is instant and free." },
+      { question: "When should you reach for the fallback result?", options: ["On the first attempt", "Only after retries are truly exhausted", "Whenever the image is large", "Never"], correct_index: 1, explanation: "Reserve the fallback for a real exhaustion of retries; reaching for it too early hides real bugs." },
+    ],
+    participation_activities: [
+      { activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "A generic alt text is better than crashing the tool when every retry fails.", correct_answer: "true", explanation: "A safe fallback like 'Image, description unavailable.' beats a stack trace that takes down the app." },
+          { type: "fill_in", question: "Which kind of checks run first, before the API call: cheap local ones or retries? Answer local or retries.", correct_answer: "local", explanation: "Cheap local checks go first; retries handle the boundary you cannot fully control." },
+        ] },
+    ],
     explanation:
       "Lessons 1 through 5 assumed a perfect world: valid images and well-formed JSON. Production images are messy. Wrong formats, huge files, and models that occasionally reply with prose instead of JSON. This lesson adds the guardrails.\n\n## Guard the upload before you spend a token\n\nTwo checks that cost nothing and save a wasted, billed API call:\n\n```python\nALLOWED_TYPES = {\"image/png\", \"image/jpeg\", \"image/webp\", \"image/gif\"}\nMAX_IMAGE_BYTES = 5_000_000  # 5 MB\n\ndef validate_image(image_bytes, media_type):\n    if len(image_bytes) == 0:\n        raise ValueError(\"empty image\")\n    if media_type not in ALLOWED_TYPES:\n        raise ValueError(f\"unsupported type: {media_type}\")\n    if len(image_bytes) > MAX_IMAGE_BYTES:\n        raise ValueError(\"image too large, resize before sending\")\n```\n\nRun this before you build the content block. An unsupported format or an oversized file fails on the API side too, but failing locally is instant and free. Failing remotely costs a network round trip and, if you're unlucky, a partial charge.\n\n## Guard the reply after you get it back\n\nThe JSON parser from the last lesson can still fail, because a model occasionally ignores the format instruction. Wrap it in a retry, the same pattern from the setup module:\n\n```python\nimport time\n\ndef get_caption_json(client, image_content, retries=2):\n    for attempt in range(retries + 1):\n        response = client.messages.create(\n            model=\"claude-sonnet-4-6\",\n            max_tokens=200,\n            messages=[{\"role\": \"user\", \"content\": [image_content, {\"type\": \"text\", \"text\": COMBINED_PROMPT}]}],\n        )\n        try:\n            return parse_caption_response(response.content[0].text)\n        except (ValueError, KeyError):\n            if attempt == retries:\n                raise\n            time.sleep(1)\n```\n\n## Fallback, not just failure\n\nIf every retry fails, don't crash the tool. Hand back something safe. A generic alt text beats no alt text, and a missing caption beats a broken app.\n\n```python\nFALLBACK = {\"caption\": \"An image.\", \"alt_text\": \"Image, description unavailable.\"}\n```\n\nReserve the fallback for a real exhaustion of retries. Reach for it too early and it hides real bugs.\n\n## Why order matters: cheap checks first\n\nValidate the upload before you spend a call. Validate the reply after you receive one. Do it the other way around, calling the API on a file you already knew was too big, and you spend money on a failure you could have caught in a microsecond.\n\n## The mental model to keep\n\nEvery boundary where untrusted data enters your program (a user's uploaded file, a model's text reply) gets a check. Cheap local checks go first. Retries handle the boundary you can't fully control.",
     starter_code: `ALLOWED_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
@@ -622,6 +804,40 @@ main()
     order: 7,
     title: "Vision Calls Cost More Than Text",
     concept: "image token cost and resizing",
+    animated_diagrams: [
+      {
+        title: "Estimating the vision bill",
+        caption: "Tokens come from pixels, so resolution sets the price before you write a word.",
+        loop: false,
+        nodes: [
+          { label: "Read size", sub: "width x height", detail: "Vision models charge by area, not file size." },
+          { label: "Image tokens", sub: "(w*h)//750", detail: "Estimate the image's token cost from its resolution." },
+          { label: "Over budget?", sub: "vs MAX_IMAGE_TOKENS", detail: "Compare against a practical ceiling for this product." },
+          { label: "Recommend resize", sub: "sqrt scaling", detail: "Scale both sides by the square root of the token ratio, since area drives the cost." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Image tokens", definition: "The token cost of an image, roughly its pixel area divided by 750, paid before any prompt text." },
+      { term: "Square-root scaling", definition: "Shrinking both dimensions by the square root of the token ratio, because tokens grow with area, not one side." },
+    ],
+    worked_examples: [
+      {
+        difficulty: "medium",
+        prompt: "Should a 4000x3000 image be resized if MAX_IMAGE_TOKENS is 1600?",
+        steps: [
+          "Estimate tokens: 4000 * 3000 = 12,000,000, divided by 750 is 16,000 tokens.",
+          "16,000 is far over the 1600 ceiling, so a resize is recommended.",
+          "scale = (1600 / 16000) ** 0.5, which is about 0.316.",
+          "New size is (int(4000*0.316), int(3000*0.316)), roughly 1264 x 948.",
+        ],
+        output: "(1264, 948)",
+      },
+    ],
+    inline_quizzes: [
+      { question: "What drives an image's token cost?", options: ["File size in bytes", "Resolution, roughly width times height over 750", "The file format", "The prompt length"], correct_index: 1, explanation: "Vision models charge by pixels, so a 4000x3000 photo costs sixteen times a 1000x750 one." },
+      { question: "Why scale both sides by the square root of the token ratio?", options: ["To keep the aspect ratio", "Tokens grow with area, so halving them shrinks each side by about 71 percent, not 50", "It is faster", "To avoid blur"], correct_index: 1, explanation: "Area is width times height, so you scale each dimension by the square root of the ratio you want." },
+    ],
     explanation:
       "An image doesn't have a fixed price. A phone photo and a thumbnail cost wildly different amounts on the same model call, because vision models charge by pixels, not by file size. This lesson builds the estimator that tells you the bill before you send anything.\n\n## How image tokens are counted\n\nText tokens come from characters. Image tokens come from resolution. A widely used approximation:\n\n```python\ndef estimate_image_tokens(width, height):\n    return (width * height) // 750\n```\n\nA 1000x750 photo costs roughly `750,000 // 750 = 1000` tokens before you write a single word of prompt. A 4000x3000 photo from a modern phone costs sixteen times that, about 16,000 tokens, for the same picture at a bigger size.\n\n## Why this matters for a captioning tool\n\nYour product runs on every image a user uploads, and phone cameras default to resolutions the model doesn't need for a one-sentence caption. Sending a full-resolution photo to ask \"describe this in one sentence\" is like mailing a moving truck to deliver a postcard.\n\n## Deciding when to downscale\n\n```python\nMAX_IMAGE_TOKENS = 1600  # a practical ceiling for this product\n\ndef recommend_resize(width, height):\n    tokens = estimate_image_tokens(width, height)\n    if tokens <= MAX_IMAGE_TOKENS:\n        return None\n    scale = (MAX_IMAGE_TOKENS / tokens) ** 0.5\n    return (int(width * scale), int(height * scale))\n```\n\nThe key idea is scaling both dimensions by the square root of the token ratio. Tokens grow with area (width times height), so to halve the tokens you shrink each side by roughly 71 percent, not 50.\n\n## Estimating the full call cost\n\n```python\ndef estimate_total_tokens(width, height, prompt_tokens, reply_tokens=150):\n    return estimate_image_tokens(width, height) + prompt_tokens + reply_tokens\n```\n\nThe image, your instruction, and the model's reply all draw from the same billed total. None of them are free just because they're short.\n\n## The mental model to keep\n\nTreat resolution the way you'd treat a long paragraph you're about to paste into a prompt. For this job bigger isn't more accurate, only more expensive. A one-sentence caption rarely needs more detail than a modestly sized image already carries.",
     starter_code: `MAX_IMAGE_TOKENS = 1600
@@ -711,6 +927,33 @@ main()
     order: 8,
     title: "Ship the Captioner",
     concept: "packaging and shipping",
+    animated_diagrams: [
+      {
+        title: "The captioner pipeline, end to end",
+        caption: "Raw image in, a validated caption and alt text out.",
+        loop: false,
+        nodes: [
+          { label: "Validate image", sub: "guard the upload", detail: "Reject bad files fast, before spending a call." },
+          { label: "Encode + call", sub: "one request", detail: "Build the image block and ask for both fields as JSON." },
+          { label: "Validate alt text", sub: "accessibility rules", detail: "Run the alt-text checks; if they fail, retry once with the same prompt." },
+          { label: "Return result", sub: "shipped", detail: "Hand back a finished, accessible caption and alt-text pair." },
+        ],
+      },
+    ],
+    key_terms: [
+      { term: "Pipeline", definition: "The functions from every earlier lesson wired together in order: encode, prompt, call, parse, validate." },
+      { term: "Fallback", definition: "A safe default caption and alt text returned when a malformed reply survives every retry." },
+    ],
+    inline_quizzes: [
+      { question: "What is a finished AI product usually made of?", options: ["One clever trick", "The same steps built carefully on their own and wired together in order", "A single giant function", "A new model"], correct_index: 1, explanation: "The product is old code assembled in the right order, not new code." },
+      { question: "Which of these is one of the done tests for this tool?", options: ["It runs on a GPU", "A bad upload fails fast with a clear message instead of a stack trace", "It never uses retries", "It captions video too"], correct_index: 1, explanation: "Failing fast on a bad upload, retrying a malformed reply, and a stranger being able to run it are the ship tests." },
+    ],
+    participation_activities: [
+      { activity_title: "Check yourself",
+        questions: [
+          { type: "true_false", question: "The process_image pipeline is mostly calls to functions you already wrote in earlier lessons.", correct_answer: "true", explanation: "Encoding, prompting, parsing, validating, and hardening collapse into a handful of calls to existing functions." },
+        ] },
+    ],
     explanation:
       "Everything so far is a function: encode, prompt, call, parse, validate, estimate. Shipping means wiring those functions into one pipeline that takes a raw image and hands back a finished, accessible result. It also means knowing what \"done\" looks like for this tool.\n\n## The full pipeline, end to end\n\n```python\ndef process_image(image_bytes, media_type, client):\n    validate_image(image_bytes, media_type)\n\n    if len(image_bytes) > 2_000_000:\n        print(\"warning: large image, consider resizing for cost\")\n\n    image_content = build_image_content(image_bytes, media_type)\n    result = get_caption_json(client, image_content)\n\n    alt_issues = validate_alt_text(result[\"alt_text\"])\n    if alt_issues:\n        result = get_caption_json(client, image_content)  # one retry with the same prompt\n\n    return result\n```\n\nSix lessons of separate pieces (encoding, prompting, parsing, validating, hardening, cost) collapse into a handful of calls to functions you already wrote. That's what a finished product usually is: not new code, but old code assembled in the right order.\n\n## What done means for this tool\n\n1. It runs on a real image file end to end and returns both a caption and alt text.\n2. A bad upload, a wrong type or an empty file, fails fast with a clear message instead of a stack trace from deep inside the API call.\n3. A malformed model reply gets one retry before it falls back. It never crashes the tool.\n4. Someone else can point it at their own photo and get a usable result without reading your source.\n\nWhen those four hold, this is a real deliverable, not a demo script.\n\n## A minimal CLI wrapper\n\n```python\nimport sys\n\nif __name__ == \"__main__\":\n    path = sys.argv[1]\n    with open(path, \"rb\") as f:\n        image_bytes = f.read()\n    media_type = \"image/jpeg\" if path.lower().endswith((\".jpg\", \".jpeg\")) else \"image/png\"\n    result = process_image(image_bytes, media_type, client)\n    print(\"Caption:\", result[\"caption\"])\n    print(\"Alt text:\", result[\"alt_text\"])\n```\n\n## It lands in your Portfolio\n\nFinishing this lesson completes the project. Like every build in this track, it saves to your **Portfolio** automatically: a working Caption & Alt-Text Generator next to whatever else you've shipped. Keep a sample image and its output handy. That pair is your proof it works.\n\n## The mental model to keep\n\nA finished AI product is rarely one clever trick. It's the same six-step loop from the setup module, each step built carefully on its own and wired together in order. You already did the hard part, one lesson at a time.",
     starter_code: `def validate_image(image_bytes, media_type):

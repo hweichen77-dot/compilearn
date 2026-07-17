@@ -60,6 +60,53 @@ Every later lesson builds on this one function. Whatever you want to send, you w
 ## The mental model
 
 Think of SSE as a radio broadcast rather than a phone call. The server keeps transmitting frames, and anyone tuned in receives them in order, one at a time, with a clear end-of-message marker between them. Below, you'll write the framing function by hand and run it on a list of words. No network yet, just the wire format, because every bug in later lessons traces back to getting this shape right.`,
+      key_terms: [
+        { term: "Server-Sent Events (SSE)", definition: "A plain-HTTP way to stream data one direction, server to client, by keeping the response open and writing framed messages over time." },
+        { term: "Frame", definition: "One SSE event: a line starting with `data: `, the payload, then a blank line that marks the end of that event." },
+        { term: "Delimiter", definition: "The trailing blank line (`\\n\\n`) that separates one frame from the next, so a receiver knows where a chunk ends." },
+      ],
+      animated_diagrams: [
+        {
+          title: "How one token becomes a frame",
+          caption: "Each token gets wrapped in the SSE shape, then written to the open connection.",
+          loop: false,
+          nodes: [
+            { label: "Token", sub: "one piece of text", detail: "A single word or fragment the server wants to send right now." },
+            { label: "Wrap", sub: "add 'data: '", detail: "Prefix the payload with the literal 'data: ' that marks it as an SSE data line." },
+            { label: "Terminate", sub: "add blank line", detail: "Append the two newlines that signal the end of this event." },
+            { label: "Write to socket", sub: "send immediately", detail: "The framed bytes go straight onto the open connection instead of waiting for the whole reply." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Frame the tokens ['Once', 'upon'] into the SSE wire format.",
+          steps: [
+            "Take the first token 'Once' and wrap it: 'data: Once' then a blank line, giving data: Once then two newlines.",
+            "Take 'upon' and wrap it the same way, giving data: upon then two newlines.",
+            "Concatenate the two frames in order with plain string addition.",
+          ],
+          output: "data: Once, blank line, data: upon, blank line.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "the blank line is not optional", content: "A single newline does not end an SSE event. Only the double newline does. Drop it and the receiver cannot tell where one chunk stops and the next starts, and every later lesson breaks." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What marks the end of a single SSE event?",
+          options: ["A semicolon", "A blank line after the data line", "The word END", "A closing brace"],
+          correct_index: 1,
+          explanation: "Each frame is a 'data: ' line followed by a blank line. That double newline is the delimiter, not decoration.",
+        },
+        {
+          question: "Why use SSE instead of a WebSocket for a writing assistant?",
+          options: ["WebSockets cannot send text", "The assistant only needs one direction, server to client, so SSE is the simpler correct tool", "SSE is faster than every other protocol", "Browsers cannot read WebSockets"],
+          correct_index: 1,
+          explanation: "SSE streams one direction over normal HTTP and auto-reconnects. Save WebSockets for when the client also needs to push data mid-stream.",
+        },
+      ],
       starter_code: `# Format plain strings into the SSE wire format: "data: <text>\\n\\n"
 
 def format_sse(data):
@@ -213,6 +260,48 @@ If \`token_stream\` built a list of all frames and returned it, you'd be back to
 ## The mental model
 
 A streaming endpoint is a pipe, not a bucket. A bucket fills up and then you dump it out all at once; a pipe lets water flow through as it arrives at one end. Below, build the generator and framing together in pure Python. Simulate the model's output as a list of words, wrap each in SSE, and print the assembled stream. No network yet, just the shape of the endpoint's core loop.`,
+      key_terms: [
+        { term: "Generator", definition: "A function that yields pieces one at a time over time instead of returning one finished value, so each piece can be sent the moment it appears." },
+        { term: "yield", definition: "The keyword that hands one value out of a generator and pauses it there until the caller asks for the next value." },
+        { term: "StreamingResponse", definition: "FastAPI's response type that reads from a generator and writes each yielded piece straight to the open connection." },
+      ],
+      animated_diagrams: [
+        {
+          title: "The endpoint's streaming loop",
+          caption: "The framework pulls one piece from the generator, frames it, writes it, and repeats until the generator is done.",
+          loop: true,
+          nodes: [
+            { label: "Ask generator", sub: "next piece", detail: "The framework requests the next value the generator will yield." },
+            { label: "Model yields", sub: "one delta", detail: "The generator produces one piece of text, either from a fake string or the real streaming API." },
+            { label: "Frame it", sub: "wrap as SSE", detail: "Re-wrap the yielded piece in 'data: ...' plus a blank line." },
+            { label: "Write to socket", sub: "send now", detail: "The framed piece goes out the open connection immediately, then the loop asks for the next one." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Run the endpoint loop on the prompt 'the ship' with a fake stream that yields 'the ' then 'ship '.",
+          steps: [
+            "fake_model_stream splits on spaces and yields 'the ' first.",
+            "format_sse wraps it into 'data: the \\n\\n' and it is added to the output.",
+            "The loop asks again; the generator yields 'ship ', wrapped into 'data: ship \\n\\n'.",
+            "The generator is exhausted, so the loop stops and the assembled stream is returned.",
+          ],
+          output: "data: the , blank line, data: ship , blank line.",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "keep the plumbing dumb", content: "The endpoint never inspects or rewrites the words. It only re-frames whatever the model hands it. That is what makes the same streaming route reusable across every feature." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why return a generator instead of building a list of all frames and returning it?",
+          options: ["Lists use more memory", "A returned list waits for the whole reply first, so 'streaming' would be a false label on a blocking call", "Generators are always faster", "The framework rejects lists"],
+          correct_index: 1,
+          explanation: "Each yield hands one piece to the framework immediately. Building a full list first means you are back to waiting for the whole reply before sending anything.",
+        },
+      ],
       starter_code: `# Simulate a streaming endpoint's core loop: consume tokens from a
 # fake generator, wrap each in the SSE frame, and assemble the stream.
 
@@ -346,6 +435,48 @@ If you're chunking text yourself, say replaying a cached reply or building a dem
 ## The mental model
 
 A delta is one puzzle piece with no picture printed on the box. You can't tell what the final image looks like from a single piece. You can only place pieces down in the order they're handed to you and trust that concatenation reveals the whole picture. Below, you'll split a full string into fixed-size deltas and prove that reconstructing it in order, with no separators, gives back the exact original.`,
+      key_terms: [
+        { term: "Delta", definition: "Whatever text arrived in one streaming event: sometimes a whole word, sometimes half a word, sometimes just punctuation." },
+        { term: "Arrival order", definition: "The sequence deltas come in. Concatenating them in that exact order, with nothing between, is the only thing that rebuilds the reply." },
+        { term: "Chunk size", definition: "The length of each delta when you split text yourself. A knob you only pick when simulating or testing, not when relaying a live model." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Deltas rebuild the reply",
+          caption: "Small arbitrary pieces arrive in order and concatenate, with no separators, into the exact original.",
+          loop: false,
+          nodes: [
+            { label: "Model produces", sub: "text over time", detail: "The model generates the reply gradually as it thinks." },
+            { label: "Deltas arrive", sub: "arbitrary pieces", detail: "Each event carries whatever text was ready, not aligned to word boundaries." },
+            { label: "Concatenate", sub: "join in order", detail: "Append each delta to the running result with no space or separator added." },
+            { label: "Full reply", sub: "exact original", detail: "The joined deltas equal the model's complete output, character for character." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Split 'hello world' into deltas of size 3, then reconstruct.",
+          steps: [
+            "Walk the string in steps of 3: indices 0, 3, 6, 9.",
+            "Slice each window: 'hel', 'lo ', 'wor', 'ld'. The last slice is shorter, which is fine.",
+            "Join the four deltas with no separator: 'hel' + 'lo ' + 'wor' + 'ld'.",
+            "Compare the result to the original 'hello world'.",
+          ],
+          output: "'hello world', identical to the input, proving order plus empty separator is the whole contract.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "never add your own separator", content: "The deltas already contain any spacing the model produced. Joining them with a space or newline silently inserts whitespace that was not in the reply. This is one of the most common streaming bugs." },
+      ],
+      inline_quizzes: [
+        {
+          question: "How do you reconstruct the full reply from a list of deltas?",
+          options: ["Join them with a space", "Join them in arrival order with no separator", "Sort them then join", "Join them with a newline between each"],
+          correct_index: 1,
+          explanation: "Deltas are meaningless individually. The contract is: receive in order, join with nothing in between. Any added separator corrupts the text.",
+        },
+      ],
       starter_code: `# Split a full reply into fixed-size deltas, then verify reconstruction
 # by concatenating them back together in order.
 
@@ -481,6 +612,52 @@ The client-side parser and the SSE format from lesson 1 are two ends of the same
 ## The mental model
 
 The reader is a person transcribing a radio broadcast live. They write down each complete sentence the instant they hear it end, but they hold an unfinished sentence in their head until the rest of it arrives. Below, you'll write that same parser in pure Python: given raw multi-frame text, split it into individual payloads, exactly what the JavaScript above does one \`fetch\` chunk at a time.`,
+      key_terms: [
+        { term: "ReadableStream reader", definition: "The browser object that hands you raw bytes from a fetch response in whatever-sized pieces the network delivers." },
+        { term: "Incomplete tail", definition: "The last element after splitting a buffer on the frame delimiter, which may be a fragment, so you keep it for the next read instead of rendering it." },
+        { term: "textContent", definition: "The DOM property you append each payload onto, so the draft visibly grows on the page instead of appearing as one block." },
+      ],
+      animated_diagrams: [
+        {
+          title: "The client read loop",
+          caption: "Read bytes, decode, split on the delimiter, render complete frames, and hold the leftover tail.",
+          loop: true,
+          nodes: [
+            { label: "Read bytes", sub: "network chunk", detail: "reader.read() returns whatever bytes arrived, which may not line up with a frame boundary." },
+            { label: "Decode + buffer", sub: "append to text", detail: "Decode the bytes and add them to the running buffer string." },
+            { label: "Split on \\n\\n", sub: "find frames", detail: "Splitting the buffer gives complete frames plus a possibly-incomplete last piece." },
+            { label: "Keep the tail", sub: "pop the last", detail: "The final piece may be half a frame, so pop it back into the buffer for the next read." },
+            { label: "Render frames", sub: "append to page", detail: "For each complete 'data: ' frame, strip the prefix and append the payload to textContent." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Parse the raw SSE text 'data: Hello\\n\\ndata: world\\n\\n' into payloads.",
+          steps: [
+            "Split on '\\n\\n', giving ['data: Hello', 'data: world', ''].",
+            "The trailing empty string is not a 'data: ' frame, so it is ignored.",
+            "For 'data: Hello', strip the 6-character prefix to get 'Hello'.",
+            "For 'data: world', strip the prefix to get 'world'.",
+          ],
+          output: "['Hello', 'world'], the two payloads in order.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does the client pop the last piece after splitting the buffer on \\n\\n?",
+          options: ["To save memory", "Because that last piece may be a frame that hasn't finished arriving, so it is held until more bytes come", "Because the last frame is always empty", "To reverse the order"],
+          correct_index: 1,
+          explanation: "A network read can cut a frame in half. Popping the tail and keeping it in the buffer means you only ever render frames you know are complete.",
+        },
+        {
+          question: "What does frame.slice(6) do in the client parser?",
+          options: ["Keeps the first 6 characters", "Strips the 'data: ' prefix, leaving just the payload", "Removes the blank line", "Trims whitespace"],
+          correct_index: 1,
+          explanation: "'data: ' is exactly six characters. Slicing them off leaves the payload that gets appended to the page.",
+        },
+      ],
       starter_code: `# Parse raw SSE text back into a list of payload strings.
 # Frames are separated by a blank line ("\\n\\n"); only "data: " frames count.
 
@@ -607,6 +784,56 @@ Picture a UI that streams beautifully, tokens flowing onto the page, users happy
 ## The mental model
 
 Streaming is the live performance; storing is the recording. An audience watching a concert still needs someone to hit record if anyone's going to hear it again. Below, you'll assemble a streamed reply from its chunks and append it as a new turn onto a growing history list, the store half of "stream to show, store to remember."`,
+      key_terms: [
+        { term: "Stream to show", definition: "Appending each delta to the page as it arrives so the user watches the draft appear live." },
+        { term: "Store to remember", definition: "Saving the full assembled text once the stream ends, into history or a database, so the draft survives past the screen." },
+        { term: "History", definition: "The running list of user and assistant turns that lets a follow-up like 'make it shorter' refer to the draft the model just wrote." },
+      ],
+      animated_diagrams: [
+        {
+          title: "One loop, two jobs",
+          caption: "Each delta is both painted to the screen and accumulated into the full reply, then saved when the stream ends.",
+          loop: true,
+          nodes: [
+            { label: "Delta arrives", sub: "one piece", detail: "The next streamed piece of the model's reply comes in." },
+            { label: "Show it", sub: "paint to page", detail: "Append the delta to the screen so the user sees the draft grow live." },
+            { label: "Accumulate", sub: "add to full_reply", detail: "Concatenate the same delta onto the growing full_reply string." },
+            { label: "Stream ends", sub: "save the turn", detail: "Once no more deltas arrive, append the complete reply to history as an assistant turn." },
+          ],
+        },
+      ],
+      comparison_tables: [
+        {
+          title: "Show versus store",
+          columns: ["Aspect", "Stream to show", "Store to remember"],
+          rows: [
+            ["When it runs", "During the stream, per delta", "Once, after the stream ends"],
+            ["What it touches", "The DOM / screen", "History, a database, or a file"],
+            ["If you skip it", "User sees a spinner, not live text", "Refresh loses the draft; regenerate has nothing to revise"],
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Assemble the chunks ['Waves ', 'crash ', 'softly'] and append the reply to a one-turn history.",
+          steps: [
+            "Join the chunks with no separator: 'Waves ' + 'crash ' + 'softly' = 'Waves crash softly'.",
+            "The user turn is already in history from before the stream.",
+            "Append an assistant turn holding the assembled reply.",
+            "History now has two turns, and the last one is the assistant's reply.",
+          ],
+          output: "History length 2, last turn = assistant 'Waves crash softly'.",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does a writing assistant especially need to store the assembled draft?",
+          options: ["To make streaming faster", "Because users iterate; a follow-up like 'shorten the second paragraph' only works if the assistant can see the draft it just streamed", "Because the model requires it", "To reduce token cost"],
+          correct_index: 1,
+          explanation: "Streaming only shows the draft. Without storing it, every regenerate starts from nothing and the model has no memory of what it just wrote.",
+        },
+      ],
       starter_code: `# Assemble a streamed reply from its chunks, then append it as a new
 # assistant turn onto the existing conversation history.
 
@@ -751,6 +978,49 @@ If you're handed a complete raw stream all at once, a saved log, a test fixture,
 ## The mental model
 
 You're assembling a jigsaw puzzle from a box that gets refilled while you work. You never place a piece you're not sure is whole; you set uncertain pieces aside and check again once more pieces arrive. Below, you'll implement exactly that: recover every complete frame from a raw stream, and drop anything left dangling at the end.`,
+      key_terms: [
+        { term: "Partial frame", definition: "A frame cut in half because the network delivered fewer bytes than a full frame in one read." },
+        { term: "Running buffer", definition: "A string you append every received chunk onto, so a frame split across two reads can be stitched back together." },
+        { term: "Holding the tail", definition: "Keeping the last split piece unprocessed until more data arrives, since it may be an unfinished frame." },
+      ],
+      animated_diagrams: [
+        {
+          title: "Buffer, split, hold the tail",
+          caption: "Each network chunk joins the buffer; complete frames are processed, the leftover tail waits.",
+          loop: true,
+          nodes: [
+            { label: "Chunk arrives", sub: "raw bytes", detail: "A network read delivers bytes cut off wherever the network happened to stop." },
+            { label: "Append to buffer", sub: "join running text", detail: "Add the new bytes to the buffer, stitching them onto any leftover tail from last time." },
+            { label: "Split on \\n\\n", sub: "find boundaries", detail: "Splitting gives every complete frame plus a last piece that may be unfinished." },
+            { label: "Pop the tail", sub: "keep for later", detail: "Remove the last piece and hold it in the buffer until more data arrives." },
+            { label: "Process frames", sub: "only complete ones", detail: "Handle every frame before the tail, since those are guaranteed whole." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Recover frames from 'data: full\\n\\ndata: partial' (no trailing blank line).",
+          steps: [
+            "Split on '\\n\\n', giving ['data: full', 'data: partial'].",
+            "Drop the last piece with frames[:-1], because it is never treated as complete.",
+            "That leaves ['data: full'] as the only guaranteed-complete frame.",
+            "Strip the 'data: ' prefix from it to get 'full'. 'data: partial' is correctly discarded as unfinished.",
+          ],
+          output: "['full'], with the dangling partial frame dropped.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "never render the tail as-is", content: "Process 'data: hello wo' before its second half arrives and you paint a broken half-word, then lose the rest when 'rld\\n\\n' shows up with no frame to attach to. Always hold the tail." },
+      ],
+      inline_quizzes: [
+        {
+          question: "After splitting a stream on \\n\\n, which pieces are safe to process?",
+          options: ["All of them", "Every piece except the last one", "Only the first one", "Only the last one"],
+          correct_index: 1,
+          explanation: "Every piece before the final split is a complete frame. The last piece may be empty or a frame that hasn't finished arriving, so you hold it back.",
+        },
+      ],
       starter_code: `# Recover complete SSE frames from a raw stream, dropping any
 # incomplete trailing frame that hasn't finished arriving.
 
@@ -891,6 +1161,48 @@ Essay drafts, email rewrites, and outline generators are exactly what users clic
 ## The mental model
 
 A budget guard is a meter running next to a taxi, not a fixed fare. You don't know the exact final cost in advance, so you watch the running total live and pull over the moment it hits your limit, instead of finding out the damage only after the ride ends. Below, consume a list of chunks against a token budget, stopping the moment the next one would exceed it.`,
+      key_terms: [
+        { term: "Token estimate", definition: "A rough count of tokens from text length, about four characters per token in English, used to track spend without an exact tokenizer." },
+        { term: "Budget guard", definition: "A running total checked against a cap, that stops generation early instead of waiting for the model to finish on its own." },
+        { term: "Check before adding", definition: "Testing 'used + cost > budget' before updating the total, so you never include a chunk that pushes you over or report a total above the cap." },
+      ],
+      animated_diagrams: [
+        {
+          title: "The budget-guarded stream loop",
+          caption: "For each chunk, estimate its cost, check against the budget, then either keep it or stop the stream.",
+          loop: true,
+          nodes: [
+            { label: "Next chunk", sub: "one delta", detail: "Pull the next streamed piece from the model." },
+            { label: "Estimate cost", sub: "tokens for this", detail: "About one token per four characters, at least one token." },
+            { label: "Would exceed?", sub: "used + cost > budget", detail: "Check before adding, so an over-budget chunk is caught before it counts." },
+            { label: "Keep or break", sub: "add or stop", detail: "Under budget: add the cost and keep the chunk. Over: break the loop and close the connection." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Consume ['abcd', 'efgh', 'ijkl'] against a budget of 2 tokens.",
+          steps: [
+            "estimate_tokens('abcd') = max(1, 4 // 4) = 1. used(0) + 1 = 1, not over 2, so keep it. used = 1.",
+            "estimate_tokens('efgh') = 1. used(1) + 1 = 2, not over 2, so keep it. used = 2.",
+            "estimate_tokens('ijkl') = 1. used(2) + 1 = 3, which is over 2, so break before adding.",
+            "Two chunks were kept; the third and any later chunks are dropped.",
+          ],
+          output: "('abcdefgh', used=2, kept=2), truncated because one chunk was dropped.",
+        },
+      ],
+      callouts: [
+        { type: "insight", position: "after", title: "the break is what saves money", content: "Exiting the with block without draining the stream tells the SDK to close the connection. That is what actually stops the spend, not just skipping the display of tokens you already paid for." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why check 'used + cost > budget' before adding the cost instead of after?",
+          options: ["It runs faster", "So you never include a chunk that pushes you over budget and never report a total above the cap", "Because addition is slow", "The SDK requires it"],
+          correct_index: 1,
+          explanation: "Checking after the fact always slightly overshoots. Checking before adding guarantees the reported total stays at or under the budget.",
+        },
+      ],
       starter_code: `# Consume streamed chunks against a token budget, stopping BEFORE
 # any chunk that would push the running total over the limit.
 
@@ -1068,6 +1380,49 @@ Finishing this lesson records the Streaming Writing Assistant in your **Portfoli
 ## The mental model
 
 A shipped streaming app hides all of this lesson's plumbing behind one button. The user never thinks about SSE frames, buffers, or token budgets; they just watch words appear. Below, wire the pipeline end to end in pure Python: chunk a reply, frame it, parse it back, and enforce the budget. One function that does what your whole app does, the last piece before it's done.`,
+      key_terms: [
+        { term: "Pipeline", definition: "The end-to-end chain of steps a reply passes through: chunk, frame, parse, budget-check, in that order." },
+        { term: "Happy path", definition: "The flow that works when everything goes right. Lessons 1 to 5 build it; the harden lessons 6 and 7 keep it standing under real conditions." },
+        { term: "Shipped", definition: "Runs from a clean start with one command, survives an empty prompt or dropped connection, and needs no explanation beyond type a prompt and click Generate." },
+      ],
+      animated_diagrams: [
+        {
+          title: "The whole app in one pass",
+          caption: "The four earlier lessons chain into one pipeline from raw text to budget-checked payloads.",
+          loop: false,
+          nodes: [
+            { label: "Chunk", sub: "lesson 3", detail: "Split the reply into fixed-size deltas." },
+            { label: "Frame", sub: "lesson 1", detail: "Wrap each delta as 'data: ...' plus a blank line into one raw stream." },
+            { label: "Parse", sub: "lesson 6", detail: "Split the raw stream back into payloads, dropping the always-incomplete last piece." },
+            { label: "Budget", sub: "lesson 7", detail: "Consume the payloads against the token cap, stopping before any that would exceed it." },
+            { label: "Result", sub: "assembled draft", detail: "Return the kept text plus counts, exactly what the running app would show and bill." },
+          ],
+        },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "Run the pipeline on 'hello world' with chunk_size 4 and budget 2.",
+          steps: [
+            "Chunk into size-4 deltas: ['hell', 'o wo', 'rld'], so 3 chunks are sent.",
+            "Frame each and concatenate, then parse back into payloads ['hell', 'o wo', 'rld'].",
+            "Budget loop: 'hell' costs 1, kept (used 1). 'o wo' costs 1, kept (used 2). 'rld' costs 1, would make 3, over budget 2, so break.",
+            "Two chunks kept, one dropped, so the draft is truncated.",
+          ],
+          output: "('hello wo', chunks_sent=3, chunks_kept=2, tokens_used=2), truncated.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "the harden lessons are not optional", content: "Wiring only lessons 1 to 5 gives a demo that works on a fast, stable connection and breaks the first time a connection hiccups or a budget-less prompt runs long. Buffering and the budget guard are what make it shippable." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why keep the buffering and budget lessons in the real build instead of just the happy path?",
+          options: ["They make it faster", "They keep the app from breaking when a connection hiccups or a long prompt runs without a spend cap", "They are required by FastAPI", "They reduce the file count"],
+          correct_index: 1,
+          explanation: "A demo that only works on a fast, stable connection is not shipped. Partial-frame buffering and the token budget are what let it survive real use.",
+        },
+      ],
       starter_code: `# The full pipeline in one function: chunk a reply, frame it as SSE,
 # parse the frames back, and enforce a token budget on what's kept.
 

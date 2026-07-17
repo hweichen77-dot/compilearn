@@ -64,6 +64,50 @@ Two knobs matter. \`size\` sets how big each chunk is: big enough to hold a full
 ## A way to picture it
 
 Think of the document as a long hallway of paragraphs. Chunking drops a marker every few hundred characters and lets neighboring markers share a bit of hallway so nothing falls in a gap. None of this understands meaning yet. Ranking comes next lesson. Right now the job is exactly one long string in, a list of overlapping windows out. Build that below in pure Python. You don't need a PDF yet.`,
+      animated_diagrams: [
+        {
+          title: "The whole RAG pipeline",
+          caption: "Every lesson in this project builds one stage of this flow.",
+          loop: false,
+          nodes: [
+            { label: "Input PDF", sub: "extract text", detail: "Pull plain text out of the document, guarding empty scanned pages." },
+            { label: "Chunk", sub: "overlapping windows", detail: "Slice the text into small overlapping pieces you can search separately." },
+            { label: "Embed", sub: "text to vectors", detail: "Turn each chunk into a vector of numbers that captures its meaning." },
+            { label: "Retrieve", sub: "rank by similarity", detail: "At query time, find the chunks closest in meaning to the question." },
+            { label: "Answer", sub: "grounded reply", detail: "Feed only those chunks to the model so the answer stays sourced." },
+          ],
+        },
+        {
+          title: "Chunking one long string",
+          caption: "Slide a fixed window forward, sharing a little text each step.",
+          loop: true,
+          nodes: [
+            { label: "Full text", sub: "one string", detail: "Start with the whole extracted document as a single long string." },
+            { label: "Take window", sub: "size chars", detail: "Copy a fixed-size slice starting at the current position." },
+            { label: "Advance", sub: "size - overlap", detail: "Move start forward by less than size so windows share overlap characters." },
+            { label: "Repeat", sub: "until end", detail: "Keep slicing until start passes the end of the text." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "RAG", definition: "Retrieval-augmented generation: pull relevant document pieces, then answer grounded in them." },
+        { term: "Chunk", definition: "A small slice of the document, sized to be searchable and cheap to send." },
+        { term: "Overlap", definition: "Text repeated between neighboring chunks so an idea on a boundary is not lost." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why do chunks overlap instead of tiling edge to edge?",
+          options: ["To save memory", "So an idea sitting on a boundary is not cut in half and lost", "To make more chunks", "The API requires it"],
+          correct_index: 1,
+          explanation: "Overlap repeats a little text between windows so a sentence straddling a boundary still lives whole inside at least one chunk.",
+        },
+        {
+          question: "Why not just paste the whole PDF into every prompt?",
+          options: ["It is illegal", "It blows past the context window and buries the answer in irrelevant pages", "PDFs cannot be read", "The model ignores long text"],
+          correct_index: 1,
+          explanation: "A real document exceeds the context window, and even when it fits, dumping every page wastes tokens and hides the one relevant paragraph.",
+        },
+      ],
       starter_code: `# Split text into overlapping, fixed-size windows.
 # start advances by (size - overlap) each step so windows overlap.
 
@@ -216,6 +260,44 @@ You never write the embedding math. The model does that. Your job is the plumbin
 ## A way to picture it
 
 An embedding is a GPS coordinate for meaning. Two texts about the same topic sit near each other on the map. Two unrelated texts sit far apart. Below, practice the magnitude and normalization math you'll reach for in the next lesson. No network call needed.`,
+      animated_diagrams: [
+        {
+          title: "Text becomes a vector",
+          caption: "The embedding model maps meaning to a point in space.",
+          loop: false,
+          nodes: [
+            { label: "Chunk text", sub: "a sentence", detail: "Start with one piece of text, a chunk or a question." },
+            { label: "Embed call", sub: "voyage-3", detail: "Send it to the embedding model, which returns a fixed-length vector." },
+            { label: "Vector", sub: "list of floats", detail: "The output looks like a list of a thousand or so numbers." },
+            { label: "Store", sub: "next to chunk", detail: "Keep each vector beside its chunk text for lookup at query time." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Embedding", definition: "A fixed-length vector of numbers that places a text's meaning as a point in space." },
+        { term: "Vector", definition: "An ordered list of floats; similar meanings point in similar directions." },
+        { term: "Magnitude", definition: "A vector's length, the square root of the sum of its squared components." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "Find the magnitude of the vector [3, 4].",
+          steps: [
+            "Square each component: 3*3 = 9 and 4*4 = 16.",
+            "Sum the squares: 9 + 16 = 25.",
+            "Take the square root: 25 ** 0.5 = 5.0.",
+          ],
+          output: "5.0",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What makes 'the cat sat on the mat' and 'a feline rested on the rug' land close together?",
+          options: ["Shared words", "Similar meaning maps to a similar direction in vector space", "Equal length", "Same first letter"],
+          correct_index: 1,
+          explanation: "Embeddings capture meaning, not exact words. Texts about similar things point in similar directions even with no words in common.",
+        },
+      ],
       starter_code: `# Practice the vector math behind embeddings: magnitude and normalization.
 
 def magnitude(v):
@@ -367,6 +449,44 @@ This one function is why RAG beats keyword search on real questions. A user asks
 ## A way to picture it
 
 Every chunk is a point on a meaning-map, and the question is another point dropped onto the same map. Cosine similarity reads the angle between the question and each chunk from the origin rather than the straight-line distance, so a short chunk and a long chunk that say the same thing score the same. Below, implement cosine similarity and use it to rank a few chunks against a query. No network required.`,
+      animated_diagrams: [
+        {
+          title: "Scoring a chunk against the question",
+          caption: "Cosine similarity reads the angle, ignoring vector length.",
+          loop: false,
+          nodes: [
+            { label: "Two vectors", sub: "query + chunk", detail: "Start with the question vector and one chunk vector." },
+            { label: "Dot product", sub: "sum of products", detail: "Multiply matching entries and add them up." },
+            { label: "Divide by mags", sub: "cancel length", detail: "Divide by both magnitudes so only direction remains." },
+            { label: "Score -1..1", sub: "relevance", detail: "1 means same direction, 0 unrelated, -1 opposite." },
+            { label: "Rank", sub: "highest first", detail: "Sort chunks by score to get the search result." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Dot product", definition: "The sum of products of matching entries; grows with both direction and vector length." },
+        { term: "Cosine similarity", definition: "The dot product divided by both magnitudes, leaving a direction-only score from -1 to 1." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "medium",
+          prompt: "cosine_similarity([1, 0, 0], [3, 0, 3])",
+          steps: [
+            "dot = 1*3 + 0*0 + 0*3 = 3.",
+            "magnitude([1,0,0]) = 1, and magnitude([3,0,3]) = sqrt(18), about 4.243.",
+            "Divide: 3 / (1 * 4.243), about 0.707.",
+          ],
+          output: "about 0.707",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why use cosine similarity instead of the raw dot product for ranking?",
+          options: ["It is faster", "The dot product grows with vector length, so long chunks score high just for being long", "Dot product can be negative", "Cosine is required by the API"],
+          correct_index: 1,
+          explanation: "Cosine divides out magnitude, so a short and a long chunk that mean the same thing score the same. Raw dot product favors longer vectors.",
+        },
+      ],
       starter_code: `# Rank fixed vectors by cosine similarity to a query vector.
 
 def dot(a, b):
@@ -539,6 +659,35 @@ Everything before this call is search. Everything from here is a normal model ca
 ## A way to picture it
 
 A RAG prompt is an open-book exam question. You hand the model the exact pages it's allowed to use, numbered, and tell it to cite the page each fact came from. It can't flip to a page you never handed it. Below, build the context-assembly and prompt-building step in pure Python. No network call needed.`,
+      animated_diagrams: [
+        {
+          title: "Assembling the RAG prompt",
+          caption: "Rules, numbered context, and the question in one request.",
+          loop: false,
+          nodes: [
+            { label: "Top chunks", sub: "retrieved", detail: "Start with the highest-scoring chunks from retrieval." },
+            { label: "Number them", sub: "[1] [2] [3]", detail: "Label each chunk so the model can cite its source." },
+            { label: "System rules", sub: "only context", detail: "Tell the model to answer using only the context and cite sources." },
+            { label: "Build request", sub: "system + user", detail: "Combine the rules, the numbered context, and the question." },
+            { label: "Model call", sub: "grounded answer", detail: "A normal API call, just fed smarter, sourced input." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Grounding", definition: "Restricting the model to answer only from the provided context, not its general knowledge." },
+        { term: "Citation label", definition: "A number like [1] attached to each chunk so the model can point at its source." },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does 'answer using ONLY the provided context' prevent?",
+          options: ["Slow replies", "The model answering from its own general knowledge when the document is silent", "Long answers", "Citations"],
+          correct_index: 1,
+          explanation: "It stops the biggest source of RAG hallucination: the model filling gaps with outside knowledge the document never contained.",
+        },
+      ],
+      callouts: [
+        { type: "analogy", position: "after", title: "An open-book exam", content: "A RAG prompt hands the model the exact numbered pages it may use and asks it to cite each fact. It cannot flip to a page you never gave it." },
+      ],
       starter_code: `# Assemble retrieved chunks into a numbered context block and a request payload.
 
 def build_context(chunks):
@@ -716,6 +865,32 @@ Without dedup, overlapping chunks eat your context budget. You can send 3 chunks
 ## A way to picture it
 
 Top-k picks the highest scores. Dedup makes sure you don't pick the same paragraph twice under two different chunk IDs. Below, implement the scan-and-skip retrieval described above. No network needed, just ranking and substring checks.`,
+      animated_diagrams: [
+        {
+          title: "Scan, skip duplicates, keep k",
+          caption: "Walk in score order until you have k genuinely different chunks.",
+          loop: true,
+          nodes: [
+            { label: "Ranked chunks", sub: "best first", detail: "Sort all chunks by similarity score, highest first." },
+            { label: "Take next", sub: "in order", detail: "Consider the next chunk down the ranked list." },
+            { label: "Duplicate?", sub: "substring check", detail: "Skip it if its text sits inside a kept chunk or contains one." },
+            { label: "Keep unique", sub: "append", detail: "Otherwise add it to the kept list." },
+            { label: "Have k?", sub: "stop or loop", detail: "Stop once k unique chunks are kept, else keep scanning." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Top-k retrieval", definition: "Taking the k highest-scoring chunks instead of just the single best one." },
+        { term: "Deduplication", definition: "Dropping near-identical chunks so overlapping windows do not repeat the same text." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why scan-and-skip duplicates instead of slicing the top k first, then deduping?",
+          options: ["It is faster", "Deduping after slicing can leave you with fewer than k chunks", "Slicing is broken", "To keep duplicates"],
+          correct_index: 1,
+          explanation: "If a duplicate sits at rank 2, cutting at the top k first and then removing it shrinks your context below k. Scanning past duplicates keeps k full.",
+        },
+      ],
       starter_code: `# Scan chunks in score order, skipping near-duplicates, until k uniques are kept.
 
 def is_duplicate(candidate, kept):
@@ -891,6 +1066,45 @@ A RAG app that never says "I don't know" is harder to trust, because you can't t
 ## A way to picture it
 
 Treat every answer as a claim that has to show its work. No relevant chunk above the floor means the model shouldn't even try. A citation pointing outside the numbered sources you sent means the model is quoting something you never gave it. Below, implement both checks in pure Python.`,
+      animated_diagrams: [
+        {
+          title: "Two guards around the answer",
+          caption: "Refuse below the floor, and reject citations that point nowhere.",
+          loop: false,
+          nodes: [
+            { label: "Best score", sub: "top chunk", detail: "Look at the single highest similarity score from retrieval." },
+            { label: "Floor check", sub: "above threshold?", detail: "If even the best chunk scores low, refuse before calling the model." },
+            { label: "Model answer", sub: "with [n] cites", detail: "If it passes, generate an answer that cites source numbers." },
+            { label: "Validate cites", sub: "1..num_chunks", detail: "Check every cited number points at a chunk you actually sent." },
+            { label: "Trust or flag", sub: "final", detail: "A bad citation means treat the answer as untrustworthy." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Similarity floor", definition: "A minimum score below which the app refuses to answer instead of guessing." },
+        { term: "Citation validation", definition: "Checking that every source number the model cites points at a real provided chunk." },
+      ],
+      worked_examples: [
+        {
+          difficulty: "easy",
+          prompt: "num_chunks = 3, and the answer cites [1] and [5]. Are the citations valid?",
+          steps: [
+            "Extract the numbers: {1, 5}.",
+            "Check 1: 1 <= 1 <= 3 is true.",
+            "Check 5: 1 <= 5 <= 3 is false.",
+            "Not all citations are in range.",
+          ],
+          output: "invalid (citation [5] points past the 3 chunks provided)",
+        },
+      ],
+      inline_quizzes: [
+        {
+          question: "What does a low best-similarity score usually mean?",
+          options: ["The model is broken", "The document probably does not cover the question, so refuse", "The question is too short", "Retry the embedding"],
+          correct_index: 1,
+          explanation: "If even the top chunk scores low, no clever prompting will help. Refusing below a floor is honest and skips the expensive generation call.",
+        },
+      ],
       starter_code: `# Two grounding guards: a similarity floor, and a citation validator.
 import re
 
@@ -1073,6 +1287,34 @@ RAG apps look cheap in a demo and turn expensive in production, because the embe
 ## A way to picture it
 
 Never pay to embed the same sentence twice. Below, tally the real embedding bill for a batch of chunks where some are exact repeats of earlier ones. Pure Python, mirroring the content-hash cache above.`,
+      animated_diagrams: [
+        {
+          title: "Bill only new chunks",
+          caption: "Hash each chunk's text and skip any you already embedded.",
+          loop: true,
+          nodes: [
+            { label: "Chunk", sub: "text in", detail: "Take the next chunk from the upload." },
+            { label: "Hash text", sub: "sha256", detail: "Compute a content hash of the exact chunk text." },
+            { label: "In cache?", sub: "seen before", detail: "If the hash is already cached, skip it for free." },
+            { label: "Embed new", sub: "pay once", detail: "Otherwise embed it and store the vector under its hash." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Content hash", definition: "A fingerprint of a chunk's exact text, used to detect and skip already-embedded chunks." },
+        { term: "Caching", definition: "Storing past results so identical work is not paid for twice." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why does caching by content hash help RAG cost the most?",
+          options: ["Questions are expensive", "Embedding scales with document size and re-uploads, not with how many questions get asked", "It speeds up the model", "It shrinks the PDF"],
+          correct_index: 1,
+          explanation: "The embedding step is the cost that grows with document size and repeat uploads. Skipping unchanged chunks removes most of that bill.",
+        },
+      ],
+      callouts: [
+        { type: "warning", position: "after", title: "Guard the edges first", content: "An empty document or a blank question should fail with a clear message before you spend a token, not crash three functions later." },
+      ],
       starter_code: `# Bill only chunks that haven't been seen (embedded) before in this batch.
 
 def token_cost(text):
@@ -1244,6 +1486,40 @@ Finishing this lesson records Chat With Your PDF in your **Portfolio** tab. Keep
 ## A way to picture it
 
 A shipped RAG app hides five lessons of machinery behind one loop: ask a question, get back a grounded answer with sources, or an honest "I don't know." Below, wire the final dispatcher together in pure Python. No network required, and then it's done.`,
+      animated_diagrams: [
+        {
+          title: "Ingest once, ask many times",
+          caption: "The costly steps run once; each question reuses the result.",
+          loop: false,
+          nodes: [
+            { label: "Ingest PDF", sub: "chunk + embed", detail: "Extract, chunk, and embed the document one time on upload." },
+            { label: "Question", sub: "embed query", detail: "Embed just the question with the same model." },
+            { label: "Retrieve", sub: "rank + floor", detail: "Score chunks, and refuse if the best is below the floor." },
+            { label: "Dedup + build", sub: "top k", detail: "Keep k unique chunks and assemble the grounded prompt." },
+            { label: "Answer", sub: "sourced reply", detail: "Return an answer with citations, or an honest I don't know." },
+          ],
+        },
+      ],
+      key_terms: [
+        { term: "Ingest", definition: "The one-time step that extracts, chunks, and embeds a document before any questions." },
+      ],
+      inline_quizzes: [
+        {
+          question: "Why do questions run cheap after ingest?",
+          options: ["The model is free", "The expensive chunking and embedding already happened, so each question reuses them", "Questions skip retrieval", "Caching disables the model"],
+          correct_index: 1,
+          explanation: "Ingest does the heavy work once. Each ask only embeds the short question and ranks against the stored vectors.",
+        },
+      ],
+      participation_activities: [
+        {
+          activity_title: "Check yourself",
+          questions: [
+            { type: "true_false", question: "A shipped RAG app should refuse honestly when the document does not cover a question.", correct_answer: "true", explanation: "Refusing below the similarity floor is what makes its confident answers trustworthy." },
+            { type: "fill_in", question: "The one-time extract-chunk-embed step is called what (one word)?", correct_answer: "ingest", explanation: "Ingest runs once per document, while ask runs once per question." },
+          ],
+        },
+      ],
       starter_code: `# The final dispatcher: rank, floor-check, dedup, and assemble context, all in one pass.
 
 def cosine_similarity(a, b):
