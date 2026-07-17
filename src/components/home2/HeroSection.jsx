@@ -8,7 +8,7 @@ const display = font.display;
 const body = font.body;
 const mono = font.mono;
 
-const RELEASE_BASE = "https://github.com/hweichen77-dot/codeflow/releases";
+const RELEASE_BASE = "https://github.com/hweichen77-dot/compilearn/releases";
 const FALLBACK = {
   mac: `${RELEASE_BASE}/download/v2.3.0/Compilearn_2.3.0_universal.dmg`,
   win: `${RELEASE_BASE}/download/v2.3.0/Compilearn_2.3.0_x64_en-US.msi`,
@@ -21,7 +21,7 @@ export default function HeroSection() {
 
   useEffect(() => {
     let alive = true;
-    fetch("https://api.github.com/repos/hweichen77-dot/codeflow/releases/latest")
+    fetch("https://api.github.com/repos/hweichen77-dot/compilearn/releases/latest")
       .then((r) => (r.ok ? r.json() : null))
       .then((rel) => {
         if (!alive || !rel?.assets) return;

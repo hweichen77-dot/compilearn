@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 const SITE = 'Compilearn'
-const ORIGIN = 'https://hweichen77-dot.github.io/codeflow'
+const ORIGIN = 'https://hweichen77-dot.github.io/compilearn'
 
 function setMeta(selector, attr, value) {
   if (typeof document === 'undefined' || value == null) return null

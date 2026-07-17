@@ -118,7 +118,7 @@ If you notice ONE specific, actionable issue (logic error, infinite loop risk, w
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#34302A" }} />
             </div>
             <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
-              ~/codeflow/{filename}
+              ~/compilearn/{filename}
             </span>
           </div>
           <div className="flex items-center gap-2">

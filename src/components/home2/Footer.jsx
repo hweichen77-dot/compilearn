@@ -74,7 +74,7 @@ export default function Footer() {
 
           <div>
             <div style={idx}>About</div>
-            <FootLink href="https://github.com/hweichen77-dot/codeflow" target="_blank" rel="noopener noreferrer">GitHub</FootLink>
+            <FootLink href="https://github.com/hweichen77-dot/compilearn" target="_blank" rel="noopener noreferrer">GitHub</FootLink>
             <FootLink href="mailto:jason.huang317235@gmail.com">Contact</FootLink>
             <FootRouterLink to={createPageUrl("Privacy")}>Privacy</FootRouterLink>
             <FootRouterLink to={createPageUrl("Terms")}>Terms</FootRouterLink>
