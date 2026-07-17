@@ -1850,7 +1850,7 @@ main()
       title: "Rate Limiting and Abuse Prevention",
       concept: "RateLimit",
       xp_reward: 10,
-      explanation: `A startup woke up to a \\$40,000 bill. One script had looped a single endpoint overnight, each call asking the model for a maximum-length completion. No prompt was injected, no secret leaked, nothing was "hacked." The attacker simply used the product faster and bigger than any human could. The defense for that class of abuse is **rate limiting**.
+      explanation: `A startup woke up to a $40,000 bill. One script had looped a single endpoint overnight, each call asking the model for a maximum-length completion. No prompt was injected, no secret leaked, nothing was "hacked." The attacker simply used the product faster and bigger than any human could. The defense for that class of abuse is **rate limiting**.
 
 ## What it is
 

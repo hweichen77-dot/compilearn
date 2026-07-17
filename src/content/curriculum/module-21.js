@@ -31,7 +31,7 @@ Prices are quoted per million tokens. You'll see a model listed like "$3 / 1M in
 
 Two facts drive every bill:
 
-1. Input and output are billed at different rates. The same provider that charges \\$3 per million input tokens might charge \\$15 per million output tokens. Reading your prompt is cheap; generating new text is expensive.
+1. Input and output are billed at different rates. The same provider that charges $3 per million input tokens might charge $15 per million output tokens. Reading your prompt is cheap; generating new text is expensive.
 2. Output is usually several times more expensive than input. A 3x to 5x gap is common. The model works harder to produce tokens than to read them, and pricing reflects that.
 
 To find a call's cost, compute each side and add them:
@@ -339,7 +339,7 @@ For output you usually can't measure ahead of time, so you **assume a budget**: 
 
 ## Why it matters
 
-The real power is multiplying by scale. One call at \\$0.0002 sounds free. The same call **100,000 times a day** is \\$20 a day, \\$600 a month. Estimating per-call cost and multiplying by expected volume turns a vague worry into a number you can plan around, and a number you can compare against alternatives before you commit.
+The real power is multiplying by scale. One call at $0.0002 sounds free. The same call **100,000 times a day** is $20 a day, $600 a month. Estimating per-call cost and multiplying by expected volume turns a vague worry into a number you can plan around, and a number you can compare against alternatives before you commit.
 
 ## The mental model to keep
 
@@ -881,7 +881,7 @@ main()
 Four practical levers, roughly in order of how often they help:
 
 1. **Trim or summarize history.** Don't resend the entire transcript forever. Keep the last few turns, or replace old turns with a short summary. This directly attacks the compounding-input problem from the last lesson.
-2. **Cap max output.** Set a limit on how many tokens the reply can use. Since output is the expensive side, a sensible cap is the highest-leverage single setting.
+2. **Cap max output.** Set a limit on how many tokens the reply can use. Since output is the expensive side, a sensible cap is the highest-impact single setting.
 3. **Use prompt caching.** If the same big chunk (a long system prompt, a fixed document) is sent on every call, providers can **cache** it so repeats are billed at a steep discount instead of full price.
 4. **Choose a smaller, cheaper model.** When the task is easy, classification, short rewrites, simple extraction, a smaller model often does it fine for a fraction of the price. Save the big model for when quality truly needs it.
 
@@ -910,7 +910,7 @@ The order matters: history trimming and an output cap are free to apply and hit 
         { term: "Prompt caching", definition: "Reusing a repeated large prompt prefix at a discounted rate instead of paying full price each call." }
       ],
       callouts: [
-        { type: "tip", title: "Cap output first", content: "Setting a max output limit is the single highest-leverage move, because output is the priciest side. It's one setting and it caps your worst case.", position: "before" },
+        { type: "tip", title: "Cap output first", content: "Setting a max output limit is the single highest-impact move, because output is the priciest side. It's one setting and it caps your worst case.", position: "before" },
         { type: "insight", title: "Downgrade the model last", content: "Switching to a smaller model saves the most but risks quality. Try the free levers, trim history, cap output, cache repeats, before reaching for a different model.", position: "after" }
       ],
       concept_diagram: {
@@ -927,7 +927,7 @@ The order matters: history trimming and an output cap are free to apply and hit 
           question: "Which single setting most directly controls the expensive side of the bill?",
           options: ["A cap on max output tokens", "A longer system prompt", "A bigger context window"],
           correct_index: 0,
-          explanation: "Output tokens are the pricey side, so capping max output is the highest-leverage single setting."
+          explanation: "Output tokens are the pricey side, so capping max output is the highest-impact single setting."
         }
       ],
       quiz_questions: [
@@ -1154,7 +1154,7 @@ main()
 
 ## What it is
 
-LLM pricing is **asymmetric**: input tokens and output tokens are billed at *different* rates, and output is almost always the expensive side. A common pattern is something like \\$3 per million input tokens against \\$15 per million output tokens, a clean **5x** gap. The provider charges more to *generate* text than to *read* it.
+LLM pricing is **asymmetric**: input tokens and output tokens are billed at *different* rates, and output is almost always the expensive side. A common pattern is something like $3 per million input tokens against $15 per million output tokens, a clean **5x** gap. The provider charges more to *generate* text than to *read* it.
 
 This means the token total alone tells you almost nothing. A call's cost depends on *which side* the tokens land on. Shift tokens from output to input and the same workload gets cheaper.
 
@@ -1177,11 +1177,11 @@ print(f"output: \${output_cost:.6f}")   # bigger, even with fewer tokens
 print(f"total:  \${total:.6f}")
 \`\`\`
 
-Here 3,000 input tokens cost \\$0.009, but just 800 output tokens cost \\$0.012, fewer tokens, higher cost, because each output token is priced 5x higher.
+Here 3,000 input tokens cost $0.009, but just 800 output tokens cost $0.012, fewer tokens, higher cost, because each output token is priced 5x higher.
 
 ## Why it matters
 
-The asymmetry flips your intuition about where to optimize. A bloated prompt feels wasteful, but it's billed on the *cheap* meter. A model that rambles a long answer is billed on the *expensive* meter. So the highest-leverage knob is usually **how much the model writes**, not how much you send. If your bill surprises you, do the input-versus-output split first, it almost always points straight at the output side.
+The asymmetry flips your intuition about where to optimize. A bloated prompt feels wasteful, but it's billed on the *cheap* meter. A model that rambles a long answer is billed on the *expensive* meter. So the highest-impact knob is usually **how much the model writes**, not how much you send. If your bill surprises you, do the input-versus-output split first, it almost always points straight at the output side.
 
 ## The mental model to keep
 
@@ -1230,14 +1230,14 @@ The asymmetry flips your intuition about where to optimize. A bloated prompt fee
           options: [
             "$0.006000",
             "$0.012000",
-            "$0.012000 ... no, $0.012",
-            "$0.012000 total is wrong; it is $0.012000"
+            "$0.018000",
+            "$0.030000"
           ],
           correct_index: 1,
           explanation: "Input = 2000/1M x 3 = $0.006; output = 400/1M x 15 = $0.006; total = $0.012000."
         },
         {
-          question: "Given the asymmetry, what is usually the highest-leverage thing to control?",
+          question: "Given the asymmetry, what is usually the highest-impact thing to control?",
           options: [
             "The length of the prompt you send",
             "How many tokens the model generates in its reply",
@@ -2039,7 +2039,7 @@ main()
       title: "Budgets and Spend Alerts",
       concept: "Budgets",
       xp_reward: 10,
-      explanation: `A startup wired GPT into a free trial and went to bed. One user wrote a script that hammered the endpoint all night. By morning the bill was \\$11,000 - for a product that earned \\$0. There was no spending cap, no per-user limit, no alert. Every cost lever in this module shrinks the *average* call; budgets and alerts protect you from the *runaway* call. They are the seatbelt.
+      explanation: `A startup wired GPT into a free trial and went to bed. One user wrote a script that hammered the endpoint all night. By morning the bill was $11,000 - for a product that earned $0. There was no spending cap, no per-user limit, no alert. Every cost lever in this module shrinks the *average* call; budgets and alerts protect you from the *runaway* call. They are the seatbelt.
 
 ## What it is
 
@@ -2196,12 +2196,12 @@ spent so far: 9600`,
         },
         {
           number: 2, difficulty: "medium",
-          prompt: "Two users share a daily account cap of $0.030 and each has a per-user cap of $0.020. User A has spent $0.019 and sends a $0.004 call; user B has spent $0.008 and sends a $0.005 call. With an 80% per-user alert, what happens to each?",
+          prompt: "Two users share a daily account cap of $0.050 and each has a per-user cap of $0.020. User A has spent $0.019 and sends a $0.004 call; user B has spent $0.008 and sends a $0.005 call. With an 80% per-user alert, what happens to each?",
           steps: [
             "User A: $0.019 + $0.004 = $0.023 > their $0.020 cap -> blocked; A stays at $0.019.",
             "User B: $0.008 + $0.005 = $0.013 <= $0.020 cap -> allowed; B now at $0.013.",
             "User B alert check: 80% of $0.020 = $0.016; $0.013 < $0.016, so no alert yet.",
-            "Account total = $0.019 + $0.013 = $0.032... but A's call was blocked, so it is $0.019 + $0.013 = $0.032 only if both went through; A's did not, so the account is $0.019 + $0.013 = $0.032 minus A's blocked $0.004 = $0.032. Recompute: spent A 0.019 + spent B 0.013 = $0.032, under no account breach here since the account cap check is separate."
+            "Account total is A's $0.019 plus B's $0.013 = $0.032, which is under the $0.050 account cap, so the account-level check passes independently of the per-user checks above."
           ],
           output: "A blocked (over per-user cap), B allowed with no alert yet."
         }

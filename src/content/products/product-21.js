@@ -1173,6 +1173,7 @@ for case_id, scores in cases.items():
         "Aggregate repeated judge scores per test case into a median verdict, treating all-failed attempts as no verdict at all.",
       challenge_language: "python",
       challenge_starter_code: `import sys
+import statistics
 
 def main():
     data = sys.stdin.read().split("\\n")
@@ -1184,13 +1185,13 @@ def main():
         scores = tokens[2:2 + k]
         # TODO: keep only the tokens that are NOT "ERR", converted to int, as 'valid'
         # TODO: if 'valid' is empty, print "<name>: NO_VERDICT"
-        # TODO: otherwise sort 'valid'; for an odd count print the middle value;
-        #       for an even count print the floor average of the two middle values
-        # TODO: print "<name>: <median>"
+        # TODO: otherwise print "<name>: <round(statistics.median(valid))>",
+        #       the same median rule the lesson uses
 
 main()
 `,
       challenge_solution_code: `import sys
+import statistics
 
 def main():
     data = sys.stdin.read().split("\\n")
@@ -1204,13 +1205,7 @@ def main():
         if not valid:
             print(f"{name}: NO_VERDICT")
             continue
-        valid.sort()
-        m = len(valid)
-        if m % 2 == 1:
-            median = valid[m // 2]
-        else:
-            median = (valid[m // 2 - 1] + valid[m // 2]) // 2
-        print(f"{name}: {median}")
+        print(f"{name}: {round(statistics.median(valid))}")
 
 main()
 `,
@@ -1222,8 +1217,8 @@ main()
         },
         {
           input: "2\nq1 4 2 4 5 3\nq2 2 ERR ERR",
-          expected_output: "q1: 3\nq2: NO_VERDICT",
-          description: "An even-count median floors down, and an all-failed case reports NO_VERDICT.",
+          expected_output: "q1: 4\nq2: NO_VERDICT",
+          description: "An even-count median averages the two middle scores and rounds, and an all-failed case reports NO_VERDICT.",
         },
         {
           input: "1\nsolo 1 5",

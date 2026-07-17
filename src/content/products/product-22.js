@@ -1484,10 +1484,21 @@ class GenerateRequest(BaseModel):
 
 @app.post("/generate")
 def generate(req: GenerateRequest):
-    result = safe_generate(req.model_dump())
-    if result["ok"] and not budget.charge(result.get("cost_cents", 0)):
+    prompt = req.prompt.strip()
+    if not prompt:
+        return {"ok": False, "status": 400, "error": "missing prompt"}
+
+    if not budget.charge(estimate_cost(prompt)):
         return {"ok": False, "status": 402, "error": "daily budget exceeded"}
-    write_log(make_log_record(result))
+
+    result = safe_generate({"prompt": prompt})
+    write_log(make_log_record(
+        result["model"],
+        result["input_tokens"],
+        result["output_tokens"],
+        result["latency_ms"],
+        status="ok" if result["ok"] else "error",
+    ))
     return result
 
 @app.get("/dashboard")

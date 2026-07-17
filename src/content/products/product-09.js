@@ -579,7 +579,7 @@ print(best_match("Do you have a store in France?", faq))
       challenge_language: "python",
       challenge_starter_code: `import sys, re
 
-STOP = {"a", "an", "the", "is", "are", "do", "you", "your", "what", "we", "does"}
+STOP = {"a", "an", "the", "is", "are", "do", "you", "your", "what", "we"}
 
 def keywords(text):
     words = re.findall(r"[a-z0-9]+", text.lower())
@@ -601,7 +601,7 @@ main()
 `,
       challenge_solution_code: `import sys, re
 
-STOP = {"a", "an", "the", "is", "are", "do", "you", "your", "what", "we", "does"}
+STOP = {"a", "an", "the", "is", "are", "do", "you", "your", "what", "we"}
 
 def keywords(text):
     words = re.findall(r"[a-z0-9]+", text.lower())

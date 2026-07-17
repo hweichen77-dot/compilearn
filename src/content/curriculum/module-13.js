@@ -346,7 +346,7 @@ You accumulate the tokens to rebuild the full message, while showing each one th
 ## Why it matters
 
 - **It is the standard.** OpenAI, Anthropic, and most providers stream over SSE, so knowing the format means you can read any of them.
-- **It is robust and simple.** Being plain HTTP, it survives most corporate proxies and load balancers that block fancier protocols.
+- **It is reliable and simple.** Being plain HTTP, it survives most corporate proxies and load balancers that block fancier protocols.
 - **You must handle partial and broken streams.** A dropped connection can leave you with half an answer. Real clients buffer, detect the missing \`[DONE]\`, and decide whether to retry or surface what they have.
 
 ## The mental model to keep
@@ -487,11 +487,11 @@ print(message)
         },
         {
           number: 2, difficulty: "hard",
-          prompt: "A stream sends three valid token events, then the connection drops before any [DONE] sentinel arrives. How should a robust client behave, and what does it have?",
+          prompt: "A stream sends three valid token events, then the connection drops before any [DONE] sentinel arrives. How should a reliable client behave, and what does it have?",
           steps: [
             "The client has accumulated three tokens of a partial message, but never saw the [DONE] marker.",
             "Because the loop ends due to the connection closing rather than the sentinel, the client should flag the result as incomplete.",
-            "A robust client distinguishes a clean finish (saw [DONE]) from a truncated one (stream ended without it).",
+            "A reliable client distinguishes a clean finish (saw [DONE]) from a truncated one (stream ended without it).",
             "It then decides policy: retry the request, or surface the partial answer clearly labeled as incomplete rather than pretending it is whole."
           ],
           output: "It holds a partial, unterminated message and should mark it incomplete, then retry or surface it as partial."
@@ -553,7 +553,7 @@ print(message)
         { input: "data: {\"token\": \"Hel\"}\n\ndata: {\"token\": \"lo\"}\n\ndata: [DONE]", output: "2\nHello", explanation: "Two token events, `Hel` + `lo`, joined into `Hello`; the blank lines and the sentinel are not counted." },
         { input: ": keep-alive\ndata: {\"token\": \"Hi\"}\n\ndata: {\"token\": \" there\"}\n\ndata: [DONE]\ndata: {\"token\": \"ignored\"}", output: "2\nHi there", explanation: "The `:` comment is skipped, and the `data:` line after `[DONE]` is dropped." },
       ],
-      challenge_notes: "Almost every streaming LLM API speaks this exact dialect of SSE: `data:` lines, blank-line separators, and a `[DONE]` terminator. Robust clients always stop at the sentinel and never trust bytes that arrive after it.",
+      challenge_notes: "Almost every streaming LLM API speaks this exact dialect of SSE: `data:` lines, blank-line separators, and a `[DONE]` terminator. Reliable clients always stop at the sentinel and never trust bytes that arrive after it.",
       challenge_hints: [
         "Read all of stdin and split on newlines; loop over the lines.",
         "Only lines that start with `data:` matter, strip that prefix and `.strip()` the rest.",

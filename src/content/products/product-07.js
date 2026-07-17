@@ -630,12 +630,14 @@ Even when you say "only JSON", models often wrap it in chatty text or a Markdown
 
 \`\`\`python
 def extract_json(text):
-    start = text.index("[")
-    end = text.rindex("]") + 1
-    return json.loads(text[start:end])
+    start = text.find("[")
+    end = text.rfind("]")
+    if start == -1 or end == -1 or end < start:
+        return []
+    return json.loads(text[start:end + 1])
 \`\`\`
 
-This one guard handles most of what goes wrong with structured output. It survives code fences, a leading "Here are the items:", and a trailing "Hope that helps!" without any special-casing.
+Use \`find\`/\`rfind\`, not \`index\`/\`rindex\`: \`find\` returns -1 when there is no bracket instead of raising, so the \`-1\` check lets a reply with no array fall through to an empty list rather than crashing. This one guard handles most of what goes wrong with structured output. It survives code fences, a leading "Here are the items:", and a trailing "Hope that helps!" without any special-casing.
 
 ## Validate every item
 
@@ -716,7 +718,7 @@ JSON is the handoff point between what the model writes and what your program ca
 raw = 'Here are the items: [{"owner": "Alex", "task": "Send report", "due": "Friday"}, {"owner": "Sam", "task": "Book room", "due": ""}] hope that helps!'
 
 def extract_json(text):
-    # TODO: find the first "[" and last "]" and json.loads that slice
+    # TODO: find first "[" and last "]" (use find/rfind); return [] if either is -1, else json.loads that slice
     pass
 
 REQUIRED = ("owner", "task", "due")
@@ -740,9 +742,11 @@ for it in valid:
 raw = 'Here are the items: [{"owner": "Alex", "task": "Send report", "due": "Friday"}, {"owner": "Sam", "task": "Book room", "due": ""}] hope that helps!'
 
 def extract_json(text):
-    start = text.index("[")
-    end = text.rindex("]") + 1
-    return json.loads(text[start:end])
+    start = text.find("[")
+    end = text.rfind("]")
+    if start == -1 or end == -1 or end < start:
+        return []
+    return json.loads(text[start:end + 1])
 
 REQUIRED = ("owner", "task", "due")
 
@@ -760,7 +764,7 @@ for it in valid:
 Valid: 1
 - Alex -> Send report`,
       hints: [
-        "text.index(\"[\") is the first bracket; text.rindex(\"]\") is the last.",
+        "text.find(\"[\") is the first bracket; text.rfind(\"]\") is the last. Both return -1 when there is no bracket, so guard before slicing.",
         "json.loads on the slice text[start:end] gives you the list of dicts.",
         "all(item.get(k) for k in REQUIRED) is False if any field is missing or empty.",
       ],

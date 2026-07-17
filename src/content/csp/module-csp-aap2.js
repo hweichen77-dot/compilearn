@@ -820,7 +820,7 @@ export default {
       "title": "Simulation, Efficiency, and the Limits of Computing",
       "concept": "Simulation and Undecidability",
       "xp_reward": 10,
-      "explanation": "You now have the full toolkit, Booleans, conditionals, loops, traversals, and search. This lesson combines them into **simulation** and steps back to ask two big questions of Big Idea 3: how *fast* can a problem be solved, and are there problems no program can solve at all?\n\n## Simulation: modeling a process step by step\n\nA **simulation** uses a program to imitate a real or hypothetical process, advancing it one step at a time inside a loop. Consider a walker on a number line who takes a series of steps left (`L`) or right (`R`):\n\n```python\nsteps = input().split()   # e.g. [\"R\", \"R\", \"L\"]\npos = 0\nfor s in steps:\n    if s == \"L\":\n        pos = pos - 1\n    else:\n        pos = pos + 1\nprint(pos)                # final position\n```\n\nEach loop pass updates the **state** (`pos`) according to a rule. Real simulations model weather, traffic, populations, or games this way, track the state, apply the rules, repeat. When real processes are random, simulations use randomness; here we keep it deterministic so the result is exact.\n\n## Efficiency: not all algorithms are equal\n\nThe search lessons showed two algorithms for one job with wildly different costs, linear search does work proportional to `n`, binary search proportional to `log n`. **Efficiency** measures how an algorithm's work grows as the input grows. Some problems have fast solutions; others (like trying every possible combination) blow up so quickly they are called **intractable**: solvable in principle but not in any practical amount of time for large inputs.\n\n## Undecidability: some problems have no algorithm\n\nFinally, a few problems cannot be solved by *any* program, no matter how clever or fast. The famous example is the **Halting Problem**: there is no general algorithm that can decide, for every possible program and input, whether that program will eventually stop or loop forever. Such problems are called **undecidable**. They mark a hard boundary on what computing can ever do.\n\n## Why it matters\n\n- **Simulation** turns loops and conditionals into a tool for modeling the world.\n- **Efficiency** explains why algorithm choice can mean seconds versus centuries.\n- **Undecidability** reminds us that computing, for all its power, has real limits.\n\nTogether these ideas close out Big Idea 3: you can not only write algorithms, but reason about how good, and how possible, they are.",
+      "explanation": "You now have the full toolkit, Booleans, conditionals, loops, traversals, and search. This lesson combines them into **simulation** and steps back to ask two big questions of Big Idea 3: how *fast* can a problem be solved, and are there problems no program can solve at all?\n\n## Simulation: modeling a process step by step\n\nA **simulation** uses a program to imitate a real or hypothetical process, advancing it one step at a time inside a loop. Consider a walker on a number line who takes a series of steps left (`L`) or right (`R`):\n\n```python\nsteps = input().split()   # e.g. [\"R\", \"R\", \"L\"]\npos = 0\nfor s in steps:\n    if s == \"L\":\n        pos = pos - 1\n    else:\n        pos = pos + 1\nprint(pos)                # final position\n```\n\nEach loop pass updates the **state** (`pos`) according to a rule. Real simulations model weather, traffic, populations, or games this way, track the state, apply the rules, repeat. When real processes are random, simulations use randomness; here we keep it deterministic so the result is exact.\n\n## Efficiency: not all algorithms are equal\n\nThe search lessons showed two algorithms for one job with wildly different costs, linear search does work proportional to `n`, binary search proportional to `log n`. **Efficiency** measures how an algorithm's work grows as the input grows. AP CSP describes an efficient algorithm as one that runs in a **reasonable amount of time**. Some problems have fast solutions; others (like trying every possible combination) blow up so quickly that they can only be solved in **unreasonable time** (also called *intractable*): solvable in principle, but not in any practical amount of time for large inputs.\n\n## Undecidability: some problems have no algorithm\n\nFinally, a few problems cannot be solved by *any* program, no matter how clever or fast. The famous example is the **Halting Problem**: there is no general algorithm that can decide, for every possible program and input, whether that program will eventually stop or loop forever. Such problems are called **undecidable**. They mark a hard boundary on what computing can ever do.\n\n## Why it matters\n\n- **Simulation** turns loops and conditionals into a tool for modeling the world.\n- **Efficiency** explains why algorithm choice can mean seconds versus centuries.\n- **Undecidability** reminds us that computing, for all its power, has real limits.\n\nTogether these ideas close out Big Idea 3: you can not only write algorithms, but reason about how good, and how possible, they are.",
       "key_terms": [
         {
           "term": "Simulation",
@@ -841,7 +841,7 @@ export default {
           "options": [
             "An undecidable problem with no general algorithm",
             "A problem binary search solves quickly",
-            "A simulation of a random walk",
+            "A simulation of a step-by-step walk",
             "An efficient sorting method"
           ],
           "correct_index": 0,
@@ -850,7 +850,7 @@ export default {
       ],
       "quiz_questions": [
         {
-          "question": "In the random-walk simulation, what does the variable `pos` represent?",
+          "question": "In the step-walk simulation, what does the variable `pos` represent?",
           "options": [
             "The current state of the process being modeled",
             "The number of steps remaining",
@@ -903,14 +903,14 @@ export default {
           "activity_title": "Check yourself",
           "questions": [
             { "type": "true_false", "question": "The Halting Problem is undecidable: no single algorithm can decide for every program whether it stops.", "correct_answer": "true", "explanation": "It is the classic example of a problem no program can solve in general." },
-            { "type": "fill_in", "question": "A problem solvable in principle but not in any practical time for large inputs is called ___.", "correct_answer": "intractable", "explanation": "Its work explodes too fast to finish, unlike an undecidable problem which has no algorithm at all." }
+            { "type": "fill_in", "question": "AP CSP says a problem solvable in principle but not in any practical time for large inputs runs in ___ time.", "correct_answer": "unreasonable", "explanation": "Its work explodes too fast to finish in a reasonable time (such a problem is also called intractable), unlike an undecidable problem which has no algorithm at all." }
           ]
         }
       ],
       "callouts": [
         { "type": "insight", "position": "after", "title": "Computing has limits", "content": "Efficiency decides seconds versus centuries, and undecidability marks problems no program can ever solve. Both are real boundaries, not just engineering hurdles." }
       ],
-      "challenge_title": "Random Walk Final Position",
+      "challenge_title": "Step Walk Final Position",
       "challenge_language": "python",
       "challenge_starter_code": "# One line contains space-separated steps, each either L or R.\n# Start at position 0. L moves -1, R moves +1.\n# Simulate all the steps and print the final position.\n\nsteps = input().split()\npos = 0\n# TODO: simulate the walk, updating pos for each step\n\nprint(pos)\n",
       "challenge_solution_code": "steps = input().split()\npos = 0\nfor s in steps:\n    if s == \"L\":\n        pos = pos - 1\n    else:\n        pos = pos + 1\nprint(pos)\n",

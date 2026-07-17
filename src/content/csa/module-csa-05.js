@@ -805,7 +805,6 @@ export default {
         },
         {
           "question": "How is the static method getCount() typically called?",
-          "objects": [],
           "options": [
             "myWidget.getCount()",
             "Widget.getCount()",

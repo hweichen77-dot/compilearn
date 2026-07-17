@@ -5,7 +5,7 @@ export default {
     "description": "A hands-on Python lab that reinforces the Algorithms and Programming big idea with real coding practice, from variables and loops to procedures, search, and a small simulation.",
     "difficulty": "beginner",
     "category": "apcsp",
-    "order": 107,
+    "order": 102.5,
     "track": "apcsp",
     "unit": "Programming Lab",
     "tags": [

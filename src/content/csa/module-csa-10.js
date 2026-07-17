@@ -193,30 +193,27 @@ export default {
       ],
       "animated_diagrams": [
         {
-          "title": "Frames push and pop",
-          "caption": "Each call pushes a frame going down, then frames pop off in reverse as calls return.",
+          "title": "Print before the call: counting down",
+          "caption": "Each countDown call prints before it recurses, so the numbers come out 3 2 1 on the way down.",
           "loop": true,
           "nodes": [
-            { "label": "Push factorial(3)", "sub": "top of stack", "detail": "The first call gets a frame holding its own n = 3." },
-            { "label": "Push factorial(2)", "sub": "n = 2", "detail": "factorial(3) calls factorial(2), which stacks a new frame on top." },
-            { "label": "Push factorial(1)", "sub": "base case", "detail": "factorial(1) hits the base case and returns 1 without pushing more." },
-            { "label": "Pop factorial(1)", "sub": "returns 1", "detail": "Its frame is removed and control goes back to factorial(2)." },
-            { "label": "Pop factorial(2)", "sub": "returns 2", "detail": "factorial(2) finishes its multiply, pops, and returns to factorial(3)." },
-            { "label": "Pop factorial(3)", "sub": "returns 6", "detail": "The last frame pops and the final answer leaves the stack." }
+            { "label": "Push countDown(3)", "sub": "prints 3", "detail": "n is 3, not 0. The print runs before the recursive call, so 3 prints, then countDown(2) is called." },
+            { "label": "Push countDown(2)", "sub": "prints 2", "detail": "2 prints before recursing, then countDown(1) stacks a new frame on top." },
+            { "label": "Push countDown(1)", "sub": "prints 1", "detail": "1 prints, then countDown(0) is called." },
+            { "label": "Push countDown(0)", "sub": "base case", "detail": "n is 0, so this frame returns at once without printing." },
+            { "label": "Pop every frame", "sub": "output 3 2 1", "detail": "No frame has work left after its call, so the frames simply pop in reverse. The output is 3 2 1." }
           ]
         }
       ],
       "step_throughs": [
         {
-          "title": "Watching the stack for factorial(4)",
+          "title": "Move the print after the call: order flips to 1 2 3",
           "steps": [
-            { "label": "push factorial(4)", "detail": "Frame for n = 4 is on the stack. It needs factorial(3) first.", "code": "return 4 * factorial(3);" },
-            { "label": "push factorial(3)", "detail": "Frame for n = 3 stacks on top, waiting on factorial(2).", "code": "return 3 * factorial(2);" },
-            { "label": "push factorial(2)", "detail": "Frame for n = 2 stacks on top, waiting on factorial(1).", "code": "return 2 * factorial(1);" },
-            { "label": "push factorial(1)", "detail": "Base case. Returns 1 and its frame pops off.", "code": "return 1;" },
-            { "label": "pop to factorial(2)", "detail": "With 1 in hand, factorial(2) computes 2 * 1 = 2 and pops.", "code": "2 * 1 = 2" },
-            { "label": "pop to factorial(3)", "detail": "factorial(3) computes 3 * 2 = 6 and pops.", "code": "3 * 2 = 6" },
-            { "label": "pop to factorial(4)", "detail": "factorial(4) computes 4 * 6 = 24 and the stack is empty.", "code": "4 * 6 = 24" }
+            { "label": "countDown(3)", "detail": "n is not 0, but the print now sits after the call, so nothing prints yet. It recurses into countDown(2) first.", "code": "countDown(2); then print 3" },
+            { "label": "countDown(2)", "detail": "Again the call comes before the print, so it recurses into countDown(1) with nothing printed yet.", "code": "countDown(1); then print 2" },
+            { "label": "countDown(1)", "detail": "Recurse into countDown(0) before printing.", "code": "countDown(0); then print 1" },
+            { "label": "countDown(0)", "detail": "Base case returns with no print, and the stack starts to unwind.", "code": "return;" },
+            { "label": "unwind and print", "detail": "As each frame resumes it runs its waiting print, deepest first: 1, then 2, then 3.", "code": "prints 1 2 3" }
           ]
         }
       ],
@@ -234,7 +231,7 @@ export default {
           "type": "insight",
           "position": "after",
           "title": "Each frame has its own copy",
-          "content": "Every call gets a fresh frame with its own parameters and local variables. That is why the n inside factorial(3) stays 3 even while factorial(2) and factorial(1) run. The values do not clobber each other."
+          "content": "Every call gets a fresh frame with its own parameters and local variables. That is why the n inside countDown(3) stays 3 even while countDown(2) and countDown(1) run. The values do not clobber each other."
         }
       ],
       "challenge_title": "Print On The Way Up",
@@ -381,15 +378,15 @@ export default {
       "project_id": "csa-10",
       "order": 4,
       "title": "Recursion on Strings",
-      "explanation": "## Strings Are Recursive Too\n\nA **String** can be viewed as a first character plus the **rest** of the string. That self-similar structure makes strings perfect for recursion. The key tools are:\n\n- `s.length()`, number of characters; `length() == 0` is the natural base case.\n- `s.charAt(0)`, the first character.\n- `s.substring(1)`, everything **except** the first character (the smaller problem).\n\n## Reversing a String\n\nTo reverse, put the first character **last**: reverse the rest, then append the first character.\n\n```java\npublic static String reverse(String s) {\n    if (s.length() <= 1) {\n        return s;                       // base case\n    }\n    return reverse(s.substring(1)) + s.charAt(0);\n}\n```\n\nTrace `reverse(\"cat\")`:\n\n- `reverse(\"cat\") = reverse(\"at\") + 'c'`\n- `reverse(\"at\") = reverse(\"t\") + 'a'`\n- `reverse(\"t\") = \"t\"` (base case)\n- Build up: `\"t\" + \"a\" = \"ta\"`, then `\"ta\" + \"c\" = \"tac\"`\n\n## Counting Occurrences\n\nThe same pattern counts a target character: check the first char, then recurse on the rest.\n\n```java\npublic static int countChar(String s, char c) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countChar(s.substring(1), c);\n    return (s.charAt(0) == c) ? 1 + rest : rest;\n}\n```\n\n## Why This Pattern Works\n\nEach call handles **one** character and delegates the remaining `n-1` characters to a recursive call. Because the string shrinks by one each time, it always reaches the empty (or single-char) base case.\n\n## A Note on Performance\n\n`substring(1)` creates a new String each call, so string recursion is not the fastest approach, but it is wonderfully clear and a common AP pattern. The mental model, **first character + smaller string**: transfers directly to arrays in the next lesson.",
+      "explanation": "## Strings Are Recursive Too\n\nA **String** can be viewed as a first character plus the **rest** of the string. That self-similar structure makes strings perfect for recursion. The key tools are:\n\n- `s.length()`, number of characters; `length() == 0` is the natural base case.\n- `s.substring(0, 1)`, the first character as a one-character string.\n- `s.substring(1)`, everything **except** the first character (the smaller problem).\n\n## Reversing a String\n\nTo reverse, put the first character **last**: reverse the rest, then append the first character.\n\n```java\npublic static String reverse(String s) {\n    if (s.length() <= 1) {\n        return s;                       // base case\n    }\n    return reverse(s.substring(1)) + s.substring(0, 1);\n}\n```\n\nTrace `reverse(\"cat\")`:\n\n- `reverse(\"cat\") = reverse(\"at\") + 'c'`\n- `reverse(\"at\") = reverse(\"t\") + 'a'`\n- `reverse(\"t\") = \"t\"` (base case)\n- Build up: `\"t\" + \"a\" = \"ta\"`, then `\"ta\" + \"c\" = \"tac\"`\n\n## Counting Occurrences\n\nThe same pattern counts a target character: check the first char, then recurse on the rest.\n\n```java\npublic static int countChar(String s, String c) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countChar(s.substring(1), c);\n    return (s.substring(0, 1).equals(c)) ? 1 + rest : rest;\n}\n```\n\n## Why This Pattern Works\n\nEach call handles **one** character and delegates the remaining `n-1` characters to a recursive call. Because the string shrinks by one each time, it always reaches the empty (or single-char) base case.\n\n## A Note on Performance\n\n`substring(1)` creates a new String each call, so string recursion is not the fastest approach, but it is wonderfully clear and a common AP pattern. The mental model, **first character + smaller string**: transfers directly to arrays in the next lesson.",
       "key_terms": [
         {
           "term": "substring(1)",
           "definition": "Returns the string with its first character removed, producing the smaller sub-problem for recursion."
         },
         {
-          "term": "charAt(0)",
-          "definition": "Returns the first character of a string, the piece processed by the current recursive call."
+          "term": "substring(0, 1)",
+          "definition": "Returns the first character of a string as a one-character String, the piece processed by the current recursive call."
         },
         {
           "term": "Empty-string base case",
@@ -402,7 +399,7 @@ export default {
           "options": [
             "When the string equals \"a\"",
             "When length() is 0 (or 1)",
-            "When charAt(0) is a space",
+            "When the first character is a space",
             "Never; strings can't have base cases"
           ],
           "correct_index": 1,
@@ -426,7 +423,7 @@ export default {
           "options": [
             "Java limits recursion depth",
             "The string shrinks by one character each call toward the empty base case",
-            "charAt resets the string",
+            "substring(1) restores the removed character",
             "It uses a loop internally"
           ],
           "correct_index": 1,
@@ -439,11 +436,11 @@ export default {
           "caption": "Each call handles the first character and hands the rest of the string to a smaller call.",
           "loop": true,
           "nodes": [
-            { "label": "\"cat\"", "sub": "first = 'c'", "detail": "Split into the first char 'c' and the rest \"at\"." },
-            { "label": "\"at\"", "sub": "first = 'a'", "detail": "Split into the first char 'a' and the rest \"t\"." },
+            { "label": "\"cat\"", "sub": "first = \"c\"", "detail": "Split into the first piece \"c\" and the rest \"at\"." },
+            { "label": "\"at\"", "sub": "first = \"a\"", "detail": "Split into the first piece \"a\" and the rest \"t\"." },
             { "label": "\"t\"", "sub": "base case", "detail": "Length is 1, so return \"t\" directly with no more recursion." },
-            { "label": "\"t\" + 'a'", "sub": "= \"ta\"", "detail": "Going back up, append 'a' after the reversed rest." },
-            { "label": "\"ta\" + 'c'", "sub": "= \"tac\"", "detail": "Append 'c' last to get the fully reversed string." }
+            { "label": "\"t\" + \"a\"", "sub": "= \"ta\"", "detail": "Going back up, append \"a\" after the reversed rest." },
+            { "label": "\"ta\" + \"c\"", "sub": "= \"tac\"", "detail": "Append \"c\" last to get the fully reversed string." }
           ]
         }
       ],
@@ -451,11 +448,11 @@ export default {
         {
           "title": "Tracing reverse(\"cat\")",
           "steps": [
-            { "label": "reverse(\"cat\")", "detail": "Length is 3, so recurse on \"at\" then tack 'c' on the end.", "code": "return reverse(\"at\") + 'c';" },
-            { "label": "reverse(\"at\")", "detail": "Length is 2, so recurse on \"t\" then tack 'a' on the end.", "code": "return reverse(\"t\") + 'a';" },
+            { "label": "reverse(\"cat\")", "detail": "Length is 3, so recurse on \"at\" then tack \"c\" on the end.", "code": "return reverse(\"at\") + \"c\";" },
+            { "label": "reverse(\"at\")", "detail": "Length is 2, so recurse on \"t\" then tack \"a\" on the end.", "code": "return reverse(\"t\") + \"a\";" },
             { "label": "reverse(\"t\")", "detail": "Length is 1, base case, return \"t\".", "code": "return \"t\";" },
-            { "label": "back in reverse(\"at\")", "detail": "\"t\" plus 'a' gives \"ta\".", "code": "\"t\" + 'a' = \"ta\"" },
-            { "label": "back in reverse(\"cat\")", "detail": "\"ta\" plus 'c' gives \"tac\".", "code": "\"ta\" + 'c' = \"tac\"" }
+            { "label": "back in reverse(\"at\")", "detail": "\"t\" plus \"a\" gives \"ta\".", "code": "\"t\" + \"a\" = \"ta\"" },
+            { "label": "back in reverse(\"cat\")", "detail": "\"ta\" plus \"c\" gives \"tac\".", "code": "\"ta\" + \"c\" = \"tac\"" }
           ]
         }
       ],
@@ -473,13 +470,13 @@ export default {
           "type": "tip",
           "position": "after",
           "title": "First character plus the rest",
-          "content": "The mental model for every string recursion is the same. Do a little work with charAt(0), then hand substring(1) to a recursive call. Once the string is empty or a single character, you are at the base case."
+          "content": "The mental model for every string recursion is the same. Do a little work with substring(0, 1), then hand substring(1) to a recursive call. Once the string is empty or a single character, you are at the base case."
         }
       ],
       "challenge_title": "Recursive String Reverse",
       "challenge_language": "java",
       "challenge_starter_code": "import java.util.*;\n\npublic class Main {\n    public static String reverse(String s) {\n        // TODO: base case + recurse on substring(1)\n        return s;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        System.out.println(reverse(s));\n    }\n}\n",
-      "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static String reverse(String s) {\n        if (s.length() <= 1) {\n            return s;\n        }\n        return reverse(s.substring(1)) + s.charAt(0);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        System.out.println(reverse(s));\n    }\n}\n",
+      "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static String reverse(String s) {\n        if (s.length() <= 1) {\n            return s;\n        }\n        return reverse(s.substring(1)) + s.substring(0, 1);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        System.out.println(reverse(s));\n    }\n}\n",
       "challenge_test_cases": [
         {
           "input": "cat",
@@ -500,7 +497,7 @@ export default {
       "project_id": "csa-10",
       "order": 5,
       "title": "Recursion on Arrays",
-      "explanation": "## Processing Arrays Recursively\n\nUnlike strings, we usually do **not** create smaller arrays (that is wasteful). Instead we pass an **index** that marks where the current sub-problem begins. The array stays the same; the index shrinks the problem.\n\nThe pattern: a helper takes the array plus an index `i`. The **base case** is when `i` reaches `arr.length` (nothing left). Otherwise, combine `arr[i]` with the recursive result for `i + 1`.\n\n## Summing an Array\n\n```java\npublic static int sum(int[] arr, int i) {\n    if (i == arr.length) {\n        return 0;                 // base case: no elements left\n    }\n    return arr[i] + sum(arr, i + 1);\n}\n```\n\nCall it with `sum(arr, 0)`. Trace `{4, 2, 7}`:\n\n- `sum(arr,0) = 4 + sum(arr,1)`\n- `sum(arr,1) = 2 + sum(arr,2)`\n- `sum(arr,2) = 7 + sum(arr,3)`\n- `sum(arr,3) = 0` (base case)\n- Up: `7+0=7`, `2+7=9`, `4+9=13`\n\n## Finding a Maximum\n\nThe same index trick finds the largest element:\n\n```java\npublic static int max(int[] arr, int i) {\n    if (i == arr.length - 1) {\n        return arr[i];            // last element\n    }\n    return Math.max(arr[i], max(arr, i + 1));\n}\n```\n\n## Wrapper Methods\n\nUsers should not have to pass a starting index. A common technique is a **wrapper** (public) method that calls the recursive **helper** with index 0:\n\n```java\npublic static int sum(int[] arr) {\n    return sum(arr, 0);\n}\n```\n\nThis keeps the public interface clean while the helper does the recursion.\n\n## Key Idea\n\n**Index-based recursion** avoids copying data: the array is shared, and only the integer index moves forward. This mirrors how recursive search and sort algorithms operate in the next lessons.",
+      "explanation": "## Processing Arrays Recursively\n\nUnlike strings, we usually do **not** create smaller arrays (that is wasteful). Instead we pass an **index** that marks where the current sub-problem begins. The array stays the same; the index shrinks the problem.\n\nThe pattern: a helper takes the array plus an index `i`. The **base case** is when `i` reaches `arr.length` (nothing left). Otherwise, combine `arr[i]` with the recursive result for `i + 1`.\n\n## Summing an Array\n\n```java\npublic static int sum(int[] arr, int i) {\n    if (i == arr.length) {\n        return 0;                 // base case: no elements left\n    }\n    return arr[i] + sum(arr, i + 1);\n}\n```\n\nCall it with `sum(arr, 0)`. Trace `{4, 2, 7}`:\n\n- `sum(arr,0) = 4 + sum(arr,1)`\n- `sum(arr,1) = 2 + sum(arr,2)`\n- `sum(arr,2) = 7 + sum(arr,3)`\n- `sum(arr,3) = 0` (base case)\n- Up: `7+0=7`, `2+7=9`, `4+9=13`\n\n## Finding a Maximum\n\nThe same index trick finds the largest element:\n\n```java\npublic static int max(int[] arr, int i) {\n    if (i == arr.length - 1) {\n        return arr[i];            // last element\n    }\n    return Math.max(arr[i], max(arr, i + 1));\n}\n```\n\nNote: `Math.max` is a convenience method that is not on the AP Java Quick Reference. On the exam you would keep the larger of the two values with an `if` statement instead.\n\n## Wrapper Methods\n\nUsers should not have to pass a starting index. A common technique is a **wrapper** (public) method that calls the recursive **helper** with index 0:\n\n```java\npublic static int sum(int[] arr) {\n    return sum(arr, 0);\n}\n```\n\nThis keeps the public interface clean while the helper does the recursion.\n\n## Key Idea\n\n**Index-based recursion** avoids copying data: the array is shared, and only the integer index moves forward. This mirrors how recursive search and sort algorithms operate in the next lessons.",
       "key_terms": [
         {
           "term": "Index-based recursion",
@@ -735,7 +732,7 @@ export default {
       "project_id": "csa-10",
       "order": 7,
       "title": "Recursive Sorting: Merge Sort",
-      "explanation": "## Divide and Conquer\n\n**Merge sort** is the textbook example of recursive **divide and conquer**. It works in three stages:\n\n- **Divide**: split the array into two halves.\n- **Conquer**: recursively sort each half.\n- **Combine**: **merge** the two sorted halves into one sorted result.\n\nThe **base case** is an array (or sub-array) of length 0 or 1, it is already sorted, so we stop.\n\n## The Merge Step\n\nMerging two sorted lists is the heart of the algorithm. Walk both lists with pointers, repeatedly taking the **smaller** front element:\n\n```java\npublic static int[] merge(int[] a, int[] b) {\n    int[] result = new int[a.length + b.length];\n    int i = 0, j = 0, k = 0;\n    while (i < a.length && j < b.length) {\n        if (a[i] <= b[j]) result[k++] = a[i++];\n        else result[k++] = b[j++];\n    }\n    while (i < a.length) result[k++] = a[i++];\n    while (j < b.length) result[k++] = b[j++];\n    return result;\n}\n```\n\n## Putting It Together\n\n```java\npublic static int[] mergeSort(int[] arr) {\n    if (arr.length <= 1) {\n        return arr;                       // base case\n    }\n    int mid = arr.length / 2;\n    int[] left = Arrays.copyOfRange(arr, 0, mid);\n    int[] right = Arrays.copyOfRange(arr, mid, arr.length);\n    return merge(mergeSort(left), mergeSort(right));\n}\n```\n\n## Why It Is Efficient\n\nThe array is halved `log n` times, and each level does `O(n)` merging work, giving **O(n log n)** overall, far better than the `O(n^2)` of simple sorts on large inputs. Merge sort is also **stable** (equal elements keep their order) thanks to the `<=` in the merge.\n\n## The Recursive Shape\n\nNotice the two recursive calls (`mergeSort(left)` and `mergeSort(right)`), branching recursion again, but here each branch handles a **disjoint** half, so there is no wasteful repeated work like naive Fibonacci. This is recursion at its most powerful.",
+      "explanation": "## Divide and Conquer\n\n**Merge sort** is the textbook example of recursive **divide and conquer**. It works in three stages:\n\n- **Divide**: split the array into two halves.\n- **Conquer**: recursively sort each half.\n- **Combine**: **merge** the two sorted halves into one sorted result.\n\nThe **base case** is an array (or sub-array) of length 0 or 1, it is already sorted, so we stop.\n\n## The Merge Step\n\nMerging two sorted lists is the heart of the algorithm. Walk both lists with pointers, repeatedly taking the **smaller** front element:\n\n```java\npublic static int[] merge(int[] a, int[] b) {\n    int[] result = new int[a.length + b.length];\n    int i = 0, j = 0, k = 0;\n    while (i < a.length && j < b.length) {\n        if (a[i] <= b[j]) result[k++] = a[i++];\n        else result[k++] = b[j++];\n    }\n    while (i < a.length) result[k++] = a[i++];\n    while (j < b.length) result[k++] = b[j++];\n    return result;\n}\n```\n\n## Putting It Together\n\n```java\npublic static int[] mergeSort(int[] arr) {\n    if (arr.length <= 1) {\n        return arr;                       // base case\n    }\n    int mid = arr.length / 2;\n    int[] left = Arrays.copyOfRange(arr, 0, mid);\n    int[] right = Arrays.copyOfRange(arr, mid, arr.length);\n    return merge(mergeSort(left), mergeSort(right));\n}\n```\n\nNote: `Arrays.copyOfRange` is a convenience method beyond the AP Java Quick Reference. AP presents merge sort using one array with low, mid, and high indices rather than returned copies, so you are expected to trace this algorithm, not write it in this exact form.\n\n## Why It Is Efficient\n\nThe array is halved `log n` times, and each level does `O(n)` merging work, giving **O(n log n)** overall, far better than the `O(n^2)` of simple sorts on large inputs. Merge sort is also **stable** (equal elements keep their order) thanks to the `<=` in the merge.\n\n## The Recursive Shape\n\nNotice the two recursive calls (`mergeSort(left)` and `mergeSort(right)`), branching recursion again, but here each branch handles a **disjoint** half, so there is no wasteful repeated work like naive Fibonacci. This is recursion at its most powerful.",
       "key_terms": [
         {
           "term": "Divide and conquer",

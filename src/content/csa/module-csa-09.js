@@ -738,6 +738,7 @@ export default {
         }
       ],
       "callouts": [
+        { "type": "insight", "position": "before", "title": "instanceof is for understanding, not exam syntax", "content": "instanceof is shown here so you can see how equals decides a type match, but it is not on the AP Java Quick Reference. The exam only asks you to call equals, never to write it, so you will not need instanceof syntax on the test." },
         { "type": "warning", "position": "after", "title": "The parameter must be Object", "content": "To override, the signature has to be public boolean equals(Object o). Always check instanceof before casting, and remember == compares references while equals compares values you define." }
       ],
       "key_terms": [

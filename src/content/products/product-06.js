@@ -1082,12 +1082,14 @@ def validate_invoice(inv):
     if errors:
         return errors
     computed = sum(it["qty"] * it["price"] for it in inv["items"])
-    if computed != inv["total"]:
+    if abs(computed - inv["total"]) > 0.01:
         errors.append(f"total mismatch: stated {inv['total']} vs computed {computed}")
     return errors
 \`\`\`
 
 This catches the model dropping a line item or misreading a price, errors that presence-and-type checks alone sail right past. Cross-field validation like this is where extraction earns its trust.
+
+Note the \`abs(computed - inv["total"]) > 0.01\` instead of \`!=\`: money is a float here, and floats don't compare exactly (0.1 + 0.2 is 0.30000000000000004, not 0.3). Comparing within a one-cent tolerance avoids false mismatches. In production the sturdier fix is to store money as integer cents and compare exactly.
 
 ## Watch the cost of big documents
 
@@ -1163,7 +1165,7 @@ print("invoice:", invoice["invoice_id"])
     if errors:
         return errors
     computed = sum(it["qty"] * it["price"] for it in inv["items"])
-    if computed != inv["total"]:
+    if abs(computed - inv["total"]) > 0.01:
         errors.append(f"total mismatch: stated {inv['total']} vs computed {computed}")
     return errors
 
@@ -1184,7 +1186,7 @@ print("computed total:", computed)
       hints: [
         "Check the three required keys first and return early if any are missing.",
         "Sum qty * price across the items list to get the computed total.",
-        "Compare the computed total to inv['total']; append a mismatch error only when they differ.",
+        "Compare with a small tolerance, abs(computed - inv['total']) > 0.01, since money is a float and floats don't compare exactly.",
       ],
       challenge_title: "Reconcile the Invoice",
       challenge_description:

@@ -842,8 +842,8 @@ def assemble(chunks):
     pass
 
 def store(history, prompt, reply):
-    # TODO: append a user turn for 'prompt' and an assistant turn for 'reply'
-    #       onto 'history' (mutate the list in place), then return it.
+    # TODO: append only an assistant turn for 'reply' onto 'history' (the user
+    #       turn is already there); mutate the list in place, then return it.
     pass
 
 history = [{"role": "user", "content": "Write me a haiku about the sea"}]

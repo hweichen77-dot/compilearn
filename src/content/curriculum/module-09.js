@@ -260,7 +260,7 @@ final answer: 42`,
         "1 ≤ N ≤ 100",
         "1 ≤ Q ≤ 1000",
         "-1000000 ≤ constant, arg ≤ 1000000",
-        "Tool names are lowercase letters, length 1, 20, and unique",
+        "Tool names are lowercase alphanumeric, length 1 to 20, and unique",
       ],
       challenge_examples: [
         { input: "3\ndouble mul 2\nincrement add 1\nshift sub 5\n4\ndouble 10\nincrement 41\nshift 5\nsquare 9", output: "20\n42\n0\nERROR", explanation: "double=10*2=20, increment=41+1=42, shift=5-5=0, and `square` was never registered so it is ERROR." },
@@ -582,7 +582,7 @@ tool result: {'city': 'Tokyo', 'temp': 18, 'units': 'celsius'}`,
         { input: "3\nadd 3 4\nmultiply 5 6\nsubtract 10 7", output: "7\n30\n3\nTOTAL 40", explanation: "7 + 30 + 3 = 40." },
         { input: "1\ndivide 8 2", output: "UNKNOWN_TOOL\nTOTAL 0", explanation: "`divide` is not a supported tool, so nothing is added and the total stays 0." },
       ],
-      challenge_notes: "This is the core of tool use: the model decides *which* tool and *what* arguments; your code owns the dispatch table and the execution. Skipping unsupported tools (rather than crashing) is exactly how production agents stay robust against an unpredictable model.",
+      challenge_notes: "This is the core of tool use: the model decides *which* tool and *what* arguments; your code owns the dispatch table and the execution. Skipping unsupported tools (rather than crashing) is exactly how production agents stay reliable against an unpredictable model.",
       challenge_hints: [
         "Use if/elif on `name` to choose the operation.",
         "Only add to `total` when the call actually succeeds.",
@@ -889,7 +889,7 @@ Answer: Lyon, about 520000 people`,
       ],
       challenge_title: "The ReAct Trace Walker",
       challenge_description: "Drive a Reason, Act, Observe loop that chases links through a knowledge graph until it reaches the goal.",
-      challenge_story: "Your research agent answers multi-hop questions like *\"what continent is the country whose capital is Lima on?\"* It can't leap straight to the answer, each fact only unlocks the next. So it runs a **ReAct** loop: it thinks, fires a `lookup` action against a knowledge graph, observes the single fact that comes back, then repeats with that new fact. You must emit the exact reasoning trace as the agent hops from the starting entity toward the goal, and you must defend against the two classic failures of an unguarded loop: hitting a **dead end** (a fact with no further link) and getting trapped in a **cycle** (looping back to a node it already visited).",
+      challenge_story: "Your research agent answers multi-hop questions like *\"what continent is the country whose capital is Lima on?\"* It can't leap straight to the answer, each fact only enables the next. So it runs a **ReAct** loop: it thinks, fires a `lookup` action against a knowledge graph, observes the single fact that comes back, then repeats with that new fact. You must emit the exact reasoning trace as the agent hops from the starting entity toward the goal, and you must defend against the two classic failures of an unguarded loop: hitting a **dead end** (a fact with no further link) and getting trapped in a **cycle** (looping back to a node it already visited).",
       challenge_statement: "You're given a knowledge graph as **N** directed links, each `from to` meaning a `lookup(from)` returns `to`. Then you're given a `start` entity and a `goal` entity.\n\nRun the ReAct loop from `start`:\n\n1. Print `Thought: start at <start>`.\n2. While the current entity is not the goal, perform a `lookup`:\n   - Print `Action: lookup(<current>)` then `Observation: <result>`.\n   - If the current entity has **no** outgoing link, stop and print `Answer: DEAD_END after <k> steps` (where `k` counts the lookups actually performed).\n   - If the observed result is an entity already visited, stop and print `Answer: LOOP after <k> steps`.\n3. When you reach the goal, print `Answer: reached <goal> in <k> steps`.\n\nIf `start` already equals `goal`, no lookups happen: print only the Thought line and `Answer: reached <goal> in 0 steps`.",
       challenge_input_format: "Line 1: integer `N`.\nNext `N` lines: `from to` (each entity is a unique key with exactly one outgoing link; entities are tokens without spaces).\nNext line: `start`.\nNext line: `goal`.",
       challenge_output_format: "The full trace: a `Thought:` line, alternating `Action:` / `Observation:` lines for each lookup, and a final `Answer:` line describing how the run ended.",
@@ -1989,7 +1989,7 @@ for name, ok in plan:
 # -> completes 2 of 3 steps
 \`\`\`
 
-The planner is efficient when the world is predictable: it thinks once and executes fast. The reactor is robust when the world surprises it: every step is a fresh decision informed by the latest observation, so it can route around failures the planner would choke on. Many strong agents blend the two, make a rough plan, but re-plan reactively whenever an observation breaks an assumption.
+The planner is efficient when the world is predictable: it thinks once and executes fast. The reactor is reliable when the world surprises it: every step is a fresh decision informed by the latest observation, so it can route around failures the planner would choke on. Many strong agents blend the two, make a rough plan, but re-plan reactively whenever an observation breaks an assumption.
 
 ## Why it matters
 
@@ -2042,7 +2042,7 @@ A planner is a chess player who calculates the whole line before touching a piec
           explanation: "Up-front planning shines when the path is predictable: fewer model calls, a fixed order, and an auditable plan."
         },
         {
-          question: "Why is a reactive agent more robust when results are surprising?",
+          question: "Why is a reactive agent more reliable when results are surprising?",
           options: [
             "It never makes mistakes",
             "Each step is a fresh decision informed by the latest observation, so it can route around failures",
@@ -2192,7 +2192,7 @@ executed in order: 4 of 4`,
         { input: "3\nsearch 1\nbook 1\nnotify 1", output: "PLAN DONE 3\nREACT 3 3", explanation: "Every step succeeds, so the rigid plan finishes all 3 and the reactor completes all 3 of 3 attempts." },
         { input: "4\nsearch 1\nreserve 0\nbook 1\nnotify 1", output: "PLAN ABORTED 1\nREACT 3 4", explanation: "The plan aborts at the failed reserve after 1 completed step; the reactor skips reserve and completes the other 3 across 4 attempts." },
       ],
-      challenge_notes: "This is the trade-off in numbers: the rigid plan is efficient but brittle (one failure ends it), while the reactor is robust but does more work (it attempts everything). Real agents often blend the two, plan for direction, react around failures.",
+      challenge_notes: "This is the trade-off in numbers: the rigid plan is efficient but brittle (one failure ends it), while the reactor is reliable but does more work (it attempts everything). Real agents often blend the two, plan for direction, react around failures.",
       challenge_hints: [
         "For the planner, loop the steps and break the moment you hit an ok of 0; count completions before the break.",
         "For the reactor, attempts is always N; completed is just the count of steps with ok == 1.",

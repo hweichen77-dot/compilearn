@@ -5,8 +5,8 @@ export default {
     description: "Learn the controls (system prompts, temperature, tokens, few-shot, structured output) that turn an LLM from a slot machine into a predictable tool.",
     difficulty: "beginner",
     category: "prompting",
-    estimated_time: 90,
-    lessons_count: 8,
+    estimated_time: 100,
+    lessons_count: 9,
     tags: ["prompt-engineering", "llm", "claude", "system-prompts", "structured-output"],
     order: 9,
     cover_image: ""
@@ -1391,7 +1391,7 @@ Free-form prose is an **open-ended interview**; structured output is a **fill-in
         },
         {
           number: 2, difficulty: "hard",
-          prompt: "Your pipeline crashes intermittently because the model occasionally returns ```json\\n{...}\\n``` with code fences. Walk through a robust fix.",
+          prompt: "Your pipeline crashes intermittently because the model occasionally returns ```json\\n{...}\\n``` with code fences. Walk through a reliable fix.",
           steps: [
             "First, prevent it at the prompt: add 'no markdown, no code fences, no explanation' to the instruction.",
             "Accept that no prompt is perfect 100% of the time, so also harden the parser.",
@@ -2423,6 +2423,288 @@ main()
         { input: "3\nNEG POS NEU\n3\n0\nNEG POS POS\n1\nNEG POS NEU\n3\nPOS POS NEU\n", expected_output: "2\n3\n1", description: "V2 is best at 3/3; V3 changed 3 variables, one violation." },
         { input: "2\nA B\n2\n0\nA B\n2\nA A\n", expected_output: "1\n2\n1", description: "V1 wins; V2 changed two variables, one violation." },
         { input: "2\nX Y\n3\n0\nX Y\n1\nX Y\n1\nY X\n", expected_output: "1\n2\n0", description: "V1 and V2 tie at 2/2; earliest wins. No version changed more than one variable, zero violations." }
+      ]
+    },
+
+    {
+      id: "ai-03-l9",
+      project_id: "ai-03",
+      order: 9,
+      title: "Chain-of-Thought: Make the Model Show Its Work",
+      concept: "Chain-of-Thought",
+      xp_reward: 10,
+      explanation: `Ask a model a multi-step word problem and demand only the final number, and it often blurts a wrong one. Ask the *same* model to "think step by step" first, and accuracy jumps. That single instruction is **chain-of-thought** prompting, and on multi-step math, logic, and planning tasks it is one of the highest-impact moves you have.
+
+## What it is
+
+**Chain-of-thought (CoT)** prompting asks the model to lay out its intermediate reasoning *before* committing to an answer, instead of jumping straight to the result. The classic trigger is the phrase **"Let's think step by step."** You are not teaching the model new facts. You are giving it room to work the problem out in the open.
+
+- **Direct answer**: "What is 17 x 24? Answer with just the number." The model has to nail it in one shot.
+- **Chain-of-thought**: "What is 17 x 24? Think step by step, then give the final answer." Now it can write 17 x 24 = 17 x 20 + 17 x 4 = 340 + 68 = 408 and check itself along the way.
+
+## Why it works
+
+Every token the model writes becomes part of the context it reads for the *next* token. When it writes out "340 + 68", those partial results are now sitting in the prompt, so the final token is predicted with the sub-steps already computed rather than guessed all at once. Reasoning in the open turns one hard leap into several easy ones.
+
+## The "think, then answer" structure
+
+The practical pattern is to ask for the reasoning **and** a clearly marked final answer, so your code can pull the answer out without parsing the whole scratchpad:
+
+\`\`\`python
+import os
+from anthropic import Anthropic
+
+client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+prompt = (
+    "A shop has 3 shelves with 14 books each, then sells 9. "
+    "How many books remain?\\n\\n"
+    "Think step by step. Put the final answer on the last line "
+    "as 'ANSWER: <number>'."
+)
+
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=300,
+    messages=[{"role": "user", "content": prompt}],
+)
+text = response.content[0].text
+final = text.splitlines()[-1].replace("ANSWER:", "").strip()
+print(final)
+\`\`\`
+
+The reasoning goes to the scratchpad; the \`ANSWER:\` line is what you actually consume.
+
+## When it helps and when it doesn't
+
+- **Use it for** multi-step arithmetic, logic puzzles, planning, "explain the tradeoff" questions, anything where a single leap is error-prone.
+- **Skip it for** simple lookups, one-step classification, or format-only tasks. The extra reasoning just burns tokens and latency without improving a one-hop answer.
+- **A hidden benefit**: because the steps are visible, you can *check the reasoning*, not just the answer. A wrong chain is far easier to debug than a bare wrong number.
+
+## The mental model to keep
+
+Chain-of-thought is **give the model a scratchpad**. On problems that need several steps, let it reason in the open and mark the final answer, so both the model and your code can separate the working from the result.`,
+      key_terms: [
+        { term: "Chain-of-thought", definition: "Prompting the model to write out its intermediate reasoning steps before giving a final answer." },
+        { term: "Think step by step", definition: "The classic trigger phrase that tells the model to reason in the open instead of answering in one leap." },
+        { term: "Final answer marker", definition: "A clearly labeled last line (e.g. 'ANSWER: 42') so your code can extract the result without parsing the reasoning." }
+      ],
+      callouts: [
+        { type: "analogy", title: "Show your work", content: "Chain-of-thought is the math-class rule 'show your work.' The model that writes each step catches its own slips; the one that blurts a single number can't.", position: "before" },
+        { type: "tip", title: "Reason first, mark the answer last", content: "Ask for the reasoning AND a labeled final line. Parse only the marked line so you get the answer without the scratchpad.", position: "after" }
+      ],
+      concept_diagram: {
+        title: "Direct answer vs chain-of-thought",
+        steps: [
+          { label: "Hard question", desc: "Needs several steps" },
+          { label: "Reason in the open", desc: "Write each sub-step" },
+          { label: "Sub-results in context", desc: "Each step feeds the next" },
+          { label: "Marked final answer", desc: "Pulled out by your code" }
+        ]
+      },
+      inline_quizzes: [
+        {
+          question: "Why does 'think step by step' improve accuracy on multi-step problems?",
+          options: [
+            "The written sub-steps become context, so the final token is predicted with them already computed",
+            "It secretly retrains the model on the problem",
+            "It forces the model to use a calculator API"
+          ],
+          correct_index: 0,
+          explanation: "Each token the model writes is read back for the next one, so intermediate results are available instead of being guessed all at once."
+        }
+      ],
+      quiz_questions: [
+        {
+          question: "Which task benefits MOST from chain-of-thought prompting?",
+          options: [
+            "A multi-step word problem with arithmetic and a final count",
+            "Classifying a single sentence as spam or not spam",
+            "Returning a stored value from a lookup table",
+            "Uppercasing a string"
+          ],
+          correct_index: 0,
+          explanation: "CoT pays off when the answer requires several dependent steps. One-hop lookups and simple classification gain nothing from extra reasoning."
+        },
+        {
+          question: "Why ask the model to put the result on a line like 'ANSWER: <number>'?",
+          options: [
+            "So your code can extract the final answer without parsing the whole reasoning",
+            "Because the API rejects responses without an ANSWER line",
+            "Because it makes the model reason faster",
+            "Because uppercase words raise the temperature"
+          ],
+          correct_index: 0,
+          explanation: "A marked final line separates the working from the result, so you consume the answer cleanly and leave the scratchpad behind."
+        },
+        {
+          question: "When is chain-of-thought the WRONG tool?",
+          options: [
+            "On a simple one-step lookup, where it just wastes tokens and latency",
+            "On a logic puzzle with several dependencies",
+            "On a planning task with ordered steps",
+            "On multi-step arithmetic"
+          ],
+          correct_index: 0,
+          explanation: "Reasoning steps help multi-step problems. For a one-hop answer they add cost and delay without improving correctness."
+        }
+      ],
+      participation_activities: [
+        {
+          activity_title: "Reasoning in the open",
+          questions: [
+            { question: "Chain-of-thought works by retraining the model's weights on your problem.", type: "true_false", correct_answer: "false", explanation: "No weights change. The model just reads its own written steps as context for the next token." },
+            { question: "The classic trigger phrase for chain-of-thought is 'Let's think step by ____.'", type: "fill_in", correct_answer: "step", explanation: "'Let's think step by step' tells the model to reason in the open before answering." }
+          ]
+        }
+      ],
+      step_throughs: [
+        {
+          title: "From a hard question to a checked answer",
+          steps: [
+            { label: "Ask for reasoning + a marker", detail: "The prompt requests step-by-step working and a labeled final line so the answer is easy to extract.", code: '"... Think step by step. End with ANSWER: <number>."' },
+            { label: "Model writes the sub-steps", detail: "Each intermediate result is written out and becomes context the model reads for the next step.", code: "3 x 14 = 42\n42 - 9 = 33" },
+            { label: "Model marks the final answer", detail: "The concluded result goes on its own labeled line, separate from the scratchpad.", code: "ANSWER: 33" },
+            { label: "Your code pulls the marked line", detail: "You read only the ANSWER line, so the reasoning stays out of your parsed result.", code: 'final = text.splitlines()[-1].split("ANSWER:")[1].strip()' }
+          ]
+        }
+      ],
+      worked_examples: [
+        {
+          number: 1, difficulty: "easy",
+          prompt: "Rewrite the direct prompt 'What is 17 x 24? Answer with only the number.' as a chain-of-thought prompt.",
+          steps: [
+            "Keep the question, but drop the demand for only the number.",
+            "Add the trigger so the model reasons first: 'Think step by step.'",
+            "Ask for a marked final line so your code can extract the result cleanly."
+          ],
+          output: '"What is 17 x 24? Think step by step, then put the result on the last line as ANSWER: <number>."'
+        },
+        {
+          number: 2, difficulty: "medium",
+          prompt: "A model keeps getting a 3-step inventory word problem wrong when asked for just the number, but you also need a machine-readable answer. Design the prompt and the extraction.",
+          steps: [
+            "Add chain-of-thought so the model works the three steps in the open instead of one leap.",
+            "Require a final line 'ANSWER: <number>' so the reasoning and the result are separable.",
+            "In code, split on the last line and strip the 'ANSWER:' marker to get the value.",
+            "Because the steps are visible, if the answer is wrong you can inspect which step broke, not just that it broke."
+          ],
+          output: "CoT prompt + 'ANSWER:' marker; parse the last line for a clean, checkable result."
+        }
+      ],
+      comparison_tables: [
+        {
+          title: "direct answer vs chain-of-thought",
+          columns: ["Approach", "What the model does", "Best for", "Cost"],
+          rows: [
+            { cells: ["Direct answer", "Commits to a result in one leap", "One-step lookups, simple classification", "Cheapest, fewest tokens"] },
+            { cells: ["Chain-of-thought", "Writes sub-steps, then a marked answer", "Multi-step math, logic, planning", "More tokens and latency, higher accuracy"], highlight: true }
+          ]
+        }
+      ],
+      drag_to_bins: [
+        {
+          title: "use chain-of-thought vs skip it",
+          bins: [
+            { id: "cot", label: "Use chain-of-thought" },
+            { id: "skip", label: "Skip it (direct answer)" }
+          ],
+          items: [
+            { id: "i1", text: "A 4-step arithmetic word problem", bin: "cot" },
+            { id: "i2", text: "Look up a country's capital", bin: "skip" },
+            { id: "i3", text: "Solve a logic grid puzzle", bin: "cot" },
+            { id: "i4", text: "Label a review POSITIVE or NEGATIVE", bin: "skip" },
+            { id: "i5", text: "Plan the order of 5 dependent tasks", bin: "cot" },
+            { id: "i6", text: "Uppercase a single word", bin: "skip" }
+          ]
+        }
+      ],
+      reflections: [
+        {
+          prompt: "In your own words: why does letting the model 'think step by step' help on multi-step problems but not on simple lookups?",
+          sampleAnswer: "On a multi-step problem the model would otherwise have to compute several dependent results in a single token prediction, which is error-prone. Writing the steps out puts each intermediate result into the context, so the next step is predicted with the earlier work already done. A simple lookup is a single hop with no intermediate work, so the extra reasoning adds tokens and latency without making the one-shot answer any more likely to be right."
+        }
+      ],
+      starter_code: `def final_answer(response):
+    # A chain-of-thought response ends with a line 'ANSWER: <value>'.
+    # TODO: return the value after the last 'ANSWER:' marker, stripped.
+    # If there is no ANSWER line, return "".
+    return ""
+
+resp = "Step 1: 3 x 14 = 42\\nStep 2: 42 - 9 = 33\\nANSWER: 33"
+print(final_answer(resp))`,
+      solution_code: `def final_answer(response):
+    for line in reversed(response.splitlines()):
+        if line.startswith("ANSWER:"):
+            return line[len("ANSWER:"):].strip()
+    return ""
+
+resp = "Step 1: 3 x 14 = 42\\nStep 2: 42 - 9 = 33\\nANSWER: 33"
+print(final_answer(resp))`,
+      expected_output: `33`,
+      hints: [
+        "Split the response into lines with response.splitlines().",
+        "Scan from the last line backward and find the one starting with 'ANSWER:'.",
+        "Strip the 'ANSWER:' prefix and surrounding whitespace before returning."
+      ],
+      challenge_difficulty: "beginner",
+      challenge_language: "python",
+      challenge_title: "Verify the Chain of Thought",
+      challenge_description: "Check each step of a model's shown reasoning; trust the final answer only if every step holds.",
+      challenge_story: "The real payoff of chain-of-thought is that the reasoning is **visible**, so you can check it instead of blindly trusting a bare number. Your grading harness receives a model's step-by-step arithmetic and must verify each step. If every claimed step actually computes, you accept the final result; the moment a step doesn't check out, you reject the chain and point at the first broken step, exactly what makes a wrong chain easier to debug than a wrong number.",
+      challenge_statement: "You are given `n` reasoning steps. Each step is a claim of the form `a op b c`, asserting that `a op b = c`, where `op` is one of `+`, `-`, or `*` and `a`, `b`, `c` are integers.\n\nVerify the steps **in order**:\n\n- If every step computes correctly, print `VALID` on the first line and the final answer (the `c` of the **last** step) on the second line.\n- If any step is wrong, print `INVALID` on the first line and the **1-based index** of the first wrong step on the second line, then stop.",
+      challenge_input_format: "Line 1: integer `n`.\nNext `n` lines: each is `a op b c` (space-separated), the claim `a op b = c`.",
+      challenge_output_format: "Two lines:\n1. `VALID` or `INVALID`.\n2. If `VALID`, the final answer (`c` of the last step); if `INVALID`, the 1-based index of the first wrong step.",
+      challenge_constraints: [
+        "1 ≤ n ≤ 100000",
+        "op is one of + - *",
+        "-1_000_000 ≤ a, b, c ≤ 1_000_000",
+      ],
+      challenge_examples: [
+        { input: "3\n2 + 3 5\n5 * 4 20\n20 - 7 13", output: "VALID\n13", explanation: "2+3=5, 5*4=20, 20-7=13 all check out; the last step's result, 13, is the final answer." },
+        { input: "2\n10 - 4 6\n6 * 2 11", output: "INVALID\n2", explanation: "Step 1 (10-4=6) is fine, but step 2 claims 6*2=11 when it is 12, so the first wrong step is index 2." },
+      ],
+      challenge_notes: "This is why chain-of-thought is worth the extra tokens: a visible chain is checkable. Apply the operations exactly as claimed and stop at the first mismatch. A single wrong step invalidates the conclusion even if later steps happen to be self-consistent.",
+      challenge_hints: [
+        "Map each operator to its computation, e.g. a dict of lambdas for '+', '-', '*'.",
+        "Loop steps with a 1-based index; on the first step where a op b != c, print INVALID and that index, then return.",
+        "If the loop finishes, print VALID and the c of the last step.",
+      ],
+      challenge_starter_code: `import sys
+
+def main():
+    data = sys.stdin.read().split("\\n")
+    n = int(data[0].strip())
+    # Each of the next n lines is "a op b c" claiming a op b = c.
+    # TODO: verify each step in order.
+    # Print VALID + final answer, or INVALID + 1-based index of first wrong step.
+
+main()
+`,
+      challenge_solution_code: `import sys
+
+def main():
+    data = sys.stdin.read().split("\\n")
+    n = int(data[0].strip())
+    ops = {"+": lambda a, b: a + b, "-": lambda a, b: a - b, "*": lambda a, b: a * b}
+    final = 0
+    for i in range(1, n + 1):
+        parts = data[i].split()
+        a = int(parts[0]); op = parts[1]; b = int(parts[2]); c = int(parts[3])
+        if ops[op](a, b) != c:
+            print("INVALID")
+            print(i)
+            return
+        final = c
+    print("VALID")
+    print(final)
+
+main()
+`,
+      challenge_test_cases: [
+        { input: "3\n2 + 3 5\n5 * 4 20\n20 - 7 13", expected_output: "VALID\n13", description: "All three steps check out; final answer is the last step's result." },
+        { input: "2\n10 - 4 6\n6 * 2 11", expected_output: "INVALID\n2", description: "Second step 6*2=11 is wrong (should be 12); first bad step is index 2." },
+        { input: "1\n7 + 8 15", expected_output: "VALID\n15", description: "A single correct step; its result is the final answer." }
       ]
     }
   ]

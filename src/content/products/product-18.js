@@ -278,7 +278,9 @@ A chunk that's a whole function answers a question on its own. When a user asks 
 
 ## The mental model to keep
 
-Chunk at the seams the language already gives you. A function is a self-contained unit, and splitting there instead of at an arbitrary character count is the decision that matters most in a code-RAG pipeline. Below, parse a small file by hand with \`ast\` and confirm each chunk lines up with a real function.`,
+Chunk at the seams the language already gives you. A function is a self-contained unit, and splitting there instead of at an arbitrary character count is the decision that matters most in a code-RAG pipeline. Below, parse a small file by hand with \`ast\` and confirm each chunk lines up with a real function.
+
+Note: the coding challenge that follows uses a simpler top-level line scan (spotting lines that start with \`def \` or \`class \`) so it runs without a parser. That keeps the exercise focused on boundary logic, but a line scan misses \`async def\`, decorated, and indented nested definitions, which is exactly why \`ast\` is the right tool on real code.`,
       starter_code: `import ast
 
 SOURCE = """import os

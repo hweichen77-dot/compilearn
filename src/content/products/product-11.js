@@ -1456,9 +1456,12 @@ class TaskAgent:
         for step_id in order:
             step = next(s for s in steps if s["step"] == step_id)
             args = resolve_args(step["args"], results)
-            outcome = run_step_safe(self.tools[step["tool"]], args, step.get("required", True))
-            if outcome["status"] == "failed":
+            try:
+                outcome = run_step_safe(self.tools[step["tool"]], args, step.get("required", True))
+            except RuntimeError:
                 return {"status": "FAILURE", "results": results}
+            if outcome["status"] == "skipped":
+                continue
             results[step_id] = outcome["result"]
         return {"status": "SUCCESS", "results": results}
 \`\`\`

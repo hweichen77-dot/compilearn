@@ -733,13 +733,12 @@ def main():
         "image": "img",
         "link": "a",
     }
-    self_closing = {"input", "image"}
+    self_closing = {"input", "img"}
 
     for kind, text in components:
         tag = tag_map.get(kind, "div")
-        if kind in self_closing:
-            html_tag = tag_map.get(kind, "div")
-            print(f"<{html_tag} />")
+        if tag in self_closing:
+            print(f"<{tag} />")
         else:
             print(f"<{tag}>{text}</{tag}>")
 

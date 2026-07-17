@@ -922,7 +922,7 @@ ReAct is the backbone of modern AI **agents**: systems that take real actions, n
 - **It grounds answers in real data.** Live weather, current prices, a database row, anything the model couldn't know is fetched, not hallucinated.
 - **It offloads exact work.** Math, code execution, and lookups go to tools that don't make arithmetic mistakes.
 - **It makes behavior traceable.** The Thought and Action log shows exactly why the system did what it did, which is invaluable for debugging.
-- **It adds failure modes.** Tools can error, return junk, or be called with bad arguments. A robust ReAct loop must handle a failed Observation, cap the number of steps, and avoid infinite loops.
+- **It adds failure modes.** Tools can error, return junk, or be called with bad arguments. A reliable ReAct loop must handle a failed Observation, cap the number of steps, and avoid infinite loops.
 
 ## The mental model to keep
 
@@ -978,7 +978,7 @@ ReAct is the backbone of modern AI **agents**: systems that take real actions, n
           explanation: "Tools pull in real, current information the frozen model could not otherwise know."
         },
         {
-          question: "Which is a real failure mode a robust ReAct loop must handle?",
+          question: "Which is a real failure mode a reliable ReAct loop must handle?",
           options: [
             "The model running out of vocabulary",
             "A tool erroring or returning junk, or the loop never terminating",
@@ -2035,7 +2035,7 @@ generated_prompt = model(meta)     # the model writes the task prompt
 result = model(generated_prompt + "\\n" + real_email)  # then we run it
 \`\`\`
 
-This unlocks **automatic prompt optimization**: generate several candidate prompts, run each against a small set of labeled examples, score how well each performs, and keep the winner. Prompt engineering becomes a search, propose candidates, evaluate against examples, select the best. It is the same propose-evaluate-select loop you saw in tree of thoughts and self-consistency, now applied to the prompts themselves.
+This enables **automatic prompt optimization**: generate several candidate prompts, run each against a small set of labeled examples, score how well each performs, and keep the winner. Prompt engineering becomes a search, propose candidates, evaluate against examples, select the best. It is the same propose-evaluate-select loop you saw in tree of thoughts and self-consistency, now applied to the prompts themselves.
 
 ## Why it matters
 

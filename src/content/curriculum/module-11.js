@@ -1864,7 +1864,7 @@ Two numbers govern everything:
 
 ## Why it matters
 
-Sequences unlock comparison tasks, but the trade-offs are sharp:
+Sequences enable comparison tasks, but the trade-offs are sharp:
 
 - **Sampling rate is a recall vs cost dial.** Too sparse and a one-second event slips between frames; too dense and you pay for near-duplicate stills.
 - **Token cost stacks fast.** Frames times tokens-per-frame can dwarf the text. Lower per-frame detail or sample fewer frames to keep the bill sane.

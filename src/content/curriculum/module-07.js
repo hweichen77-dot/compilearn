@@ -1687,7 +1687,7 @@ Answer from the context only.`,
       ],
       challenge_examples: [
         { input: "2 512\nclaude-sonnet-4-6\nAcme was founded by Dale in 1999.\nAcme makes rockets.\nWho founded Acme?", output: "claude-sonnet-4-6\n512\n125\nuser\n91", explanation: "model and max_tokens echo the input. The fixed system prompt is 125 chars. The single user message (Context + both chunks + Question) is 91 chars." },
-        { input: "1 256\nclaude-opus-4-1\nThe Moon orbits Earth.\nWhat orbits Earth?", output: "claude-opus-4-1\n256\n125\nuser\n61", explanation: "A different model and token cap pass through; the system length stays 125; the shorter context yields a 61-char user message." },
+        { input: "1 256\nclaude-opus-4-8\nThe Moon orbits Earth.\nWhat orbits Earth?", output: "claude-opus-4-8\n256\n125\nuser\n61", explanation: "A different model and token cap pass through; the system length stays 125; the shorter context yields a 61-char user message." },
       ],
       challenge_notes: "The system prompt is the contract; the user message is the payload. Hardcoding the rules in `system` (not in the user turn) is what makes the model reliably refuse to speculate. In real code you'd read `os.environ['ANTHROPIC_API_KEY']` and never hardcode it, but this exercise stays offline and just builds the request, so no key or network is involved.",
       challenge_hints: [
@@ -1755,7 +1755,7 @@ main()
 `,
       challenge_test_cases: [
         { input: "2 512\nclaude-sonnet-4-6\nAcme was founded by Dale in 1999.\nAcme makes rockets.\nWho founded Acme?", expected_output: "claude-sonnet-4-6\n512\n125\nuser\n91", description: "Example 1: a two-chunk grounded request fingerprint." },
-        { input: "1 256\nclaude-opus-4-1\nThe Moon orbits Earth.\nWhat orbits Earth?", expected_output: "claude-opus-4-1\n256\n125\nuser\n61", description: "Example 2: a different model and token cap pass through; system length is constant." }
+        { input: "1 256\nclaude-opus-4-8\nThe Moon orbits Earth.\nWhat orbits Earth?", expected_output: "claude-opus-4-8\n256\n125\nuser\n61", description: "Example 2: a different model and token cap pass through; system length is constant." }
       ]
     },
     {

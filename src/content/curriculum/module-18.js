@@ -866,7 +866,7 @@ main()
 
 ## How it works
 
-The shared idea is **spend the budget on signal, not noise.** Summarizing is the highest-leverage move because it shrinks a lot of text into a little while keeping meaning:
+The shared idea is **spend the budget on signal, not noise.** Summarizing is the highest-impact move because it shrinks a lot of text into a little while keeping meaning:
 
 \`\`\`python
 old_turns = ["hi", "i need help with python", "specifically loops", "for-loops vs while"]
@@ -1363,7 +1363,7 @@ drift: 1`,
         "Use ceiling division for the estimate: estimate = (chars + 3) // 4.",
       ],
       challenge_examples: [
-        { input: "3\n23 5\n11 3\n40 18", output: "15\n1", explanation: "ceil(23/4)=6 vs 5 -> drift 1, over. ceil(11/4)=3 vs 3 -> drift 0. ceil(40/4)=10 vs 18 -> drift 8, under. Wait recompute: drifts 1+0+8=9... but actual sample: see notes. Here total |6-5|+|3-3|+|10-18| = 1+0+8 = 9; undercounted only the third (10<18), so 1. (Total shown reflects these values.)" },
+        { input: "3\n23 5\n11 3\n40 18", output: "9\n1", explanation: "Estimates are ceil(23/4)=6, ceil(11/4)=3, ceil(40/4)=10 against actuals 5, 3, 18. Per-item drift is |6-5|+|3-3|+|10-18| = 1+0+8 = 9. Only the third estimate is an undercount (10 < 18), so the undercount count is 1." },
         { input: "2\n0 0\n8 2", output: "0\n0", explanation: "ceil(0/4)=0 vs 0 -> drift 0. ceil(8/4)=2 vs 2 -> drift 0. No drift, nothing undercounted." },
       ],
       challenge_notes: "Use integer ceiling division \`(chars + 3) // 4\` to avoid floating-point surprises on huge inputs. Undercounting is the risky direction: if the estimate is below the truth, a prompt you *thought* fit may actually overflow the window. A real calibration job like this is how teams decide whether the cheap rule is safe enough or whether they must always call the tokenizer.",
@@ -1641,10 +1641,10 @@ use: large-200k`,
         "1 ≤ t ≤ 2000000",
       ],
       challenge_examples: [
-        { input: "3 4\n8000 1\n32000 3\n200000 10\n5000\n20000\n100000\n500000", output: "24\n1", explanation: "Job 5000 -> cheapest fitting is 8k (cost 1). 20000 -> 32k (3). 100000 -> 200k (10). 500000 -> no model fits, rejected. Total 1+3+10 = 14... see notes; here costs sum per the chosen models and one rejection." },
+        { input: "3 4\n8000 1\n32000 3\n200000 10\n5000\n20000\n100000\n500000", output: "14\n1", explanation: "Job 5000 -> cheapest fitting is 8k (cost 1). 20000 -> 32k (3). 100000 -> 200k (10). 500000 -> no model fits, rejected. Total routed cost is 1+3+10 = 14 with 1 rejection." },
         { input: "2 2\n10000 5\n10000 5\n9000\n9000", output: "10\n0", explanation: "Two models tie on window and cost; both jobs fit, each costs 5, total 10, no rejections." },
       ],
-      challenge_notes: "Sort or scan the models once per job; with m small (<= 1000) a linear scan per job is fine. The tie-break on smaller window encodes right-sizing: when cost is equal, prefer the model that wastes less capacity. A rejected job is the real-world signal that you need a bigger-window model in your fleet. (In the first example, the routed costs are 1 + 3 + 10 = 14 with one rejection; the sample's totals reflect the chosen models for that fleet.)",
+      challenge_notes: "Sort or scan the models once per job; with m small (<= 1000) a linear scan per job is fine. The tie-break on smaller window encodes right-sizing: when cost is equal, prefer the model that wastes less capacity. A rejected job is the real-world signal that you need a bigger-window model in your fleet.",
       challenge_hints: [
         "Read all models into a list of (window, cost) pairs first.",
         "For each job, scan the models, keep only those with window >= t, and track the best by (cost, window).",

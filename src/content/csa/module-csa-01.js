@@ -86,7 +86,8 @@ export default {
         }
       ],
       "callouts": [
-        { "type": "warning", "position": "after", "title": "Types do not mix freely", "content": "You cannot store 3.14 in an int. The compiler rejects it, so match each value to the type you declared." }
+        { "type": "warning", "position": "after", "title": "Types do not mix freely", "content": "You cannot store 3.14 in an int. The compiler rejects it, so match each value to the type you declared." },
+        { "type": "tip", "position": "after", "title": "Scanner is a course convention, not exam syntax", "content": "The challenges read input with Scanner so the auto-grader can feed test cases. Scanner is not on the AP Java Quick Reference and the exam never asks you to write it, so treat Scanner I/O as a convenience for this course, not as syntax you need to memorize for the test." }
       ],
       "step_throughs": [
         {

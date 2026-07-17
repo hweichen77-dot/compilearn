@@ -1546,7 +1546,7 @@ The most operationally important field is \`stop_reason\`. If it reads \`max_tok
 The headline text is only part of the value:
 
 - **usage** is how you compute cost (recall the per-token math from module 1) and watch for runaway prompts.
-- **stop_reason** is how you detect a cut-off answer *programmatically* instead of eyeballing it. A robust app checks \`if response.stop_reason == "max_tokens"\` and reacts.
+- **stop_reason** is how you detect a cut-off answer *programmatically* instead of eyeballing it. A reliable app checks \`if response.stop_reason == "max_tokens"\` and reacts.
 - **id** and **model** make support and monitoring possible, you can log them and trace any single call later.
 
 Ignoring these fields is how beginners ship apps that silently truncate long answers or quietly blow a token budget.
@@ -1689,7 +1689,7 @@ stop_reason: end_turn`,
             "An abruptly-ending reply is a classic truncation symptom.",
             "Check response.stop_reason, if it's 'max_tokens', the reply was cut off at the cap.",
             "Fix it by raising max_tokens so the reply has room to finish.",
-            "Make it robust: if stop_reason == 'max_tokens', log it or retry with a higher cap automatically."
+            "Make it reliable: if stop_reason == 'max_tokens', log it or retry with a higher cap automatically."
           ],
           output: "stop_reason == 'max_tokens' confirms truncation; raise max_tokens (and check the field in code)."
         }
@@ -1995,7 +1995,7 @@ for code in [200, 401, 429, 500, 400]:
           title: "status codes and the right reaction",
           columns: ["Code", "Meaning", "Whose fault", "Reaction"],
           rows: [
-            { cells: ["200", "Success", ", ", "Read the response"] },
+            { cells: ["200", "Success", "Nobody", "Read the response"] },
             { cells: ["400", "Bad Request", "You", "Fix the body, do not retry"] },
             { cells: ["401", "Unauthorized", "You", "Fix the key, do not retry"] },
             { cells: ["429", "Too Many Requests", "Load", "Wait, then retry (backoff)"], highlight: true },

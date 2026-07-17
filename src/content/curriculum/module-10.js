@@ -923,7 +923,7 @@ When validation fails, you have a choice: **reject** the output, or **repair** i
 
 ## How it works
 
-A robust structured-output step has layers, each catching what the last can't:
+A reliable structured-output step has layers, each catching what the last can't:
 
 1. **Parse.** \`json.loads\`, does it parse at all? Wrap in try/except.
 2. **Check the shape.** Are all required keys present, with the right types?
@@ -1477,7 +1477,7 @@ else:
           explanation: "Record 2 fails to parse and never reaches validation. Records 1 and 3 are clean and sum to 15.25."
         }
       ],
-      challenge_notes: "This is the capstone pattern: a creative model handles the messy human part (understanding text), and a strict pipeline handles the rigid part (shape and sense). Format the total with `f\"\${total:.2f}\"` so the books stay clean.",
+      challenge_notes: "This is the capstone pattern: a creative model handles the messy human part (understanding text), and a strict pipeline handles the rigid part (shape and sense). Format the total with `f\"total {total:.2f}\"` so the books stay clean.",
       challenge_hints: [
         "Parse inside try/except ValueError, and also reject non-dict JSON as `bad json`.",
         "Strip the name before the emptiness check so a whitespace-only name fails.",
@@ -1782,7 +1782,7 @@ record accepted: True`,
       challenge_examples: [
         {
           input: '3\n{"order_id": 1, "qty": 2, "status": "shipped"}\n{"order_id": 5, "qty": 0, "status": "pending"}\n{"order_id": 9, "status": "shipped"}',
-          output: "OK\nBAD_TYPE qty\nMISSING qty\n2 was the line count... ",
+          output: "OK\nBAD_TYPE qty\nMISSING qty\n1",
           explanation: "Record 1 is fully valid. Record 2 has qty 0 which is below the minimum, a type/range failure on qty. Record 3 is missing qty entirely, caught before any type check."
         },
         {
@@ -1791,7 +1791,7 @@ record accepted: True`,
           explanation: 'Record 1 has the right shape but "Shipped" is not in the allowed set. Record 2 fails to parse.'
         }
       ],
-      challenge_notes: "Check failures strictly in priority order and stop at the first one, so a record missing a key never also reports a type error. Guard the boolean-vs-int trap with `isinstance(v, bool)` before treating a value as an integer. The first example's second output line is illustrative of ordering, not literal; rely on the test cases for exact expected output.",
+      challenge_notes: "Check failures strictly in priority order and stop at the first one, so a record missing a key never also reports a type error. Guard the boolean-vs-int trap with `isinstance(v, bool)` before treating a value as an integer.",
       challenge_hints: [
         "Wrap json.loads in try/except ValueError and also reject anything that is not a dict.",
         "Use a fixed key order list for both the MISSING and BAD_TYPE scans so output is deterministic.",
@@ -1917,7 +1917,7 @@ Note \`data.get("items", [])\`: if the list is missing, you loop over an empty l
 
 ## Why it matters
 
-Nesting unlocks realistic data, but it multiplies the places things can go wrong:
+Nesting enables realistic data, but it multiplies the places things can go wrong:
 
 - **Empty lists are normal.** An order with zero items, a search with zero results, your loop must handle the empty case without special-casing it into a bug.
 - **Depth invites partial failure.** The top object can be fine while one item three levels down is malformed. Validate each item, not just the wrapper.

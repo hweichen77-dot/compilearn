@@ -35,7 +35,7 @@ This is the big difference from the text work in earlier modules. **Text is a 1D
 
 ## Normalize before you do anything
 
-Raw pixel values run 0, 255. Almost every model expects them rescaled to a smaller, centered range, usually 0 to 1, or roughly -1 to 1. The most common move is **normalization**: divide every value by 255, and sometimes subtract a per-channel mean. This isn't a ritual. Large, unscaled inputs push a network's internal math into extreme ranges, which makes training slow and unstable.
+Raw pixel values run 0 to 255. Almost every model expects them rescaled to a smaller, centered range, usually 0 to 1, or roughly -1 to 1. The most common move is **normalization**: divide every value by 255, and sometimes subtract a per-channel mean. This isn't a ritual. Large, unscaled inputs push a network's internal math into extreme ranges, which makes training slow and unstable.
 
 \`\`\`python
 import numpy as np
@@ -59,9 +59,9 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
 
 **An image is a spreadsheet of brightness, one sheet per color.** Height by width by channels. Normalize it, respect its grid, and the rest of computer vision is operations on that array.`,
       key_terms: [
-        { term: "Pixel", definition: "The smallest unit of an image, one cell in the grid, holding a brightness value (0, 255 per color channel)." },
+        { term: "Pixel", definition: "The smallest unit of an image, one cell in the grid, holding a brightness value (0 to 255 per color channel)." },
         { term: "Channel", definition: "One of the color grids that stack to form an image. Color images have 3 (red, green, blue); grayscale has 1." },
-        { term: "Normalization", definition: "Rescaling raw pixel values (0, 255) into a smaller centered range like 0, 1 so a model trains stably." }
+        { term: "Normalization", definition: "Rescaling raw pixel values (0 to 255) into a smaller centered range like 0 to 1 so a model trains stably." }
       ],
       callouts: [
         {
@@ -82,9 +82,9 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
         steps: [
           { label: "Physical scene", desc: "Light hits a camera sensor." },
           { label: "Sampling", desc: "The sensor measures brightness at each pixel location." },
-          { label: "Three channels", desc: "Each pixel gets a red, green, and blue value (0, 255)." },
+          { label: "Three channels", desc: "Each pixel gets a red, green, and blue value (0 to 255)." },
           { label: "Array", desc: "Values stored as a height × width × 3 grid of numbers." },
-          { label: "Normalize", desc: "Divide by 255 so the model sees values in 0, 1." }
+          { label: "Normalize", desc: "Divide by 255 so the model sees values in 0 to 1." }
         ]
       },
       inline_quizzes: [
@@ -111,12 +111,12 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
           question: "What does dividing pixel values by 255 accomplish?",
           options: [
             "It converts color to grayscale",
-            "It rescales values from 0, 255 into 0, 1 so the model trains stably",
+            "It rescales values from 0 to 255 into 0 to 1 so the model trains stably",
             "It removes the alpha channel",
             "It doubles the resolution"
           ],
           correct_index: 1,
-          explanation: "255 is the max pixel value, so dividing by it maps everything into 0, 1. Small, centered inputs keep training stable and fast."
+          explanation: "255 is the max pixel value, so dividing by it maps everything into 0 to 1. Small, centered inputs keep training stable and fast."
         },
         {
           question: "How many numbers represent a single 100×100 grayscale image?",
@@ -136,10 +136,10 @@ You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an
               explanation: "Grayscale has exactly one channel. Three channels (RGB) is what makes an image color."
             },
             {
-              question: "To rescale pixel values into the 0, 1 range, you divide each one by ___.",
+              question: "To rescale pixel values into the 0 to 1 range, you divide each one by ___.",
               type: "fill_in",
               correct_answer: "255",
-              explanation: "255 is the maximum possible pixel value, so dividing by it normalizes everything to 0, 1."
+              explanation: "255 is the maximum possible pixel value, so dividing by it normalizes everything to 0 to 1."
             }
           ]
         }
@@ -246,7 +246,7 @@ Normalized:
       ],
       challenge_title: "The Brightness Gate",
       challenge_description: "Normalize a batch of RGB pixels, compute perceptual luminance, and count how many pass a brightness gate.",
-      challenge_story: "You're building the preprocessing stage of an image classifier. Before a single pixel reaches the neural network, raw camera bytes (0, 255 per channel) must be **normalized** to the 0, 1 range the model was trained on. Your team also wants a cheap quality gate: dark, underexposed frames waste GPU time, so the pipeline should flag how many pixels are 'bright enough' using the standard **perceptual luminance** formula before the batch is even uploaded.",
+      challenge_story: "You're building the preprocessing stage of an image classifier. Before a single pixel reaches the neural network, raw camera bytes (0 to 255 per channel) must be **normalized** to the 0 to 1 range the model was trained on. Your team also wants a cheap quality gate: dark, underexposed frames waste GPU time, so the pipeline should flag how many pixels are 'bright enough' using the standard **perceptual luminance** formula before the batch is even uploaded.",
       challenge_statement: "You are given `n` RGB pixels. For each pixel with channels `r g b` (each `0`, `255`):\n\n1. Normalize each channel to `0.0`, `1.0` by dividing by `255`.\n2. Compute its **luminance** using the Rec. 601 weights:\n   \`luminance = 0.299·r' + 0.587·g' + 0.114·b'\` where `r' g' b'` are the normalized channels.\n\nA pixel **passes the brightness gate** if its luminance is **greater than or equal to** the threshold `t`.\n\nPrint two lines:\n1. The **average luminance** across all `n` pixels, rounded to exactly **4 decimal places**.\n2. The **count** of pixels that pass the gate.",
       challenge_input_format: "The first line has an integer `n` and a float `t` (the threshold), separated by a space. Each of the next `n` lines has three integers `r g b`.",
       challenge_output_format: "Line 1: average luminance formatted to exactly 4 decimal places.\nLine 2: an integer, the number of pixels with luminance ≥ `t`.",
@@ -332,7 +332,7 @@ main()
       title: "What a CNN Actually Does",
       concept: "Convolution",
       xp_reward: 10,
-      explanation: `In 2012 a network called AlexNet won the ImageNet contest by a margin so wide it ended a debate. The architecture behind it, a **convolutional neural network**, or **CNN**: became the engine behind nearly every "is this a dog or a cat" system for the next decade. You won't build one from scratch, but understanding the single idea that makes it work, the **convolution**, unlocks everything that follows.
+      explanation: `In 2012 a network called AlexNet won the ImageNet contest by a margin so wide it ended a debate. The architecture behind it, a **convolutional neural network**, or **CNN**: became the engine behind nearly every "is this a dog or a cat" system for the next decade. You won't build one from scratch, but understanding the single idea that makes it work, the **convolution**, enables everything that follows.
 
 ## The problem CNNs solve
 
@@ -453,7 +453,7 @@ CNNs slashed image-classification error rates and made vision practical at scale
             "Labels the detected objects"
           ],
           correct_index: 1,
-          explanation: "Pooling (often max-pooling over 2×2 blocks) reduces the feature map's size and makes the network a bit robust to small position changes."
+          explanation: "Pooling (often max-pooling over 2×2 blocks) reduces the feature map's size and makes the network a bit more reliable under small position changes."
         }
       ],
       participation_activities: [
@@ -1078,7 +1078,7 @@ print(data["store"], "->", data["total"])
 
 Two things matter in that prompt. First, **name the exact fields and their types**: vague prompts give vague shapes. Second, **say "only the JSON, no other text"** so you don't have to strip a "Here's the JSON:" preamble before parsing.
 
-## Why structured output unlocks real work
+## Why structured output enables real work
 
 Once the answer is a dict, the image becomes a row in a table. Scan 500 receipts, get 500 objects, load them into a spreadsheet, sum the totals. The model did the *seeing*; your code does the *processing*. That division of labor is the whole game in applied vision: let the model handle perception, keep the deterministic logic in plain code.
 
@@ -1293,7 +1293,7 @@ print(data["store"], "->", data["total"])
       ],
       challenge_title: "Audit the Model's JSON Receipts",
       challenge_description: "Parse a batch of structured JSON replies from a receipt-extraction model, skip the malformed ones, and report a per-category expense breakdown.",
-      challenge_story: "Your finance automation pipeline photographs receipts and asks a vision model to return **structured JSON**: `{\"store\": ..., \"category\": ..., \"total\": ...}`. In the real world the model occasionally hallucinates broken JSON, drops a field, or returns a non-numeric total, and your accounting export can't crash on a single bad row. You're writing the **robust ingestion layer**: parse everything that's valid, quietly skip everything that isn't, and roll the valid receipts up into a category report the bookkeeper can paste straight into the ledger.",
+      challenge_story: "Your finance automation pipeline photographs receipts and asks a vision model to return **structured JSON**: `{\"store\": ..., \"category\": ..., \"total\": ...}`. In the real world the model occasionally hallucinates broken JSON, drops a field, or returns a non-numeric total, and your accounting export can't crash on a single bad row. You're writing the **reliable ingestion layer**: parse everything that's valid, quietly skip everything that isn't, and roll the valid receipts up into a category report the bookkeeper can paste straight into the ledger.",
       challenge_statement: "You are given `n` lines, each a JSON reply from the extraction model. A reply is **valid** only if it parses as JSON **and** contains both a `category` (string) and a `total` that can be read as a number. Any reply that fails to parse, is missing either field, or has a non-numeric `total` must be **skipped** (it must not crash your program).\n\nFor every valid reply, add its `total` to a running sum for its `category`.\n\nPrint:\n1. The number of **valid** receipts.\n2. The number of **skipped** receipts.\n3. Then, for each category that has at least one valid receipt, a line `category sum`, where `sum` is that category's total formatted to exactly **2 decimal places**. Output these category lines in **alphabetical order** of category name.",
       challenge_input_format: "The first line is an integer `n`. Each of the next `n` lines is one JSON reply string (possibly malformed).",
       challenge_output_format: "Line 1: the count of valid receipts.\nLine 2: the count of skipped receipts.\nThen one line per category (alphabetical): the category name, a space, and its total to 2 decimal places.",
@@ -1395,7 +1395,7 @@ main()
 
 **Resolution** is just the image's pixel dimensions: width times height. A photo that is \`1920 × 1080\` holds about two million pixels per channel, and three channels of color, so roughly **six million numbers**. Double the width and height and you don't double the count, you *quadruple* it, because area grows with the square of the side. That quadratic scaling is the whole story of why big images are expensive.
 
-The numbers themselves are unchanged from lesson 1: each pixel is **0, 255 per channel**, three channels for RGB. What changes here is the *count*, and the count is what drives memory, speed, and money.
+The numbers themselves are unchanged from lesson 1: each pixel is **0 to 255 per channel**, three channels for RGB. What changes here is the *count*, and the count is what drives memory, speed, and money.
 
 ## How it works
 

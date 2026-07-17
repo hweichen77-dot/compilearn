@@ -577,22 +577,22 @@ export default {
       "callouts": [
         { "type": "tip", "position": "after", "title": "Say legal, ethical, or both", "content": "On a free-response prompt, state whether a concern is legal, ethical, or both, and explain exactly who is affected." }
       ],
-      "challenge_title": "Benefit vs Harm Verdict",
+      "challenge_title": "Access Log Compliance",
       "challenge_language": "python",
-      "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # Input: two integers, benefit score and harm score.\n    # TODO: print 'reconsider' if harm > benefit, 'acceptable' if benefit > harm,\n    # else 'debate'.\n    pass\n\nmain()",
-      "challenge_solution_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    benefit = int(data[0])\n    harm = int(data[1])\n    if harm > benefit:\n        print(\"reconsider\")\n    elif benefit > harm:\n        print(\"acceptable\")\n    else:\n        print(\"debate\")\n\nmain()",
+      "challenge_starter_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # First token N, then N access records, each \"authorized\" or \"unauthorized\".\n    # Unauthorized access is a legal and ethical concern, so the log is only\n    # compliant when every record is authorized.\n    # TODO: print 'compliant' if all records are authorized, else 'violation'.\n    pass\n\nmain()",
+      "challenge_solution_code": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    n = int(data[0])\n    records = data[1:1+n]\n    if all(r == \"authorized\" for r in records):\n        print(\"compliant\")\n    else:\n        print(\"violation\")\n\nmain()",
       "challenge_test_cases": [
         {
-          "input": "7 9",
-          "expected_output": "reconsider"
+          "input": "3 authorized authorized authorized",
+          "expected_output": "compliant"
         },
         {
-          "input": "8 3",
-          "expected_output": "acceptable"
+          "input": "4 authorized unauthorized authorized authorized",
+          "expected_output": "violation"
         },
         {
-          "input": "5 5",
-          "expected_output": "debate"
+          "input": "1 unauthorized",
+          "expected_output": "violation"
         }
       ]
     },

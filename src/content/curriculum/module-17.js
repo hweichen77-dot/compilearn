@@ -52,7 +52,7 @@ Order matters. The roles tell the model who said what, but the *sequence* tells 
 
 ## Why it matters
 
-Thinking in messages instead of one big string unlocks everything else:
+Thinking in messages instead of one big string enables everything else:
 
 - **Roles separate instructions from input.** The system role is for rules; the user role is for the actual request. Mixing them is a common beginner mistake.
 - **The output is just another message.** The assistant's reply is a message of the same shape, which is why you can append it back and keep going.
@@ -1386,7 +1386,7 @@ full reply: {"name": "George Washington", "age": 57}`,
         "Strings contain no newline characters.",
       ],
       challenge_examples: [
-        { input: "2\n{\n\"name\": \"Ada\"}\n- \nFirst item", output: "{\"name\": \"Ada\"}\n- First item\nchars 26", explanation: "Item 1: '{' + '\"name\": \"Ada\"}' = '{\"name\": \"Ada\"}' (15 chars). Item 2: '- ' + 'First item' = '- First item' (12 chars). 15 + 12 wait recount: see notes; the summed length is reported on the final line." },
+        { input: "2\n{\n\"name\": \"Ada\"}\n- \nFirst item", output: "{\"name\": \"Ada\"}\n- First item\nchars 27", explanation: "Item 1: '{' + '\"name\": \"Ada\"}' = '{\"name\": \"Ada\"}' (15 chars). Item 2: '- ' + 'First item' = '- First item' (12 chars). The summed length 15 + 12 = 27 is reported on the final line." },
         { input: "1\nTranslating: \nBonjour", output: "Translating: Bonjour\nchars 20", explanation: "The prefill 'Translating: ' (13 chars) plus 'Bonjour' (7 chars) makes a 20-character reply." },
       ],
       challenge_notes: "The whole point: the model never re-emits your prefill, so the client owns reassembly. Reading lines without stripping spaces matters because a prefill like '- ' or 'Translating: ' ends in a meaningful space; trimming it would corrupt the format you worked to force.",

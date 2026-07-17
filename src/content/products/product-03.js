@@ -368,7 +368,7 @@ for i, c in enumerate(result):
         steps: [
           "Start with current empty. Candidate for sentence 1 is \"The sky is blue\" (15 chars), which fits, so current becomes it.",
           "Candidate for sentence 2 is \"The sky is blue Water boils at 100C\" (35 chars), still under 40, so current grows.",
-          "Candidate for sentence 3 is \"The sky is blue Water boils at 100C Cells have a nucleus\" (55 chars), over 40, so flush current as a chunk and restart from sentence 3.",
+          "Candidate for sentence 3 is \"The sky is blue Water boils at 100C Cells have a nucleus\" (56 chars), over 40, so flush current as a chunk and restart from sentence 3.",
           "After the loop, current holds \"Cells have a nucleus\", so append it as the final chunk.",
         ],
         output: "[\"The sky is blue Water boils at 100C\", \"Cells have a nucleus\"]",

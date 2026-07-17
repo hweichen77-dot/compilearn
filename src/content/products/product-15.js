@@ -53,9 +53,10 @@ Two reasons. First, the **context window**: the model reads only so many tokens 
 def chunk_text(text, size=800, overlap=100):
     chunks = []
     start = 0
+    step = max(1, size - overlap)
     while start < len(text):
         chunks.append(text[start:start + size])
-        start += size - overlap
+        start += step
     return chunks
 \`\`\`
 
@@ -129,9 +130,10 @@ print("chunks:", len(result))
 def chunk_text(text, size, overlap):
     chunks = []
     start = 0
+    step = max(1, size - overlap)
     while start < len(text):
         chunks.append(text[start:start + size])
-        start += size - overlap
+        start += step
     return chunks
 
 sample = "the quick brown fox jumps over the lazy dog while the sun sets slowly"
@@ -173,9 +175,10 @@ def main():
 
     chunks = []
     start = 0
+    step = max(1, size - overlap)
     while start < len(text):
         chunks.append(text[start:start + size])
-        start += size - overlap
+        start += step
 
     print(len(chunks))
     for c in chunks:

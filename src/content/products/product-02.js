@@ -438,7 +438,7 @@ Write "casual and friendly" in the prompt and the model picks its own idea of ca
 A \`build_profile\` function that walks the sample replies and returns the profile dict:
 
 - \`avg_words\`: the rounded average word count across samples.
-- \`greeting\`: True if any sample opens with hi/hey/hello.
+- \`greeting\`: True if any sample's first word is hi/hey/hello. Compare the whole first word, not a prefix, so "hidden" and "highlight" don't count as greetings.
 - \`signoff\`: True if any sample contains thanks/cheers/best/regards.
 - \`exclaim\`: True if any sample uses "!".
 
@@ -458,7 +458,7 @@ samples = [
 def build_profile(replies):
     # TODO: return a dict with:
     #   avg_words -> rounded average word count across replies
-    #   greeting  -> True if any reply starts with hi/hey/hello (case-insensitive)
+    #   greeting  -> True if any reply's first word is hi/hey/hello (case-insensitive)
     #   signoff   -> True if any reply contains thanks/cheers/best/regards
     #   exclaim   -> True if any reply contains "!"
     pass
@@ -480,7 +480,7 @@ samples = [
 def build_profile(replies):
     total_words = sum(len(r.split()) for r in replies)
     avg_words = round(total_words / len(replies))
-    greeting = any(r.lower().startswith(("hi", "hey", "hello")) for r in replies)
+    greeting = any((r.lower().split() or [""])[0].strip("!.,?'") in ("hi", "hey", "hello") for r in replies)
     signoff = any(
         any(w in r.lower() for w in ("thanks", "cheers", "best", "regards"))
         for r in replies
@@ -501,7 +501,7 @@ print("exclaim:", profile["exclaim"])
 `,
       hints: [
         "len(reply.split()) counts words in one reply; average over all of them.",
-        "reply.lower().startswith((\"hi\", \"hey\", \"hello\")) checks the greeting.",
+        "Compare the first word to hi/hey/hello, not a prefix, so 'hidden' isn't a greeting: (r.lower().split() or [\"\"])[0].strip(\"!.,?'\").",
         "any(...) collapses a per-reply check into one True/False for the profile.",
       ],
       animated_diagrams: [
@@ -579,7 +579,7 @@ def main():
     replies = [data[i] for i in range(1, n + 1)]
 
     # TODO: print three lines:
-    #   greetings=<count of replies starting with hi/hey/hello, case-insensitive>
+    #   greetings=<count of replies whose first word is hi/hey/hello, case-insensitive>
     #   exclaims=<count of replies containing "!">
     #   avgwords=<rounded average word count across the replies>
 
@@ -592,7 +592,7 @@ def main():
     n = int(data[0])
     replies = [data[i] for i in range(1, n + 1)]
 
-    greetings = sum(1 for r in replies if r.lower().startswith(("hi", "hey", "hello")))
+    greetings = sum(1 for r in replies if (r.lower().split() or [""])[0].strip("!.,?'") in ("hi", "hey", "hello"))
     exclaims = sum(1 for r in replies if "!" in r)
     total_words = sum(len(r.split()) for r in replies)
     avg = round(total_words / n) if n else 0

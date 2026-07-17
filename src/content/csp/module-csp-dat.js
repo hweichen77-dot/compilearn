@@ -605,8 +605,8 @@ export default {
           "expected_output": "50 10 50"
         },
         {
-          "input": "4\n5 14 25 99",
-          "expected_output": "0 10 20 100"
+          "input": "4\n4 14 26 99",
+          "expected_output": "0 10 30 100"
         },
         {
           "input": "1\n3",
@@ -739,7 +739,7 @@ export default {
       "project_id": "csp-dat",
       "order": 7,
       "title": "Metadata",
-      "explanation": "## Data About Data\n\n**Metadata** is data that describes other data. A photo file holds the image itself, but it also stores metadata: the date taken, camera model, resolution, file size, and sometimes GPS location. The picture is the data; the facts about the picture are the metadata.\n\n## Everyday Examples\n\n- A music file: the song is the data; the title, artist, album, and length are metadata.\n- An email: the message body is the data; the sender, recipient, subject, and timestamp are metadata.\n- A web page: the content is the data; the author, language, and last-modified date are metadata.\n\nMetadata makes data **findable, organized, and usable**. Search engines rely on metadata to index pages; photo apps sort by date using metadata; libraries catalog books by author and subject metadata.\n\n## Working With Metadata\n\nMetadata is often stored as labeled fields. Suppose each line of input is a `key=value` pair describing a file, and we want to report just the file's size:\n\n```python\nn = int(input())\nsize = \"unknown\"\nfor _ in range(n):\n    line = input()\n    key, value = line.split(\"=\")\n    if key == \"size\":\n        size = value\nprint(size)\n```\n\nThe program scans the metadata fields and pulls out the one it needs, ignoring the rest.\n\n## Benefits and Concerns\n\n- **Benefit**: metadata lets us search, filter, and organize huge collections quickly without opening every file.\n- **Concern**: metadata can reveal private information. A photo's GPS metadata can expose where you live, and document metadata may show authors or edit history you did not intend to share.\n\nUnderstanding metadata is essential both for building useful systems and for protecting privacy, two themes the AP exam connects directly to the Data big idea.",
+      "explanation": "## Data About Data\n\n**Metadata** is data that describes other data. A photo file holds the image itself, but it also stores metadata: the date taken, camera model, resolution, file size, and sometimes GPS location. The picture is the data; the facts about the picture are the metadata.\n\n## Everyday Examples\n\n- A music file: the song is the data; the title, artist, album, and length are metadata.\n- An email: the message body is the data; the sender, recipient, subject, and timestamp are metadata.\n- A web page: the content is the data; the author, language, and last-modified date are metadata.\n\nMetadata makes data **findable, organized, and usable**. Search engines rely on metadata to index pages; photo apps sort by date using metadata; libraries catalog books by author and subject metadata.\n\n## Working With Metadata\n\nMetadata is often stored as labeled fields. Suppose each line of input is a `key=value` pair describing a file, and we want to report just the file's size:\n\n```python\nn = int(input())\nsize = \"unknown\"\nfor _ in range(n):\n    line = input()\n    key, value = line.split(\"=\", 1)\n    if key == \"size\":\n        size = value\nprint(size)\n```\n\nThe program scans the metadata fields and pulls out the one it needs, ignoring the rest. Note the `1` in `split(\"=\", 1)`: it splits on only the first `=`, so a value that itself contains `=` (like a URL or a formula) stays intact. Plain `split(\"=\")` would crash on such a line by returning more than two parts.\n\n## Benefits and Concerns\n\n- **Benefit**: metadata lets us search, filter, and organize huge collections quickly without opening every file.\n- **Concern**: metadata can reveal private information. A photo's GPS metadata can expose where you live, and document metadata may show authors or edit history you did not intend to share.\n\nUnderstanding metadata is essential both for building useful systems and for protecting privacy, two themes the AP exam connects directly to the Data big idea.",
       "key_terms": [
         {
           "term": "Metadata",
@@ -824,7 +824,7 @@ export default {
       "challenge_title": "Read a Metadata Field",
       "challenge_language": "python",
       "challenge_starter_code": "# Line 1: number of metadata lines n.\n# Next n lines: each is key=value.\n# Print the value of the 'size' field, or 'unknown' if it is missing.\nn = int(input())\n# TODO: scan the n lines and print the value paired with key 'size'\n",
-      "challenge_solution_code": "n = int(input())\nsize = \"unknown\"\nfor _ in range(n):\n    line = input()\n    key, value = line.split(\"=\")\n    if key == \"size\":\n        size = value\nprint(size)\n",
+      "challenge_solution_code": "n = int(input())\nsize = \"unknown\"\nfor _ in range(n):\n    line = input()\n    key, value = line.split(\"=\", 1)\n    if key == \"size\":\n        size = value\nprint(size)\n",
       "challenge_test_cases": [
         {
           "input": "3\ndate=2024\nsize=1024\nname=cat",

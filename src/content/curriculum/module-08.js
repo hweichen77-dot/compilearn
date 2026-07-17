@@ -653,7 +653,7 @@ print(round(jaccard(ref, "paris is the capital of france"), 2))  # 1.0, same wor
 print(round(jaccard(ref, "the capital of france is lyon"), 2))   # 0.71, one word off
 \`\`\`
 
-The first pair has identical word sets, so 1.0. The second swaps "paris" for "lyon", five shared words out of seven total, so about 0.71. Order is invisible to Jaccard, which is both its strength (robust to rephrasing) and its weakness (it scores "dog bites man" and "man bites dog" identical).
+The first pair has identical word sets, so 1.0. The second swaps "paris" for "lyon", five shared words out of seven total, so about 0.71. Order is invisible to Jaccard, which is both its strength (reliable across rephrasing) and its weakness (it scores "dog bites man" and "man bites dog" identical).
 
 ## Why it matters
 
@@ -807,7 +807,7 @@ print(round(jaccard(ref, "the capital of france is lyon"), 2))`,
           rows: [
             { cells: ["Exact match", "No", "False failures on any rewording", "One canonical string (labels, IDs)"] },
             { cells: ["Contains", "Yes", "Fooled by negation ('not Paris')", "Chatty output, single required fact"] },
-            { cells: ["Jaccard overlap", "Partial", "Ignores word order", "Free-form text, robust to rephrasing"], highlight: true },
+            { cells: ["Jaccard overlap", "Partial", "Ignores word order", "Free-form text, reliable across rephrasing"], highlight: true },
             { cells: ["Embedding cosine", "Yes", "Needs a model + vectors", "Meaning matters more than wording"] }
           ]
         }
@@ -1169,7 +1169,7 @@ print(f"Empathy score: {score}")`,
       challenge_title: "Parsing the Judge",
       challenge_description: "Parse a batch of LLM-judge verdicts, discard malformed or out-of-range scores, and report the average of what survives.",
       challenge_difficulty: "intermediate",
-      challenge_story: "Your LLM-as-judge runs over a thousand customer-support replies, emitting one JSON verdict per case on a 1, 5 rubric. But judges are messy: sometimes the model wraps prose around the JSON and your parser already handled that, sometimes it hallucinates a score of 9, sometimes it forgets the `score` field entirely, and sometimes it returns flat garbage. A naive `json.loads(...)['score']` crashes on the first bad row and poisons your average on the rest. Build the robust aggregator: keep only verdicts that parse cleanly and fall inside the rubric, average those, and report exactly how many you trusted versus threw out.",
+      challenge_story: "Your LLM-as-judge runs over a thousand customer-support replies, emitting one JSON verdict per case on a 1, 5 rubric. But judges are messy: sometimes the model wraps prose around the JSON and your parser already handled that, sometimes it hallucinates a score of 9, sometimes it forgets the `score` field entirely, and sometimes it returns flat garbage. A naive `json.loads(...)['score']` crashes on the first bad row and poisons your average on the rest. Build the reliable aggregator: keep only verdicts that parse cleanly and fall inside the rubric, average those, and report exactly how many you trusted versus threw out.",
       challenge_statement: "You are given **N** lines, each a candidate JSON verdict from the judge.\n\nA verdict is **valid** only when all of these hold:\n\n- the line parses as a JSON object,\n- it has a `score` key,\n- the value is a JSON integer (not a boolean, not a float, not a string),\n- the integer is in the rubric range `1 ≤ score ≤ 5`.\n\nEvery line failing any condition is **invalid** and excluded. Compute the average of the valid scores (rounded to two decimals) and report the counts of valid and invalid verdicts. If no verdict is valid, report the average as `0.00`.",
       challenge_input_format: "Line 1: integer `N`. Each of the next `N` lines is one candidate verdict (a JSON string, or possibly malformed text).",
       challenge_output_format: "Two lines:\n1. The average of valid scores to exactly two decimals (`0.00` if none are valid).\n2. Two space-separated integers: the count of valid verdicts then the count of invalid verdicts.",
@@ -1314,7 +1314,7 @@ The math case passes (exact "4"). Paris passes (contains, even though the answer
 
 ## Why it matters
 
-A suite turns evals from a one-off check into a **gate**. Set a threshold, the suite must stay at or above its last pass rate, and wire it into CI or your pre-edit routine. If a change drops the number, you don't ship it. This is what makes AI development feel like software engineering instead of gambling: every change is measured, every regression is caught at the door, and progress compounds because nothing silently backslides. The highest-leverage move is turning each real-world failure into a new case, a **regression test**: so the same bug can never sneak back. Over months your suite becomes a museum of every mistake the system ever made and a guarantee none of them return.
+A suite turns evals from a one-off check into a **gate**. Set a threshold, the suite must stay at or above its last pass rate, and wire it into CI or your pre-edit routine. If a change drops the number, you don't ship it. This is what makes AI development feel like software engineering instead of gambling: every change is measured, every regression is caught at the door, and progress compounds because nothing silently backslides. The most valuable move is turning each real-world failure into a new case, a **regression test**: so the same bug can never sneak back. Over months your suite becomes a museum of every mistake the system ever made and a guarantee none of them return.
 
 ## The mental model to keep
 
