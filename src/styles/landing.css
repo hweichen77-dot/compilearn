@@ -63,3 +63,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cl-aurora::before, .cl-aurora::after, .cl-mrow, .cl-shimmer, .cl-pulse { animation: none !important; }
 }
+
+@media (max-width: 880px) { .cl-wedge { grid-template-columns: 1fr !important; gap: 34px !important; } }
+@media (max-width: 820px) { .cl-pgwhy, .cl-steps { grid-template-columns: 1fr !important; } }
+@media (max-width: 720px) { .cl-nums { grid-template-columns: repeat(2,1fr) !important; gap: 34px 20px !important; } }
