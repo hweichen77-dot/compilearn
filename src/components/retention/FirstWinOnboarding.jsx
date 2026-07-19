@@ -9,22 +9,16 @@ import { useDialogA11y } from "@/lib/useDialogA11y";
 
 const CHOICES = [
   {
-    to: "/Playground",
-    title: "Defend an AI from attack",
-    sub: "Live lab · beat a real prompt-injection",
+    to: "/AITrack",
+    title: "Yes, I've written Python before",
+    sub: "Jump into the AI engineering track",
     accent: KIT.emerald,
   },
   {
-    to: "/Projects",
-    title: "Do your first lesson",
-    sub: "Guided · learn one concept end to end",
+    to: "/APCS",
+    title: "No, I'm new to coding",
+    sub: "Start with AP Computer Science Principles",
     accent: KIT.amber,
-  },
-  {
-    to: "/Challenges",
-    title: "Try a challenge",
-    sub: "Solo · write code, get graded",
-    accent: KIT.gold,
   },
 ];
 
@@ -61,7 +55,7 @@ export default function FirstWinOnboarding() {
           transition={{ duration: 0.22 }}
           role="dialog"
           aria-modal="true"
-          aria-label="Get your first win"
+          aria-label="Have you coded in Python before?"
         >
           <motion.div
             ref={dialogRef}
@@ -89,10 +83,10 @@ export default function FirstWinOnboarding() {
               className="font-extrabold leading-tight"
               style={{ color: KIT.white, fontSize: "1.8rem", letterSpacing: "-0.02em" }}
             >
-              Get your first win
+              Have you coded in Python before?
             </h2>
             <p className="mt-2 text-sm leading-relaxed" style={{ color: KIT.dim }}>
-              Pick one of these, finish it, and you&apos;re on the board. Takes about 5 minutes.
+              Pick one and we&apos;ll drop you into the right starting track.
             </p>
 
             <div className="mt-6 flex flex-col gap-2.5">
