@@ -106,7 +106,7 @@ export default function HomeLanding() {
 
       <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
         <video ref={vref} muted autoPlay loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(7,11,10,.9) 0%,rgba(7,11,10,.4) 26%,transparent 55%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(85% 78% at 50% 42%,rgba(7,11,10,.72) 0%,rgba(7,11,10,.34) 60%,transparent 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg,#070B0A 2%,rgba(7,11,10,.35) 32%,transparent 66%)" }} />
         <svg style={{ position: "absolute", left: "50%", top: "6%", transform: "translateX(-50%)", width: 900, maxWidth: "120vw", height: 360, opacity: 0.7, pointerEvents: "none" }} viewBox="0 0 900 360" fill="none" aria-hidden="true">
           <defs><filter id="hglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="25" /></filter></defs>
@@ -117,22 +117,22 @@ export default function HomeLanding() {
         <div className="cl-grid" style={{ ...gridLine, left: "50%" }} />
         <div className="cl-grid" style={{ ...gridLine, left: "75%" }} />
 
-        <div style={{ ...wrap, zIndex: 5, padding: "40px 24px" }}>
-          <Reveal as="h1" style={{ fontFamily: display, fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.02em", lineHeight: 0.98, fontSize: "clamp(40px,7vw,72px)", maxWidth: "16ch", margin: 0, textWrap: "balance" }}>
-            Launch your coding career<span style={{ color: A }}>.</span>
+        <div style={{ ...wrap, zIndex: 5, padding: "40px 24px", textAlign: "center" }}>
+          <Reveal as="h1" style={{ fontFamily: display, fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.02em", lineHeight: 0.98, fontSize: "clamp(40px,7vw,72px)", maxWidth: "15ch", margin: "0 auto", textWrap: "balance" }}>
+            Learn AI by building real products<span style={{ color: A }}>.</span>
           </Reveal>
-          <Reveal delay={0.12} as="p" style={{ color: "rgba(255,255,255,.72)", fontSize: 14, lineHeight: 1.6, maxWidth: 512, margin: "22px 0 0" }}>
+          <Reveal delay={0.12} as="p" style={{ color: "rgba(255,255,255,.72)", fontSize: 15, lineHeight: 1.6, maxWidth: 560, margin: "22px auto 0" }}>
             Master in-demand coding skills by building and shipping real AI products, from your first prompt to a deployed app. Guided tracks, a live playground, no fluff.
           </Reveal>
 
-          <Reveal delay={0.18} style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap", marginTop: 26 }}>
+          <Reveal delay={0.18} style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 18, flexWrap: "wrap", marginTop: 28 }}>
             <MagneticButton as="a" onClick={() => (window.location.hash = "")} style={{ fontFamily: body, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", borderRadius: 999, padding: "14px 28px", fontSize: 14, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, background: A, color: "#070B0A", boxShadow: "0 10px 34px -12px rgba(94,210,156,.7)" }}>
               Get Started <ArrowRight size={18} strokeWidth={2.4} />
             </MagneticButton>
             <a href="#playground" style={{ color: DIM, fontSize: 13.5, fontFamily: mono }}>or try the AI playground ↓</a>
           </Reveal>
 
-          <Reveal delay={0.24} style={{ display: "flex", gap: 34, marginTop: 34, flexWrap: "wrap" }}>
+          <Reveal delay={0.24} style={{ display: "flex", justifyContent: "center", gap: 34, marginTop: 36, flexWrap: "wrap" }}>
             {statBlk(<CountUp to={3} />, "languages, in-browser")}
             {statBlk(<CountUp to={128} />, "AP CS lessons")}
             {statBlk(<CountUp to={480} suffix="+" />, "lessons & challenges")}
