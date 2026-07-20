@@ -11,6 +11,7 @@ import '@fontsource/plus-jakarta-sans/800.css'
 import '@fontsource/instrument-serif/400.css'
 import '@fontsource/instrument-serif/400-italic.css'
 import '@fontsource-variable/spline-sans-mono'
+import { MotionConfig } from 'framer-motion'
 import App from '@/App.jsx'
 import '@/index.css'
 import { initAnalytics } from '@/lib/analytics'
@@ -20,5 +21,7 @@ initMonitoring()
 initAnalytics()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <App />
+  <MotionConfig reducedMotion="user">
+    <App />
+  </MotionConfig>
 )
