@@ -8,7 +8,7 @@ import CodeEditor from "../components/editor/CodeEditor";
 import ProblemStatement from "../components/challenge/ProblemStatement";
 import { getCompetitive } from "@/content";
 import { gradeCpp } from "../lib/cppRunner";
-import { Stagger, StaggerItem } from "@/lib/motion";
+import { ResizableSplit } from "@/components/kit";
 
 const DIFF_NUM = { easy: "01", medium: "02", hard: "03" };
 
@@ -66,7 +66,7 @@ export default function CompetitiveDetail() {
     <div style={{ background: "#070B0A", minHeight: "100vh" }}>
       <div className="relative pt-20" style={{ borderBottom: "1px solid #17201C" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #5ED29C, transparent)" }} />
-        <div className="max-w-5xl mx-auto px-8 lg:px-16 py-10">
+        <div className="max-w-none mx-auto px-6 lg:px-12 py-8">
           <Link to={createPageUrl("Competitive")} className="font-sans text-xs tracking-widest uppercase mb-8 inline-block" style={{ color: "#ECF3EF" }}>
             ← Competitive
           </Link>
@@ -94,78 +94,84 @@ export default function CompetitiveDetail() {
         </div>
       </div>
 
-      <Stagger className="max-w-5xl mx-auto px-8 lg:px-16 py-10 space-y-8" as="div">
-        <StaggerItem as="div">
-          <ProblemStatement problem={problem} />
-        </StaggerItem>
+      <div className="mx-auto w-full max-w-none px-6 lg:px-12 py-8">
+        <ResizableSplit
+          storageKey="competitive-split"
+          left={
+            <div className="space-y-6">
+              <ProblemStatement problem={problem} />
 
-        <StaggerItem as="div">
-          <CodeEditor
-            code={code}
-            onChange={setCode}
-            onRun={handleRun}
-            output={output}
-            isRunning={isRunning}
-            filename="solution.cpp"
-          />
-        </StaggerItem>
-
-        <AnimatePresence>
-          {passed && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-4 px-6 py-5" style={{ border: "1px solid #5ED29C33", background: "#5ED29C08", borderRadius: 14 }}>
-              <span className="font-sans text-sm" style={{ color: "#5ED29C" }}>✓</span>
-              <div>
-                <div className="font-sans text-xs tracking-widest uppercase mb-1" style={{ color: "#5ED29C" }}>Accepted</div>
-                <div className="font-display text-sm" style={{ color: "#ECF3EF", fontWeight: 400 }}>All test cases passed. Clean.</div>
+              <div className="flex flex-wrap gap-3">
+                {problem.editorial && (
+                  <button onClick={() => setShowEditorial(!showEditorial)} className="cl-lift font-sans text-xs px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: showEditorial ? "#5ED29C" : "#ECF3EF", border: `1px solid ${showEditorial ? "#5ED29C33" : "#17201C"}`, background: showEditorial ? "#5ED29C10" : "transparent" }}>
+                    {showEditorial ? "Editorial ▾" : "Editorial"}
+                  </button>
+                )}
+                {problem.solution_cpp && (
+                  <button onClick={() => setShowSolution(!showSolution)} className="cl-lift font-sans text-xs px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: "#ECF3EF", border: "1px solid #17201C" }}>
+                    {showSolution ? "Solution ▾" : "Show solution"}
+                  </button>
+                )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        <StaggerItem className="flex flex-wrap gap-3" as="div">
-          {problem.editorial && (
-            <button onClick={() => setShowEditorial(!showEditorial)} className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: showEditorial ? "#5ED29C" : "#ECF3EF", border: `1px solid ${showEditorial ? "#5ED29C33" : "#17201C"}`, background: showEditorial ? "#5ED29C10" : "transparent" }}>
-              {showEditorial ? ", Editorial" : "+ Editorial"}
-            </button>
-          )}
-          {problem.solution_cpp && (
-            <button onClick={() => setShowSolution(!showSolution)} className="cl-lift font-sans text-xs tracking-widest uppercase px-4 py-2.5 rounded-[10px] transition-all duration-150" style={{ color: "#ECF3EF", border: "1px solid #17201C" }}>
-              {showSolution ? ", Solution" : "Show Solution"}
-            </button>
-          )}
-        </StaggerItem>
+              <AnimatePresence>
+                {showEditorial && problem.editorial && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <div style={{ border: "1px solid #17201C", background: "#0C1210", borderRadius: 14, overflow: "hidden" }}>
+                      <div className="px-5 py-3" style={{ borderBottom: "1px solid #17201C" }}>
+                        <span className="font-display text-xs" style={{ color: "#5ED29C" }}>Editorial</span>
+                      </div>
+                      <p className="font-display text-sm leading-relaxed px-5 py-4" style={{ color: "#ECF3EF", fontWeight: 400 }}>
+                        {problem.editorial}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-        <AnimatePresence>
-          {showEditorial && problem.editorial && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div style={{ border: "1px solid #17201C", background: "#0C1210", borderRadius: 14, overflow: "hidden" }}>
-                <div className="px-5 py-3" style={{ borderBottom: "1px solid #17201C" }}>
-                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#5ED29C" }}>Editorial</span>
-                </div>
-                <p className="font-display text-sm leading-relaxed px-5 py-4" style={{ color: "#ECF3EF", fontWeight: 400 }}>
-                  {problem.editorial}
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {showSolution && problem.solution_cpp && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div style={{ border: "1px solid #17201C", background: "#0C1210", borderRadius: 14, overflow: "hidden" }}>
-                <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #17201C" }}>
-                  <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#ECF3EF" }}>Solution</span>
-                  <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10" }}>C++</span>
-                </div>
-                <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#ECF3EF" }}>
-                  {problem.solution_cpp}
-                </pre>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Stagger>
+              <AnimatePresence>
+                {showSolution && problem.solution_cpp && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <div style={{ border: "1px solid #17201C", background: "#0C1210", borderRadius: 14, overflow: "hidden" }}>
+                      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #17201C" }}>
+                        <span className="font-display text-xs" style={{ color: "#ECF3EF" }}>Solution</span>
+                        <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10" }}>C++</span>
+                      </div>
+                      <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#ECF3EF" }}>
+                        {problem.solution_cpp}
+                      </pre>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          }
+          right={
+            <div className="flex h-full flex-col gap-4">
+              <CodeEditor
+                fill
+                code={code}
+                onChange={setCode}
+                onRun={handleRun}
+                output={output}
+                isRunning={isRunning}
+                filename="solution.cpp"
+              />
+              <AnimatePresence>
+                {passed && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-4 px-6 py-5" style={{ border: "1px solid #5ED29C33", background: "#5ED29C08", borderRadius: 14 }}>
+                    <span className="font-sans text-sm" style={{ color: "#5ED29C" }}>✓</span>
+                    <div>
+                      <div className="font-display text-xs mb-1" style={{ color: "#5ED29C" }}>Accepted</div>
+                      <div className="font-display text-sm" style={{ color: "#ECF3EF", fontWeight: 400 }}>All test cases passed. Clean.</div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }

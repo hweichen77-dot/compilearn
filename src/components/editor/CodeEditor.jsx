@@ -244,6 +244,8 @@ Be direct and specific to the code shown. Under 130 words total.`,
                 color: "transparent",
                 WebkitTextFillColor: "transparent",
                 caretColor: "#5ED29C",
+                scrollBehavior: "auto",
+                overscrollBehavior: "contain",
               }}
             />
           </div>
