@@ -149,6 +149,6 @@ export default [
       { input: "2 1\n5 100\n3 50", expected_output: "0" },
     ],
     editorial:
-      "0/1 knapsack is the canonical resource-allocation DP: maximize value subject to a single capacity constraint where each item is taken whole or skipped. The 1D-array trick collapses the textbook 2D table to O(B) memory; the crucial detail is iterating the weight axis **downward**, which guarantees `dp[w-c]` still refers to the previous item's state so each item is used at most once. Reverse that loop and you get unbounded knapsack, where items repeat. In LLM systems this is exactly the context-packing problem: fit the most-relevant retrieved chunks into a fixed token window, and the same DP underlies budgeted feature selection and prompt compression.",
+      "0/1 knapsack is the canonical resource-allocation DP: maximize value subject to a single capacity constraint where each item is taken whole or skipped. The 1D-array trick collapses the textbook 2D table to O(B) memory; the key detail is iterating the weight axis **downward**, which guarantees `dp[w-c]` still refers to the previous item's state so each item is used at most once. Reverse that loop and you get unbounded knapsack, where items repeat. In LLM systems this is exactly the context-packing problem: fit the most-relevant retrieved chunks into a fixed token window, and the same DP underlies budgeted feature selection and prompt compression.",
   },
 ];

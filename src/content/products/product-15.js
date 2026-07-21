@@ -1285,7 +1285,7 @@ def call_with_retry(fn, tries=3):
 
 ## Where it earns its keep
 
-RAG apps look cheap in a demo and turn expensive in production, because the embedding step scales with document size and re-uploads, not with how many questions people ask. Caching by content hash is the highest-leverage fix here. Most re-uploads edit a handful of pages, not the whole document.
+RAG apps look cheap in a demo and turn expensive in production, because the embedding step scales with document size and re-uploads, not with how many questions people ask. Caching by content hash is the most effective fix here. Most re-uploads edit a handful of pages, not the whole document.
 
 ## A way to picture it
 

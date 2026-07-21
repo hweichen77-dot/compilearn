@@ -232,7 +232,7 @@ export default {
           "explanation": "In row-major order the outer loop walks the rows while the inner loop walks the columns of each row."
         },
         {
-          "question": "Which expression most robustly gives the column count for row r of array m?",
+          "question": "Which expression most reliably gives the column count for row r of array m?",
           "options": [
             "m.length",
             "m[r].length",
