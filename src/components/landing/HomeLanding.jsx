@@ -263,13 +263,14 @@ export default function HomeLanding() {
           <div>
             <Reveal>
               <h1 className="u-display text-[clamp(40px,6.2vw,68px)] font-extrabold leading-[0.98] tracking-tight text-white">
-                Learn AI by <GradientText brand>building</GradientText> real products.
+                Build real AI, then <GradientText brand>defend it</GradientText>.
               </h1>
             </Reveal>
             <Reveal delay={0.08}>
               <p className="measure mt-6 text-lg leading-relaxed text-white/70">
-                Go from your first prompt to a deployed app. Guided tracks, a live
-                playground, an AI tutor that reads your actual code, no fluff.
+                You don't watch tutorials. Each lesson you build a working system,
+                run it on a real model, and throw attacks at it until it holds up.
+                You finish with something you can ship.
               </p>
             </Reveal>
             <Reveal delay={0.14}>
@@ -277,7 +278,7 @@ export default function HomeLanding() {
                 Build{" "}
                 <Typewriter
                   className="u-mono text-white"
-                  words={["a chatbot", "an essay grader", "a RAG search app", "an AP CSA project"]}
+                  words={["a chatbot", "a RAG search app", "a prompt that resists injection", "an AI code reviewer"]}
                 />
               </div>
             </Reveal>
@@ -287,7 +288,7 @@ export default function HomeLanding() {
                   onClick={() => navigate("/login")}
                   className="inline-flex items-center gap-2 rounded-full bg-[#5ED29C] px-7 py-3.5 text-[15px] font-bold text-[#070B0A] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
                 >
-                  Start learning free <ArrowRight size={18} strokeWidth={2.4} />
+                  Start building free <ArrowRight size={18} strokeWidth={2.4} />
                 </MagneticButton>
                 <a
                   href="#playground"
@@ -323,7 +324,7 @@ export default function HomeLanding() {
       <Section id="tracks" className="py-24">
         <Reveal>
           <h2 className="u-display text-[clamp(28px,3.8vw,44px)] font-extrabold leading-tight tracking-tight text-white">
-            One place for everything worth learning.
+            Start with AI. The rest is here when you want it.
           </h2>
         </Reveal>
         <Reveal delay={0.08}>
