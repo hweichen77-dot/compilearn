@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { createPageUrl } from "../utils";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
-import { Reveal } from "@/components/kit";
 import {
   CatalogPage, CatalogHero, Facet, CardGrid, CourseCard, TRACK_ACCENT,
 } from "@/components/catalog/CatalogKit";
