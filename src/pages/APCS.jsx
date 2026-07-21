@@ -1,28 +1,20 @@
 import React, { useState } from "react";
-import "@/styles/landing.css";
-import { font } from "@/lib/tokens";
-import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
-import ProgressRing from "../components/gamification/ProgressRing";
-import { Stagger, StaggerItem } from "@/lib/motion";
-import { Reveal } from "@/components/landing/primitives";
+import { Reveal } from "@/components/kit";
+import {
+  CatalogPage, CatalogHero, Facet, CardGrid, CourseCard, TRACK_ACCENT,
+} from "@/components/catalog/CatalogKit";
 
-const eyebrow = { color: "#7FE0B0", fontFamily: font.mono, fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600 };
+const ACCENT = TRACK_ACCENT.apcsp;
 
 const TRACKS = [
-  { key: "apcsp", label: "AP CSP", title: "Computer Science Principles", lang: "Python · pseudocode",
-    blurb: "The five Big Ideas of computing, creative development, data, algorithms & programming, systems & networks, and the impact of computing. Runnable Python plus exam-style practice." },
-  { key: "apcsa", label: "AP CSA", title: "Computer Science A", lang: "Java",
+  { key: "apcsp", label: "AP CSP", lang: "Python · pseudocode",
+    blurb: "The five Big Ideas of computing — creative development, data, algorithms & programming, systems & networks, and the impact of computing. Runnable Python plus exam-style practice." },
+  { key: "apcsa", label: "AP CSA", lang: "Java",
     blurb: "Object-oriented Java across all ten units, from primitive types to recursion. Every concept comes with autograded Java drills and FRQ-style practice." },
 ];
-
-const DIFF_COLOR = {
-  beginner: { color: "#5ED29C", border: "#5ED29C33", bg: "#5ED29C10" },
-  intermediate: { color: "#7FE0B0", border: "#7FE0B033", bg: "#7FE0B010" },
-  advanced: { color: "#FF6B5C", border: "#FF6B5C33", bg: "#FF6B5C10" },
-};
 
 export default function APCS() {
   const [track, setTrack] = useState("apcsp");
@@ -65,127 +57,60 @@ export default function APCS() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#050807" }}>
-      <div className="relative px-8 lg:px-16 pt-28 pb-12" style={{ borderBottom: "1px solid #17201C" }}>
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #5ED29C, transparent)" }} />
-        <div className="max-w-7xl mx-auto">
-          <Reveal>
-            <div style={{ ...eyebrow, marginBottom: 14 }}>AP COMPUTER SCIENCE</div>
-            <h1 style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 700, letterSpacing: "-0.03em", color: "#ECF3EF", lineHeight: 1.08, margin: "0 0 20px" }}>
-              Pass the AP exam.<br />
-              <span className="cl-grad">And understand it.</span>
-            </h1>
-            <p style={{ fontFamily: font.body, color: "#B7C6BE", fontSize: 18, maxWidth: 560, lineHeight: 1.55 }}>
-              CSP in Python, CSA in Java. Both follow the AP exam, and you write code the whole way, with practice on the multiple choice and FRQs.
-            </p>
-            <p style={{ fontFamily: font.mono, fontSize: 12, maxWidth: 560, marginTop: 20, color: "#7C8D85", lineHeight: 1.6 }}>
-              Compilearn is an independent project, not affiliated with or endorsed by the College Board. AP® and Advanced Placement® are registered trademarks of the College Board.
-            </p>
-          </Reveal>
-        </div>
-      </div>
+    <CatalogPage>
+      <CatalogHero
+        title="Pass the AP exam. And understand it."
+        lead="CSP in Python, CSA in Java. Both follow the AP exam, and you write code the whole way, with practice on the multiple choice and FRQs."
+        note="Compilearn is an independent project, not affiliated with or endorsed by the College Board. AP® and Advanced Placement® are registered trademarks of the College Board."
+        accent={ACCENT}
+      />
 
-      <div className="max-w-7xl mx-auto px-8 lg:px-16 pt-10">
-        <div className="flex gap-2 mb-2">
-          {TRACKS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTrack(t.key)}
-              className="transition-all duration-150"
-              style={{
-                fontFamily: font.mono, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase",
-                padding: "12px 20px", borderRadius: 10,
-                color: track === t.key ? "#1a1206" : "#B7C6BE",
-                background: track === t.key ? "#5ED29C" : "transparent",
-                border: `1px solid ${track === t.key ? "#5ED29C" : "#17201C"}`,
-                fontWeight: 700,
-                boxShadow: track === t.key ? "0 6px 24px -8px rgba(94,210,156,.6)" : "none",
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
+      <div className="mx-auto max-w-6xl px-6 sm:px-10 lg:px-16 py-10">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <Facet
+            label="Course"
+            options={TRACKS.map((t) => ({ value: t.key, label: t.label }))}
+            value={track}
+            onChange={setTrack}
+          />
         </div>
-        <p style={{ fontFamily: font.body, fontSize: 14, marginTop: 16, marginBottom: 4, color: "#B7C6BE", lineHeight: 1.55 }}>
-          <span style={{ fontFamily: font.mono, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.14em", color: "#5ED29C" }}>{active.lang}</span>
+        <p className="t-body mb-10" style={{ fontSize: 14, lineHeight: 1.55, maxWidth: "70ch" }}>
+          <span className="u-mono" style={{ color: ACCENT, fontSize: 12 }}>{active.lang}</span>
           &nbsp;·&nbsp; {active.blurb}
         </p>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-8 lg:px-16 py-12 space-y-12">
         {trackProjects.length === 0 ? (
-          <div style={{ fontFamily: font.body, fontSize: 15, color: "#B7C6BE", textAlign: "center", padding: "80px 0" }}>
+          <div className="text-center py-24 t-muted" style={{ fontSize: 15 }}>
             {active.label} curriculum is coming soon.
           </div>
         ) : (
           units.map((unit) => (
-            <div key={unit}>
-              <Reveal><div style={{ ...eyebrow, marginBottom: 18 }}>{unit}</div></Reveal>
-              <Stagger as="div" style={{ borderTop: "1px solid #17201C" }}>
+            <Reveal key={unit} className="mb-12 last:mb-0">
+              <h2 className="u-display t-strong mb-5" style={{ fontSize: 15, margin: "0 0 20px" }}>{unit}</h2>
+              <CardGrid>
                 {byUnit.get(unit).map((p, i) => {
-                  const dc = DIFF_COLOR[p.difficulty] || DIFF_COLOR.beginner;
                   const pct = modulePct(p.id);
                   const done = pct === 100;
                   return (
-                    <StaggerItem key={p.id} as="div">
-                    <Link
+                    <CourseCard
+                      key={p.id}
                       to={createPageUrl(`ProjectDetail?id=${p.id}`)}
-                      className="group block"
-                    >
-                      <div
-                        className="grid gap-8 px-6 py-6 transition-all duration-200"
-                        style={{ gridTemplateColumns: "3rem 1fr auto", borderBottom: "1px solid #0C1210" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#0C1210"; e.currentTarget.style.paddingLeft = "1.75rem"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.paddingLeft = "1.5rem"; }}
-                      >
-                        <div className="flex items-center" style={{ minWidth: "3rem" }}>
-                          {pct > 0 ? (
-                            <ProgressRing percent={pct} size={38} color="#5ED29C" />
-                          ) : (
-                            <span style={{ fontFamily: font.mono, fontWeight: 700, fontSize: "1.5rem", color: "#7C8D85", letterSpacing: "-0.05em" }}>
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <span className="font-display font-bold text-base group-hover:text-white transition-colors duration-150" style={{ color: done ? "#5ED29C" : "#ECF3EF", letterSpacing: "-0.02em" }}>
-                              {p.title}
-                            </span>
-                            {done && (
-                              <span style={{ fontFamily: font.mono, fontSize: 11, color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10", borderRadius: 6, padding: "1px 8px" }}>
-                                DONE
-                              </span>
-                            )}
-                          </div>
-                          <p style={{ fontFamily: font.body, fontSize: 14, color: "#B7C6BE", marginBottom: 12, lineHeight: 1.5 }}>
-                            {p.description}
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {(p.tags || []).slice(0, 4).map((c) => (
-                              <span key={c} style={{ fontFamily: font.mono, fontSize: 11, color: "#B7C6BE", border: "1px solid #17201C", borderRadius: 6, padding: "1px 8px" }}>
-                                {c}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <span
-                            style={{ fontFamily: font.mono, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: dc.color, border: `1px solid ${dc.border}`, background: dc.bg, borderRadius: 6, padding: "3px 10px" }}
-                          >
-                            {p.difficulty}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                    </StaggerItem>
+                      accent={ACCENT}
+                      index={String(i + 1).padStart(2, "0")}
+                      title={p.title}
+                      description={p.description}
+                      tags={p.tags}
+                      status={done ? "completed" : pct > 0 ? "in_progress" : "not_started"}
+                      progressPct={pct}
+                      meta={[p.difficulty, active.label]}
+                    />
                   );
                 })}
-              </Stagger>
-            </div>
+              </CardGrid>
+            </Reveal>
           ))
         )}
       </div>
-    </div>
+    </CatalogPage>
   );
 }

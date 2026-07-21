@@ -1,296 +1,298 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  Home, Sparkles, GraduationCap, Trophy, Boxes, Terminal,
+  FlaskConical, User, Search, LogOut, ArrowRight,
+} from "lucide-react";
 import { createPageUrl } from "./utils";
 import { useAuth } from "@/lib/AuthContext";
-import { isDesktop } from "@/lib/desktopAuth";
 import { PageTransition } from "@/lib/motion";
 import MilestoneBurst from "@/components/retention/MilestoneBurst";
 import FirstWinOnboarding from "@/components/retention/FirstWinOnboarding";
 
+const NAV = [
+  { label: "Home", page: "Home", icon: Home },
+  { label: "AI Track", page: "AITrack", icon: Sparkles },
+  { label: "AP CS", page: "APCS", icon: GraduationCap },
+  { label: "Compete", page: "Competitive", icon: Trophy },
+  { label: "Projects", page: "Projects", icon: Boxes },
+  { label: "Challenges", page: "Challenges", icon: Terminal },
+  { label: "Playground", page: "Playground", icon: FlaskConical, amber: true },
+];
+
+const MOBILE_TABS = ["Home", "AITrack", "Playground", "Challenges", "Portfolio"];
+
+const SEARCH_DEST = [
+  ...NAV,
+  { label: "Portfolio", page: "Portfolio", icon: User },
+  { label: "Dashboard", page: "Dashboard", icon: Home },
+];
+
+function CommandPalette({ open, onClose }) {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  const inputRef = useRef(null);
+  const results = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return SEARCH_DEST;
+    return SEARCH_DEST.filter((d) => d.label.toLowerCase().includes(s));
+  }, [q]);
+
+  useEffect(() => {
+    if (open) { setQ(""); setTimeout(() => inputRef.current?.focus(), 20); }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "Enter" && results[0]) { navigate(createPageUrl(results[0].page)); onClose(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, results, navigate, onClose]);
+
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-start justify-center px-4 pt-[18vh]"
+      style={{ background: "rgba(3,6,5,0.72)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search Compilearn"
+    >
+      <div
+        className="w-full max-w-lg overflow-hidden"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", borderRadius: 14, boxShadow: "0 24px 64px -12px rgba(0,0,0,0.7)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3 px-4" style={{ borderBottom: "1px solid var(--border-subtle)", height: 52 }}>
+          <Search size={16} style={{ color: "var(--text-muted)" }} />
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Jump to…"
+            aria-label="Search"
+            className="t-body w-full bg-transparent outline-none text-sm"
+            style={{ caretColor: "var(--accent)" }}
+          />
+          <kbd className="u-mono t-muted" style={{ fontSize: 11 }}>esc</kbd>
+        </div>
+        <ul className="max-h-80 overflow-y-auto py-2" role="listbox">
+          {results.length === 0 && (
+            <li className="px-4 py-3 t-muted text-sm">No matches.</li>
+          )}
+          {results.map((d, i) => {
+            const Icon = d.icon || ArrowRight;
+            return (
+              <li key={d.page} role="option" aria-selected={i === 0}>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                  style={{ color: "var(--text-primary)", background: i === 0 ? "rgba(94,210,156,0.08)" : "transparent" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(94,210,156,0.08)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = i === 0 ? "rgba(94,210,156,0.08)" : "transparent")}
+                  onClick={() => { navigate(createPageUrl(d.page)); onClose(); }}
+                >
+                  <Icon size={15} style={{ color: "var(--accent)" }} />
+                  <span className="text-sm">{d.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  const navGroups = [
-    {
-      name: "Learn",
-      links: [
-        { label: "AI Track", page: "AITrack" },
-        { label: "AP CS", page: "APCS" },
-        { label: "Compete", page: "Competitive" },
-      ],
-    },
-    {
-      name: "Practice",
-      links: [
-        { label: "Projects", page: "Projects" },
-        { label: "Challenges", page: "Challenges" },
-        { label: "Playground", page: "Playground", badge: "Live" },
-      ],
-    },
-  ];
-  const showFullNav = Boolean(user) || isDesktop;
 
   const isActive = (page) => currentPageName === page;
 
-  if (currentPageName === "Home") return <>{children}</>;
+  if (currentPageName === "Home") {
+    return (
+      <>
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+        {children}
+      </>
+    );
+  }
+
+  const TOPBAR = 50;
+  const SIDEBAR = 208;
 
   return (
-    <div style={{ background: "#070B0A", minHeight: "100vh" }}>
+    <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
       <div className="cf-grain" aria-hidden="true" />
       {user && <MilestoneBurst />}
       {user && <FirstWinOnboarding />}
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] font-sans text-xs tracking-widest uppercase px-4 py-2"
-        style={{ background: "#5ED29C", color: "#070B0A" }}
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] u-mono text-xs px-4 py-2"
+        style={{ background: "var(--accent)", color: "var(--bg-base)" }}
       >
         Skip to content
       </a>
-      <nav
-        aria-label="Primary"
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-        style={{
-          background: scrolled ? "rgba(21,19,14,0.95)" : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: scrolled ? "1px solid #17201C" : "1px solid transparent",
-          height: scrolled ? "52px" : "64px",
-        }}
+
+      <header
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6"
+        style={{ height: TOPBAR, background: "var(--bg-base)", borderBottom: "1px solid var(--border-subtle)" }}
       >
-        <div
-          className="max-w-7xl mx-auto flex items-center justify-between h-full px-8 lg:px-16"
-        >
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <span
-              className="inline-flex items-center justify-center rounded-md transition-all duration-200"
-              style={{
-                fontFamily: "'Spline Sans Mono Variable', ui-monospace, monospace",
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#5ED29C",
-                background: "rgba(94,210,156,0.1)",
-                border: "1px solid rgba(94,210,156,0.24)",
-                width: "26px",
-                height: "26px",
-                lineHeight: 1,
-              }}
-            >
-              {">_"}
-            </span>
-            <span
-              className="inline-flex items-center transition-colors duration-200"
-              style={{ color: "#ECF3EF", fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, fontSize: "17px", letterSpacing: "-0.01em", lineHeight: 1 }}
-            >
-              Compilearn
-            </span>
-          </Link>
-
-          {showFullNav && (
-          <div className="hidden md:flex items-center gap-0">
-            {navGroups.map((group, gi) => (
-              <React.Fragment key={group.name}>
-                {gi > 0 && (
-                  <span aria-hidden="true" className="mx-2 lg:mx-3 w-px h-4" style={{ background: "#17201C" }} />
-                )}
-                {group.links.map((link) => (
-                  <Link
-                    key={link.page}
-                    to={createPageUrl(link.page)}
-                    aria-label={link.badge ? `${link.label} — ${link.badge}` : undefined}
-                    className="font-sans text-xs tracking-widest uppercase whitespace-nowrap px-3 lg:px-4 py-2 transition-all duration-150 relative inline-flex items-center gap-1.5"
-                    style={{
-                      color: isActive(link.page) ? "#5ED29C" : "#B7C6BE",
-                    }}
-                    onMouseEnter={e => {
-                      if (!isActive(link.page)) e.currentTarget.style.color = "#7FE0B0";
-                    }}
-                    onMouseLeave={e => {
-                      if (!isActive(link.page)) e.currentTarget.style.color = "#B7C6BE";
-                    }}
-                  >
-                    {isActive(link.page) && (
-                      <span
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-4"
-                        style={{ background: "#5ED29C" }}
-                      />
-                    )}
-                    {link.label}
-                    {link.badge && (
-                      <span
-                        aria-hidden="true"
-                        className="font-sans px-1.5 py-0.5 leading-none rounded-sm"
-                        style={{
-                          fontSize: "8px",
-                          letterSpacing: "0.06em",
-                          color: "#ECF3EF",
-                          border: "1px solid #17201C",
-                        }}
-                      >
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </React.Fragment>
-            ))}
-          </div>
-          )}
-
-          <div className={showFullNav ? "hidden md:flex items-center gap-3" : "flex items-center gap-2"}>
-            {user ? (
-              <>
-                {[{ label: "Portfolio", page: "Portfolio" }].map((p) => (
-                  <Link
-                    key={p.page}
-                    to={createPageUrl(p.page)}
-                    className="font-sans text-xs tracking-widest uppercase whitespace-nowrap px-3 py-2 transition-all duration-150"
-                    style={{ color: isActive(p.page) ? "#5ED29C" : "#B7C6BE" }}
-                    onMouseEnter={e => { if (!isActive(p.page)) e.currentTarget.style.color = "#7FE0B0"; }}
-                    onMouseLeave={e => { if (!isActive(p.page)) e.currentTarget.style.color = "#B7C6BE"; }}
-                  >
-                    {p.label}
-                  </Link>
-                ))}
-                <span className="font-sans text-xs whitespace-nowrap" style={{ color: "#ECF3EF" }}>
-                  {user.name?.split(" ")[0] || user.email?.split("@")[0]}
-                </span>
-                <button
-                  onClick={logout}
-                  className="font-sans text-xs tracking-widest uppercase whitespace-nowrap px-3 py-2 transition-all duration-150"
-                  style={{ color: "#ECF3EF", border: "1px solid #17201C" }}
-                  onMouseEnter={e => { e.currentTarget.style.color = "#B7C6BE"; e.currentTarget.style.borderColor = "#17201C"; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = "#B7C6BE"; e.currentTarget.style.borderColor = "#17201C"; }}
-                >
-                  Exit
-                </button>
-              </>
-            ) : (
-              <>
-              <button
-                onClick={() => navigate("/login")}
-                className="font-sans text-xs tracking-widest uppercase px-5 py-2 transition-all duration-150"
-                style={{ color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10" }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = "#5ED29C20";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = "#5ED29C10";
-                  e.currentTarget.style.transform = "";
-                }}
-              >
-                Sign In →
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="font-sans text-xs tracking-widest uppercase px-5 py-2 transition-all duration-150"
-                style={{ color: "#070B0A", border: "1px solid #5ED29C", background: "#5ED29C" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ""; }}
-              >
-                Start
-              </button>
-              </>
-            )}
-          </div>
-
-          {showFullNav && (
-          <button
-            className="md:hidden font-sans text-xs tracking-widest uppercase p-2 transition-colors"
-            style={{ color: mobileOpen ? "#5ED29C" : "#ECF3EF" }}
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-nav-menu"
+        <Link to="/" className="flex items-center gap-2.5">
+          <span
+            className="inline-flex items-center justify-center"
+            style={{
+              fontFamily: "'Spline Sans Mono Variable', ui-monospace, monospace", fontSize: 13, fontWeight: 700,
+              color: "var(--amber)", background: "rgba(245,165,36,0.10)",
+              border: "1px solid rgba(245,165,36,0.28)", width: 26, height: 26,
+              borderRadius: 6, lineHeight: 1,
+            }}
           >
-            {mobileOpen ? "[ X ]" : "[ = ]"}
+            {">_"}
+          </span>
+          <span className="t-strong" style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 16, letterSpacing: "-0.02em" }}>
+            Compilearn
+          </span>
+        </Link>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex items-center gap-2 px-2.5 sm:px-3 h-8 transition-colors"
+            aria-label="Search (Command K)"
+            style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, color: "var(--text-muted)", background: "var(--bg-raised)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-default)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-subtle)")}
+          >
+            <Search size={14} />
+            <span className="hidden sm:inline text-xs">Search</span>
+            <kbd className="hidden sm:inline u-mono" style={{ fontSize: 10, opacity: 0.7 }}>⌘K</kbd>
           </button>
+
+          {user ? (
+            <>
+              <span className="hidden sm:inline text-xs t-body">
+                {user.name?.split(" ")[0] || user.email?.split("@")[0]}
+              </span>
+              <button
+                onClick={logout}
+                aria-label="Sign out"
+                className="inline-flex items-center justify-center transition-colors"
+                style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-strong)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              >
+                <LogOut size={15} />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="u-mono text-xs px-4 h-8 transition-transform"
+              style={{ color: "var(--bg-base)", background: "var(--accent)", borderRadius: 8, fontWeight: 700 }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
+            >
+              Start
+            </button>
           )}
         </div>
+      </header>
 
-        {showFullNav && mobileOpen && (
-          <div
-            id="mobile-nav-menu"
-            className="md:hidden px-8 py-4 space-y-1"
-            style={{ background: "#070B0A", borderTop: "1px solid #17201C" }}
-          >
-            {navGroups.map((group) => (
-              <div key={group.name} className="mb-2">
-                <div className="font-sans text-[10px] tracking-[0.18em] uppercase px-4 pt-2 pb-1" style={{ color: "#7C8D85" }}>
-                  {group.name}
-                </div>
-                {group.links.map((link) => (
-                  <Link
-                    key={link.page}
-                    to={createPageUrl(link.page)}
-                    onClick={() => setMobileOpen(false)}
-                    aria-label={link.badge ? `${link.label} — ${link.badge}, optional advanced track` : undefined}
-                    className="flex items-center gap-2 font-sans text-xs tracking-widest uppercase px-4 py-3 transition-colors"
-                    style={{ color: isActive(link.page) ? "#5ED29C" : "#B7C6BE" }}
-                  >
-                    {link.label}
-                    {link.badge && (
-                      <span
-                        aria-hidden="true"
-                        className="font-sans px-1.5 py-0.5 leading-none rounded-sm"
-                        style={{
-                          fontSize: "8px",
-                          letterSpacing: "0.06em",
-                          color: "#ECF3EF",
-                          border: "1px solid #17201C",
-                        }}
-                      >
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            ))}
-            <div style={{ borderTop: "1px solid #17201C", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
-              {user ? (
-                <>
-                <Link
-                  to={createPageUrl("Portfolio")}
-                  onClick={() => setMobileOpen(false)}
-                  className="block font-sans text-xs tracking-widest uppercase px-4 py-3 transition-colors"
-                  style={{ color: "#ECF3EF" }}
-                >
-                  Portfolio
-                </Link>
-                <button
-                  onClick={() => { setMobileOpen(false); logout(); }}
-                  className="font-sans text-xs tracking-widest uppercase w-full text-left px-4 py-3"
-                  style={{ color: "#ECF3EF" }}
-                >
-                  Sign Out
-                </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => { setMobileOpen(false); navigate("/login"); }}
-                  className="font-sans text-xs tracking-widest uppercase px-4 py-3"
-                  style={{ color: "#5ED29C" }}
-                >
-                  Sign In →
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+      <nav
+        aria-label="Primary"
+        className="hidden lg:flex flex-col fixed left-0 bottom-0 z-40 py-4 px-3"
+        style={{ top: TOPBAR, width: SIDEBAR, borderRight: "1px solid var(--border-subtle)", background: "var(--bg-base)" }}
+      >
+        {NAV.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.page);
+          return (
+            <Link
+              key={item.page}
+              to={createPageUrl(item.page)}
+              aria-current={active ? "page" : undefined}
+              className="flex items-center gap-3 px-3 h-10 mb-0.5 transition-colors"
+              style={{
+                borderRadius: 9,
+                color: active ? "var(--text-strong)" : "var(--text-muted)",
+                background: active ? "rgba(94,210,156,0.10)" : "transparent",
+              }}
+              onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--text-primary)"; }}
+              onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--text-muted)"; }}
+            >
+              <Icon size={17} style={{ color: active ? "var(--accent)" : (item.amber ? "var(--amber)" : "currentColor"), flexShrink: 0 }} />
+              <span className="text-sm" style={{ fontWeight: active ? 600 : 400 }}>{item.label}</span>
+            </Link>
+          );
+        })}
+        <div className="flex-1" />
+        <Link
+          to={createPageUrl("Portfolio")}
+          aria-current={isActive("Portfolio") ? "page" : undefined}
+          className="flex items-center gap-3 px-3 h-10 transition-colors"
+          style={{
+            borderRadius: 9,
+            color: isActive("Portfolio") ? "var(--text-strong)" : "var(--text-muted)",
+            background: isActive("Portfolio") ? "rgba(94,210,156,0.10)" : "transparent",
+          }}
+        >
+          <User size={17} style={{ color: isActive("Portfolio") ? "var(--accent)" : "currentColor" }} />
+          <span className="text-sm">Portfolio</span>
+        </Link>
       </nav>
 
-      <main id="main-content">
-        <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+      <main
+        id="main-content"
+        style={{ paddingTop: TOPBAR, paddingBottom: 0 }}
+        className="lg:pl-[208px]"
+      >
+        <div className="pb-16 lg:pb-0">
+          <PageTransition pageKey={currentPageName}>{children}</PageTransition>
+        </div>
       </main>
+
+      <nav
+        aria-label="Primary mobile"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch"
+        style={{ height: 60, background: "var(--bg-base)", borderTop: "1px solid var(--border-subtle)" }}
+      >
+        {MOBILE_TABS.map((page) => {
+          const item = SEARCH_DEST.find((d) => d.page === page);
+          const Icon = item?.icon || Home;
+          const active = isActive(page);
+          return (
+            <Link
+              key={page}
+              to={createPageUrl(page)}
+              aria-current={active ? "page" : undefined}
+              className="flex-1 flex flex-col items-center justify-center gap-1"
+              style={{ color: active ? "var(--accent)" : "var(--text-muted)" }}
+            >
+              <Icon size={19} />
+              <span className="u-mono" style={{ fontSize: 9, letterSpacing: "0.02em" }}>{item?.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

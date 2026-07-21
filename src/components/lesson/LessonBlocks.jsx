@@ -10,10 +10,10 @@ const TOOL_REGISTRY = {
   tokenizer: InteractiveTokenizer,
 };
 
-function Label({ children, accent = "#9A6A1F" }) {
+function Label({ children }) {
   return (
-    <div className="font-sans text-xs tracking-widest uppercase mt-10 mb-2" style={{ color: "#FFFFFF" }}>
-      <span style={{ color: accent }}>//</span> {children}
+    <div className="u-mono mt-10 mb-2" style={{ color: "var(--text-strong)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+      <span style={{ color: "var(--accent-2)" }}>//</span> {children}
     </div>
   );
 }

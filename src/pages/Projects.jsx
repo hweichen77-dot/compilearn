@@ -1,34 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { font } from "@/lib/tokens";
+import React, { useState, useEffect, useMemo } from "react";
 import { api } from "@/api/apiClient";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/content/categories";
 import { foundationsAreFinished, isModuleGated } from "@/lib/foundationsGate";
-import { Reveal, GlowCard } from "@/components/landing/primitives";
-import "@/styles/landing.css";
+import { Reveal } from "@/components/kit";
+import {
+  CatalogPage, CatalogHero, FilterToolbar, SearchInput, Facet, TagChips,
+  CardGrid, CourseCard, EmptyState, CardSkeleton, TRACK_ACCENT,
+} from "@/components/catalog/CatalogKit";
 
-const DIFFICULTY_LABEL = {
-  beginner: "00",
-  intermediate: "01",
-  advanced: "02",
-};
-
-function Label({ children, color = "#7C8D85", className = "", style }) {
-  return (
-    <span
-      className={`text-[11px] tracking-[0.18em] uppercase ${className}`}
-      style={{ fontFamily: font.mono, color, ...style }}
-    >
-      {children}
-    </span>
-  );
-}
+const LEVELS = [
+  { value: "all", label: "All levels" },
+  { value: "beginner", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+];
 
 export default function Projects() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [level, setLevel] = useState("all");
+  const [tag, setTag] = useState(null);
   const [user, setUser] = useState(null);
   const [nudge, setNudge] = useState(null);
 
@@ -60,7 +53,6 @@ export default function Projects() {
     if (project.lessons_count && pp.length >= project.lessons_count) return "completed";
     return "in_progress";
   };
-
   const getProgress = (project) => {
     const pp = progress.filter((p) => p.project_id === project.id);
     return project.lessons_count ? Math.round((pp.length / project.lessons_count) * 100) : 0;
@@ -72,10 +64,18 @@ export default function Projects() {
     ...presentCats.map((c) => ({ value: c, label: CATEGORY_LABELS[c] })),
   ];
 
+  const allTags = useMemo(() => {
+    const counts = new Map();
+    projects.forEach((p) => (p.tags || []).forEach((t) => counts.set(t, (counts.get(t) || 0) + 1)));
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([t]) => t);
+  }, [projects]);
+
   const filtered = projects.filter((p) => {
     const matchSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === "all" || p.category === category;
-    return matchSearch && matchCat;
+    const matchLevel = level === "all" || p.difficulty === level;
+    const matchTag = !tag || (p.tags || []).includes(tag);
+    return matchSearch && matchCat && matchLevel && matchTag;
   });
 
   const beginnerProjects = projects.filter((p) => p.difficulty === "beginner");
@@ -95,278 +95,84 @@ export default function Projects() {
     ...(uncategorized.length ? [{ id: "_other", label: "More", items: uncategorized }] : []),
   ].filter((s) => s.items.length > 0);
 
+  const renderCard = (project, i) => {
+    const status = getStatus(project);
+    const pct = getProgress(project);
+    const gated = isModuleGated({
+      finished: foundationsFinished,
+      done: status === "completed",
+      difficulty: project.difficulty,
+    });
+    return (
+      <CourseCard
+        key={project.id}
+        to={createPageUrl(`ProjectDetail?id=${project.id}`)}
+        accent={TRACK_ACCENT.projects}
+        index={String(i + 1).padStart(2, "0")}
+        title={project.title}
+        description={project.description}
+        tags={project.tags}
+        status={status}
+        progressPct={pct}
+        gated={gated}
+        onClick={() => setNudge(project.title)}
+        meta={[
+          project.lessons_count ? `${project.lessons_count} lessons` : null,
+          project.difficulty,
+          project.estimated_time ? `${project.estimated_time}min` : null,
+        ]}
+      />
+    );
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: "#050807" }}>
-      <style>{`
-        .cl-row { transition: transform .25s cubic-bezier(.16,1,.3,1), border-color .25s, box-shadow .25s; }
-        .cl-row:hover { border-color: #26302B !important; box-shadow: 0 14px 44px -14px rgba(94,210,156,0.35); }
-        @media (prefers-reduced-motion: reduce) { .cl-row { transition: none; } }
-      `}</style>
-      <div
-        className="relative px-8 lg:px-16 pt-28 pb-16"
-        style={{ borderBottom: "1px solid #17201C" }}
-      >
-        <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: "linear-gradient(90deg, transparent, #5ED29C, transparent)" }}
-        />
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-3">
-            <Label color="#5ED29C">Projects</Label>
-          </div>
-          <h1
-            style={{ fontFamily: font.display, fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, letterSpacing: "-0.025em", color: "#ECF3EF", lineHeight: 1.12, margin: "0 0 16px" }}
-          >
-            Choose your module.
-          </h1>
-          <p className="text-base" style={{ fontFamily: font.body, color: "#B7C6BE", fontWeight: 400 }}>
-            Each project is a chapter. New here? Start at the top and work down, each one builds on the last.
-          </p>
-        </div>
-      </div>
+    <CatalogPage>
+      <CatalogHero
+        title="Choose your module."
+        lead="Each project is a chapter. New here? Start at the top and work down — each one builds on the last."
+        accent={TRACK_ACCENT.projects}
+      />
 
-      <div className="max-w-7xl mx-auto px-8 lg:px-16 py-12">
-        <div className="flex flex-wrap items-center gap-4 mb-12">
-          <div className="relative flex-1 min-w-48 max-w-xs">
-            <span
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none"
-              style={{ fontFamily: font.mono, color: "#7C8D85" }}
-            >
-              /search
-            </span>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="filter projects..."
-              className="w-full text-sm py-3 pl-16 pr-4 bg-transparent outline-none transition-colors duration-150"
-              style={{
-                fontFamily: font.body,
-                border: "1px solid #17201C",
-                borderRadius: "12px",
-                background: "#0C1210",
-                color: "#ECF3EF",
-                caretColor: "#5ED29C",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#5ED29C")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#17201C")}
-            />
+      <div className="mx-auto max-w-6xl px-6 sm:px-10 lg:px-16 py-10">
+        <FilterToolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Filter projects…" />
+          <Facet label="Category" options={CATEGORIES} value={category} onChange={setCategory} />
+          <Facet label="Level" options={LEVELS} value={level} onChange={setLevel} />
+        </FilterToolbar>
+        {allTags.length > 0 && (
+          <div className="mb-8">
+            <TagChips tags={allTags} active={tag} onToggle={setTag} />
           </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.value}
-                onClick={() => setCategory(cat.value)}
-                className="text-xs tracking-widest uppercase px-4 py-2.5 transition-all duration-150"
-                style={{
-                  fontFamily: font.mono,
-                  borderRadius: "10px",
-                  border: `1px solid ${category === cat.value ? "#5ED29C" : "#17201C"}`,
-                  color: category === cat.value ? "#7FE0B0" : "#B7C6BE",
-                  background: category === cat.value ? "rgba(94,210,156,0.10)" : "transparent",
-                }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
 
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div
-                key={i}
-                className="h-24 animate-pulse"
-                style={{ background: "#0C1210", border: "1px solid #17201C", borderRadius: "16px" }}
-              />
-            ))}
-          </div>
+          <CardSkeleton />
+        ) : filtered.length === 0 ? (
+          <EmptyState>No projects match your filters.</EmptyState>
         ) : (
-          <div>
-            <div
-              className="grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-3 mb-2"
-              style={{ borderBottom: "1px solid #17201C" }}
-            >
-              {["LVL", "PROJECT", "LESSONS", "STATUS"].map(h => (
-                <Label key={h}>{h}</Label>
-              ))}
-            </div>
-
-            {sections.map((section) => (
-              <Reveal as="div" key={section.id} className="mb-12 last:mb-0">
-                <div
-                  className="flex items-baseline gap-3 px-6 pt-8 pb-3 mb-3"
-                  style={{ borderBottom: "1px solid #1F1C15" }}
-                >
-                  <Label color="#B7C6BE">{section.label}</Label>
-                  <span className="text-xs" style={{ fontFamily: font.mono, color: "#7C8D85" }}>
-                    {section.items.length}
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {section.items.map((project) => {
-                    const status = getStatus(project);
-                    const pct = getProgress(project);
-                    const gated = isModuleGated({
-                      finished: foundationsFinished,
-                      done: status === "completed",
-                      difficulty: project.difficulty,
-                    });
-                    const rowInner = (
-                      <GlowCard
-                        className="cl-row grid grid-cols-[3rem_1fr_auto_auto] items-center gap-8 px-6 py-6"
-                        style={{ background: "#0C1210", border: "1px solid #17201C", borderRadius: "16px", opacity: gated ? 0.55 : 1 }}
-                      >
-                        <div
-                          className="font-bold"
-                          style={{
-                            fontFamily: font.mono,
-                            fontSize: "1.5rem",
-                            color: "#7C8D85",
-                            letterSpacing: "-0.05em",
-                          }}
-                        >
-                          {DIFFICULTY_LABEL[project.difficulty] || "00"}
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <div
-                              className="font-display font-bold text-lg leading-snug transition-colors duration-200 group-hover:text-white"
-                              style={{ color: "#ECF3EF", letterSpacing: "-0.02em" }}
-                            >
-                              {project.title}
-                            </div>
-                            {gated && (
-                              <Label
-                                color="#7FE0B0"
-                                className="px-2 py-0.5 whitespace-nowrap"
-                                style={{ border: "1px solid rgba(94,210,156,0.25)", background: "rgba(94,210,156,0.08)", borderRadius: "8px" }}
-                              >
-                                Finish Foundations first
-                              </Label>
-                            )}
-                          </div>
-                          {project.description && (
-                            <div
-                              className="text-sm line-clamp-1"
-                              style={{ fontFamily: font.body, color: "#B7C6BE", fontWeight: 400 }}
-                            >
-                              {project.description}
-                            </div>
-                          )}
-                          {status === "in_progress" && (
-                            <div className="flex items-center gap-3 mt-2">
-                              <div className="flex gap-1">
-                                {Array.from({ length: 10 }).map((_, di) => (
-                                  <div
-                                    key={di}
-                                    className="w-1.5 h-1.5 rounded-sm transition-all duration-200"
-                                    style={{
-                                      background: di < Math.round(pct / 10) ? "#5ED29C" : "#17201C",
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs" style={{ fontFamily: font.mono, color: "#7FE0B0" }}>
-                                {pct}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div
-                          className="text-sm text-right"
-                          style={{ fontFamily: font.mono, color: "#B7C6BE" }}
-                        >
-                          {project.lessons_count ? `${project.lessons_count}` : ", "}
-                          {project.estimated_time ? (
-                            <div className="text-xs" style={{ fontFamily: font.mono, color: "#7C8D85" }}>
-                              {project.estimated_time}min
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div>
-                          {gated && (
-                            <Label color="#7FE0B0" className="px-3 py-1" style={{ border: "1px solid rgba(94,210,156,0.25)", background: "rgba(94,210,156,0.08)", borderRadius: "8px" }}>
-                              LOCKED
-                            </Label>
-                          )}
-                          {!gated && status === "completed" && (
-                            <Label color="#5fbf7e" className="px-3 py-1" style={{ border: "1px solid rgba(95,191,126,0.3)", background: "rgba(95,191,126,0.08)", borderRadius: "8px" }}>
-                              DONE
-                            </Label>
-                          )}
-                          {!gated && status === "in_progress" && (
-                            <Label color="#5ED29C" className="px-3 py-1" style={{ border: "1px solid rgba(94,210,156,0.3)", background: "rgba(94,210,156,0.08)", borderRadius: "8px" }}>
-                              ACTIVE
-                            </Label>
-                          )}
-                          {!gated && status === "not_started" && (
-                            <Label color="#B7C6BE" className="px-3 py-1" style={{ border: "1px solid #17201C", borderRadius: "8px" }}>
-                              START
-                            </Label>
-                          )}
-                        </div>
-                      </GlowCard>
-                    );
-
-                    return gated ? (
-                      <div
-                        key={project.id}
-                        role="button"
-                        tabIndex={0}
-                        aria-disabled="true"
-                        title="Finish the Foundations modules to unlock this"
-                        className="group block cursor-not-allowed"
-                        onClick={() => setNudge(project.title)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setNudge(project.title);
-                          }
-                        }}
-                      >
-                        {rowInner}
-                      </div>
-                    ) : (
-                      <Link
-                        key={project.id}
-                        to={createPageUrl(`ProjectDetail?id=${project.id}`)}
-                        className="group block"
-                      >
-                        {rowInner}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </Reveal>
-            ))}
-
-            {filtered.length === 0 && (
-              <div className="text-center py-24">
-                <Label className="block mb-4">No results</Label>
-                <p className="font-display text-base" style={{ color: "#B7C6BE" }}>
-                  No projects match your filter.
-                </p>
+          sections.map((section) => (
+            <Reveal key={section.id} className="mb-12 last:mb-0">
+              <div className="flex items-baseline gap-3 mb-5">
+                <h2 className="u-display t-strong" style={{ fontSize: 15, margin: 0 }}>{section.label}</h2>
+                <span className="u-mono t-muted" style={{ fontSize: 12 }}>{section.items.length}</span>
               </div>
-            )}
-          </div>
+              <CardGrid>
+                {section.items.map((project, i) => renderCard(project, i))}
+              </CardGrid>
+            </Reveal>
+          ))
         )}
       </div>
 
       {nudge && (
         <div
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 text-xs tracking-widest uppercase px-5 py-3 shadow-lg"
-          style={{ fontFamily: font.mono, color: "#7FE0B0", border: "1px solid rgba(94,210,156,0.4)", background: "#0C1210", borderRadius: "12px" }}
+          className="fixed bottom-20 lg:bottom-8 left-1/2 -translate-x-1/2 z-[60] u-mono px-5 py-3"
+          style={{ fontSize: 12, color: "var(--accent)", border: "1px solid var(--accent)", background: "var(--bg-surface)", borderRadius: 12 }}
           role="status"
         >
           Finish the Foundations modules to unlock "{nudge}"
         </div>
       )}
-    </div>
+    </CatalogPage>
   );
 }

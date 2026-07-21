@@ -41,15 +41,15 @@ export default function ProjectBrief({ brief }) {
               </ul>
             </Section>
 
-            <Section icon={<Wrench size={13} />} label="Skills" accent="#C2643C">
+            <Section icon={<Wrench size={13} />} label="Skills" accent="var(--accent-2)">
               <div className="flex flex-wrap gap-1.5">
                 {brief.skills?.map((s, i) => (
-                  <span key={i} className="font-sans text-xs px-2 py-1" style={{ background: "#C2643C14", border: "1px solid #C2643C33", color: "#C2643C" }}>{s}</span>
+                  <span key={i} className="u-mono text-xs px-2 py-1" style={{ background: "rgba(52,208,196,0.10)", border: "1px solid rgba(52,208,196,0.30)", color: "var(--accent-2)" }}>{s}</span>
                 ))}
               </div>
             </Section>
 
-            <Section icon={<ListChecks size={13} />} label="Milestones" accent="#cc66ff">
+            <Section icon={<ListChecks size={13} />} label="Milestones" accent="var(--accent)">
               <ol className="space-y-2">
                 {brief.milestones?.map((m, i) => (
                   <li key={i} className="flex gap-3">
@@ -63,7 +63,7 @@ export default function ProjectBrief({ brief }) {
               </ol>
             </Section>
 
-            <Section icon={<Award size={13} />} label="Done well means" accent="#f0c000">
+            <Section icon={<Award size={13} />} label="Done well means" accent="var(--accent-2)">
               <ul className="space-y-2">
                 {brief.rubric?.map((r, i) => (
                   <li key={i}>
