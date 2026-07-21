@@ -474,6 +474,7 @@ export default function ProjectDetail() {
   const editorBlock = activeLesson && handsOn && (
     <>
       <CodeEditor
+        fill
         code={code}
         onChange={setCode}
         onRun={handleRun}
@@ -490,7 +491,7 @@ export default function ProjectDetail() {
     </>
   );
 
-  const rightBlock = handsOn ? editorBlock : (hasChallenge ? <LessonChallenge lesson={activeLesson} /> : null);
+  const rightBlock = handsOn ? editorBlock : (hasChallenge ? <LessonChallenge lesson={activeLesson} fill /> : null);
 
   const footerBlock = activeLesson && (
     <>
@@ -765,7 +766,7 @@ export default function ProjectDetail() {
                         >
                           <div className="h-12 w-1 rounded-full bg-white/20 transition-colors group-hover:bg-[#5ED29C]" />
                         </div>
-                        <section role="region" aria-label="Code editor" className="space-y-6" style={{ flex: 1, minWidth: 0, position: "sticky", top: 64 }}>
+                        <section role="region" aria-label="Code editor" className="flex flex-col" style={{ flex: 1, minWidth: 0, position: "sticky", top: 64, height: "calc(100vh - 96px)" }}>
                           {rightBlock}
                         </section>
                       </div>

@@ -11,7 +11,7 @@ import { trace, traceStyles } from "./trace/theme";
 
 const EXT = { python: "py", java: "java", cpp: "cpp" };
 
-export default function LessonChallenge({ lesson }) {
+export default function LessonChallenge({ lesson, fill = false }) {
   const [code, setCode] = useState(lesson.challenge_starter_code || "");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -48,7 +48,7 @@ export default function LessonChallenge({ lesson }) {
   };
 
   return (
-    <div style={{ ...traceStyles.panel }}>
+    <div className={fill ? "flex h-full min-h-0 flex-col" : ""} style={{ ...traceStyles.panel }}>
       <div
         className="flex items-center gap-3 px-6 py-4"
         style={{ borderBottom: `1px solid ${trace.border}`, background: trace.surface, borderTopLeftRadius: 4, borderTopRightRadius: 4 }}
@@ -67,7 +67,7 @@ export default function LessonChallenge({ lesson }) {
         </span>
       </div>
 
-      <div className="px-6 py-5">
+      <div className={`px-6 py-5 ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
         <style>{`
           .lc-md { color:#FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem; line-height: 1.7; }
           .lc-md p { margin: 0 0 0.6rem; }
@@ -161,8 +161,9 @@ export default function LessonChallenge({ lesson }) {
           </div>
         )}
 
-        <div className="mb-4">
+        <div className={`mb-4 ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
           <CodeEditor
+            fill={fill}
             code={code}
             onChange={setCode}
             onRun={handleRun}
