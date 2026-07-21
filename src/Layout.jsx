@@ -137,6 +137,28 @@ export default function Layout({ children, currentPageName }) {
 
   const TOPBAR = 56;
 
+  const navItem = (item, showDivider = false) => {
+    const Icon = item.icon;
+    const active = isActive(item.page);
+    return (
+      <React.Fragment key={item.page}>
+        {showDivider && <div className="mx-2 h-5 w-px self-center" style={{ background: "var(--border-subtle)" }} />}
+        <Link
+          to={createPageUrl(item.page)}
+          aria-current={active ? "page" : undefined}
+          className="group relative flex items-center gap-2 px-3"
+          style={{ height: TOPBAR }}
+        >
+          <Icon size={15} className={active ? "shrink-0 text-[#5ED29C]" : "shrink-0 text-white transition-colors group-hover:text-white/90"} />
+          <span className={`u-mono text-[13px] transition-colors ${active ? "font-semibold text-white" : "text-white group-hover:text-white/90"}`}>
+            {item.label}
+          </span>
+          <span aria-hidden className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[#5ED29C] transition-opacity duration-200" style={{ opacity: active ? 1 : 0 }} />
+        </Link>
+      </React.Fragment>
+    );
+  };
+
   return (
     <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
       <div className="cf-grain" aria-hidden="true" />
@@ -153,12 +175,11 @@ export default function Layout({ children, currentPageName }) {
       </a>
 
       <header
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 sm:px-6"
+        className="fixed top-0 left-0 right-0 z-50 flex items-center px-4 sm:px-6"
         style={{ height: TOPBAR, background: "var(--bg-base)", borderBottom: "1px solid var(--border-subtle)" }}
       >
-       <div className="flex w-full max-w-[1600px] items-center justify-between">
-        <div className="flex items-center gap-5">
-          <Link to="/" className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1">
+          <Link to="/" className="flex items-center gap-2.5 pr-2">
             <span
               className="inline-flex items-center justify-center"
               style={{
@@ -174,35 +195,14 @@ export default function Layout({ children, currentPageName }) {
               Compilearn
             </span>
           </Link>
-
-          <nav aria-label="Primary" className="hidden lg:flex items-center" style={{ height: TOPBAR }}>
-            {[...NAV, { label: "Portfolio", page: "Portfolio", icon: User }].map((item, idx) => {
-              const Icon = item.icon;
-              const active = isActive(item.page);
-              return (
-                <React.Fragment key={item.page}>
-                  {(idx === 4 || item.page === "Portfolio") && (
-                    <div className="mx-2 h-5 w-px self-center" style={{ background: "var(--border-subtle)" }} />
-                  )}
-                  <Link
-                    to={createPageUrl(item.page)}
-                    aria-current={active ? "page" : undefined}
-                    className="group relative flex items-center gap-2 px-3"
-                    style={{ height: TOPBAR }}
-                  >
-                    <Icon size={15} className={active ? "shrink-0 text-[#5ED29C]" : "shrink-0 text-white transition-colors group-hover:text-white/90"} />
-                    <span className={`u-mono text-[13px] transition-colors ${active ? "font-semibold text-white" : "text-white group-hover:text-white/90"}`}>
-                      {item.label}
-                    </span>
-                    <span aria-hidden className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[#5ED29C] transition-opacity duration-200" style={{ opacity: active ? 1 : 0 }} />
-                  </Link>
-                </React.Fragment>
-              );
-            })}
-          </nav>
+          <div className="hidden lg:flex">{navItem(NAV[0])}</div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <nav aria-label="Primary" className="absolute left-1/2 hidden -translate-x-1/2 items-center lg:flex" style={{ height: TOPBAR }}>
+          {NAV.slice(1).map((item, idx) => navItem(item, idx === 3))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setPaletteOpen(true)}
             className="flex items-center gap-2 px-2.5 sm:px-3 h-8 transition-colors"
@@ -219,6 +219,14 @@ export default function Layout({ children, currentPageName }) {
           {user ? (
             <>
               <InventoryStrip compact initial={(user.name?.[0] || user.email?.[0] || "").toUpperCase()} />
+              <Link
+                to={createPageUrl("Portfolio")}
+                aria-current={isActive("Portfolio") ? "page" : undefined}
+                className="hidden sm:inline u-mono text-xs transition-colors"
+                style={{ color: isActive("Portfolio") ? "var(--accent)" : "var(--text-strong)" }}
+              >
+                Portfolio
+              </Link>
               <span className="hidden sm:inline text-xs t-body">
                 {user.name?.split(" ")[0] || user.email?.split("@")[0]}
               </span>
@@ -245,7 +253,6 @@ export default function Layout({ children, currentPageName }) {
             </button>
           )}
         </div>
-       </div>
       </header>
 
 

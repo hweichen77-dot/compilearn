@@ -30,7 +30,7 @@ export function CatalogHero({ title, lead, note, accent = "var(--accent)", child
         className="absolute top-0 left-0 right-0 h-px"
         style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
       />
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl text-center">
         <h1
           className="u-display t-strong"
           style={{ fontSize: "clamp(2.1rem, 4.5vw, 3.4rem)", margin: 0 }}
@@ -38,12 +38,12 @@ export function CatalogHero({ title, lead, note, accent = "var(--accent)", child
           {title}
         </h1>
         {lead && (
-          <p className="t-body measure" style={{ fontSize: 18, lineHeight: 1.55, marginTop: 16 }}>
+          <p className="t-body measure mx-auto" style={{ fontSize: 18, lineHeight: 1.55, marginTop: 16 }}>
             {lead}
           </p>
         )}
         {note && (
-          <p className="u-mono t-muted" style={{ fontSize: 12, lineHeight: 1.6, marginTop: 16, maxWidth: "60ch" }}>
+          <p className="u-mono t-muted mx-auto" style={{ fontSize: 12, lineHeight: 1.6, marginTop: 16, maxWidth: "60ch" }}>
             {note}
           </p>
         )}
