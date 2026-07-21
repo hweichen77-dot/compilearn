@@ -4,10 +4,10 @@ import { Search } from "lucide-react";
 
 export const TRACK_ACCENT = {
   ai: "#5ED29C",
-  apcsp: "#34D0C4",
-  apcsa: "#34D0C4",
-  projects: "#5ED29C",
-  challenges: "#34D0C4",
+  apcsp: "#4DA3FF",
+  apcsa: "#A78BFA",
+  projects: "#34D0C4",
+  challenges: "#F472B6",
   competitive: "#FF6B5C",
 };
 
@@ -212,7 +212,7 @@ export function CourseCard({
       </div>
       {description && (
         <p
-          className="t-muted"
+          className="t-body"
           style={{ fontSize: 14, lineHeight: 1.5, margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
         >
           {description}
@@ -224,7 +224,7 @@ export function CourseCard({
             <span
               key={t}
               className="u-mono"
-              style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}
+              style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, border: `1px solid ${accent}40`, color: accent, background: `${accent}12` }}
             >
               {t}
             </span>
