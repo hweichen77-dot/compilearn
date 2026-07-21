@@ -382,6 +382,8 @@ export default function ProjectDetail() {
   }
 
   const handsOn = !!activeLesson && !activeLesson.illustrative && (activeLesson.starter_code || activeLesson.solution_code);
+  const hasChallenge = !!activeLesson && !activeLesson.illustrative && !!activeLesson.challenge_title;
+  const showSplit = handsOn || hasChallenge;
 
   const readingBlock = activeLesson && (
     <>
@@ -463,7 +465,7 @@ export default function ProjectDetail() {
               }}
             />
           )}
-          <LessonChallenge lesson={activeLesson} />
+          {!showSplit && <LessonChallenge lesson={activeLesson} />}
         </div>
       </div>
     </>
@@ -487,6 +489,8 @@ export default function ProjectDetail() {
       )}
     </>
   );
+
+  const rightBlock = handsOn ? editorBlock : (hasChallenge ? <LessonChallenge lesson={activeLesson} /> : null);
 
   const footerBlock = activeLesson && (
     <>
@@ -744,7 +748,7 @@ export default function ProjectDetail() {
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="reader-surface"
                 >
-                  {handsOn ? (
+                  {showSplit ? (
                     <>
                       <div ref={splitRef} className="hidden lg:flex items-start gap-0">
                         <section role="region" aria-label="Lesson" className="space-y-8" style={{ width: `${splitPct}%`, minWidth: 0 }}>
@@ -762,12 +766,12 @@ export default function ProjectDetail() {
                           <div className="h-12 w-1 rounded-full bg-white/20 transition-colors group-hover:bg-[#5ED29C]" />
                         </div>
                         <section role="region" aria-label="Code editor" className="space-y-6" style={{ flex: 1, minWidth: 0, position: "sticky", top: 64 }}>
-                          {editorBlock}
+                          {rightBlock}
                         </section>
                       </div>
                       <div className="lg:hidden space-y-8">
                         <section role="region" aria-label="Lesson" className="space-y-8">{readingBlock}</section>
-                        <section role="region" aria-label="Code editor" className="space-y-6">{editorBlock}</section>
+                        <section role="region" aria-label="Code editor" className="space-y-6">{rightBlock}</section>
                         {footerBlock}
                       </div>
                     </>

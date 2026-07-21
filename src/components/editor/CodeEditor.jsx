@@ -23,6 +23,7 @@ export default function CodeEditor({
   isSubmitting = false,
   submitResults = null,
   runLabel = "run",
+  fill = false,
 }) {
   const [copied, setCopied] = useState(false);
   const [aiHint, setAiHint] = useState(null);
@@ -151,7 +152,7 @@ Be direct and specific to the code shown. Under 130 words total.`,
 
   return (
     <>
-      <div className="overflow-hidden" style={{ border: "1px solid #17201C", background: "#070B0A" }}>
+      <div className={`overflow-hidden ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`} style={{ border: "1px solid #17201C", background: "#070B0A" }}>
         <div
           className="flex items-center justify-between px-5 py-3"
           style={{ borderBottom: "1px solid #17201C", background: "#070B0A" }}
@@ -207,7 +208,7 @@ Be direct and specific to the code shown. Under 130 words total.`,
           </div>
         </div>
 
-        <div className="flex relative" style={{ minHeight: "280px", maxHeight: "500px", background: EDITOR_BG }}>
+        <div className={`flex relative ${fill ? "min-h-0 flex-1" : ""}`} style={{ minHeight: fill ? 0 : "280px", maxHeight: fill ? "none" : "500px", background: EDITOR_BG }}>
           <div
             ref={lineNumbersRef}
             className="text-right select-none overflow-hidden flex-shrink-0 py-5 px-4"

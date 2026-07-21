@@ -117,7 +117,7 @@ export default function ChallengeDetail() {
       <div className="relative pt-20" style={{ borderBottom: "1px solid #17201C" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #5ED29C, transparent)" }} />
 
-        <div className="max-w-5xl mx-auto px-8 lg:px-16 py-10">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8">
           <Link
             to={createPageUrl("Challenges")}
             className="font-sans text-xs tracking-widest uppercase mb-8 inline-block transition-colors duration-150"
@@ -162,7 +162,7 @@ export default function ChallengeDetail() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-10 py-8">
+      <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-12 py-8">
         <ResizableSplit
           storageKey="challenge-split"
           left={
@@ -283,8 +283,9 @@ export default function ChallengeDetail() {
             </div>
           }
           right={
-            <div className="space-y-4">
+            <div className="flex h-full flex-col gap-4">
               <CodeEditor
+                fill
                 code={code}
                 onChange={(v) => { setCode(v); if (submitResults) setSubmitResults(null); }}
                 onRun={handleRun}
