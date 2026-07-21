@@ -46,8 +46,13 @@ function Nav() {
           scrolled ? "h-14" : "h-[68px]"
         }`}
       >
-        <Link to="/" className="flex items-center gap-2">
-          <span className="u-mono text-[#F5A524] text-lg font-semibold">&gt;_</span>
+        <Link to="/" className="flex items-center gap-2.5">
+          <span
+            className="grid h-7 w-7 place-items-center rounded-md u-mono text-sm font-bold"
+            style={{ color: "#5ED29C", background: "rgba(94,210,156,0.10)", border: "1px solid rgba(94,210,156,0.28)" }}
+          >
+            &gt;_
+          </span>
           <span className="u-display text-[17px] font-extrabold tracking-tight text-white">
             Compilearn
           </span>

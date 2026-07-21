@@ -162,8 +162,8 @@ export default function Layout({ children, currentPageName }) {
             className="inline-flex items-center justify-center"
             style={{
               fontFamily: "'Spline Sans Mono Variable', ui-monospace, monospace", fontSize: 13, fontWeight: 700,
-              color: "var(--amber)", background: "rgba(245,165,36,0.10)",
-              border: "1px solid rgba(245,165,36,0.28)", width: 26, height: 26,
+              color: "var(--accent)", background: "rgba(94,210,156,0.10)",
+              border: "1px solid rgba(94,210,156,0.28)", width: 26, height: 26,
               borderRadius: 6, lineHeight: 1,
             }}
           >
@@ -224,41 +224,47 @@ export default function Layout({ children, currentPageName }) {
         className="hidden lg:flex flex-col fixed left-0 bottom-0 z-40 py-4 px-3"
         style={{ top: TOPBAR, width: SIDEBAR, borderRight: "1px solid var(--border-subtle)", background: "var(--bg-base)" }}
       >
-        {NAV.map((item) => {
+        {NAV.map((item, idx) => {
           const Icon = item.icon;
           const active = isActive(item.page);
           return (
-            <Link
-              key={item.page}
-              to={createPageUrl(item.page)}
-              aria-current={active ? "page" : undefined}
-              className="flex items-center gap-3 px-3 h-10 mb-0.5 transition-colors"
-              style={{
-                borderRadius: 9,
-                color: active ? "var(--text-strong)" : "var(--text-muted)",
-                background: active ? "rgba(94,210,156,0.10)" : "transparent",
-              }}
-              onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--text-primary)"; }}
-              onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--text-muted)"; }}
-            >
-              <Icon size={17} style={{ color: active ? "var(--accent)" : (item.amber ? "var(--amber)" : "currentColor"), flexShrink: 0 }} />
-              <span className="text-sm" style={{ fontWeight: active ? 600 : 400 }}>{item.label}</span>
-            </Link>
+            <React.Fragment key={item.page}>
+              {idx === 4 && (
+                <div className="my-3 mx-4 h-px" style={{ background: "var(--border-subtle)" }} />
+              )}
+              <Link
+                to={createPageUrl(item.page)}
+                aria-current={active ? "page" : undefined}
+                className="group relative flex items-center gap-3 h-9 pl-4 pr-3 mb-0.5"
+              >
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-1/2 w-0.5 -translate-y-1/2 rounded-full bg-[#5ED29C] transition-all duration-200"
+                  style={{ height: active ? 16 : 0 }}
+                />
+                <Icon size={16} className={active ? "shrink-0 text-[#5ED29C]" : "shrink-0 text-white/55 transition-colors group-hover:text-white/90"} />
+                <span className={`u-mono text-[13px] transition-colors ${active ? "font-semibold text-white" : "text-white/55 group-hover:text-white/90"}`}>
+                  {item.label}
+                </span>
+              </Link>
+            </React.Fragment>
           );
         })}
         <div className="flex-1" />
         <Link
           to={createPageUrl("Portfolio")}
           aria-current={isActive("Portfolio") ? "page" : undefined}
-          className="flex items-center gap-3 px-3 h-10 transition-colors"
-          style={{
-            borderRadius: 9,
-            color: isActive("Portfolio") ? "var(--text-strong)" : "var(--text-muted)",
-            background: isActive("Portfolio") ? "rgba(94,210,156,0.10)" : "transparent",
-          }}
+          className="group relative flex items-center gap-3 h-9 pl-4 pr-3"
         >
-          <User size={17} style={{ color: isActive("Portfolio") ? "var(--accent)" : "currentColor" }} />
-          <span className="text-sm">Portfolio</span>
+          <span
+            aria-hidden
+            className="absolute left-0 top-1/2 w-0.5 -translate-y-1/2 rounded-full bg-[#5ED29C] transition-all duration-200"
+            style={{ height: isActive("Portfolio") ? 16 : 0 }}
+          />
+          <User size={16} className={isActive("Portfolio") ? "shrink-0 text-[#5ED29C]" : "shrink-0 text-white/55 transition-colors group-hover:text-white/90"} />
+          <span className={`u-mono text-[13px] transition-colors ${isActive("Portfolio") ? "font-semibold text-white" : "text-white/55 group-hover:text-white/90"}`}>
+            Portfolio
+          </span>
         </Link>
       </nav>
 
