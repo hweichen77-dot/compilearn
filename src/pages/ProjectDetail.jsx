@@ -676,8 +676,8 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="mx-auto px-6 sm:px-10 lg:px-16 py-8" style={{ maxWidth: focusMode ? 960 : "72rem" }}>
-        <div className="grid gap-8" style={{ gridTemplateColumns: focusMode ? "1fr" : undefined }}>
+      <div className={`px-6 sm:px-10 lg:px-16 py-8 ${focusMode ? "mx-auto" : ""}`} style={{ maxWidth: focusMode ? 960 : "none" }}>
+        <div className={`grid gap-10 ${focusMode ? "" : "lg:grid-cols-[220px_minmax(0,1fr)]"}`} style={{ gridTemplateColumns: focusMode ? "1fr" : undefined }}>
           {!focusMode && (
             <aside className="relative hidden lg:block" style={{ width: 220 }} aria-label="Lessons in this module">
               <div className="sticky top-16" style={{ borderLeft: "1px solid var(--border-subtle)", paddingLeft: "1.25rem" }}>
