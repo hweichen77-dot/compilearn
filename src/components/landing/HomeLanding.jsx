@@ -97,19 +97,28 @@ const TRACKS = [
   {
     key: "ai",
     label: "AI Track",
-    body: "From your first API call to prompting, agents, RAG, vision, and shipping to production. Six modules, built to be done in order.",
+    body: "From your first API call to shipping in production. Six modules, built to be done in order.",
     tag: "310+ lessons",
     span: "md:col-span-4 md:row-span-2",
     big: true,
     to: "AITrack",
+    modules: [
+      "The first API call",
+      "Prompting & context",
+      "Agents & tools",
+      "RAG & retrieval",
+      "Vision & multimodal",
+      "Shipping to production",
+    ],
   },
   {
     key: "projects",
     label: "AI Projects",
-    body: "Build real things: chatbots, graders, search apps, one guided step at a time.",
+    body: "Build real things you can show off, one guided step at a time.",
     tag: "22 projects",
     span: "md:col-span-2",
     to: "Projects",
+    chips: ["Chatbot", "Essay grader", "RAG search", "Vision app", "+18 more"],
   },
   {
     key: "csp",
@@ -118,6 +127,7 @@ const TRACKS = [
     tag: "48 lessons",
     span: "md:col-span-2",
     to: "APCS",
+    chips: ["Big Ideas 1–5", "Create Task", "MCQ practice"],
   },
   {
     key: "csa",
@@ -126,8 +136,17 @@ const TRACKS = [
     tag: "80 lessons",
     span: "md:col-span-6",
     to: "APCS",
+    chips: ["Java basics", "OOP & classes", "Arrays & ArrayList", "2D arrays", "Recursion", "Sorting & searching", "MCQ drills", "FRQ prep", "Labs", "Exam review"],
   },
 ];
+
+function TrackChip({ children }) {
+  return (
+    <span className="u-mono text-[11px] rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/70">
+      {children}
+    </span>
+  );
+}
 
 function TrackCard({ t }) {
   const navigate = useNavigate();
@@ -140,12 +159,30 @@ function TrackCard({ t }) {
           </span>
           <h3 className="u-display text-lg font-bold text-white">{t.label}</h3>
         </div>
-        <p className={`mt-3 text-sm leading-relaxed text-white/60 ${t.big ? "max-w-md" : "max-w-xs"}`}>
+        <p className={`mt-3 text-sm leading-relaxed text-white/70 ${t.big ? "max-w-md" : "max-w-xs"}`}>
           {t.body}
         </p>
-        <div className="mt-auto flex items-center gap-2 pt-4">
+
+        {t.big ? (
+          <ol className="mt-6 flex flex-1 flex-col justify-between border-l border-white/10 py-2 pl-5">
+            {t.modules.map((m, i) => (
+              <li key={m} className="flex items-baseline gap-3 u-mono text-[13px] text-white/80">
+                <span className="text-[#5ED29C]">{String(i + 1).padStart(2, "0")}</span>
+                <span>{m}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
+            {t.chips.map((c) => (
+              <TrackChip key={c}>{c}</TrackChip>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-auto flex items-center gap-2 pt-5">
           <span className="u-mono text-xs text-[#5ED29C]">{t.tag}</span>
-          <ArrowRight size={14} className="text-white/40 transition-transform group-hover:translate-x-1" />
+          <ArrowRight size={14} className="text-white/60 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </BentoCard>
