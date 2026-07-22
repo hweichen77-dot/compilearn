@@ -1,62 +1,15 @@
 
 import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 import { authenticate } from "../_shared/auth.ts";
 
 const GROQ_API_KEY = Deno.env.get("PLAYGROUND_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
 const MAX_SYSTEM_CHARS = 4000;
 const MAX_INPUT_CHARS = 600;
 const MAX_INPUTS = 3;
 const MAX_TOKENS_CAP = 256;
-
-const RATE_LIMIT_MAX = 6;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-const GLOBAL_MAX_PER_WINDOW = 120;
-let globalCount = 0;
-let globalResetAt = 0;
-
-function rateLimited(key: string): boolean {
-  const now = Date.now();
-  const entry = hits.get(key);
-  if (!entry || now >= entry.resetAt) {
-    hits.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT_MAX;
-}
-
-function globalLimited(): boolean {
-  const now = Date.now();
-  if (now >= globalResetAt) {
-    globalCount = 1;
-    globalResetAt = now + RATE_LIMIT_WINDOW_MS;
-    return false;
-  }
-  globalCount += 1;
-  return globalCount > GLOBAL_MAX_PER_WINDOW;
-}
-
-function corsHeaders(origin: string | null) {
-
-  const ok =
-    origin &&
-    (origin === ALLOWED_ORIGIN ||
-      origin === "tauri://localhost" ||
-      origin === "http://tauri.localhost" ||
-      /^http:\/\/localhost(:\d+)?$/.test(origin) ||
-      /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin));
-  return {
-    "Access-Control-Allow-Origin": ok ? origin! : ALLOWED_ORIGIN,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
-  };
-}
 
 Deno.serve(async (req: Request) => {
   const cors = corsHeaders(req.headers.get("Origin"));

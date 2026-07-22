@@ -1,14 +1,11 @@
 import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("FEEDBACK_FROM") ?? "Compilearn Feedback <onboarding@resend.dev>";
 const TO = Deno.env.get("FEEDBACK_TO") ?? "jason.huang317235@gmail.com";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type, apikey",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -16,6 +13,7 @@ const escapeHtml = (s: string) =>
 const KINDS = new Set(["bug", "idea", "content"]);
 
 Deno.serve(async (req: Request) => {
+  const cors = corsHeaders(req.headers.get("Origin"));
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   const json = (b: unknown, status = 200) =>
     new Response(JSON.stringify(b), { status, headers: { ...cors, "content-type": "application/json" } });

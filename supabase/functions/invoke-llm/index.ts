@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "../_shared/cors.ts";
 import { checkLimits } from "../_shared/rateLimit.ts";
 
 const GROQ_API_KEY = Deno.env.get("INVOKE_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
@@ -6,7 +7,6 @@ const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
 const MAX_PROMPT_CHARS = 8000;
 
@@ -40,12 +40,7 @@ function globalLimited(): boolean {
   return globalCount > GLOBAL_MAX_PER_WINDOW;
 }
 
-const cors = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-};
+
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -75,6 +70,7 @@ async function authenticate(req: Request): Promise<string | null> {
 }
 
 Deno.serve(async (req: Request) => {
+  const cors = corsHeaders(req.headers.get("Origin"));
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 

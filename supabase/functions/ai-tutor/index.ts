@@ -1,9 +1,9 @@
 
 import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
 const GROQ_API_KEY = Deno.env.get("TUTOR_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
 const MAX_MESSAGE_CHARS = 1500;
 const MAX_MESSAGES = 10;
@@ -41,21 +41,6 @@ function globalLimited(): boolean {
   return globalCount > GLOBAL_MAX_PER_WINDOW;
 }
 
-function corsHeaders(origin: string | null) {
-  const ok =
-    origin &&
-    (origin === ALLOWED_ORIGIN ||
-      origin === "tauri://localhost" ||
-      origin === "http://tauri.localhost" ||
-      /^http:\/\/localhost(:\d+)?$/.test(origin) ||
-      /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin));
-  return {
-    "Access-Control-Allow-Origin": ok ? origin! : ALLOWED_ORIGIN,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
-  };
-}
 
 function systemPrompt(lessonTitle: string, context: string, socratic: boolean, code: string, output: string): string {
   const codeBlock = code ? `\n\nStudent's current code:\n\`\`\`\n${code}\n\`\`\`` : "";
