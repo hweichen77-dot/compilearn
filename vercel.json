@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "VITE_BASE=/app/ npx vite build --outDir dist/app && node scripts/build-marketing.mjs",
+  "buildCommand": "VITE_BASE=/app/ npx vite build --outDir dist/app && PRERENDER_DIST=dist/app VITE_BASE=/app node scripts/prerender.mjs && node scripts/build-marketing.mjs",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,

@@ -6,7 +6,7 @@ import { LESSON_ROUTES } from '../src/content/index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const DIST = path.join(ROOT, 'dist')
+const DIST = path.resolve(ROOT, process.env.PRERENDER_DIST || 'dist')
 const SITE_URL = (process.env.VITE_SITE_URL || 'https://compilearn.vercel.app').replace(/\/+$/, '')
 const BASE = (process.env.VITE_BASE || '/').replace(/\/+$/, '')
 const ORIGIN = `${SITE_URL}${BASE}`
