@@ -11,6 +11,7 @@ on:
     paths:
       - 'supabase/functions/**'
       - 'supabase/retention-cron.sql'
+      - 'supabase/rate-limit.sql'
       - '.github/workflows/deploy-supabase.yml'
 
 concurrency:
