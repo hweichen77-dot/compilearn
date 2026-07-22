@@ -1,4 +1,4 @@
-const FALLBACK_ORIGIN = 'https://compilearn.vercel.app'
+const FALLBACK_ORIGIN = 'https://www.compilearn.com'
 
 function trimEnd(value) {
   return value.replace(/\/+$/, '')
