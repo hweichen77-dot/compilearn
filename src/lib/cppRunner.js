@@ -18,6 +18,18 @@ class InfraError extends Error {
   }
 }
 
+async function rateLimitMessage(e) {
+  const status = e?.context?.status ?? e?.status;
+  if (status !== 429 && status !== 401 && status !== 403) return null;
+  try {
+    const body = await e.context.json();
+    if (body?.error) return body.error;
+  } catch {  }
+  return status === 429
+    ? "You've hit the limit for now. Wait a minute and try again."
+    : "Sign in to keep running code.";
+}
+
 async function runViaGodbolt(source, stdin) {
   const MAX_ATTEMPTS = 4;
   let lastStatus = 0;
@@ -28,7 +40,7 @@ async function runViaGodbolt(source, stdin) {
       body: JSON.stringify({
         source,
         lang: "c++",
-        allowStoreCodeDebug: true,
+        allowStoreCodeDebug: false,
         options: {
           userArguments: "-O2 -std=c++17",
           executeParameters: { args: [], stdin: String(stdin || "") },
@@ -115,6 +127,8 @@ export async function runCpp(source, stdin = "") {
     }
     return normalize(data);
   } catch (e) {
+    const limited = await rateLimitMessage(e);
+    if (limited) return { output: limited, isError: true, infra: true, empty: false };
     if (auth.isConfigured) {
       try {
         return normalize(await runViaGodbolt(source, stdin));

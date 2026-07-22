@@ -1,5 +1,6 @@
 
-import { checkLimits } from "../_shared/rateLimit.ts";
+import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
+import { authenticate } from "../_shared/auth.ts";
 
 const GROQ_API_KEY = Deno.env.get("PLAYGROUND_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
@@ -65,8 +66,17 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  const limitErr = await checkLimits({ caller: `ip:${ip}`, fn: "llm-playground", perMin: 6, perDay: 30, globalPerMin: 120, globalPerDay: 4000 });
+  const userId = await authenticate(req);
+  const caller = userId ? `user:${userId}` : `ip:${callerIp(req)}`;
+  const limitErr = await checkLimits({
+    caller,
+    fn: "llm-playground",
+    perMin: userId ? 10 : 4,
+    perDay: userId ? 60 : 15,
+    globalPerMin: 120,
+    globalPerDay: 4000,
+    failClosed: true,
+  });
   if (limitErr) return json({ error: limitErr }, 429);
 
   let payload: { systemPrompt?: string; inputs?: unknown; maxTokens?: number };

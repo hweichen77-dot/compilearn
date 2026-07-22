@@ -263,6 +263,32 @@ export default function Layout({ children, currentPageName }) {
         <div className="pb-16 lg:pb-0">
           <PageTransition pageKey={currentPageName}>{children}</PageTransition>
         </div>
+        <footer
+          className="px-6 lg:px-10 py-6 flex flex-wrap items-center gap-x-5 gap-y-2 pb-24 lg:pb-6"
+          style={{ borderTop: "1px solid var(--border-subtle)" }}
+        >
+          <Link
+            to={createPageUrl("Privacy")}
+            className="u-mono text-xs transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-strong)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+          >
+            Privacy &amp; your data
+          </Link>
+          <Link
+            to={createPageUrl("Terms")}
+            className="u-mono text-xs transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-strong)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+          >
+            Terms
+          </Link>
+          <span className="u-mono text-xs" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+            Export or delete your data any time from Privacy.
+          </span>
+        </footer>
       </main>
 
       <nav

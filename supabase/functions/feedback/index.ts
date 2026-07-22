@@ -1,4 +1,4 @@
-import { checkLimits } from "../_shared/rateLimit.ts";
+import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("FEEDBACK_FROM") ?? "Compilearn Feedback <onboarding@resend.dev>";
@@ -32,8 +32,8 @@ Deno.serve(async (req: Request) => {
   const page = String(body.page ?? "").slice(0, 200);
   const ua = String(body.ua ?? "").slice(0, 300);
 
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "anon";
-  const limitErr = await checkLimits({ caller: ip, fn: "feedback", perMin: 4, perDay: 20, globalPerMin: 60, globalPerDay: 2000 });
+  const ip = callerIp(req);
+  const limitErr = await checkLimits({ caller: ip, fn: "feedback", perMin: 4, perDay: 20, globalPerMin: 60, globalPerDay: 2000, failClosed: true });
   if (limitErr) return json({ error: limitErr }, 429);
 
   const html =
@@ -54,7 +54,8 @@ Deno.serve(async (req: Request) => {
     });
     if (!resp.ok) {
       const detail = await resp.text().catch(() => "");
-      return json({ error: "send failed", status: resp.status, detail: detail.slice(0, 200) }, 502);
+      console.error("feedback send failed", resp.status, detail.slice(0, 500));
+      return json({ error: "could not send your message right now" }, 502);
     }
     return json({ ok: true });
   } catch (e) {

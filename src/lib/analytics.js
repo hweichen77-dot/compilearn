@@ -1,7 +1,33 @@
 const KEY = import.meta.env.VITE_POSTHOG_KEY || ''
 const HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
 
-export const analyticsEnabled = Boolean(KEY) && typeof window !== 'undefined'
+export const OPT_OUT_KEY = 'codeflow.analyticsOptOut'
+
+function signalsOptOut() {
+  if (typeof window === 'undefined') return false
+  try {
+    if (window.localStorage.getItem(OPT_OUT_KEY) === '1') return true
+  } catch {  }
+  const nav = typeof navigator !== 'undefined' ? navigator : null
+  if (!nav) return false
+  return nav.globalPrivacyControl === true || nav.doNotTrack === '1' || window.doNotTrack === '1'
+}
+
+export function isAnalyticsOptedOut() {
+  return signalsOptOut()
+}
+
+export function setAnalyticsOptOut(optOut) {
+  try {
+    if (optOut) window.localStorage.setItem(OPT_OUT_KEY, '1')
+    else window.localStorage.removeItem(OPT_OUT_KEY)
+  } catch {  }
+  if (optOut && posthog) {
+    try { posthog.opt_out_capturing() } catch {  }
+  }
+}
+
+export const analyticsEnabled = Boolean(KEY) && typeof window !== 'undefined' && !signalsOptOut()
 
 const SENSITIVE_PARAMS = ['access_token', 'refresh_token', 'provider_token', 'provider_refresh_token', 'id_token', 'token', 'code']
 function sanitizeUrl(value) {

@@ -9,7 +9,6 @@ const MAX_STDIN_BYTES = 64_000;
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const FUNCTION_SHARED_SECRET = Deno.env.get("FUNCTION_SHARED_SECRET");
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://hweichen77-dot.github.io";
 
 const RATE_LIMIT_MAX = 20;
@@ -37,16 +36,9 @@ function globalLimited(): boolean {
   return globalCount > GLOBAL_MAX_PER_WINDOW;
 }
 
-function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let r = 0;
-  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return r === 0;
-}
-
 const cors = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-function-secret",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
@@ -59,11 +51,6 @@ function json(body: unknown, status = 200): Response {
 }
 
 async function authenticate(req: Request): Promise<string | null> {
-  if (FUNCTION_SHARED_SECRET) {
-    const provided = req.headers.get("x-function-secret");
-    if (provided && safeEqual(provided, FUNCTION_SHARED_SECRET)) return "secret";
-  }
-
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
@@ -95,9 +82,8 @@ Deno.serve(async (req: Request) => {
   const caller = await authenticate(req);
   if (!caller) return json({ error: "unauthorized" }, 401);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  const rlKey = caller === "secret" ? `ip:${ip}` : `user:${caller}`;
-  const limitErr = await checkLimits({ caller: rlKey, fn: "run-java", perMin: 20, globalPerMin: 200, globalPerDay: 5000 });
+  const rlKey = `user:${caller}`;
+  const limitErr = await checkLimits({ caller: rlKey, fn: "run-java", perMin: 20, perDay: 300, globalPerMin: 200, globalPerDay: 5000, failClosed: true });
   if (limitErr) return json({ error: limitErr }, 429);
 
   try {
@@ -118,7 +104,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         source,
         lang: "java",
-        allowStoreCodeDebug: true,
+        allowStoreCodeDebug: false,
         options: {
           userArguments: "",
           executeParameters: { args: [], stdin: typeof stdin === "string" ? stdin : "" },

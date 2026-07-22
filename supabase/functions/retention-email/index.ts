@@ -22,9 +22,22 @@ function safeEqual(a: string, b: string): boolean {
   return r === 0;
 }
 
+function safeResumeUrl(candidate?: string): string {
+  if (!candidate) return SITE;
+  try {
+    const target = new URL(candidate, SITE);
+    const allowed = new URL(SITE);
+    if (target.protocol !== "https:") return SITE;
+    if (target.host !== allowed.host) return SITE;
+    return target.toString();
+  } catch {
+    return SITE;
+  }
+}
+
 function subjectAndBody({ name, streak, kind, resumeUrl }: { name?: string; streak?: number; kind?: string; resumeUrl?: string }) {
   const who = name ? escapeHtml(name.split(" ")[0]) : "there";
-  const url = resumeUrl || SITE;
+  const url = safeResumeUrl(resumeUrl);
   if (kind === "goal") {
     return {
       subject: "One lesson keeps today going",

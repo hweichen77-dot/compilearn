@@ -9,7 +9,12 @@
     "core:default",
     "deep-link:default",
     "opener:default",
-    "opener:allow-open-url",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://*" }
+      ]
+    },
     "notification:default"
   ]
 }

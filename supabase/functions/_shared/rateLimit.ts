@@ -52,27 +52,38 @@ function memConsume(bucket: string, max: number, windowMs: number): boolean {
   return true;
 }
 
-async function consume(bucket: string, max: number, windowMs: number): Promise<boolean> {
-  const db = await dbConsume(bucket, max, windowMs);
+const MAX_BUCKET_LEN = 200;
+
+async function consume(bucket: string, max: number, windowMs: number): Promise<boolean | null> {
+  const key = bucket.slice(0, MAX_BUCKET_LEN);
+  const db = await dbConsume(key, max, windowMs);
   if (db !== null) return db;
 
   const kv = await getKv();
-  if (!kv) return memConsume(bucket, max, windowMs);
-  const key = ["rl", bucket];
+  if (!kv) return null;
+  const kvKey = ["rl", key];
   for (let attempt = 0; attempt < 4; attempt++) {
-    const res = await kv.get<{ c: number; r: number }>(key);
+    const res = await kv.get<{ c: number; r: number }>(kvKey);
     const now = Date.now();
     const v = res.value;
     if (!v || now >= v.r) {
-      const ok = await kv.atomic().check(res).set(key, { c: 1, r: now + windowMs }, { expireIn: windowMs }).commit();
+      const ok = await kv.atomic().check(res).set(kvKey, { c: 1, r: now + windowMs }, { expireIn: windowMs }).commit();
       if (ok.ok) return true;
       continue;
     }
     if (v.c >= max) return false;
-    const ok = await kv.atomic().check(res).set(key, { c: v.c + 1, r: v.r }, { expireIn: Math.max(1000, v.r - now) }).commit();
+    const ok = await kv.atomic().check(res).set(kvKey, { c: v.c + 1, r: v.r }, { expireIn: Math.max(1000, v.r - now) }).commit();
     if (ok.ok) return true;
   }
-  return true;
+  return null;
+}
+
+export function callerIp(req: Request): string {
+  const direct = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip");
+  if (direct?.trim()) return direct.trim();
+  const chain = req.headers.get("x-forwarded-for") ?? "";
+  const hops = chain.split(",").map(h => h.trim()).filter(Boolean);
+  return hops.length > 0 ? hops[hops.length - 1] : "unknown";
 }
 
 export interface RateOpts {
@@ -82,20 +93,30 @@ export interface RateOpts {
   perDay?: number;
   globalPerMin: number;
   globalPerDay: number;
+  failClosed?: boolean;
 }
 
 export async function checkLimits(o: RateOpts): Promise<string | null> {
-  if (!(await consume(`u:${o.fn}:${o.caller}`, o.perMin, 60_000))) {
-    return "rate limit exceeded — slow down and try again in a minute";
+  const unavailable = o.failClosed
+    ? "rate limiting is unavailable right now — please try again shortly"
+    : null;
+
+  const checks: Array<[Promise<boolean | null>, string]> = [
+    [consume(`u:${o.fn}:${o.caller}`, o.perMin, 60_000), "rate limit exceeded — slow down and try again in a minute"],
+  ];
+  if (o.perDay) {
+    checks.push([consume(`ud:${o.fn}:${o.caller}`, o.perDay, 86_400_000), "daily limit reached for this account — try again tomorrow"]);
   }
-  if (o.perDay && !(await consume(`ud:${o.fn}:${o.caller}`, o.perDay, 86_400_000))) {
-    return "daily limit reached for this device — sign in to keep going";
-  }
-  if (!(await consume(`g:${o.fn}`, o.globalPerMin, 60_000))) {
-    return "service is busy right now — try again shortly";
-  }
-  if (!(await consume(`d:${o.fn}`, o.globalPerDay, 86_400_000))) {
-    return "daily capacity reached — please try again tomorrow";
+  checks.push([consume(`g:${o.fn}`, o.globalPerMin, 60_000), "service is busy right now — try again shortly"]);
+  checks.push([consume(`d:${o.fn}`, o.globalPerDay, 86_400_000), "daily capacity reached — please try again tomorrow"]);
+
+  for (const [pending, message] of checks) {
+    const allowed = await pending;
+    if (allowed === false) return message;
+    if (allowed === null && unavailable) return unavailable;
+    if (allowed === null && !o.failClosed && !memConsume(`${o.fn}:${o.caller}`, o.perMin, 60_000)) {
+      return message;
+    }
   }
   return null;
 }

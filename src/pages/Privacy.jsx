@@ -33,7 +33,7 @@ export default function Privacy() {
             Privacy Policy
           </h1>
           <p className="font-sans text-xs mb-12" style={{ color: '#FFFFFF', fontFamily: LABEL }}>
-            Last updated: June 2026
+            Last updated: July 2026
           </p>
         </StaggerItem>
 
@@ -50,24 +50,78 @@ export default function Privacy() {
           </p>
         </Section></StaggerItem>
 
+        <StaggerItem as="div"><Section title="What happens to the code you write">
+          <p>
+            Most code you write runs entirely inside your browser and never leaves your device.
+            Python runs locally in a sandboxed worker, and your editor contents are not uploaded
+            as you type.
+          </p>
+          <p>
+            Three features do send code off your device, because they cannot work otherwise:
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              Running C++ or Java sends that program to Compiler Explorer (godbolt.org), which
+              compiles and runs it and sends back the output. We ask them not to retain it.
+            </li>
+            <li>
+              Asking the AI tutor for help sends your current code, the program output, and your
+              question to Groq, which runs the model that answers you.
+            </li>
+            <li>
+              The prompt playground sends the prompt and test inputs you write to Groq.
+            </li>
+          </ul>
+          <p>
+            We do not sell your code, publish it, or use it to train models. We do not read it
+            except when investigating a specific bug you report.
+          </p>
+        </Section></StaggerItem>
+
         <StaggerItem as="div"><Section title="Analytics">
           <p>
-            We use privacy-respecting product analytics to understand which lessons work and where
-            people get stuck. We track page views and learning events (e.g. &quot;challenge
-            completed&quot;), never your code, keystrokes, or personal content. Analytics use
-            localStorage, not third-party tracking cookies.
+            We use PostHog for product analytics to understand which lessons work and where people
+            get stuck. We record learning events such as &quot;challenge completed&quot;, never your
+            code, keystrokes, or personal content. Session recording, autocapture, and automatic
+            page-view capture are all switched off, and URLs are stripped of anything sensitive
+            before they are sent. Analytics use localStorage, not third-party tracking cookies.
           </p>
         </Section></StaggerItem>
 
         <StaggerItem as="div"><Section title="Error monitoring">
           <p>
-            When something crashes, we collect a technical error report (stack trace, page, browser)
-            to fix it. These reports do not include your code or progress data.
+            When something crashes, Sentry collects a technical error report (stack trace, page,
+            browser) so we can fix it. These reports do not include your code or progress data, and
+            we scrub tokens and email addresses before they are sent.
           </p>
         </Section></StaggerItem>
 
-        <StaggerItem as="div"><Section title="What we never do">
-          <p>We do not sell your data. We do not run ad networks. We do not read or share the code you write.</p>
+        <StaggerItem as="div"><Section title="Who else processes your data">
+          <p>
+            We keep this list short on purpose. Compilearn relies on these companies to work:
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Supabase, for accounts and progress sync</li>
+            <li>Google, if you choose to sign in with a Google account</li>
+            <li>Groq, for the AI tutor and the prompt playground</li>
+            <li>Compiler Explorer (godbolt.org), for running C++ and Java</li>
+            <li>PostHog, for product analytics</li>
+            <li>Sentry, for crash reports</li>
+            <li>Vercel, which hosts the site</li>
+          </ul>
+          <p>
+            These providers process data on servers in the United States. We do not sell your data
+            to anyone, and we do not run ad networks.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="How long we keep it">
+          <p>
+            Local progress stays in your browser until you clear it. If you have an account, your
+            synced progress is kept until you delete your account, which removes it immediately and
+            permanently. Analytics and crash reports are retained by those providers on their own
+            schedules, generally under a year.
+          </p>
         </Section></StaggerItem>
 
         <StaggerItem as="div"><Section title="Your data & your rights">

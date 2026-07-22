@@ -3,6 +3,7 @@ import { font, color } from '@/lib/tokens'
 import { useAuth } from '@/lib/AuthContext'
 import { toast } from '@/components/ui/use-toast'
 import { exportUserData, deleteLocalData, deleteAccountAndData } from '@/lib/dataRights'
+import { isAnalyticsOptedOut, setAnalyticsOptOut } from '@/lib/analytics'
 
 const btnBase = {
   fontFamily: font.body,
@@ -19,6 +20,19 @@ export default function DataControls() {
   const isAccount = isAuthenticated && authMode === 'email'
   const [busy, setBusy] = useState(null)
   const [confirming, setConfirming] = useState(false)
+  const [optedOut, setOptedOut] = useState(() => isAnalyticsOptedOut())
+
+  const onToggleAnalytics = (e) => {
+    const next = e.target.checked
+    setAnalyticsOptOut(next)
+    setOptedOut(next)
+    toast({
+      title: next ? 'Usage analytics turned off' : 'Usage analytics turned on',
+      description: next
+        ? 'We will stop recording which lessons you open. Reload to apply everywhere.'
+        : 'Thanks, this helps us find the lessons people get stuck on.',
+    })
+  }
 
   const onExport = async () => {
     setBusy('export')
@@ -63,6 +77,22 @@ export default function DataControls() {
           ? ' Deleting your account removes your synced progress from our servers and cannot be undone.'
           : ' You are in guest mode, so this only affects data stored in this browser.'}
       </p>
+
+      <label
+        className="flex items-start gap-2.5 mb-5 cursor-pointer select-none"
+        style={{ color: color.textBody, fontFamily: font.body, fontSize: '0.9rem', lineHeight: 1.65 }}
+      >
+        <input
+          type="checkbox"
+          checked={optedOut}
+          onChange={onToggleAnalytics}
+          className="mt-1"
+        />
+        <span>
+          Do not record my usage. We stop sending learning events to our analytics. Your browser&apos;s
+          Do Not Track or Global Privacy Control setting is honored automatically.
+        </span>
+      </label>
 
       <div className="flex flex-wrap gap-3">
         <button
