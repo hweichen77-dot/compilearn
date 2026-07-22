@@ -75,6 +75,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
           # Bake production config into the installers so the downloaded desktop
           # app ships with Supabase (Google sign-in) + analytics live, not dormant.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}

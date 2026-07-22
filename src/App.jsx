@@ -14,6 +14,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import AppSkeleton from '@/components/ui/AppSkeleton';
+import { checkForAppUpdate } from '@/lib/appUpdate';
 
 const isDesktop = typeof window !== 'undefined' && Boolean(window.__TAURI__ || window.__TAURI_INTERNALS__);
 
@@ -122,6 +123,8 @@ const Gate = () => {
 };
 
 function App() {
+  useEffect(() => { checkForAppUpdate(); }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>

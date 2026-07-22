@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Compilearn",
-  "version": "2.10.1",
+  "version": "2.10.2",
   "identifier": "com.compilearn.app",
   "build": {
     "frontendDist": "../dist",
@@ -37,13 +37,22 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
-    }
+    },
+    "createUpdaterArtifacts": true
   },
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["codeflow"]
+        "schemes": [
+          "codeflow"
+        ]
       }
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc4Q0MyRUNEQ0JBMzgzOEUKUldTT2c2UEx6UzdNZUsrb2RvR01Ec3NYZkNrcDhvOXplSnAvOTQrL3ZYTEQ3NUtvME9mQTRycysK",
+      "endpoints": [
+        "https://github.com/hweichen77-dot/compilearn/releases/latest/download/latest.json"
+      ]
     }
   }
 }
