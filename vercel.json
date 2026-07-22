@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "VITE_BASE=/app/ npx vite build --outDir dist/app && cp website/index.html website/teachers.html website/styles.css website/hls.min.js dist/ && cp -r website/fonts dist/fonts && cp dist/app/index.html dist/404.html",
+  "buildCommand": "VITE_BASE=/app/ npx vite build --outDir dist/app && node scripts/build-marketing.mjs",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
@@ -10,23 +10,54 @@
       "destination": "/app/$1",
       "permanent": true
     },
-    { "source": "/learn/:path*", "destination": "/app/learn/:path*", "permanent": true }
+    {
+      "source": "/learn/:path*",
+      "destination": "/app/learn/:path*",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/app/:path*", "destination": "/app" },
-    { "source": "/((?!app/).*)", "destination": "/app" }
+    {
+      "source": "/app/:path*",
+      "destination": "/app"
+    },
+    {
+      "source": "/((?!app/).*)",
+      "destination": "/app"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-fau/Ze6Lr4RWeNcffh9DeLzNSQaaYLSrJp0o9QU4RxU=' 'sha256-od02LDGFEmhixaaiPjonn6Pr4uK7f4bP/YXtv16j/4w=' 'sha256-r0uWJOF4qGJCNd/CCt29TRdOzrMjELM0d7PeurULveQ=' 'sha256-yZQ5+qoOtMvp40Qpj61R+oejSz80/Hdw20nW3+8i0mI=' blob:; worker-src 'self' blob:; connect-src 'self' https://usehtyzsxuyiyjdpnplv.supabase.co wss://usehtyzsxuyiyjdpnplv.supabase.co https://us.i.posthog.com https://us-assets.i.posthog.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.sentry.io https://godbolt.org https://api.github.com https://stream.mux.com https://*.mux.com; media-src 'self' blob: https://stream.mux.com https://*.mux.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://i.ytimg.com https://image.mux.com; frame-src https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'; frame-ancestors 'none'" }
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-fau/Ze6Lr4RWeNcffh9DeLzNSQaaYLSrJp0o9QU4RxU=' 'sha256-od02LDGFEmhixaaiPjonn6Pr4uK7f4bP/YXtv16j/4w=' 'sha256-r0uWJOF4qGJCNd/CCt29TRdOzrMjELM0d7PeurULveQ=' 'sha256-yZQ5+qoOtMvp40Qpj61R+oejSz80/Hdw20nW3+8i0mI=' blob:; worker-src 'self' blob:; connect-src 'self' https://usehtyzsxuyiyjdpnplv.supabase.co wss://usehtyzsxuyiyjdpnplv.supabase.co https://us.i.posthog.com https://us-assets.i.posthog.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.sentry.io https://godbolt.org https://api.github.com https://stream.mux.com https://*.mux.com; media-src 'self' blob: https://stream.mux.com https://*.mux.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://i.ytimg.com https://image.mux.com; frame-src https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'; frame-ancestors 'none'"
+        }
       ]
     }
   ]

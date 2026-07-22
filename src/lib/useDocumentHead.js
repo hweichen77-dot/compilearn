@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
+import { appOrigin } from './siteUrl'
 
 const SITE = 'Compilearn'
-const ORIGIN = 'https://hweichen77-dot.github.io/compilearn'
 
 function setMeta(selector, attr, value) {
   if (typeof document === 'undefined' || value == null) return null
@@ -41,7 +41,8 @@ export function useDocumentHead({ title, description, path, schemaType = 'Learni
     const prevTitle = document.title
     document.title = fullTitle
 
-    const canonical = path ? `${ORIGIN}${path}` : `${ORIGIN}/`
+    const origin = appOrigin()
+    const canonical = path ? `${origin}${path}` : `${origin}/`
     let linkEl = document.head.querySelector('link[rel="canonical"]')
     let linkCreated = false
     const prevHref = linkEl?.getAttribute('href')
@@ -68,7 +69,7 @@ export function useDocumentHead({ title, description, path, schemaType = 'Learni
       name: fullTitle,
       description: description || 'Learn to code in your browser with a live AI tutor.',
       url: canonical,
-      provider: { '@type': 'Organization', name: SITE, url: `${ORIGIN}/` },
+      provider: { '@type': 'Organization', name: SITE, url: `${appOrigin()}/` },
       isAccessibleForFree: true,
       inLanguage: 'en',
       learningResourceType: 'Interactive lesson',

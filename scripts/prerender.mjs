@@ -7,8 +7,9 @@ import { LESSON_ROUTES } from '../src/content/index.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const DIST = path.join(ROOT, 'dist')
-const ORIGIN = 'https://hweichen77-dot.github.io/codeflow'
-const BASE = '/codeflow'
+const SITE_URL = (process.env.VITE_SITE_URL || 'https://compilearn.vercel.app').replace(/\/+$/, '')
+const BASE = (process.env.VITE_BASE || '/').replace(/\/+$/, '')
+const ORIGIN = `${SITE_URL}${BASE}`
 
 const TOP_PAGES = ['/', '/AITrack', '/Playground', '/Projects', '/Challenges', '/Competitive', '/APCS', '/Privacy', '/Terms']
 
@@ -132,7 +133,7 @@ function run() {
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     urls
-      .map((u) => `  <url><loc>https://hweichen77-dot.github.io${u}</loc></url>`)
+      .map((u) => `  <url><loc>${SITE_URL}${u}</loc></url>`)
       .join('\n') +
     `\n</urlset>\n`
   fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap)
