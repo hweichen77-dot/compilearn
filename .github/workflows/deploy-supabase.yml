@@ -12,6 +12,7 @@ on:
       - 'supabase/functions/**'
       - 'supabase/retention-cron.sql'
       - 'supabase/rate-limit.sql'
+      - 'supabase/leaderboard.sql'
       - '.github/workflows/deploy-supabase.yml'
 
 concurrency:
@@ -75,6 +76,19 @@ jobs:
           echo "rate-limit SQL HTTP $code"
           if [ "$code" -ge 300 ]; then cat /tmp/rlresp.json; exit 1; fi
           echo "Rate-limit schema applied."
+
+      - name: Apply leaderboard schema
+        run: |
+          set -e
+          jq -Rs '{query: .}' < supabase/leaderboard.sql > /tmp/lb.json
+          code=$(curl -sS -o /tmp/lbresp.json -w '%{http_code}' \
+            -X POST "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "content-type: application/json" \
+            --data @/tmp/lb.json)
+          echo "leaderboard SQL HTTP $code"
+          if [ "$code" -ge 300 ]; then cat /tmp/lbresp.json; exit 1; fi
+          echo "Leaderboard schema applied."
 
       - name: Deploy functions
         run: |
