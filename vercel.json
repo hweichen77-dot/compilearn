@@ -1,29 +1,25 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "VITE_BASE=/app/ npx vite build --outDir dist/app && PRERENDER_DIST=dist/app VITE_BASE=/app node scripts/prerender.mjs && node scripts/build-marketing.mjs",
+  "buildCommand": "npx vite build && node scripts/prerender.mjs",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/(AITrack|APCS|ChallengeDetail|Challenges|Competitive|CompetitiveDetail|Dashboard|LessonDemo|LessonExpander|Playground|Portfolio|Privacy|ProjectDetail|Projects|Terms|login)",
-      "destination": "/app/$1",
+      "source": "/app",
+      "destination": "/",
       "permanent": true
     },
     {
-      "source": "/learn/:path*",
-      "destination": "/app/learn/:path*",
+      "source": "/app/:path*",
+      "destination": "/:path*",
       "permanent": true
     }
   ],
   "rewrites": [
     {
-      "source": "/app/:path*",
-      "destination": "/app"
-    },
-    {
-      "source": "/((?!app/).*)",
-      "destination": "/app"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
