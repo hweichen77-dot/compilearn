@@ -42,13 +42,6 @@ function globalLimited(): boolean {
 
 
 
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...cors, "content-type": "application/json" },
-  });
-}
-
 async function authenticate(req: Request): Promise<string | null> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
@@ -71,6 +64,8 @@ async function authenticate(req: Request): Promise<string | null> {
 
 Deno.serve(async (req: Request) => {
   const cors = corsHeaders(req.headers.get("Origin"));
+  const json = (body: unknown, status = 200): Response =>
+    new Response(JSON.stringify(body), { status, headers: { ...cors, "content-type": "application/json" } });
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
