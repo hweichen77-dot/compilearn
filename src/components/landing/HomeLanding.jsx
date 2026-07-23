@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import React, { useEffect, useState } from "react";
 import { ArrowRight, Play } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
+import FaultyTerminal from "@/components/kit/FaultyTerminal";
 import {
-  GridBackdrop,
   HeroGlow,
   GradientText,
   Typewriter,
@@ -23,7 +22,10 @@ import {
 } from "@/components/kit";
 import LivePlayground from "@/components/landing/LivePlayground";
 
-const MUX = "https://stream.mux.com/tLkHO1qZoaaQOUeVWo8hEBeGQfySP02EPS02BmnNFyXys.m3u8";
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const V = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "";
 const DOWNLOAD_MAC = `https://github.com/hweichen77-dot/compilearn/releases/download/v${V}/Compilearn_${V}_universal.dmg`;
@@ -231,41 +233,34 @@ export default function HomeLanding() {
   const aiTitles = projects
     .filter((p) => (p.track || "ai") === "ai" && p.kind !== "product")
     .map((p) => p.title);
-  const vref = useRef(null);
-  useEffect(() => {
-    const v = vref.current;
-    if (!v) return;
-    const tryPlay = () => { const p = v.play(); if (p) p.catch(() => {}); };
-    v.addEventListener("canplay", tryPlay);
-    if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: false });
-      hls.on(Hls.Events.MANIFEST_PARSED, tryPlay);
-      hls.loadSource(MUX);
-      hls.attachMedia(v);
-      return () => { v.removeEventListener("canplay", tryPlay); hls.destroy(); };
-    }
-    if (v.canPlayType("application/vnd.apple.mpegurl")) {
-      v.src = MUX;
-    }
-    return () => v.removeEventListener("canplay", tryPlay);
-  }, []);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#070B0A] text-white" style={{ fontFamily: "var(--font-display)" }}>
       <Nav />
 
       <section className="relative overflow-hidden">
-        <video
-          ref={vref}
-          muted
-          autoPlay
-          loop
-          playsInline
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+        <div className="absolute inset-0 z-0">
+        <FaultyTerminal
+          className="h-full w-full opacity-70"
+          tint="#5ED29C"
+          scale={1.7}
+          gridMul={[2, 1]}
+          digitSize={1.3}
+          timeScale={0.4}
+          noiseAmp={1.2}
+          scanlineIntensity={0.6}
+          glitchAmount={1}
+          flickerAmount={0.7}
+          curvature={0.12}
+          mouseReact
+          mouseStrength={0.4}
+          brightness={1.5}
+          pause={prefersReducedMotion}
+          pageLoadAnimation={!prefersReducedMotion}
         />
-        <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(85%_78%_at_50%_36%,rgba(7,11,10,.5)_0%,rgba(7,11,10,.3)_55%,transparent_100%)]" />
+        </div>
+        <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(90%_82%_at_42%_40%,rgba(7,11,10,.72)_0%,rgba(7,11,10,.42)_50%,transparent_100%)]" />
         <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(0deg,#070B0A_3%,rgba(7,11,10,.3)_34%,transparent_70%)]" />
-        <GridBackdrop />
         <HeroGlow color="#5ED29C" />
 
         <div className="relative z-10 mx-auto grid min-h-[72vh] max-w-6xl items-center gap-12 px-6 pt-12 pb-8 lg:grid-cols-[1.05fr_.95fr]">
