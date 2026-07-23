@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 
 const PORT = 4178
-const BASE = '/codeflow/'
+const BASE = process.env.VITE_BASE ?? '/compilearn/'
 const ORIGIN = `http://localhost:${PORT}`
 const URL = `${ORIGIN}${BASE}`
 
