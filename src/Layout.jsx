@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Home, Sparkles, GraduationCap, Trophy, Boxes, Terminal,
+  Home, Bot, GraduationCap, Trophy, Boxes, Terminal,
   FlaskConical, User, Search, LogOut, ArrowRight,
 } from "lucide-react";
 import { createPageUrl } from "./utils";
@@ -19,7 +19,7 @@ const prefersReducedMotion =
 
 const NAV = [
   { label: "Home", page: "Home", icon: Home },
-  { label: "AI Track", page: "AITrack", icon: Sparkles },
+  { label: "AI Track", page: "AITrack", icon: Bot },
   { label: "AP CS", page: "APCS", icon: GraduationCap },
   { label: "Compete", page: "Competitive", icon: Trophy },
   { label: "Projects", page: "Projects", icon: Boxes },

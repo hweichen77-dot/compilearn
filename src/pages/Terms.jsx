@@ -25,9 +25,6 @@ export default function Terms() {
     <div className="min-h-screen px-8 lg:px-16 pt-28 pb-20" style={{ background: 'transparent' }}>
       <Stagger className="max-w-2xl mx-auto rounded-2xl px-6 sm:px-10 py-10 bg-[#0C1210]/88 backdrop-blur-sm" as="div">
         <StaggerItem as="div">
-          <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: '#5ED29C', fontFamily: LABEL }}>
-            TERMS
-          </div>
           <h1 style={{ fontFamily: SERIF, fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ECF3EF', margin: '0 0 8px', lineHeight: 1.08 }}>
             Terms of Service
           </h1>

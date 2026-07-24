@@ -120,7 +120,7 @@ export default function ChallengeDetail() {
         <div className="max-w-none mx-auto px-6 lg:px-12 py-8">
           <Link
             to={createPageUrl("Challenges")}
-            className="font-sans text-xs tracking-widest uppercase mb-8 inline-block transition-colors duration-150"
+            className="font-sans text-xs mb-8 inline-block transition-colors duration-150"
             style={{ color: "#ECF3EF" }}
             onMouseEnter={e => e.currentTarget.style.color = "#5ED29C"}
             onMouseLeave={e => e.currentTarget.style.color = "#CBD6D0"}

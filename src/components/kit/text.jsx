@@ -2,36 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { animate, useInView, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export function GradientText({ children, className, brand = false }) {
-  return (
-    <span
-      className={cn(
-        "bg-clip-text text-transparent",
-        brand
-          ? "bg-gradient-to-b from-[#7FE0B0] via-[#5ED29C] to-[#2E8B7A]"
-          : "bg-gradient-to-b from-white via-white to-white/40",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-export function ShimmerText({ children, className }) {
-  return (
-    <span
-      className={cn(
-        "bg-gradient-to-r from-[#7FE0B0] via-[#5ED29C] to-[#34D0C4] bg-clip-text text-transparent",
-        "bg-[length:200%_auto] [animation:kit-shimmer_4s_linear_infinite]",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
 export function CountUp({ to, suffix = "", className }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });

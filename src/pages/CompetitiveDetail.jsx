@@ -67,7 +67,7 @@ export default function CompetitiveDetail() {
       <div className="relative pt-20" style={{ borderBottom: "1px solid #17201C" }}>
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, #5ED29C, transparent)" }} />
         <div className="max-w-none mx-auto px-6 lg:px-12 py-8">
-          <Link to={createPageUrl("Competitive")} className="font-sans text-xs tracking-widest uppercase mb-8 inline-block" style={{ color: "#ECF3EF" }}>
+          <Link to={createPageUrl("Competitive")} className="font-sans text-xs mb-8 inline-block" style={{ color: "#ECF3EF" }}>
             ← Competitive
           </Link>
           <div className="flex items-start gap-5">

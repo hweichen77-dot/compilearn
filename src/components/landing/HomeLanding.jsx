@@ -449,7 +449,7 @@ export default function HomeLanding() {
                 className="h-full rounded-2xl border border-white/10 bg-white/[0.03] transition-colors hover:border-[#5ED29C]/40"
               >
                 <div className="relative z-[1] p-6">
-                  <div className="u-mono text-sm tracking-widest text-[#5ED29C]">step {n}</div>
+                  <div className="u-mono text-sm text-white/40">step {n}</div>
                   <h3 className="u-display mt-4 text-xl font-bold text-white">{t}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/70">{d}</p>
                 </div>
@@ -591,12 +591,12 @@ function SiteFooter() {
             <span className="u-display text-lg font-extrabold tracking-tight text-white">Compilearn</span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
-            Built for people who learn by doing. Real code execution and an AI tutor
-            that won't hand you the answer.
+            You learn by building. Run real code and get an AI tutor that won't hand
+            you the answer.
           </p>
         </div>
         <div>
-          <h4 className="u-mono mb-4 text-xs uppercase tracking-widest text-[#2E8B7A]">Product</h4>
+          <h4 className="u-mono mb-4 text-xs text-white/60">Product</h4>
           <div className="space-y-2">
             <FooterLink to={createPageUrl("AITrack")}>AI track</FooterLink>
             <FooterLink to={createPageUrl("APCS")}>AP CS</FooterLink>
@@ -605,7 +605,7 @@ function SiteFooter() {
           </div>
         </div>
         <div>
-          <h4 className="u-mono mb-4 text-xs uppercase tracking-widest text-[#2E8B7A]">About</h4>
+          <h4 className="u-mono mb-4 text-xs text-white/60">About</h4>
           <div className="space-y-2">
             <FooterLink href="https://github.com/hweichen77-dot/compilearn">GitHub</FooterLink>
             <FooterLink href="mailto:jason.huang317235@gmail.com">Contact</FooterLink>

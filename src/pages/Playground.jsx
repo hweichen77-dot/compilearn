@@ -53,7 +53,7 @@ export default function Playground() {
 
         <div className="mt-6 max-w-md">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-sans text-[11px] tracking-[0.16em]" style={{ color: '#ECF3EF' }}>
+            <span className="font-sans text-[11px]" style={{ color: '#ECF3EF' }}>
               Labs solved
             </span>
             <span className="font-sans text-xs" style={{ color: '#5ED29C' }}>

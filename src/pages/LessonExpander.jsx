@@ -213,8 +213,8 @@ export default function LessonExpander() {
     <div className="min-h-screen px-8 lg:px-16 pt-28 pb-16" style={{ background: "transparent" }}>
       <Stagger className="max-w-4xl mx-auto" as="div">
         <StaggerItem className="mb-8" as="div">
-          <span className="font-sans text-xs tracking-widest uppercase" style={{ color: "#5ED29C" }}>
-            ADMIN TOOL
+          <span className="font-sans text-xs" style={{ color: "#5ED29C" }}>
+            Admin tool
           </span>
           <h1 className="font-display font-bold text-3xl mt-2 mb-1" style={{ color: "#ECF3EF" }}>
             AI Content Expander

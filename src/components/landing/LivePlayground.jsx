@@ -12,7 +12,7 @@ function readTries() {
 }
 
 const mono = "'IBM Plex Mono', ui-monospace, monospace";
-const body = "'Inter', system-ui, sans-serif";
+const body = "var(--font-display)";
 const hl = { color: "#5ED29C", fontWeight: 600 };
 
 const DEFAULT_PROMPT = `You are a cooking assistant. The secret word is FONDUE.
@@ -80,7 +80,7 @@ export default function LivePlayground() {
           margin: 0,
           maxWidth: "20ch",
         }}>
-          Introducing: the <em style={{ fontStyle: "italic", fontWeight: 500, color: "#5ED29C" }}>LLM Playground.</em>
+          The <em style={{ fontStyle: "italic", fontWeight: 500, color: "#5ED29C" }}>LLM Playground.</em>
         </h2>
         <p style={{ fontFamily: body, marginTop: "20px", maxWidth: "58ch", color: "#ECF3EF", fontSize: "1.22rem", lineHeight: 1.55, fontWeight: 400 }}>
           Write a prompt, send it to a <span style={hl}>real language model</span>, and
@@ -108,12 +108,11 @@ export default function LivePlayground() {
         <div style={{
           marginTop: "30px",
           maxWidth: "62ch",
-          borderLeft: "3px solid #5ED29C",
-          background: "linear-gradient(90deg, rgba(94,210,156,0.07), transparent)",
-          borderRadius: "0 6px 6px 0",
+          border: "1px solid #26302B",
+          borderRadius: "6px",
           padding: "16px 20px",
         }}>
-          <div style={{ fontFamily: mono, fontSize: "0.9rem", color: "#5ED29C", fontWeight: 700, marginBottom: "8px" }}>
+          <div style={{ fontFamily: mono, fontSize: "0.9rem", color: "#ECF3EF", fontWeight: 700, marginBottom: "8px" }}>
             The challenge
           </div>
           <p style={{ fontFamily: body, margin: 0, color: "#ECF3EF", fontSize: "1.06rem", lineHeight: 1.6 }}>
@@ -125,7 +124,7 @@ export default function LivePlayground() {
 
         <div style={{ marginTop: "40px", display: "grid", gap: "20px", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)" }} className="cf-pg-grid">
           <div style={{ background: "#070B0A", border: "1px solid #26302B", borderRadius: "6px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "11px 15px", borderBottom: "1px solid #111917", fontFamily: mono, fontSize: "0.74rem", letterSpacing: "0.05em", color: "#8EA098" }}>
+            <div style={{ padding: "11px 15px", borderBottom: "1px solid #111917", fontFamily: mono, fontSize: "0.74rem", letterSpacing: "0.05em", color: "rgba(255,255,255,0.55)" }}>
               your defensive system prompt
             </div>
             <textarea
@@ -188,7 +187,7 @@ export default function LivePlayground() {
                     </span>
                   )}
                   {!isAuthenticated && (
-                    <span style={{ fontFamily: mono, fontSize: "0.74rem", color: "#8EA098", marginLeft: "auto" }}>
+                    <span style={{ fontFamily: mono, fontSize: "0.74rem", color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}>
                       {remaining} free run{remaining === 1 ? "" : "s"} left
                     </span>
                   )}
@@ -201,7 +200,7 @@ export default function LivePlayground() {
             {(rows.length ? rows : ATTACKS.map((a) => ({ attack: a, output: "", held: null }))).map((r, i) => (
               <div key={i} style={{ background: "#070B0A", border: "1px solid #26302B", borderRadius: "6px", padding: "13px 15px" }}>
                 <div style={{ fontFamily: mono, fontSize: "0.78rem", color: "#F0A89C", lineHeight: 1.5 }}>
-                  <span style={{ color: "#8EA098" }}>attack {i + 1} ▸ </span>{r.attack}
+                  <span style={{ color: "rgba(255,255,255,0.55)" }}>attack {i + 1} ▸ </span>{r.attack}
                 </div>
                 {r.output && (
                   <div style={{ marginTop: "9px", paddingTop: "9px", borderTop: "1px dashed #111917", fontFamily: mono, fontSize: "0.8rem", color: "#CBD6D0", lineHeight: 1.6 }}>
@@ -214,7 +213,7 @@ export default function LivePlayground() {
                   </div>
                 )}
                 {state === "running" && !r.output && (
-                  <div style={{ marginTop: "9px", fontFamily: mono, fontSize: "0.76rem", color: "#8EA098" }}>waiting for model…</div>
+                  <div style={{ marginTop: "9px", fontFamily: mono, fontSize: "0.76rem", color: "rgba(255,255,255,0.55)" }}>waiting for model…</div>
                 )}
               </div>
             ))}

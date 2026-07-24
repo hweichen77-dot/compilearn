@@ -39,7 +39,7 @@ const C = {
   emerald: "#5FBF7E",
   white: "#ECF3EF",
   text: "#ECF3EF",
-  dim: "#B7C6BE",
+  dim: "rgba(255,255,255,0.62)",
 };
 
 export default function Dashboard() {
