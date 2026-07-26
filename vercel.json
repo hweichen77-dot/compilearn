@@ -6,6 +6,12 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "compilearn.com" }],
+      "destination": "https://www.compilearn.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/app",
       "destination": "/",
       "permanent": true

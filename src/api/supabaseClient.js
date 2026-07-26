@@ -10,12 +10,9 @@ const makeStub = () => ({
   auth: {
     getSession: async () => ({ data: { session: null } }),
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
-    signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
     signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
-    signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
     updateUser: async () => ({ data: null, error: new Error('Supabase not configured') }),
     signOut: async () => ({ error: null }),
-    resetPasswordForEmail: async () => ({ data: null, error: new Error('Supabase not configured') }),
   },
   from: () => {
     const result = Promise.resolve({ data: [], error: null })
@@ -41,9 +38,6 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   : makeStub()
 
 export const auth = {
-  signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
-  signUp: (email, password, name) =>
-    supabase.auth.signUp({ email, password, options: { data: { name: name || '' } } }),
   signInWithGoogle: () =>
     supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -59,10 +53,6 @@ export const auth = {
   updateUser: (data) => supabase.auth.updateUser({ data }),
   getSession: () => supabase.auth.getSession(),
   onAuthStateChange: (cb) => supabase.auth.onAuthStateChange(cb),
-  resetPassword: (email) =>
-    supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}${import.meta.env.BASE_URL || '/'}` : undefined,
-    }),
   isConfigured: Boolean(supabaseUrl && supabaseAnonKey),
 }
 

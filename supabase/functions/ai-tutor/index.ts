@@ -1,6 +1,7 @@
 
 import { checkLimits, callerIp } from "../_shared/rateLimit.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { authenticate } from "../_shared/auth.ts";
 
 const GROQ_API_KEY = Deno.env.get("TUTOR_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
@@ -10,37 +11,6 @@ const MAX_MESSAGES = 10;
 const MAX_CONTEXT_CHARS = 1200;
 const MAX_CODE_CHARS = 2000;
 const MAX_TOKENS = 320;
-
-const RATE_LIMIT_MAX = 12;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-const GLOBAL_MAX_PER_WINDOW = 240;
-let globalCount = 0;
-let globalResetAt = 0;
-
-function rateLimited(key: string): boolean {
-  const now = Date.now();
-  const entry = hits.get(key);
-  if (!entry || now >= entry.resetAt) {
-    hits.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT_MAX;
-}
-
-function globalLimited(): boolean {
-  const now = Date.now();
-  if (now >= globalResetAt) {
-    globalCount = 1;
-    globalResetAt = now + RATE_LIMIT_WINDOW_MS;
-    return false;
-  }
-  globalCount += 1;
-  return globalCount > GLOBAL_MAX_PER_WINDOW;
-}
-
 
 function systemPrompt(lessonTitle: string, context: string, socratic: boolean, code: string, output: string): string {
   const codeBlock = code ? `\n\nStudent's current code:\n\`\`\`\n${code}\n\`\`\`` : "";
@@ -72,8 +42,16 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
-  const ip = callerIp(req);
-  const limitErr = await checkLimits({ caller: `ip:${ip}`, fn: "ai-tutor", perMin: 12, perDay: 120, globalPerMin: 240, globalPerDay: 8000, failClosed: true });
+  const userId = await authenticate(req);
+  const limitErr = await checkLimits({
+    caller: userId ? `user:${userId}` : `ip:${callerIp(req)}`,
+    fn: "ai-tutor",
+    perMin: userId ? 12 : 4,
+    perDay: userId ? 120 : 20,
+    globalPerMin: 240,
+    globalPerDay: 8000,
+    failClosed: true,
+  });
   if (limitErr) return json({ error: limitErr }, 429);
 
   let payload: {

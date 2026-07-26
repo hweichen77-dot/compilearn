@@ -80,21 +80,6 @@ export const AuthProvider = ({ children }) => {
     return () => { active = false; sub?.subscription?.unsubscribe?.(); };
   }, []);
 
-  const signUpEmail = async ({ email, password, name }) => {
-    const { data, error } = await supaAuth.signUp(email, password, name);
-    if (error) return { error };
-    track('sign_up', { method: 'email' });
-    if (data?.session?.user) adoptSupabaseUser(data.session.user);
-    return { data, needsConfirmation: !data?.session };
-  };
-
-  const signInEmail = async ({ email, password }) => {
-    const { data, error } = await supaAuth.signIn(email, password);
-    if (error) return { error };
-    if (data?.user) { track('sign_in', { method: 'email' }); adoptSupabaseUser(data.user); }
-    return { data };
-  };
-
   const signInGoogle = async () => {
     track('sign_in_start', { method: 'google' });
     if (isDesktop) {
@@ -102,11 +87,6 @@ export const AuthProvider = ({ children }) => {
       return { error };
     }
     const { error } = await supaAuth.signInWithGoogle();
-    return { error };
-  };
-
-  const resetPassword = async (email) => {
-    const { error } = await supaAuth.resetPassword(email);
     return { error };
   };
 
@@ -167,10 +147,7 @@ export const AuthProvider = ({ children }) => {
       authError: null,
       appPublicSettings: null,
       supabaseConfigured: supaAuth.isConfigured,
-      signUpEmail,
-      signInEmail,
       signInGoogle,
-      resetPassword,
       signInGuest,
       signInLocal,
       completeOnboarding,

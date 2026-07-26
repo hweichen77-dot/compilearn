@@ -211,10 +211,12 @@ token_verifications = 30
 web3 = 30
 
 # Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
+# Production is turned on by setting the TURNSTILE_SECRET repo secret; see the
+# "Apply auth hardening" step in .github/workflows/deploy-supabase.yml.
 # [auth.captcha]
 # enabled = true
-# provider = "hcaptcha"
-# secret = ""
+# provider = "turnstile"
+# secret = "env(TURNSTILE_SECRET)"
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
@@ -268,12 +270,13 @@ max_frequency = "5s"
 # [auth.sms.test_otp]
 # 4152127777 = "123456"
 
-# Configure logged in session timeouts.
-# [auth.sessions]
+# Configure logged in session timeouts. Production values are applied by the
+# "Apply auth hardening" step in .github/workflows/deploy-supabase.yml.
+[auth.sessions]
 # Force log out after the specified duration.
-# timebox = "24h"
+timebox = "168h"
 # Force log out if the user has been inactive longer than the specified duration.
-# inactivity_timeout = "8h"
+inactivity_timeout = "72h"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
 # [auth.hook.before_user_created]

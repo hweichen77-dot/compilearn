@@ -105,6 +105,36 @@ jobs:
           supabase functions deploy retention-email --project-ref "$PROJECT_REF" --no-verify-jwt
           supabase functions deploy feedback        --project-ref "$PROJECT_REF" --no-verify-jwt
 
+      - name: Apply auth hardening
+        env:
+          TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
+        run: |
+          set -e
+          # sessions_timebox / sessions_inactivity_timeout are in hours.
+          # Captcha fields are only sent when TURNSTILE_SECRET is configured.
+          jq -n --arg captcha "$TURNSTILE_SECRET" '
+            {
+              jwt_exp: 3600,
+              refresh_token_rotation_enabled: true,
+              security_refresh_token_reuse_interval: 10,
+              sessions_timebox: 168,
+              sessions_inactivity_timeout: 72
+            }
+            + (if $captcha == "" then {} else {
+                security_captcha_enabled: true,
+                security_captcha_provider: "turnstile",
+                security_captcha_secret: $captcha
+              } end)
+          ' > /tmp/auth.json
+          code=$(curl -sS -o /tmp/authresp.json -w '%{http_code}' \
+            -X PATCH "https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "content-type: application/json" \
+            --data @/tmp/auth.json)
+          echo "auth config HTTP $code"
+          if [ "$code" -ge 300 ]; then cat /tmp/authresp.json; exit 1; fi
+          echo "Auth hardening applied."
+
       - name: Apply retention cron (only when Resend is configured)
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
