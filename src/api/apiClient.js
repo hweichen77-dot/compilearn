@@ -76,14 +76,19 @@ const OFFLINE_MSG =
 
 export const aiAvailable = auth.isConfigured
 
+const SIGNED_OUT_MSG =
+  "The AI helper isn't available until you sign in. You can still read the lesson, write code, and run it, your code runs for real."
+
 const InvokeLLM = async ({ prompt, max_tokens } = {}) => {
   try {
     const { supabase } = await import('./supabaseClient')
+    const { data } = await supabase.auth.getSession()
+    if (!data?.session) return SIGNED_OUT_MSG
     if (supabase?.functions?.invoke && prompt) {
-      const { data, error } = await supabase.functions.invoke('invoke-llm', {
+      const { data: res, error } = await supabase.functions.invoke('invoke-llm', {
         body: { prompt, max_tokens },
       })
-      if (!error && data?.text) return data.text
+      if (!error && res?.text) return res.text
     }
   } catch {
   }
