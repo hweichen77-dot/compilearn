@@ -207,7 +207,7 @@ function TrackCard({ t, modules }) {
 
         <div className="mt-auto flex items-center gap-2 pt-5">
           <span className="u-mono text-xs text-[#5ED29C]">{t.big && mods && mods.length ? `${mods.length} modules` : t.tag}</span>
-          <ArrowRight size={14} className="text-white/60 transition-transform group-hover:translate-x-1" />
+          <ArrowRight size={14} aria-hidden="true" className="text-white/60 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </MagicBentoCard>
@@ -329,7 +329,7 @@ export default function HomeLanding() {
                     onClick={() => navigate("/login")}
                     className="inline-flex items-center gap-2 rounded-full bg-[#5ED29C] px-7 py-3.5 text-[15px] font-bold text-[#070B0A] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
                   >
-                    Start building free <ArrowRight size={18} strokeWidth={2.4} />
+                    Start building free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
                   </MagneticButton>
                 ) : (
                   <ClickSpark sparkColor="#5ED29C" sparkCount={10} sparkRadius={24} sparkSize={12} duration={500}>
@@ -341,7 +341,7 @@ export default function HomeLanding() {
                       thickness={2}
                       className="star-brand text-[15px] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
                     >
-                      Start building free <ArrowRight size={18} strokeWidth={2.4} />
+                      Start building free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
                     </StarBorder>
                   </ClickSpark>
                 )}
@@ -361,7 +361,7 @@ export default function HomeLanding() {
                     href="#playground"
                     className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:border-white/40"
                   >
-                    <Play size={15} /> Try the playground
+                    <Play size={15} aria-hidden="true" /> Try the playground
                   </a>
                 </GlareHover>
               </div>
@@ -572,7 +572,7 @@ export default function HomeLanding() {
             onClick={() => navigate("/login")}
             className="mt-9 inline-flex items-center gap-2 rounded-full bg-[#5ED29C] px-8 py-4 text-[17px] font-bold text-[#070B0A] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
           >
-            Start learning free <ArrowRight size={18} strokeWidth={2.4} />
+            Start learning free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
           </MagneticButton>
         </Reveal>
       </Section>
@@ -605,7 +605,7 @@ function SiteFooter() {
           </p>
         </div>
         <div>
-          <h4 className="u-mono mb-4 text-xs text-white/60">Product</h4>
+          <h3 className="u-mono mb-4 text-xs text-white/60">Product</h3>
           <div className="space-y-2">
             <FooterLink to={createPageUrl("AITrack")}>AI track</FooterLink>
             <FooterLink to={createPageUrl("APCS")}>AP CS</FooterLink>
@@ -614,7 +614,7 @@ function SiteFooter() {
           </div>
         </div>
         <div>
-          <h4 className="u-mono mb-4 text-xs text-white/60">About</h4>
+          <h3 className="u-mono mb-4 text-xs text-white/60">About</h3>
           <div className="space-y-2">
             <FooterLink href="https://github.com/hweichen77-dot/compilearn">GitHub</FooterLink>
             <FooterLink href="mailto:jason.huang317235@gmail.com">Contact</FooterLink>
