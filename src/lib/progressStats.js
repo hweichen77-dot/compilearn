@@ -1,4 +1,4 @@
-import { getLevel, LEVELS } from "../components/gamification/XPLevelBar";
+import { getLevel, LEVELS } from "./levels.js";
 
 const STREAK_BASE = "codeflow_streak";
 const PROFILE_KEY = "codeflow_profile_v1";
