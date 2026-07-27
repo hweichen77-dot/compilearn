@@ -130,6 +130,7 @@ export default function LivePlayground() {
             <textarea
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
+              aria-label="Your defensive system prompt"
               spellCheck={false}
               style={{
                 flex: 1,

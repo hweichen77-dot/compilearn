@@ -63,6 +63,7 @@ export default function HeroPlayground() {
         <textarea
           value={systemPrompt}
           onChange={(e) => setSystemPrompt(e.target.value)}
+          aria-label="Your defensive system prompt"
           spellCheck={false}
           rows={4}
           className="u-mono w-full resize-none rounded-md border border-[#1c2622] bg-black/40 p-3 text-[12.5px] leading-relaxed text-[#7FBF8F] outline-none focus:border-[#5ED29C]/50"

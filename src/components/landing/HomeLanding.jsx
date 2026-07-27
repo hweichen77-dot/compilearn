@@ -272,6 +272,7 @@ export default function HomeLanding() {
       <div className="relative z-10">
       <Nav />
 
+      <main id="main-content">
       <section className="relative overflow-hidden">
         <HeroGlow color="#5ED29C" />
 
@@ -568,6 +569,7 @@ export default function HomeLanding() {
           </MagneticButton>
         </Reveal>
       </Section>
+      </main>
 
       <SiteFooter />
       </div>
