@@ -270,6 +270,13 @@ export default function HomeLanding() {
       <div className="pointer-events-none fixed inset-0 z-0 bg-[#070B0A]/55" />
 
       <div className="relative z-10">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] u-mono text-xs px-4 py-2"
+        style={{ background: "var(--accent)", color: "var(--bg-base)" }}
+      >
+        Skip to content
+      </a>
       <Nav />
 
       <main id="main-content">
