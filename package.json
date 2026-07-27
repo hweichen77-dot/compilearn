@@ -1,12 +1,13 @@
 {
   "name": "compilearn",
   "private": true,
-  "version": "2.11.9",
+  "version": "2.11.10",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/gen-content-manifests.mjs",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/check-bundle.mjs",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
