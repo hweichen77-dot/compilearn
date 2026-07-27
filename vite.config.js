@@ -28,6 +28,9 @@ export default defineConfig({
               ? 'vendor'
               : undefined
           }
+          if (id.includes('/src/content/projects.generated')) {
+            return undefined
+          }
           if (id.includes('/src/content/curriculum/')) {
             const m = id.match(/module-(\d+)/)
             return m ? `curriculum-module-${m[1]}` : 'curriculum'

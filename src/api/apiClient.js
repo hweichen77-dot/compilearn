@@ -1,6 +1,7 @@
 import { UserProgress, CapstoneSubmission } from './progressStore.js'
 import { getProfile, setProfile, clear as clearProfile } from './localProfile.js'
 import { auth } from './supabaseClient'
+import { PROJECTS } from '@/content/projects.generated.js'
 
 let _contentPromise = null
 const loadContent = () => {
@@ -31,18 +32,9 @@ const sortList = (arr, sort) => {
 }
 
 const Project = {
-  list: async (sort) => {
-    const { PROJECTS } = await loadContent()
-    return sortList([...PROJECTS], sort || 'order')
-  },
-  filter: async (q) => {
-    const { PROJECTS } = await loadContent()
-    return q?.id ? PROJECTS.filter((p) => p.id === q.id) : [...PROJECTS]
-  },
-  get: async (id) => {
-    const { getProject } = await loadContent()
-    return getProject(id)
-  },
+  list: async (sort) => sortList([...PROJECTS], sort || 'order'),
+  filter: async (q) => (q?.id ? PROJECTS.filter((p) => p.id === q.id) : [...PROJECTS]),
+  get: async (id) => PROJECTS.find((p) => p.id === id) || null,
 }
 
 const Lesson = {
