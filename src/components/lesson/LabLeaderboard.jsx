@@ -5,7 +5,7 @@ import { fetchLeaderboard, getMyEntry, publishEntry, unpublishEntry } from '@/li
 import { track } from '@/lib/analytics'
 
 const ACCENT = '#5ED29C'
-const MUTED = '#9FB3AA'
+const MUTED = 'rgba(236,243,239,0.72)'
 
 export default function LabLeaderboard({ lab, refreshKey }) {
   const { isAuthenticated } = useAuth()

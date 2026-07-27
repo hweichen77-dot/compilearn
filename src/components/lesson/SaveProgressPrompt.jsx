@@ -35,7 +35,7 @@ export default function SaveProgressPrompt({ labId, solvedCount, totalLabs }) {
         >
           Save my progress <ArrowRight size={15} />
         </button>
-        <span className="text-xs" style={{ color: '#9FB3AA' }}>Takes one tap with Google. Keep playing without it if you prefer.</span>
+        <span className="text-xs" style={{ color: 'rgba(236,243,239,0.72)' }}>Takes one tap with Google. Keep playing without it if you prefer.</span>
       </div>
     </div>
   )

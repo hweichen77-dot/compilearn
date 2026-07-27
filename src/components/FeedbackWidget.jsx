@@ -99,7 +99,7 @@ export default function FeedbackWidget() {
                     fontSize: '10px',
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
-                    color: kind === k.key ? '#070B0A' : '#8EA098',
+                    color: kind === k.key ? '#070B0A' : 'rgba(236,243,239,0.55)',
                     background: kind === k.key ? '#5ED29C' : 'transparent',
                     border: '1px solid #26302B',
                     fontFamily: LABEL,
@@ -130,7 +130,7 @@ export default function FeedbackWidget() {
             <div className="flex items-center justify-between">
               <span
                 className="font-sans text-xs"
-                style={{ color: status === 'error' ? '#E8735A' : '#8EA098', fontFamily: LABEL }}
+                style={{ color: status === 'error' ? '#E8735A' : 'rgba(236,243,239,0.55)', fontFamily: LABEL }}
                 role="status"
               >
                 {status === 'sent' ? 'Thanks, sent!' : status === 'error' ? "Couldn't send, try again" : ''}
@@ -141,7 +141,7 @@ export default function FeedbackWidget() {
                 className="font-sans text-xs tracking-widest uppercase px-5 py-2.5 transition-all"
                 style={{
                   background: text.trim() && status !== 'sending' ? '#5ED29C' : '#17201C',
-                  color: text.trim() && status !== 'sending' ? '#070B0A' : '#8EA098',
+                  color: text.trim() && status !== 'sending' ? '#070B0A' : 'rgba(236,243,239,0.55)',
                   fontWeight: 700,
                   cursor: text.trim() && status !== 'sending' ? 'pointer' : 'not-allowed',
                   fontFamily: LABEL,

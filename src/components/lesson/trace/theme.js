@@ -10,7 +10,7 @@ export const trace = Object.freeze({
   borderActive: '#46413A',
 
   text: '#ECF3EF',
-  dim: '#B7C6BE',
+  dim: 'rgba(236,243,239,0.72)',
   faint: '#FFFFFF',
   muted: '#4A453C',
 

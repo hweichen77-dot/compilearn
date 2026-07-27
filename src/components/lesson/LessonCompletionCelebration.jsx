@@ -36,7 +36,7 @@ export default function LessonCompletionCelebration({ show, lessonTitle, xpEarne
             onClick={e => e.stopPropagation()}
           >
             <div style={{ fontSize: "3rem", marginBottom: "12px" }}></div>
-            <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: trace.lime }}>
+            <div className="font-sans text-sm mb-3" style={{ color: trace.lime }}>
               Lesson Complete
             </div>
             <h2

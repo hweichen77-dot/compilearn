@@ -15,6 +15,6 @@ export const color = {
   amberDim: "#2E8B7A",
   text: "#ECF3EF",
   textBody: "#ECF3EF",
-  textMute: "#B7C6BE",
-  textFaint: "#B7C6BE",
+  textMute: "rgba(236,243,239,0.72)",
+  textFaint: "rgba(236,243,239,0.55)",
 };

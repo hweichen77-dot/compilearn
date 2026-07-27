@@ -222,7 +222,7 @@ export default function ChallengeDetail() {
                   <button
                     onClick={() => setShowHints(!showHints)}
                     className="cl-lift font-sans text-xs px-4 py-2.5 rounded-[10px] transition-all duration-150"
-                    style={{ color: showHints ? "#5ED29C" : "#B7C6BE", border: `1px solid ${showHints ? "#5ED29C33" : "#17201C"}`, background: showHints ? "#5ED29C10" : "transparent" }}
+                    style={{ color: showHints ? "#5ED29C" : "rgba(236,243,239,0.72)", border: `1px solid ${showHints ? "#5ED29C33" : "#17201C"}`, background: showHints ? "#5ED29C10" : "transparent" }}
                   >
                     {showHints ? "Hint ▾" : "Hint"}
                   </button>

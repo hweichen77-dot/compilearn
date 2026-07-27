@@ -83,7 +83,7 @@ Be direct and educational. Use code examples where helpful. Total response under
                 HOW DID I CATCH THIS?
               </span>
             </div>
-            <button onClick={onClose} aria-label="Close dialog" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.color = "#CBD6D0"} onMouseLeave={e => e.currentTarget.style.color = "#B7C6BE"}>
+            <button onClick={onClose} aria-label="Close dialog" style={{ color: "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.color = "#CBD6D0"} onMouseLeave={e => e.currentTarget.style.color = "rgba(236,243,239,0.72)"}>
               <X size={16} />
             </button>
           </div>

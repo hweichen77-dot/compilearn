@@ -40,12 +40,6 @@ export default class ErrorBoundary extends React.Component {
           className="w-full max-w-md p-10 text-center"
           style={{ border: '1px solid #17201C', background: '#070B0A' }}
         >
-          <div
-            className="font-sans text-xs tracking-widest uppercase mb-3"
-            style={{ color: '#FF6B5C', fontFamily: LABEL }}
-          >
-            SOMETHING BROKE
-          </div>
           <h1
             style={{
               fontFamily: SERIF,

@@ -46,9 +46,6 @@ export default class RouteErrorBoundary extends React.Component {
     return (
       <div className="flex items-center justify-center px-6" style={{ minHeight: '60vh' }}>
         <div className="w-full max-w-md p-10 text-center" style={{ border: '1px solid #17201C', background: '#070B0A' }}>
-          <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: '#FF6B5C', fontFamily: LABEL }}>
-            THIS PAGE HIT A SNAG
-          </div>
           <h1 style={{ fontFamily: SERIF, fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ECF3EF', margin: '0 0 10px', lineHeight: 1.15 }}>
             Couldn&apos;t load this page.
           </h1>

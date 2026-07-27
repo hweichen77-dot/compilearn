@@ -54,9 +54,6 @@ export default function WelcomeModal() {
       onClick={(e) => { if (e.target === e.currentTarget) dismiss(false) }}
     >
       <div ref={dialogRef} tabIndex={-1} className="w-full max-w-lg p-10" style={{ border: '1px solid #2A261E', background: '#070B0A', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', outline: 'none' }}>
-        <div className="font-sans text-xs tracking-widest uppercase mb-3" style={{ color: '#5ED29C', fontFamily: LABEL }}>
-          WELCOME TO CODEFLOW
-        </div>
         <h1 style={{ fontFamily: SERIF, fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#ECF3EF', lineHeight: 1.12, margin: '0 0 8px' }}>
           Hey {firstName}, here&apos;s the idea.
         </h1>

@@ -172,7 +172,7 @@ Be direct and specific to the code shown. Under 130 words total.`,
               onClick={handleCopy}
               className="font-sans text-xs px-3 py-1.5 transition-all duration-150"
               style={{
-                color: copied ? "#5ED29C" : "#B7C6BE",
+                color: copied ? "#5ED29C" : "rgba(236,243,239,0.72)",
                 border: `1px solid ${copied ? "#5ED29C33" : "#17201C"}`,
                 background: copied ? "#5ED29C10" : "transparent",
               }}
@@ -371,7 +371,7 @@ function SubmitResults({ results, onReview, review, reviewLoading, reviewAvailab
 
       <div className="py-2" style={{ background: "#080808" }}>
         {rows.length === 0 && (
-          <div className="px-5 py-3 font-mono text-xs" style={{ color: "#B7C6BE" }}>No test cases to grade.</div>
+          <div className="px-5 py-3 font-mono text-xs" style={{ color: "rgba(236,243,239,0.72)" }}>No test cases to grade.</div>
         )}
         {rows.map((r, i) => {
           const isFirstError = i === firstError;
@@ -390,8 +390,8 @@ function SubmitResults({ results, onReview, review, reviewLoading, reviewAvailab
               </div>
               {!r.ok && (
                 <div className="mt-1.5 ml-6 font-mono text-xs space-y-0.5">
-                  <div style={{ color: "#B7C6BE" }}>expected: <span style={{ color: "#5ED29C" }}>{fmt(r.expected)}</span></div>
-                  <div style={{ color: "#B7C6BE" }}>actual:   <span style={{ color: "#FF6B5C" }}>{fmt(r.got)}</span></div>
+                  <div style={{ color: "rgba(236,243,239,0.72)" }}>expected: <span style={{ color: "#5ED29C" }}>{fmt(r.expected)}</span></div>
+                  <div style={{ color: "rgba(236,243,239,0.72)" }}>actual:   <span style={{ color: "#FF6B5C" }}>{fmt(r.got)}</span></div>
                 </div>
               )}
             </div>

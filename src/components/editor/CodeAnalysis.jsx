@@ -27,7 +27,7 @@ export default function CodeAnalysis({ hint, onDismiss, onExplain }) {
               className="font-sans text-xs px-2 py-1 transition-colors"
               style={{ color: "#FFFFFF", border: "1px solid #17201C" }}
               onMouseEnter={e => e.currentTarget.style.color = "#5ED29C"}
-              onMouseLeave={e => e.currentTarget.style.color = "#B7C6BE"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(236,243,239,0.72)"}
             >
               how?
             </button>
@@ -35,7 +35,7 @@ export default function CodeAnalysis({ hint, onDismiss, onExplain }) {
               onClick={onDismiss}
               className="font-sans text-xs"
               style={{ color: "#ECF3EF" }}
-              onMouseEnter={e => e.currentTarget.style.color = "#B7C6BE"}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(236,243,239,0.72)"}
               onMouseLeave={e => e.currentTarget.style.color = "#ECF3EF"}
             >
               ×

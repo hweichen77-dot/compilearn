@@ -22,12 +22,6 @@ export default function ProfileGate() {
         className="w-full max-w-md p-10"
         style={{ border: '1px solid #17201C', background: '#070B0A' }}
       >
-        <div
-          className="font-sans text-xs tracking-widest uppercase mb-3"
-          style={{ color: '#FFFFFF' }}
-        >
-          WELCOME
-        </div>
         <h1
           style={{
             fontFamily: font.display,
@@ -76,7 +70,7 @@ export default function ProfileGate() {
             className="w-full font-sans text-sm tracking-widest uppercase px-8 py-4 transition-all duration-150"
             style={{
               background: name.trim() ? '#5ED29C' : '#17201C',
-              color: name.trim() ? '#070B0A' : '#B7C6BE',
+              color: name.trim() ? '#070B0A' : 'rgba(236,243,239,0.72)',
               fontWeight: 700,
               cursor: name.trim() ? 'pointer' : 'not-allowed',
               fontFamily: font.body,

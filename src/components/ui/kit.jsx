@@ -19,7 +19,7 @@ export const KIT = {
   emerald: "#4CC98A",
   white: "#FFFFFF",
   text: "#ECF3EF",
-  dim: "#B9B1A2",
+  dim: "rgba(255,255,255,0.70)",
 };
 
 export function Eyebrow({ children, color = KIT.dim, className = "", style, caret = true }) {

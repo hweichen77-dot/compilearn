@@ -57,7 +57,7 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
     <div className="rounded-xl border p-5 md:p-6" style={{ borderColor: '#2a2519', background: '#0C1210' }}>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: amber }}>
+          <div className="text-xs font-semibold" style={{ color: amber }}>
             {labIndex && labCount ? `Lab ${labIndex} of ${labCount}` : 'Red-team lab'}
           </div>
           <h3 className="text-xl font-bold mt-1 inline-flex items-center gap-2" style={{ color: '#ECF3EF' }}>

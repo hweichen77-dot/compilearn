@@ -231,7 +231,7 @@ export default function LessonExpander() {
               onClick={() => setTab(t)}
               className="font-sans text-xs tracking-widest uppercase px-6 py-3 transition-all"
               style={{
-                color: tab === t ? "#5ED29C" : "#B7C6BE",
+                color: tab === t ? "#5ED29C" : "rgba(236,243,239,0.72)",
                 borderBottom: tab === t ? "2px solid #5ED29C" : "2px solid transparent",
                 background: "transparent",
                 marginBottom: "-1px",
@@ -251,7 +251,7 @@ export default function LessonExpander() {
                 className="font-sans text-xs tracking-widest uppercase px-6 py-3 transition-all"
                 style={{
                   background: enrichRunning ? "#17201C" : "#cc66ff",
-                  color: enrichRunning ? "#B7C6BE" : "#070B0A",
+                  color: enrichRunning ? "rgba(236,243,239,0.72)" : "#070B0A",
                   border: "1px solid transparent", fontWeight: 700,
                   cursor: enrichRunning ? "not-allowed" : "pointer",
                 }}
@@ -281,7 +281,7 @@ export default function LessonExpander() {
             className="font-sans text-xs tracking-widest uppercase px-6 py-3 transition-all"
             style={{
               background: running ? "#17201C" : "#5ED29C",
-              color: running ? "#B7C6BE" : "#070B0A",
+              color: running ? "rgba(236,243,239,0.72)" : "#070B0A",
               border: "1px solid transparent",
               fontWeight: 700,
               cursor: running ? "not-allowed" : "pointer",

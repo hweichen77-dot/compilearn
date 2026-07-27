@@ -74,7 +74,7 @@ export default function ShareCard({ name, level, levelName, totalXP, lessons, ch
         style={{
           display: "inline-flex", alignItems: "center", gap: "8px",
           padding: "10px 18px", border: "1px solid #26302B", background: "transparent",
-          color: busy ? "#8EA098" : "#5ED29C", fontFamily: BODY, cursor: busy ? "default" : "pointer",
+          color: busy ? "rgba(236,243,239,0.55)" : "#5ED29C", fontFamily: BODY, cursor: busy ? "default" : "pointer",
           borderRadius: "2px",
         }}
         onMouseEnter={(e) => { if (!busy) e.currentTarget.style.borderColor = "#5ED29C"; }}
@@ -121,7 +121,7 @@ export default function ShareCard({ name, level, levelName, totalXP, lessons, ch
           </div>
 
           <div style={{ fontFamily: BODY, fontSize: "18px", color: "#FFFFFF", position: "absolute", right: "80px", bottom: "40px" }}>
-            learn to build with AI · codeflow
+            learn to build with AI · compilearn.com
           </div>
         </div>
       </div>

@@ -73,7 +73,7 @@ export default function ShareResult({ lab, passed, total, allPass }) {
         style={{ ...btn, background: 'transparent', color: '#ECF3EF', border: '1px solid #2f3a35' }}>
         Post on Reddit
       </button>
-      <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: '#9FB3AA' }}>
+      <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'rgba(236,243,239,0.72)' }}>
         <Link2 size={13} /> link comes back to this lab
       </span>
     </div>

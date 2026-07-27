@@ -87,13 +87,13 @@ export default function Achievements({ progress = [], projects = [], streak = 0,
               </div>
               <div
                 className="font-display text-sm font-bold mb-1"
-                style={{ color: a.unlocked ? "#ECF3EF" : "#B7C6BE", letterSpacing: "-0.01em" }}
+                style={{ color: a.unlocked ? "#ECF3EF" : "rgba(236,243,239,0.72)", letterSpacing: "-0.01em" }}
               >
                 {a.title}
               </div>
               <div
                 className="font-sans"
-                style={{ fontSize: "0.65rem", color: a.unlocked ? "#CBD6D0" : "#B7C6BE", lineHeight: 1.4 }}
+                style={{ fontSize: "0.65rem", color: a.unlocked ? "#CBD6D0" : "rgba(236,243,239,0.72)", lineHeight: 1.4 }}
               >
                 {a.unlocked ? a.desc : "LOCKED"}
               </div>
