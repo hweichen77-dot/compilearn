@@ -28,7 +28,7 @@ export default defineConfig({
               ? 'vendor'
               : undefined
           }
-          if (id.includes('/src/content/projects.generated')) {
+          if (/\/src\/content\/(projects\.generated|categories|schema)\./.test(id)) {
             return undefined
           }
           if (id.includes('/src/content/curriculum/')) {
