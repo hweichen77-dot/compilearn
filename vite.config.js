@@ -24,7 +24,9 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            return 'vendor'
+            return /node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)
+              ? 'vendor'
+              : undefined
           }
           if (id.includes('/src/content/curriculum/')) {
             const m = id.match(/module-(\d+)/)
