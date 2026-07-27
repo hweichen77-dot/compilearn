@@ -1,11 +1,11 @@
 {
   "name": "compilearn",
   "private": true,
-  "version": "2.11.8",
+  "version": "2.11.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/gen-projects.mjs",
+    "prebuild": "node scripts/gen-content-manifests.mjs",
     "build": "vite build && node scripts/prerender.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
@@ -16,7 +16,7 @@
     "smoke": "node scripts/smoke-test.mjs",
     "test": "node --test \"src/**/*.test.js\"",
     "preview": "vite preview",
-    "build:desktop": "node scripts/gen-projects.mjs && cross-env VITE_BASE=/ vite build",
+    "build:desktop": "node scripts/gen-content-manifests.mjs && cross-env VITE_BASE=/ vite build",
     "tauri": "tauri"
   },
   "dependencies": {

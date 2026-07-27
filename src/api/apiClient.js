@@ -1,7 +1,6 @@
 import { UserProgress, CapstoneSubmission } from './progressStore.js'
 import { getProfile, setProfile, clear as clearProfile } from './localProfile.js'
 import { auth } from './supabaseClient'
-import { PROJECTS } from '@/content/projects.generated.js'
 
 let _contentPromise = null
 const loadContent = () => {
@@ -31,10 +30,19 @@ const sortList = (arr, sort) => {
   return desc ? sorted.reverse() : sorted
 }
 
+let _projectsPromise = null
+const loadProjects = async () => {
+  if (!_projectsPromise) _projectsPromise = import('@/content/projects.generated.js')
+  return (await _projectsPromise).PROJECTS
+}
+
 const Project = {
-  list: async (sort) => sortList([...PROJECTS], sort || 'order'),
-  filter: async (q) => (q?.id ? PROJECTS.filter((p) => p.id === q.id) : [...PROJECTS]),
-  get: async (id) => PROJECTS.find((p) => p.id === id) || null,
+  list: async (sort) => sortList([...(await loadProjects())], sort || 'order'),
+  filter: async (q) => {
+    const projects = await loadProjects()
+    return q?.id ? projects.filter((p) => p.id === q.id) : [...projects]
+  },
+  get: async (id) => (await loadProjects()).find((p) => p.id === id) || null,
 }
 
 const Lesson = {
@@ -54,8 +62,8 @@ const Lesson = {
 
 const Challenge = {
   list: async (sort) => {
-    const { CHALLENGES } = await loadContent()
-    return sortList([...CHALLENGES], sort || 'order')
+    const { CHALLENGE_SUMMARIES } = await import('@/content/challenges.generated.js')
+    return sortList([...CHALLENGE_SUMMARIES], sort || 'order')
   },
   filter: async (q) => {
     const { CHALLENGES } = await loadContent()
