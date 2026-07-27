@@ -2,6 +2,7 @@ const KEY = import.meta.env.VITE_POSTHOG_KEY || ''
 const HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
 
 import { getAttribution } from './attribution'
+import { sanitizeUrl as sanitizeUrlWithOrigin } from './redact'
 
 export const OPT_OUT_KEY = 'codeflow.analyticsOptOut'
 
@@ -41,18 +42,7 @@ export function setAnalyticsOptOut(optOut) {
 
 export const analyticsEnabled = Boolean(KEY) && typeof window !== 'undefined' && !signalsOptOut()
 
-const SENSITIVE_PARAMS = ['access_token', 'refresh_token', 'provider_token', 'provider_refresh_token', 'id_token', 'token', 'code']
-function sanitizeUrl(value) {
-  if (typeof value !== 'string' || !value) return value
-  try {
-    const u = new URL(value, window.location.origin)
-    u.hash = ''
-    for (const p of SENSITIVE_PARAMS) u.searchParams.delete(p)
-    return u.toString()
-  } catch {
-    return value.split('#')[0]
-  }
-}
+const sanitizeUrl = (value) => sanitizeUrlWithOrigin(value, window.location.origin)
 function sanitizeProperties(props) {
   if (!props) return props
   for (const k of Object.keys(props)) {
