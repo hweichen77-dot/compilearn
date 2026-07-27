@@ -131,12 +131,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const navigateToLogin = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = `${import.meta.env.BASE_URL || '/'}login`;
-    }
-  };
-
   return (
     <AuthContext.Provider value={{
       user,
@@ -152,7 +146,6 @@ export const AuthProvider = ({ children }) => {
       signInLocal,
       completeOnboarding,
       logout,
-      navigateToLogin,
     }}>
       {children}
     </AuthContext.Provider>

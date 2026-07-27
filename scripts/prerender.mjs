@@ -125,6 +125,13 @@ function run() {
     topWritten++
   }
 
+  const notFound = replaceHead(template, {
+    title: 'Page not found',
+    description: 'That page could not be found.',
+    url: ORIGIN,
+  }).replace('</head>', '<meta name="robots" content="noindex" />\n  </head>')
+  fs.writeFileSync(path.join(DIST, '404.html'), notFound)
+
   const urls = [
     ...TOP_PAGES.map((p) => `${BASE}${p === '/' ? '/' : p}`),
     ...routes.map((r) => `${BASE}${r.path}`),
