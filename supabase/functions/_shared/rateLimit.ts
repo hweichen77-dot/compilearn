@@ -81,9 +81,12 @@ async function consume(bucket: string, max: number, windowMs: number): Promise<b
 export function callerIp(req: Request): string {
   const edge = req.headers.get("cf-connecting-ip")?.trim();
   if (edge) return edge;
+
   const chain = req.headers.get("x-forwarded-for") ?? "";
   const hops = chain.split(",").map(h => h.trim()).filter(Boolean);
-  return hops.length > 0 ? hops[hops.length - 1] : "unknown";
+  if (hops.length > 0) return hops[hops.length - 1];
+
+  return req.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
 export interface RateOpts {
