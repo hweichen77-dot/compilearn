@@ -1,30 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
 import LiquidEther from "@/components/kit/LiquidEther";
-import HeroPlayground from "@/components/landing/HeroPlayground";
-import {
-  HeroGlow,
-  ShinyText,
-  RotatingText,
-  CountUp,
-  Reveal,
-  Stagger,
-  Item,
-  MagneticButton,
-  StarBorder,
-  ClickSpark,
-  GlareHover,
-  MagicBentoGrid,
-  MagicBentoCard,
-  SpotlightCard,
-  PixelCard,
-  Marquee,
-} from "@/components/kit";
+import { CountUp, Reveal, Stagger, Item } from "@/components/kit";
 import LivePlayground from "@/components/landing/LivePlayground";
 
 const prefersReducedMotion =
@@ -40,6 +22,27 @@ const NAV_LINKS = [
   ["Tracks", "#tracks"],
   ["Playground", "#playground"],
 ];
+
+function Accent({ children }) {
+  return <em className="u-serif italic text-[1.1em] text-[#5ED29C]">{children}</em>;
+}
+
+function Numeral({ children }) {
+  return (
+    <span className="u-display block text-[clamp(38px,4.4vw,58px)] leading-none tracking-[-0.04em] text-white">
+      {children}
+    </span>
+  );
+}
+
+function RuleLabel({ children }) {
+  return (
+    <div className="mt-4 flex items-center gap-4">
+      <span className="h-px w-10 shrink-0 bg-[#5ED29C]" />
+      <span className="text-[13px] font-semibold text-white">{children}</span>
+    </div>
+  );
+}
 
 function NavLinks() {
   const [hovered, setHovered] = useState(null);
@@ -101,133 +104,109 @@ function Nav() {
         </Link>
         <div className="flex items-center gap-4">
           <NavLinks />
-          <MagneticButton
+          <button
             onClick={() => navigate("/login")}
-            className="rounded-full bg-[#5ED29C] px-5 py-2 text-[13px] font-bold text-[#070B0A] shadow-[0_8px_30px_-10px_rgba(94,210,156,.7)]"
+            className="rounded-full bg-[#5ED29C] px-5 py-2 text-[13px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
           >
             Start a track
-          </MagneticButton>
+          </button>
         </div>
       </div>
     </nav>
   );
 }
 
-
 const TRACKS = [
   {
     key: "ai",
+    n: "01.",
     label: "AI Track",
-    body: "From your first API call to shipping real apps in production, built to be done in order.",
-    tag: "AI Track",
-    span: "md:col-span-4 md:row-span-2",
-    big: true,
+    title: "Your first API call to a running app",
+    body: "Starts where you have never called a model before and ends with something deployed. Meant to be done in order.",
+    tag: "modules",
     to: "AITrack",
     modules: ["Your First API Call", "Prompt Engineering", "Build a Chatbot", "Embeddings & Semantic Search", "Build a RAG System", "AI Agents & Tool Use", "Shipping to production"],
   },
   {
     key: "projects",
+    n: "02.",
     label: "AI Projects",
-    body: "Build real things you can show off, one guided step at a time.",
+    title: "Twenty-two things you can hand to someone",
+    body: "Each project is broken into steps you can follow, and what you end up with is a real app rather than an exercise.",
     tag: "22 projects",
-    span: "md:col-span-2",
     to: "Projects",
     chips: ["Chatbot", "Essay grader", "RAG search", "Vision app", "+18 more"],
   },
   {
     key: "csp",
+    n: "03.",
     label: "AP CSP",
-    body: "Full AP Computer Science Principles curriculum plus Create Task practice.",
+    title: "The whole Computer Science Principles course",
+    body: "Every Big Idea, plus Create Task practice and the multiple choice drills that show up on the exam.",
     tag: "48 lessons",
-    span: "md:col-span-2",
     to: "APCS",
     chips: ["Big Ideas 1–5", "Create Task", "MCQ practice"],
   },
   {
     key: "csa",
+    n: "04.",
     label: "AP CSA",
-    body: "Java from the ground up, with MCQ drills and free-response prep for the exam.",
+    title: "Java from nothing to free response",
+    body: "Starts with syntax and gets as far as recursion and sorting, then drills the exam format until it stops being scary.",
     tag: "80 lessons",
-    span: "md:col-span-6",
     to: "APCS",
-    chips: ["Java basics", "OOP & classes", "Arrays & ArrayList", "2D arrays", "Recursion", "Sorting & searching", "MCQ drills", "FRQ prep", "Labs", "Exam review"],
+    chips: ["Java basics", "OOP & classes", "Arrays & ArrayList", "2D arrays", "Recursion", "Sorting & searching", "MCQ drills", "FRQ prep"],
   },
 ];
 
 function TrackChip({ children }) {
   return (
-    <span className="u-mono text-[11px] rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/70">
+    <span className="u-mono text-[11px] rounded-full border border-white/12 px-3 py-1 text-white">
       {children}
     </span>
   );
 }
 
-function TrackCard({ t, modules }) {
+function TrackCell({ t, modules }) {
   const navigate = useNavigate();
-  const mods = modules && modules.length ? modules : t.modules;
-  const shown = t.big ? (mods || []).slice(0, 12) : [];
-  const extra = t.big ? (mods || []).length - shown.length : 0;
+  const count = t.key === "ai" && modules?.length ? modules.length : null;
   return (
-    <MagicBentoCard
-      span={t.span}
+    <button
+      type="button"
       onClick={() => navigate(createPageUrl(t.to))}
-      disableAnimations={prefersReducedMotion}
-      className="group flex cursor-pointer flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-[#5ED29C]/40"
+      className="group flex flex-col items-start bg-[#070B0A]/70 p-8 text-left backdrop-blur-sm transition-colors hover:bg-[#0C1210]/80 md:p-11"
     >
-      <div className="relative z-[5] flex h-full flex-col">
-        <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-lg border border-[#5ED29C]/25 bg-[#5ED29C]/10 u-mono text-xs font-semibold text-[#5ED29C]">
-            {t.key === "ai" ? ">_" : t.key === "projects" ? "◍" : t.key === "csp" ? "CSP" : "CSA"}
-          </span>
-          <h3 className="u-display text-lg font-bold text-white">{t.label}</h3>
-        </div>
-        <p className={`mt-3 text-sm leading-relaxed text-white/70 ${t.big ? "max-w-md" : "max-w-xs"}`}>
-          {t.body}
-        </p>
-
-        {t.big ? (
-          <ol className="mt-6 flex flex-1 flex-col justify-between border-l border-white/10 py-2 pl-5">
-            {shown.map((m, i) => (
-              <li key={m + i} className="flex items-baseline gap-3 u-mono text-[12.5px] text-white/80">
-                <span className="text-[#5ED29C]">{String(i + 1).padStart(2, "0")}</span>
-                <span className="min-w-0 truncate">{m}</span>
-              </li>
-            ))}
-            {extra > 0 && (
-              <li className="u-mono text-[12.5px] text-white/50 pl-8">+ {extra} more modules</li>
-            )}
-          </ol>
-        ) : (
-          <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
-            {t.chips.map((c) => (
-              <TrackChip key={c}>{c}</TrackChip>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center gap-2 pt-5">
-          <span className="u-mono text-xs text-[#5ED29C]">{t.big && mods && mods.length ? `${mods.length} modules` : t.tag}</span>
-          <ArrowRight size={14} aria-hidden="true" className="text-white/60 transition-transform group-hover:translate-x-1" />
-        </div>
+      <Numeral>{t.n}</Numeral>
+      <RuleLabel>{t.label}</RuleLabel>
+      <h3 className="u-display mt-7 text-[clamp(21px,2vw,27px)] font-extrabold leading-[1.12] tracking-[-0.03em] text-white">
+        {t.title}
+      </h3>
+      <p className="mt-4 max-w-[42ch] text-[15px] leading-relaxed text-white/92">{t.body}</p>
+      <div className="mt-7 flex flex-wrap gap-2">
+        {(t.chips || t.modules.slice(0, 4)).map((c) => (
+          <TrackChip key={c}>{c}</TrackChip>
+        ))}
       </div>
-    </MagicBentoCard>
+      <span className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-[#5ED29C]">
+        {count ? `${count} modules` : t.tag}
+        <ArrowRight size={14} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
+      </span>
+    </button>
   );
 }
 
 const STEPS = [
-  ["01", "Write a prompt", "Open a lesson and write your instructions. No install, no account to begin."],
-  ["02", "Run on a real LLM", "Your code and prompts execute against an actual language model, live in the browser."],
-  ["03", "Get auto-graded", "Challenges and the playground score your work against real rubrics. A win is a real win."],
-  ["04", "Level up", "Build a streak, climb the tracks, and ship projects you can actually show off."],
+  ["01.", "Write a prompt", "Open a lesson and type your instructions. There is nothing to install, and you do not need an account yet."],
+  ["02.", "Run it on a real model", "Your prompt goes to an actual language model and comes back with whatever that model really said."],
+  ["03.", "Get it graded", "Challenges score the output against a rubric, so passing means the thing worked and not that you clicked through."],
+  ["04.", "Keep going", "Hold a streak, move through the tracks, and end up with projects worth showing someone."],
 ];
 
 const STATS = [
-  [480, "+", "lessons & challenges"],
+  [480, "+", "lessons and challenges"],
   [128, "", "AP CS lessons"],
-  [3, "", "languages run in-browser"],
+  [3, "", "languages that run in the browser"],
 ];
-
-const MARQUEE_ITEMS = ["Python", "Java", "C++", "Real LLMs", "AP CSP", "AP CSA", "Prompting", "RAG & Search", "Agents", "Vision"];
 
 function Section({ id, children, className = "" }) {
   return (
@@ -262,12 +241,12 @@ export default function HomeLanding() {
             BFECC={false}
             iterationsPoisson={18}
             autoDemo
-            autoSpeed={0.6}
-            autoIntensity={2.6}
+            autoSpeed={0.85}
+            autoIntensity={3.6}
           />
         </div>
       )}
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[#070B0A]/55" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(102deg,rgba(7,11,10,.88)_0%,rgba(7,11,10,.66)_40%,rgba(7,11,10,.16)_100%)]" />
 
       <div className="relative z-10">
       <a
@@ -280,274 +259,168 @@ export default function HomeLanding() {
       <Nav />
 
       <main id="main-content">
-      <section className="relative overflow-hidden">
-        <HeroGlow color="#5ED29C" />
-
-        <div className="relative z-10 mx-auto grid min-h-[72vh] max-w-6xl items-center gap-12 px-6 pt-12 pb-8 lg:grid-cols-[1.05fr_.95fr]">
-          <div>
-            <Reveal>
-              <h1 className="u-display text-[clamp(40px,6.2vw,68px)] font-extrabold leading-[0.98] tracking-tight text-white">
-                Write the prompt.{" "}
-                <ShinyText
-                  text="Survive the attacks"
-                  color="#5ED29C"
-                  shineColor="#EAFFF5"
-                  speed={4}
-                  spread={70}
-                  disabled={prefersReducedMotion}
-                />
-                .
-              </h1>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <p className="measure mt-6 text-lg leading-relaxed text-white/70">
-                Learn how AI works by defending one. You write the system prompt that
-                guards a rule, then real attacks try to break it. Beat the playground,
-                then build real projects. No signup to start.
-              </p>
-            </Reveal>
-            <Reveal delay={0.14}>
-              <div className="mt-6 flex items-center gap-2 text-base text-white/92">
-                Build
-                <span className="u-mono text-[#F5A524]">&gt;_</span>
-                <RotatingText
-                  texts={["a chatbot", "a RAG search app", "a prompt that resists injection", "an AI code reviewer"]}
-                  auto={!prefersReducedMotion}
-                  rotationInterval={2200}
-                  staggerDuration={0.02}
-                  staggerFrom="last"
-                  splitLevelClassName="overflow-hidden"
-                  mainClassName="u-mono text-[#5ED29C]"
-                  transition={{ type: "spring", damping: 26, stiffness: 320 }}
-                />
-              </div>
-            </Reveal>
-            <Reveal delay={0.2}>
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                {prefersReducedMotion ? (
-                  <MagneticButton
-                    onClick={() => navigate("/login")}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#5ED29C] px-7 py-3.5 text-[15px] font-bold text-[#070B0A] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
-                  >
-                    Start building free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
-                  </MagneticButton>
-                ) : (
-                  <ClickSpark sparkColor="#5ED29C" sparkCount={10} sparkRadius={24} sparkSize={12} duration={500}>
-                    <StarBorder
-                      as="button"
-                      onClick={() => navigate("/login")}
-                      color="#5ED29C"
-                      speed="5s"
-                      thickness={2}
-                      className="star-brand text-[15px] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
-                    >
-                      Start building free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
-                    </StarBorder>
-                  </ClickSpark>
-                )}
-                <GlareHover
-                  width="auto"
-                  height="auto"
-                  background="transparent"
-                  borderColor="transparent"
-                  borderRadius="9999px"
-                  glareColor="#5ED29C"
-                  glareOpacity={0.25}
-                  glareAngle={-30}
-                  glareSize={220}
-                  style={{ display: "inline-grid" }}
-                >
-                  <a
-                    href="#playground"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:border-white/40"
-                  >
-                    <Play size={15} aria-hidden="true" /> Try the playground
-                  </a>
-                </GlareHover>
-              </div>
-            </Reveal>
-            <Reveal delay={0.26}>
-              <div className="mt-6">
-                <div className="u-mono text-[12.5px] text-white/55">Or get the desktop app:</div>
-                <div className="mt-3 flex items-center gap-3">
-                  {[
-                    [DOWNLOAD_MAC, "Download for macOS"],
-                    [DOWNLOAD_WIN, "Download for Windows"],
-                  ].map(([href, label]) => (
-                    <GlareHover
-                      key={label}
-                      width="auto"
-                      height="auto"
-                      background="transparent"
-                      borderColor="transparent"
-                      borderRadius="9999px"
-                      glareColor="#5ED29C"
-                      glareOpacity={0.22}
-                      glareAngle={-30}
-                      glareSize={220}
-                      style={{ display: "inline-grid" }}
-                    >
-                      <a
-                        href={href}
-                        rel="noopener"
-                        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:border-[#5ED29C]/60 whitespace-nowrap"
-                      >
-                        {label}
-                      </a>
-                    </GlareHover>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal delay={0.16}>
-            <HeroPlayground />
-          </Reveal>
-        </div>
-      </section>
-
-      <div className="border-y border-white/10 bg-black/20 py-2.5">
-        <Marquee speed={34}>
-          {MARQUEE_ITEMS.map((t) => (
-            <span key={t} className="u-mono text-[15px] text-white">
-              {t}
-              <span className="ml-6 text-[#5ED29C]/60">/</span>
+      <section className="relative mx-auto flex min-h-[86vh] max-w-6xl flex-col justify-center px-6 pb-20 pt-10">
+        <Reveal>
+          <h1 className="u-display max-w-[15ch] text-[clamp(46px,8.4vw,104px)] font-extrabold leading-[0.92] tracking-[-0.035em] text-white">
+            Write the prompt.
+            <span className="block text-[#5ED29C]">
+              Survive the attacks<span className="cl-caret" aria-hidden="true">_</span>
             </span>
-          ))}
-        </Marquee>
-      </div>
+          </h1>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-9 max-w-[52ch] text-[clamp(17px,1.5vw,20px)] leading-[1.6] text-white">
+            You write the system prompt that guards a secret. Then real attacks try to{" "}
+            <Accent>talk the model into giving it up</Accent>. It runs against an actual
+            language model in your browser, and you do not need an account to start.
+          </p>
+        </Reveal>
+        <Reveal delay={0.18}>
+          <div className="mt-11 flex flex-wrap items-center gap-8">
+            <button
+              onClick={() => navigate("/login")}
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#5ED29C] px-9 py-4 text-[16px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
+            >
+              Start building free
+              <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />
+            </button>
+            <a
+              href="#playground"
+              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-white"
+            >
+              <span className="border-b border-white/25 pb-0.5 transition-colors group-hover:border-[#5ED29C]">
+                Try the playground
+              </span>
+              <ArrowRight size={16} aria-hidden="true" className="text-[#5ED29C] transition-transform group-hover:translate-x-1" />
+            </a>
+          </div>
+        </Reveal>
+      </section>
 
       <Reveal>
         <LivePlayground />
       </Reveal>
 
-      <Section id="tracks" className="py-24">
+      <Section id="tracks" className="py-28">
         <Reveal>
-          <h2 className="u-display text-[clamp(28px,3.8vw,44px)] font-extrabold leading-tight tracking-tight text-white">
+          <h2 className="u-display max-w-[18ch] text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
             Start with AI. The rest is here when you want it.
           </h2>
         </Reveal>
         <Reveal delay={0.08}>
-          <p className="measure mt-4 text-lg text-white/70">
-            Pick a lane or wander across all four. From your first line of Python to
-            shipping with AI and prepping for the AP exam.
+          <p className="mt-6 max-w-[54ch] text-[17px] leading-relaxed text-white">
+            Four tracks. You can begin on any of them, and there is no rule against
+            running two at once.
           </p>
         </Reveal>
-        <div className="mt-12">
-          <MagicBentoGrid disableAnimations={prefersReducedMotion}>
-            {TRACKS.map((t) => (
-              <TrackCard key={t.key} t={t} modules={t.key === "ai" ? aiTitles : null} />
-            ))}
-          </MagicBentoGrid>
+        <div className="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 md:grid-cols-2">
+          {TRACKS.map((t) => (
+            <TrackCell key={t.key} t={t} modules={t.key === "ai" ? aiTitles : null} />
+          ))}
         </div>
       </Section>
 
-      <Section className="py-24">
+      <Section className="py-28">
         <Reveal>
-          <h2 className="u-display text-[clamp(28px,3.8vw,44px)] font-extrabold leading-tight tracking-tight text-white">
-            Write a prompt. Run it live. Know it stuck.
+          <h2 className="u-display max-w-[16ch] text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
+            What actually happens when you open a lesson
           </h2>
         </Reveal>
-        <Stagger className="mt-12 grid gap-4 md:grid-cols-4" gap={0.08}>
+        <Stagger className="mt-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4" gap={0.08}>
           {STEPS.map(([n, t, d]) => (
             <Item key={n}>
-              <PixelCard
-                variant="green"
-                className="h-full rounded-2xl border border-white/10 bg-white/[0.03] transition-colors hover:border-[#5ED29C]/40"
-              >
-                <div className="relative z-[1] p-6">
-                  <div className="u-mono text-sm text-white/40">step {n}</div>
-                  <h3 className="u-display mt-4 text-xl font-bold text-white">{t}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/70">{d}</p>
-                </div>
-              </PixelCard>
+              <div className="border-t border-white/12 pt-7">
+                <Numeral>{n}</Numeral>
+                <h3 className="u-display mt-6 text-[19px] font-extrabold tracking-[-0.02em] text-white">{t}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-white/92">{d}</p>
+              </div>
             </Item>
           ))}
         </Stagger>
       </Section>
 
-      <Section className="grid items-center gap-12 py-24 lg:grid-cols-2">
+      <Section className="grid items-center gap-16 py-28 lg:grid-cols-[1fr_1fr]">
         <Reveal>
-          <SpotlightCard spotlightColor="rgba(94, 210, 156, 0.22)">
-            <div className="flex flex-col gap-3">
-              <div className="self-end rounded-2xl border border-[#5ED29C]/25 bg-[#5ED29C]/10 px-4 py-3 u-mono text-[13px] text-white/80">
-                for i in range(len(nums)):
-                <br />
-                &nbsp;&nbsp;total =+ nums[i]
-              </div>
-              <div className="self-start rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-white/92">
-                <span className="u-mono mb-2 block text-[11px] uppercase tracking-widest text-[#5ED29C]">
-                  tutor
-                </span>
-                Your total never adds up because{" "}
-                <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">=+</code>{" "}
-                isn't what you think. Python reads it as{" "}
-                <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">total = (+nums[i])</code>
-                , so each loop overwrites total. You meant{" "}
-                <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">+=</code>. Flip
-                the two characters and it accumulates.
-              </div>
+          <div className="flex flex-col gap-3 rounded-2xl border border-white/12 bg-[#070B0A]/70 p-6 backdrop-blur-sm">
+            <div className="self-end rounded-2xl border border-[#5ED29C]/25 bg-[#5ED29C]/10 px-4 py-3 u-mono text-[13px] text-white">
+              for i in range(len(nums)):
+              <br />
+              &nbsp;&nbsp;total =+ nums[i]
             </div>
-          </SpotlightCard>
+            <div className="self-start rounded-2xl border border-white/12 px-4 py-3 text-sm leading-relaxed text-white">
+              <span className="u-mono mb-2 block text-[11px] text-[#5ED29C]">tutor</span>
+              Your total never adds up because{" "}
+              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">=+</code>{" "}
+              isn't what you think. Python reads it as{" "}
+              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">total = (+nums[i])</code>
+              , so each loop overwrites total. You meant{" "}
+              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">+=</code>. Flip
+              the two characters and it accumulates.
+            </div>
+          </div>
         </Reveal>
         <Reveal delay={0.1}>
           <div>
-            <h2 className="u-display text-[clamp(28px,3.6vw,42px)] font-extrabold leading-tight tracking-tight text-white">
-              A tutor that reads your actual code.
+            <h2 className="u-display max-w-[15ch] text-[clamp(28px,3.8vw,46px)] font-extrabold leading-[1.04] tracking-[-0.035em] text-white">
+              A tutor that reads <Accent>your actual code</Accent>
             </h2>
-            <p className="measure mt-4 text-lg text-white/70">
-              When something breaks, the tutor looks at the exact code you wrote,
-              explains the failure in plain English, then points at the one line to
-              change. No forum, no waiting. The teacher who's there when nobody else is.
+            <p className="mt-6 max-w-[50ch] text-[17px] leading-relaxed text-white">
+              When something breaks it reads the code you wrote, not a generic version of
+              the error. It says what went wrong in plain English and points at the line
+              to change. You get that at 1am on a Sunday, which is usually when you need it.
             </p>
           </div>
         </Reveal>
       </Section>
 
-      <div className="border-y border-white/10 bg-[radial-gradient(700px_300px_at_50%_0%,rgba(94,210,156,.06),transparent_70%)]">
-        <Section className="grid grid-cols-2 gap-8 py-14 md:grid-cols-4">
+      <div className="border-y border-white/12">
+        <Section className="grid grid-cols-2 gap-x-8 gap-y-14 py-20 md:grid-cols-4">
           {STATS.map(([v, suffix, label], i) => (
             <Reveal key={label} delay={i * 0.07}>
-              <b className="u-display block text-[clamp(34px,4.4vw,52px)] font-extrabold leading-none tracking-tight text-white">
+              <b className="u-display block text-[clamp(38px,5vw,62px)] font-extrabold leading-none tracking-[-0.04em] text-white">
                 <CountUp to={v} suffix={suffix} />
               </b>
-              <span className="u-mono mt-2 block text-[12.5px] text-white/60">{label}</span>
+              <span className="mt-5 block h-px w-10 bg-[#5ED29C]" />
+              <span className="mt-4 block text-[14px] font-medium text-white">{label}</span>
             </Reveal>
           ))}
           <Reveal delay={0.21}>
-            <b className="u-display block text-[clamp(34px,4.4vw,52px)] font-extrabold leading-none tracking-tight text-white">
+            <b className="u-display block text-[clamp(38px,5vw,62px)] font-extrabold leading-none tracking-[-0.04em] text-white">
               $0
             </b>
-            <span className="u-mono mt-2 block text-[12.5px] text-white/60">to start, no card</span>
+            <span className="mt-5 block h-px w-10 bg-[#5ED29C]" />
+            <span className="mt-4 block text-[14px] font-medium text-white">to start, and no card</span>
           </Reveal>
         </Section>
       </div>
 
-      <Section className="py-24">
-        <div className="grid items-start gap-14 md:grid-cols-[1.5fr_1fr]">
+      <Section className="py-28">
+        <div className="grid items-start gap-16 md:grid-cols-[1.5fr_1fr]">
           <Reveal>
             <figure className="m-0">
-              <span className="u-display block text-5xl leading-[0.6] text-white/15">&ldquo;</span>
-              <blockquote className="u-display mt-2 text-[clamp(24px,2.6vw,34px)] font-semibold leading-snug tracking-tight text-white">
-                Most people who try to learn to code never ship anything. Compilearn is
-                where you learn by{" "}
-                <span className="italic text-[#5ED29C]">building real things</span>.
+              <blockquote className="u-display text-[clamp(24px,2.9vw,38px)] font-extrabold leading-[1.14] tracking-[-0.03em] text-white">
+                Plenty of people finish a course and still have{" "}
+                <Accent>never built anything someone else could open</Accent>. That is the
+                part Compilearn is built around.
               </blockquote>
-              <figcaption className="mt-6 u-mono text-xs tracking-wide text-white/60">
-                the Compilearn mission
+              <figcaption className="mt-8 flex items-center gap-4">
+                <span className="h-px w-10 bg-[#5ED29C]" />
+                <span className="text-[13px] font-semibold text-white">the Compilearn mission</span>
               </figcaption>
             </figure>
           </Reveal>
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-10">
             {[
-              ["A tutor that makes you think it through instead of handing over the answer. That's the difference between learning and copying.", "how we teach"],
-              ["Run real Python, Java, and C++ right in the browser. No setup, no toy sandboxes. The same code you'd write for a real project.", "what you'll use"],
+              ["The tutor pushes you to work it out instead of pasting the answer in. Slower, and it is the only version that sticks.", "how we teach"],
+              ["Python, Java, and C++ all run in the browser. It is the same code you would write in a real editor, not a trimmed down teaching version.", "what you will use"],
             ].map(([q, who], i) => (
               <Reveal key={who} delay={0.08 + i * 0.08}>
-                <figure className="m-0 border-t border-white/10 pt-6">
-                  <blockquote className="text-[17px] leading-relaxed text-white/92">{q}</blockquote>
-                  <figcaption className="mt-4 u-mono text-xs tracking-wide text-white/60">{who}</figcaption>
+                <figure className="m-0 border-t border-white/12 pt-7">
+                  <blockquote className="text-[17px] leading-relaxed text-white">{q}</blockquote>
+                  <figcaption className="mt-5 flex items-center gap-4">
+                    <span className="h-px w-8 bg-[#5ED29C]" />
+                    <span className="text-[13px] font-semibold text-white">{who}</span>
+                  </figcaption>
                 </figure>
               </Reveal>
             ))}
@@ -555,25 +428,26 @@ export default function HomeLanding() {
         </div>
       </Section>
 
-      <Section className="py-28 text-center">
+      <Section className="py-32">
         <Reveal>
-          <h2 className="u-display mx-auto max-w-[16ch] text-[clamp(38px,6.4vw,78px)] font-extrabold leading-none tracking-tight text-white">
-            Start coding in the next 30 seconds.
+          <h2 className="u-display max-w-[14ch] text-[clamp(40px,7vw,88px)] font-extrabold leading-[0.94] tracking-[-0.04em] text-white">
+            Start coding in the next 30 seconds<span className="cl-caret" aria-hidden="true">_</span>
           </h2>
         </Reveal>
         <Reveal delay={0.08}>
-          <p className="mx-auto mt-6 max-w-[46ch] text-lg text-white/70">
-            Free, runs in your browser, no signup to begin. Open a lesson and run your
-            first line.
+          <p className="mt-8 max-w-[48ch] text-[18px] leading-relaxed text-white">
+            It is free, it runs in the browser, and you do not have to sign up first. Open
+            a lesson and run a line.
           </p>
         </Reveal>
         <Reveal delay={0.16}>
-          <MagneticButton
+          <button
             onClick={() => navigate("/login")}
-            className="mt-9 inline-flex items-center gap-2 rounded-full bg-[#5ED29C] px-8 py-4 text-[17px] font-bold text-[#070B0A] shadow-[0_10px_34px_-12px_rgba(94,210,156,.7)]"
+            className="mt-12 inline-flex items-center gap-2.5 rounded-full bg-[#5ED29C] px-10 py-4 text-[17px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
           >
-            Start learning free <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
-          </MagneticButton>
+            Start learning free
+            <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />
+          </button>
         </Reveal>
       </Section>
       </main>
@@ -585,28 +459,42 @@ export default function HomeLanding() {
 }
 
 function FooterLink({ to, href, children }) {
-  const cls = "block text-sm text-white/70 transition-colors hover:text-[#5ED29C]";
+  const cls = "block text-sm text-white transition-colors hover:text-[#5ED29C]";
   if (to) return <Link to={to} className={cls}>{children}</Link>;
   return <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>{children}</a>;
 }
 
 function SiteFooter() {
   return (
-    <footer className="border-t border-white/10 px-6 pb-24 pt-16">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-10">
+    <footer className="border-t border-white/12 px-6 pb-24 pt-20">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-12">
         <div className="max-w-sm">
           <div className="flex items-center gap-2">
             <span className="u-mono text-[#F5A524] text-lg font-semibold">&gt;_</span>
             <span className="u-display text-lg font-extrabold tracking-tight text-white">Compilearn</span>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-white/70">
-            You learn by building. Run real code and get an AI tutor that won't hand
-            you the answer.
+          <p className="mt-5 text-sm leading-relaxed text-white">
+            Run real code in the browser and get a tutor that makes you work it out.
           </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            {[
+              [DOWNLOAD_MAC, "Download for macOS"],
+              [DOWNLOAD_WIN, "Download for Windows"],
+            ].map(([href, label]) => (
+              <a
+                key={label}
+                href={href}
+                rel="noopener"
+                className="inline-flex items-center rounded-full border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:border-[#5ED29C]"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
         </div>
         <div>
-          <h3 className="u-mono mb-4 text-xs text-white/60">Product</h3>
-          <div className="space-y-2">
+          <h3 className="mb-5 text-[13px] font-semibold text-white">Product</h3>
+          <div className="space-y-2.5">
             <FooterLink to={createPageUrl("AITrack")}>AI track</FooterLink>
             <FooterLink to={createPageUrl("APCS")}>AP CS</FooterLink>
             <FooterLink to={createPageUrl("Challenges")}>Compete</FooterLink>
@@ -614,8 +502,8 @@ function SiteFooter() {
           </div>
         </div>
         <div>
-          <h3 className="u-mono mb-4 text-xs text-white/60">About</h3>
-          <div className="space-y-2">
+          <h3 className="mb-5 text-[13px] font-semibold text-white">About</h3>
+          <div className="space-y-2.5">
             <FooterLink href="https://github.com/hweichen77-dot/compilearn">GitHub</FooterLink>
             <FooterLink href="mailto:jason.huang317235@gmail.com">Contact</FooterLink>
             <FooterLink to={createPageUrl("Privacy")}>Privacy</FooterLink>
@@ -623,9 +511,9 @@ function SiteFooter() {
           </div>
         </div>
       </div>
-      <div className="mx-auto mt-16 max-w-6xl border-t border-white/10 pt-6 text-xs text-white/60">
+      <div className="mx-auto mt-20 max-w-6xl border-t border-white/12 pt-7 text-xs text-white">
         © 2026 Compilearn. Learn by building.
-        <p className="mt-2 leading-relaxed text-white/60">
+        <p className="mt-2 leading-relaxed text-white">
           Independent project, not affiliated with or endorsed by the College Board. AP®
           and Advanced Placement® are registered trademarks of the College Board. AI
           output can be inaccurate, so verify before relying on it.
