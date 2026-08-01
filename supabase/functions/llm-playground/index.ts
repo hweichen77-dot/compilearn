@@ -8,7 +8,7 @@ const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
 
 const MAX_SYSTEM_CHARS = 4000;
 const MAX_INPUT_CHARS = 600;
-const MAX_INPUTS = 3;
+const MAX_INPUTS = 5;
 const MAX_TOKENS_CAP = 256;
 
 Deno.serve(async (req: Request) => {
