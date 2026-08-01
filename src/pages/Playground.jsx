@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import LABS from '@/content/playgroundLabs'
+import ATTACKER_LABS from '@/content/attackerLabs'
 import LlmPlayground from '@/components/lesson/LlmPlayground'
+import AttackerLab from '@/components/lesson/AttackerLab'
+import PromptAudit from '@/components/lesson/PromptAudit'
 import useDocumentHead from '@/lib/useDocumentHead'
 import { Stagger, StaggerItem, HoverCard } from '@/lib/motion'
 import { ProgressBar, KIT } from '@/components/ui/kit'
@@ -25,6 +28,9 @@ export default function Playground() {
       return ''
     }
   })()
+  const [mode, setMode] = useState('defend')
+  const [attackerId, setAttackerId] = useState(ATTACKER_LABS[0].id)
+  const activeAttacker = ATTACKER_LABS.find((l) => l.id === attackerId) || ATTACKER_LABS[0]
   const daily = pickDailyLab(LABS)
   const hoursLeft = Math.max(1, Math.round(msUntilNextDay() / 3600000))
   const [activeId, setActiveId] = useState(initialId)
@@ -97,9 +103,48 @@ export default function Playground() {
         )}
       </StaggerItem>
 
+      <StaggerItem className="mb-6 flex gap-2" as="div">
+        {[['defend', 'Defend a prompt'], ['attack', 'Break one instead'], ['audit', 'Audit your own']].map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setMode(key)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold border"
+            style={{
+              borderColor: mode === key ? '#5a4a20' : '#241f14',
+              background: mode === key ? '#211c12' : 'transparent',
+              color: mode === key ? '#ECF3EF' : '#D6CDB8',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </StaggerItem>
+
+      {mode === 'audit' && (
+        <StaggerItem as="div"><PromptAudit /></StaggerItem>
+      )}
+
+      {mode !== 'audit' && (
       <StaggerItem className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6" as="div">
         <nav className="flex md:flex-col gap-2 overflow-x-auto">
-          {LABS.map((lab) => {
+          {mode === 'attack' && ATTACKER_LABS.map((lab) => (
+            <HoverCard
+              key={lab.id}
+              as="button"
+              type="button"
+              onClick={() => setAttackerId(lab.id)}
+              className="text-left px-3 py-3 rounded-lg border shrink-0 transition-colors"
+              style={{
+                borderColor: lab.id === attackerId ? '#5a4a20' : '#241f14',
+                background: lab.id === attackerId ? '#211c12' : 'transparent',
+              }}
+            >
+              <div className="text-sm font-semibold" style={{ color: lab.id === attackerId ? '#ECF3EF' : '#D6CDB8' }}>{lab.title}</div>
+              <div className="text-xs mt-0.5" style={{ color: '#FFFFFF' }}>{lab.tagline}</div>
+            </HoverCard>
+          ))}
+          {mode === 'defend' && LABS.map((lab) => {
             const on = lab.id === active.id
             const done = solvedIds.includes(lab.id)
             return (
@@ -125,6 +170,14 @@ export default function Playground() {
         </nav>
 
         <div>
+          {mode === 'attack' ? (
+            <AttackerLab
+              key={activeAttacker.id}
+              lab={activeAttacker}
+              labIndex={ATTACKER_LABS.findIndex((l) => l.id === activeAttacker.id) + 1}
+              labCount={ATTACKER_LABS.length}
+            />
+          ) : (
           <LlmPlayground
             key={active.id}
             lab={active}
@@ -132,8 +185,10 @@ export default function Playground() {
             labCount={LABS.length}
             initialPrompt={active.id === initialId ? replayPrompt : ''}
           />
+          )}
         </div>
       </StaggerItem>
+      )}
     </Stagger>
   )
 }

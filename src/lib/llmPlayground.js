@@ -26,6 +26,25 @@ export async function runPlayground({ systemPrompt, inputs, maxTokens = 200, mod
   }
 }
 
+export const COMPARE_MODELS = [
+  { id: 'openai/gpt-oss-120b', label: 'gpt-oss-120b' },
+  { id: 'llama-3.3-70b-versatile', label: 'llama-3.3-70b' },
+]
+
+export function compareRuns(runA, runB) {
+  const rows = runA.graded.map((a, i) => {
+    const b = runB.graded[i] || {}
+    return { input: a.input, a, b, agree: a.pass === b.pass }
+  })
+  return {
+    rows,
+    disagreements: rows.filter((r) => !r.agree).length,
+    passedA: runA.passed,
+    passedB: runB.passed,
+    total: runA.graded.length,
+  }
+}
+
 const normalize = (s) =>
   String(s ?? '')
     .toLowerCase()

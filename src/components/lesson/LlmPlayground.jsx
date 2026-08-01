@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Shield, ShieldAlert, CheckCircle2, Link2, Check } from 'lucide-react'
-import { runPlayground, gradePlayground } from '@/lib/llmPlayground'
+import { runPlayground, gradePlayground, COMPARE_MODELS, compareRuns } from '@/lib/llmPlayground'
 import { markLabSolved, isLabSolved, getSolvedLabs } from '@/lib/playgroundProgress'
 import { track, trackFunnel } from '@/lib/analytics'
 import { buildReplayUrl } from '@/lib/replayLink'
@@ -24,6 +24,9 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
   const [lastAttempt, setLastAttempt] = useState(null)
   const [diff, setDiff] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [compare, setCompare] = useState(false)
+  const [comparison, setComparison] = useState(null)
+  const [solvedChars, setSolvedChars] = useState(0)
 
   const activeInputs = lab.inputs.slice(0, unlocked)
   const locked = lab.inputs.length - unlocked
@@ -52,12 +55,23 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
       setDiff(null)
     }
 
-    const res = await runPlayground({ systemPrompt, inputs: activeInputs.map((i) => i.text) })
+    setComparison(null)
+    const texts = activeInputs.map((i) => i.text)
+    const res = await runPlayground({ systemPrompt, inputs: texts, model: compare ? COMPARE_MODELS[0].id : undefined })
     if (!res.ok) {
       if (res.configured === false) { setState({ status: 'unconfigured', error: res.error }); return }
       setState({ status: 'error', error: res.error }); return
     }
     const graded = gradePlayground(res.results, activeInputs)
+
+    if (compare) {
+      const alt = await runPlayground({ systemPrompt, inputs: texts, model: COMPARE_MODELS[1].id })
+      if (alt.ok) {
+        const gradedAlt = gradePlayground(alt.results, activeInputs)
+        setComparison(compareRuns(graded, gradedAlt))
+        track('playground_compared', { lab: lab.id, disagreements: compareRuns(graded, gradedAlt).disagreements })
+      }
+    }
     setResult({ ...graded, model: res.model, wave: unlocked })
     setState({ status: 'done' })
     setLastAttempt({ prompt: systemPrompt, passed: graded.passed, total: graded.total })
@@ -68,6 +82,7 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
     if (clearedEverything) {
       markLabSolved(lab.id)
       setSolved(true)
+      setSolvedChars(systemPrompt.trim().length)
     }
     try {
       track('playground_run', { lab: lab.id, passed: graded.passed, total: graded.total })
@@ -160,6 +175,10 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
         >
           {state.status === 'running' ? 'Running the attacks…' : `Run ${unlocked} attacks ▶`}
         </button>
+        <label className="text-xs inline-flex items-center gap-2 cursor-pointer" style={{ color: '#FFFFFF' }}>
+          <input type="checkbox" checked={compare} onChange={(e) => setCompare(e.target.checked)} />
+          Compare two models
+        </label>
       </div>
 
       {state.status === 'error' && (
@@ -231,6 +250,28 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
             )}
           </div>
 
+          {comparison && (
+            <div className="rounded-xl p-4 mb-4" style={{ background: '#050807', border: '1px solid #26302B' }}>
+              <div className="text-sm font-bold" style={{ color: '#ECF3EF' }}>
+                {COMPARE_MODELS[0].label} held {comparison.passedA}/{comparison.total}, {COMPARE_MODELS[1].label} held {comparison.passedB}/{comparison.total}
+              </div>
+              <p className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
+                {comparison.disagreements === 0
+                  ? 'Both models behaved the same on every attack, so this prompt is not model specific.'
+                  : `They disagreed on ${comparison.disagreements} of ${comparison.total}. A prompt that only holds on one model is not a fix.`}
+              </p>
+              <div className="mt-3 space-y-2">
+                {comparison.rows.filter((r) => !r.agree).map((r, i) => (
+                  <div key={i} className="rounded-md p-2 text-xs" style={{ background: '#1B1913', border: '1px solid #3a331f' }}>
+                    <div className="font-mono mb-1" style={{ color: '#FFFFFF' }}>{r.input}</div>
+                    <div style={{ color: r.a.pass ? held : broken }}>{COMPARE_MODELS[0].label}: {r.a.pass ? 'HELD' : 'BROKEN'}</div>
+                    <div style={{ color: r.b.pass ? held : broken }}>{COMPARE_MODELS[1].label}: {r.b.pass ? 'HELD' : 'BROKEN'}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {result.graded.map((g, i) => (
               <div key={i} className="rounded-lg p-3" style={{ background: '#050807', border: '1px solid #221d12' }}>
@@ -265,7 +306,7 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
         </div>
       )}
 
-      <LabLeaderboard lab={lab} refreshKey={boardKey} />
+      <LabLeaderboard lab={lab} refreshKey={boardKey} bestChars={solvedChars} />
     </div>
   )
 }

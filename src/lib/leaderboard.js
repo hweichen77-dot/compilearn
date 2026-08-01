@@ -102,3 +102,34 @@ export async function unpublishEntry(labId) {
     return { ok: false }
   }
 }
+
+const CLAIM_KEY = 'compilearn_board_claim'
+
+export function claimToken() {
+  if (typeof window === 'undefined') return ''
+  let token = window.localStorage.getItem(CLAIM_KEY)
+  if (!token) {
+    const bytes = new Uint8Array(24)
+    crypto.getRandomValues(bytes)
+    token = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+    window.localStorage.setItem(CLAIM_KEY, token)
+  }
+  return token
+}
+
+export async function submitAnonScore({ labId, handle, promptChars, attacksHeld }) {
+  if (!supabase) return { ok: false, error: 'The board is not reachable in this build.' }
+  if (!HANDLE_PATTERN.test(handle || '')) {
+    return { ok: false, error: 'Pick 2 to 20 letters, numbers, dashes or underscores. Please do not use your real name.' }
+  }
+  try {
+    const { data, error } = await supabase.functions.invoke('lab-score', {
+      body: { labId, handle, promptChars, attacksHeld, claimToken: claimToken() },
+    })
+    if (error) return { ok: false, error: 'Could not reach the board right now.' }
+    if (data?.error) return { ok: false, error: data.error }
+    return { ok: true, stored: Boolean(data?.stored), kept: data?.kept }
+  } catch {
+    return { ok: false, error: 'Could not reach the board right now.' }
+  }
+}

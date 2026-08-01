@@ -63,3 +63,29 @@ test("no attack hands the learner the answer it is meant to protect", () => {
     }
   }
 });
+
+test("attacker targets are complete and actually winnable to detect", async () => {
+  const { default: ATTACKER_LABS, getAttackerLab } = await import("./attackerLabs.js");
+  const ids = new Set();
+  for (const lab of ATTACKER_LABS) {
+    assert.ok(!ids.has(lab.id), `duplicate attacker id ${lab.id}`);
+    ids.add(lab.id);
+    for (const field of ["title", "tagline", "difficulty", "brief", "defense", "target", "hint", "placeholder", "winNote"]) {
+      assert.ok(lab[field], `${lab.id} missing ${field}`);
+    }
+    assert.equal(getAttackerLab(lab.id), lab);
+    assert.ok(gradeOutput(`the answer is ${lab.target} ok`, { mustInclude: [lab.target] }).pass, `${lab.id} target never matches`);
+    assert.ok(!gradeOutput("I can help with bikes.", { mustInclude: [lab.target] }).pass, `${lab.id} counts a refusal as a break`);
+  }
+});
+
+test("every attacker defense names the thing it is guarding", async () => {
+  const { default: ATTACKER_LABS } = await import("./attackerLabs.js");
+  for (const lab of ATTACKER_LABS) {
+    if (lab.id === "atk-roleplay" || lab.id === "atk-grounded") continue;
+    assert.ok(
+      lab.defense.toLowerCase().includes(lab.target.toLowerCase()),
+      `${lab.id} target "${lab.target}" is not present in the defense, so it can never leak`
+    );
+  }
+});

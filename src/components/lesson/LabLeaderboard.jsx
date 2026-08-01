@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Trophy } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
-import { fetchLeaderboard, getMyEntry, publishEntry, unpublishEntry } from '@/lib/leaderboard'
+import { fetchLeaderboard, getMyEntry, publishEntry, unpublishEntry, submitAnonScore } from '@/lib/leaderboard'
 import { track } from '@/lib/analytics'
 
 const ACCENT = '#5ED29C'
 const MUTED = 'rgba(236,243,239,0.72)'
 
-export default function LabLeaderboard({ lab, refreshKey }) {
+export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
   const { isAuthenticated } = useAuth()
   const [rows, setRows] = useState([])
   const [mine, setMine] = useState(null)
@@ -29,6 +29,17 @@ export default function LabLeaderboard({ lab, refreshKey }) {
     setBusy(false)
     if (!res.ok) { setError(res.error); return }
     track('leaderboard_joined', { lab: lab.id })
+    setHandle('')
+    load()
+  }
+
+  const joinAnon = async () => {
+    setBusy(true)
+    setError('')
+    const res = await submitAnonScore({ labId: lab.id, handle: handle.trim(), promptChars: bestChars, attacksHeld: lab.inputs.length })
+    setBusy(false)
+    if (!res.ok) { setError(res.error); return }
+    track('leaderboard_joined_anon', { lab: lab.id })
     setHandle('')
     load()
   }
@@ -105,9 +116,35 @@ export default function LabLeaderboard({ lab, refreshKey }) {
         </div>
       )}
 
-      {!isAuthenticated && (
+      {!isAuthenticated && bestChars > 0 && (
+        <div className="mt-3 pt-3" style={{ borderTop: '1px solid #17201C' }}>
+          <p className="text-xs" style={{ color: MUTED }}>
+            You solved this in {bestChars} characters. Pick a handle to appear on the board, no account needed.
+            Use a nickname rather than your real name.
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              placeholder="handle"
+              maxLength={20}
+              aria-label="Leaderboard handle"
+              className="px-2 py-1 rounded-md text-xs"
+              style={{ background: '#050807', color: '#ECF3EF', border: '1px solid #26302B' }}
+            />
+            <button type="button" onClick={joinAnon} disabled={busy || !handle.trim()}
+              className="px-3 py-1 rounded-md text-xs font-bold disabled:opacity-50"
+              style={{ background: '#5ED29C', color: '#07130C' }}>
+              Put me on the board
+            </button>
+          </div>
+          {error && <p className="text-xs mt-1" style={{ color: '#FF6B5C' }}>{error}</p>}
+        </div>
+      )}
+
+      {!isAuthenticated && !bestChars && (
         <p className="text-xs mt-3 pt-3" style={{ color: MUTED, borderTop: '1px solid #17201C' }}>
-          Sign in to put a score on the board. You choose a handle, and you can remove yourself any time.
+          Solve the lab to claim a place on the board. No account needed.
         </p>
       )}
     </div>

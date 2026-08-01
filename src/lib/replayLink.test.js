@@ -42,3 +42,13 @@ test("identical prompts report no change", () => {
   assert.equal(d.changed, false);
   assert.equal(d.added + d.removed, 0);
 });
+
+test("comparison flags only the attacks where the models disagree", async () => {
+  const { compareRuns } = await import("./llmPlayground.js");
+  const a = { passed: 2, graded: [{ input: "x", pass: true }, { input: "y", pass: true }, { input: "z", pass: false }] };
+  const b = { passed: 1, graded: [{ input: "x", pass: true }, { input: "y", pass: false }, { input: "z", pass: false }] };
+  const c = compareRuns(a, b);
+  assert.equal(c.total, 3);
+  assert.equal(c.disagreements, 1);
+  assert.deepEqual(c.rows.filter((r) => !r.agree).map((r) => r.input), ["y"]);
+});
