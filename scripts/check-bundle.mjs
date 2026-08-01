@@ -16,7 +16,7 @@ if (!fs.existsSync(indexHtml)) {
 }
 
 const html = fs.readFileSync(indexHtml, 'utf8')
-const refs = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+\.js)"/g)].map((m) => m[1]))]
+const refs = [...new Set([...html.matchAll(/(?:src|href)="[^"]*?(assets\/[^"]+\.js)"/g)].map((m) => m[1]))]
 
 if (refs.length === 0) {
   console.error('[check-bundle] no eager scripts found in index.html, the parser is probably stale')
