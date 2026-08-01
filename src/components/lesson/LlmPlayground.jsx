@@ -1,22 +1,42 @@
 import React, { useState } from 'react'
-import { Shield, ShieldAlert, CheckCircle2 } from 'lucide-react'
+import { Shield, ShieldAlert, CheckCircle2, Link2, Check } from 'lucide-react'
 import { runPlayground, gradePlayground } from '@/lib/llmPlayground'
 import { markLabSolved, isLabSolved, getSolvedLabs } from '@/lib/playgroundProgress'
 import { track, trackFunnel } from '@/lib/analytics'
+import { buildReplayUrl } from '@/lib/replayLink'
+import { diffPrompts } from '@/lib/promptDiff'
 import ShareResult from './ShareResult'
 import SaveProgressPrompt from './SaveProgressPrompt'
 import { submitLabScore } from '@/lib/leaderboard'
 import LabLeaderboard from './LabLeaderboard'
 
-export default function LlmPlayground({ lab, labIndex, labCount }) {
-  const [systemPrompt, setSystemPrompt] = useState('')
+const FIRST_WAVE = 3
+
+export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt = '' }) {
+  const [systemPrompt, setSystemPrompt] = useState(initialPrompt)
   const [state, setState] = useState({ status: 'idle' })
   const [result, setResult] = useState(null)
   const [showHint, setShowHint] = useState(false)
   const [solved, setSolved] = useState(() => isLabSolved(lab.id))
   const [hasRun, setHasRun] = useState(false)
   const [boardKey, setBoardKey] = useState(0)
-  const [justSolved, setJustSolved] = useState(false)
+  const [unlocked, setUnlocked] = useState(() => (isLabSolved(lab.id) ? lab.inputs.length : Math.min(FIRST_WAVE, lab.inputs.length)))
+  const [lastAttempt, setLastAttempt] = useState(null)
+  const [diff, setDiff] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  const activeInputs = lab.inputs.slice(0, unlocked)
+  const locked = lab.inputs.length - unlocked
+
+  const copyReplay = async () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.compilearn.com'
+    try {
+      await navigator.clipboard.writeText(buildReplayUrl({ origin, labId: lab.id, prompt: systemPrompt }))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      track('playground_replay_copied', { lab: lab.id })
+    } catch {  }
+  }
 
   const run = async () => {
     if (!hasRun) {
@@ -25,22 +45,33 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
     }
     setState({ status: 'running' })
     setResult(null)
-    const res = await runPlayground({ systemPrompt, inputs: lab.inputs.map((i) => i.text) })
+
+    if (lastAttempt && lastAttempt.prompt !== systemPrompt) {
+      setDiff({ ...diffPrompts(lastAttempt.prompt, systemPrompt), previousPassed: lastAttempt.passed, previousTotal: lastAttempt.total })
+    } else {
+      setDiff(null)
+    }
+
+    const res = await runPlayground({ systemPrompt, inputs: activeInputs.map((i) => i.text) })
     if (!res.ok) {
       if (res.configured === false) { setState({ status: 'unconfigured', error: res.error }); return }
       setState({ status: 'error', error: res.error }); return
     }
-    const graded = gradePlayground(res.results, lab.inputs)
-    setResult({ ...graded, model: res.model })
+    const graded = gradePlayground(res.results, activeInputs)
+    setResult({ ...graded, model: res.model, wave: unlocked })
     setState({ status: 'done' })
-    if (graded.allPass) {
-      const isNew = markLabSolved(lab.id)
+    setLastAttempt({ prompt: systemPrompt, passed: graded.passed, total: graded.total })
+
+    const clearedEverything = graded.allPass && unlocked === lab.inputs.length
+    if (graded.allPass && locked > 0) setUnlocked(lab.inputs.length)
+
+    if (clearedEverything) {
+      markLabSolved(lab.id)
       setSolved(true)
-      setJustSolved(isNew)
     }
     try {
       track('playground_run', { lab: lab.id, passed: graded.passed, total: graded.total })
-      if (graded.allPass) {
+      if (clearedEverything) {
         track('playground_solved', { lab: lab.id, prompt_chars: systemPrompt.trim().length })
         trackFunnel('challengeComplete', { lab: lab.id, prompt_chars: systemPrompt.trim().length })
         submitLabScore({ labId: lab.id, promptChars: systemPrompt.trim().length, attacksHeld: graded.total })
@@ -73,7 +104,7 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
           )}
           <span className="text-[11px] px-2 py-1 rounded-md border uppercase tracking-wide inline-flex items-center gap-1"
             style={{ borderColor: '#3a331f', color: '#FFFFFF' }}>
-            <ShieldAlert size={11} style={{ color: amber }} /> {lab.inputs.length} attacks
+            <ShieldAlert size={11} style={{ color: amber }} /> {unlocked} of {lab.inputs.length} attacks
           </span>
         </div>
       </div>
@@ -85,10 +116,17 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
           <label htmlFor="llm-system-prompt" className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#FFFFFF' }}>
             Your defensive system prompt
           </label>
-          <button type="button" onClick={() => setShowHint((v) => !v)}
-            className="text-xs underline" style={{ color: amber }}>
-            {showHint ? 'Hide hint' : 'Need a hint?'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={copyReplay} disabled={!systemPrompt.trim()}
+              className="text-xs inline-flex items-center gap-1 disabled:opacity-40" style={{ color: amber }}>
+              {copied ? <Check size={12} /> : <Link2 size={12} />}
+              {copied ? 'Link copied' : 'Copy replay link'}
+            </button>
+            <button type="button" onClick={() => setShowHint((v) => !v)}
+              className="text-xs underline" style={{ color: amber }}>
+              {showHint ? 'Hide hint' : 'Need a hint?'}
+            </button>
+          </div>
         </div>
         {showHint && (
           <p className="text-xs mb-2 p-3 rounded-md" style={{ background: '#211c12', color: '#FFFFFF' }}>{lab.hint}</p>
@@ -102,6 +140,14 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
           className="w-full rounded-lg p-3 text-sm font-mono resize-y focus:outline-none focus:border-[#5ED29C]"
           style={{ background: '#050807', color: '#ECF3EF', border: '1px solid #2a2519' }}
         />
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[11px]" style={{ color: '#FFFFFF' }}>{systemPrompt.trim().length} characters</span>
+          {locked > 0 && (
+            <span className="text-[11px]" style={{ color: '#FFFFFF' }}>
+              Hold these {unlocked} to unlock {locked} harder {locked === 1 ? 'attack' : 'attacks'}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-3 mt-3">
@@ -112,7 +158,7 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
           className="px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
           style={{ background: amber, color: '#1a1509' }}
         >
-          {state.status === 'running' ? 'Running the attacks…' : 'Run the attacks ▶'}
+          {state.status === 'running' ? 'Running the attacks…' : `Run ${unlocked} attacks ▶`}
         </button>
       </div>
 
@@ -129,7 +175,6 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
 
       {result && (
         <div className="mt-5">
-          {}
           <div className="rounded-xl p-4 mb-4" style={{ background: result.allPass ? '#12200f' : '#1B1913', border: `1px solid ${result.allPass ? '#2f5a25' : '#26302B'}` }}>
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
@@ -142,8 +187,34 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
               </div>
               <ShareResult lab={lab} passed={result.passed} total={result.total} allPass={result.allPass} />
             </div>
-            {}
-            {result.allPass && (
+
+            {diff && diff.changed && (
+              <div className="mt-3 rounded-lg p-3" style={{ background: '#050807', border: '1px solid #221d12' }}>
+                <div className="text-[11px] font-semibold mb-1" style={{ color: '#FFFFFF' }}>
+                  What changed since your last run, {diff.previousPassed}/{diff.previousTotal} then, {result.passed}/{result.total} now
+                </div>
+                <p className="text-xs font-mono leading-relaxed" style={{ color: '#FFFFFF' }}>
+                  {diff.parts.map((p, i) => (
+                    <span key={i} style={
+                      p.type === 'added' ? { background: 'rgba(76,201,138,0.18)', color: held }
+                        : p.type === 'removed' ? { background: 'rgba(255,107,92,0.14)', color: broken, textDecoration: 'line-through' }
+                          : { color: 'rgba(255,255,255,0.75)' }
+                    }>{p.value}</span>
+                  ))}
+                </p>
+                <div className="text-[11px] mt-1" style={{ color: '#FFFFFF' }}>
+                  {diff.added} words added, {diff.removed} removed
+                </div>
+              </div>
+            )}
+
+            {result.allPass && result.wave < lab.inputs.length && (
+              <p className="text-sm mt-3 font-semibold" style={{ color: amber }}>
+                That wave held. {lab.inputs.length - result.wave} harder {lab.inputs.length - result.wave === 1 ? 'attack is' : 'attacks are'} now unlocked, run again to finish the lab.
+              </p>
+            )}
+
+            {result.allPass && result.wave === lab.inputs.length && (
               <SaveProgressPrompt labId={lab.id} solvedCount={getSolvedLabs().length} totalLabs={labCount || 0} />
             )}
             <div className="flex flex-wrap gap-2 mt-4">
@@ -155,12 +226,11 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
                 </div>
               ))}
             </div>
-            {result.allPass && (
+            {result.allPass && result.wave === lab.inputs.length && (
               <p className="text-sm mt-3" style={{ color: '#9FE0A8' }}>{lab.successNote}</p>
             )}
           </div>
 
-          {}
           <div className="space-y-3">
             {result.graded.map((g, i) => (
               <div key={i} className="rounded-lg p-3" style={{ background: '#050807', border: '1px solid #221d12' }}>
@@ -174,8 +244,20 @@ export default function LlmPlayground({ lab, labIndex, labCount }) {
                 <pre className="text-sm mt-2 whitespace-pre-wrap font-mono" style={{ color: '#FFFFFF' }}>
                   {g.output || g.error || '(empty)'}
                 </pre>
-                {!g.pass && g.reasons?.length > 0 && (
-                  <p className="text-xs mt-1" style={{ color: '#FFFFFF' }}>× {g.reasons.join(' · ')}</p>
+                {!g.pass && g.findings?.length > 0 && (
+                  <div className="mt-2 rounded-md p-2" style={{ background: '#1a0f0f', border: '1px solid #4a2020' }}>
+                    {g.findings.map((f, k) => (
+                      <div key={k} className="text-xs" style={{ color: '#FFFFFF' }}>
+                        <span style={{ color: broken, fontWeight: 700 }}>
+                          {f.kind === 'leaked' ? 'Leaked' : f.kind === 'missing' ? 'Missing' : 'No refusal'}
+                        </span>{' '}
+                        {f.label}
+                        {f.excerpt && (
+                          <span className="block font-mono mt-1" style={{ color: '#FFC9C1' }}>“{f.excerpt}”</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

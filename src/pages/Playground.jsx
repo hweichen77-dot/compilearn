@@ -6,6 +6,8 @@ import useDocumentHead from '@/lib/useDocumentHead'
 import { Stagger, StaggerItem, HoverCard } from '@/lib/motion'
 import { ProgressBar, KIT } from '@/components/ui/kit'
 import { getSolvedLabs, PLAYGROUND_CHANGED_EVENT } from '@/lib/playgroundProgress'
+import { readReplayPrompt } from '@/lib/replayLink'
+import { pickDailyLab, msUntilNextDay } from '@/lib/dailyLab'
 
 export default function Playground() {
 
@@ -16,6 +18,15 @@ export default function Playground() {
     } catch {  }
     return LABS[0]?.id
   })()
+  const replayPrompt = (() => {
+    try {
+      return readReplayPrompt(window.location.search)
+    } catch {
+      return ''
+    }
+  })()
+  const daily = pickDailyLab(LABS)
+  const hoursLeft = Math.max(1, Math.round(msUntilNextDay() / 3600000))
   const [activeId, setActiveId] = useState(initialId)
   const active = LABS.find((l) => l.id === activeId) || LABS[0]
 
@@ -62,6 +73,28 @@ export default function Playground() {
           </div>
           <ProgressBar pct={solvedPct} color={KIT.emerald} height={8} glow={false} />
         </div>
+
+        {daily && (
+          <div className="mt-6 rounded-xl border p-4 flex items-center justify-between gap-4 flex-wrap"
+            style={{ borderColor: '#2f5a25', background: '#12200f' }}>
+            <div>
+              <div className="text-sm font-bold" style={{ color: '#ECF3EF' }}>
+                Today’s lab: {daily.title}
+              </div>
+              <p className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
+                Everyone gets the same lab today. It changes at midnight UTC, in about {hoursLeft} {hoursLeft === 1 ? 'hour' : 'hours'}.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveId(daily.id)}
+              className="px-4 py-2 rounded-lg text-sm font-bold shrink-0"
+              style={{ background: KIT.emerald, color: '#07130C' }}
+            >
+              {activeId === daily.id ? 'You are on it' : 'Play today’s lab'}
+            </button>
+          </div>
+        )}
       </StaggerItem>
 
       <StaggerItem className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6" as="div">
@@ -97,6 +130,7 @@ export default function Playground() {
             lab={active}
             labIndex={LABS.findIndex((l) => l.id === active.id) + 1}
             labCount={LABS.length}
+            initialPrompt={active.id === initialId ? replayPrompt : ''}
           />
         </div>
       </StaggerItem>

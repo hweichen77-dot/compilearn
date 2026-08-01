@@ -5,6 +5,8 @@ import { authenticate } from "../_shared/auth.ts";
 
 const GROQ_API_KEY = Deno.env.get("PLAYGROUND_GROQ_API_KEY") ?? Deno.env.get("GROQ_API_KEY");
 const MODEL = Deno.env.get("GROQ_MODEL") ?? "openai/gpt-oss-120b";
+const ALT_MODEL = Deno.env.get("GROQ_ALT_MODEL") ?? "llama-3.3-70b-versatile";
+const ALLOWED_MODELS = new Set([MODEL, ALT_MODEL]);
 
 const MAX_SYSTEM_CHARS = 4000;
 const MAX_INPUT_CHARS = 600;
@@ -32,7 +34,7 @@ Deno.serve(async (req: Request) => {
   });
   if (limitErr) return json({ error: limitErr }, 429);
 
-  let payload: { systemPrompt?: string; inputs?: unknown; maxTokens?: number };
+  let payload: { systemPrompt?: string; inputs?: unknown; maxTokens?: number; model?: string };
   try {
     payload = await req.json();
   } catch {
@@ -55,6 +57,8 @@ Deno.serve(async (req: Request) => {
   }
 
   const maxTokens = Math.min(Number(payload.maxTokens) || 200, MAX_TOKENS_CAP);
+  const requested = typeof payload.model === "string" ? payload.model : "";
+  const model = ALLOWED_MODELS.has(requested) ? requested : MODEL;
   const endpoint = "https://api.groq.com/openai/v1/chat/completions";
 
   try {
@@ -67,7 +71,7 @@ Deno.serve(async (req: Request) => {
             authorization: `Bearer ${GROQ_API_KEY}`,
           },
           body: JSON.stringify({
-            model: MODEL,
+            model,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: input },
@@ -88,7 +92,7 @@ Deno.serve(async (req: Request) => {
         return { input, output };
       }),
     );
-    return json({ configured: true, model: MODEL, results });
+    return json({ configured: true, model, models: [MODEL, ALT_MODEL], results });
   } catch (e) {
     console.error("llm-playground error:", e);
     return json({ error: "internal error" }, 500);
