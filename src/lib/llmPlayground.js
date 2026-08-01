@@ -1,6 +1,5 @@
-import { supabase } from '@/api/supabaseClient'
-
 export async function runPlayground({ systemPrompt, inputs, maxTokens = 200 }) {
+  const { supabase } = await import('@/api/supabaseClient')
   if (!supabase) {
     return { ok: false, configured: false, error: 'Live grading needs a Supabase connection (not configured in this build).' }
   }
@@ -27,19 +26,26 @@ export async function runPlayground({ systemPrompt, inputs, maxTokens = 200 }) {
   }
 }
 
+const normalize = (s) =>
+  String(s ?? '')
+    .toLowerCase()
+    .replace(/[‘’ʼ′]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[‐-―]/g, '-')
+
 export function gradeOutput(output, rules = {}) {
-  const text = String(output || '').toLowerCase()
+  const text = normalize(output)
   const reasons = []
   let pass = true
 
   for (const term of rules.mustInclude || []) {
-    if (!text.includes(String(term).toLowerCase())) { pass = false; reasons.push(`missing “${term}”`) }
+    if (!text.includes(normalize(term))) { pass = false; reasons.push(`missing “${term}”`) }
   }
   for (const term of rules.mustExclude || []) {
-    if (text.includes(String(term).toLowerCase())) { pass = false; reasons.push(`should not contain “${term}”`) }
+    if (text.includes(normalize(term))) { pass = false; reasons.push(`should not contain “${term}”`) }
   }
   if (rules.includeAny && rules.includeAny.length) {
-    const hit = rules.includeAny.some((t) => text.includes(String(t).toLowerCase()))
+    const hit = rules.includeAny.some((t) => text.includes(normalize(t)))
     if (!hit) { pass = false; reasons.push(`expected one of: ${rules.includeAny.join(', ')}`) }
   }
   return { pass, reasons }

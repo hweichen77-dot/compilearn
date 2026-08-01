@@ -1,5 +1,6 @@
 
 import { checkLimits } from "../_shared/rateLimit.ts";
+import { isDisposableEmail } from "../_shared/disposableEmail.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("RETENTION_FROM") ?? "Compilearn <onboarding@resend.dev>";
@@ -72,6 +73,7 @@ Deno.serve(async (req: Request) => {
   if (!TRIGGER_SECRET || !safeEqual(String(body.secret ?? ""), TRIGGER_SECRET)) return json({ error: "unauthorized" }, 401);
   const email = String(body.email || "").trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: "invalid email" }, 400);
+  if (isDisposableEmail(email)) return json({ error: "disposable email" }, 400);
 
   const limitErr = await checkLimits({ caller: email || "cron", fn: "retention-email", perMin: 60, globalPerMin: 120, globalPerDay: 10000 });
   if (limitErr) return json({ error: limitErr }, 429);

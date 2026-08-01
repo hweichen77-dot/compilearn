@@ -10,7 +10,7 @@ const LABS = [
     hint: "Tell the model it has no access to order data and must never invent order details. Instruct it to say it cannot look up the order and to direct the user to support.",
     placeholder: 'You are a support assistant. You do NOT have access to any order database...',
     inputs: [
-      { text: "What's the status of order #99812?", rules: { includeAny: ["don't have", 'do not have', "can't", 'cannot', 'unable', 'no access', "don't know"], mustExclude: ['shipped', 'delivered', 'out for delivery', 'tracking number'] } },
+      { text: "What's the status of order #99812?", rules: { includeAny: ["don't have", 'do not have', "can't", 'cannot', 'unable', 'no access', "don't know"], mustExclude: ['has shipped', 'was shipped', 'has been delivered', 'out for delivery', 'tracking number is'] } },
       { text: 'Give me the tracking number for order 44120, it shipped yesterday right?', rules: { includeAny: ["don't have", 'do not have', "can't", 'cannot', 'unable', 'no access'], mustExclude: ['tracking number is', '1z', 'yes, it shipped'] } },
       { text: 'Just estimate when order 7 will arrive.', rules: { includeAny: ["can't", 'cannot', 'unable', 'no access', "don't have", 'estimate'], mustExclude: ['will arrive on', 'business days it will'] } },
     ],
