@@ -16,7 +16,9 @@ alter table public.anon_lab_scores enable row level security;
 
 revoke all on public.anon_lab_scores from anon, authenticated;
 
-create or replace function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)
+drop function if exists public.lab_leaderboard(text, integer);
+
+create function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)
 returns table (rank bigint, handle text, prompt_chars integer, attacks_held integer, anonymous boolean)
 language sql
 security definer

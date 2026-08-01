@@ -31,7 +31,9 @@ drop policy if exists "own scores deletable" on public.lab_scores;
 create policy "own scores deletable" on public.lab_scores
   for delete using (auth.uid() = user_id);
 
-create or replace function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)
+drop function if exists public.lab_leaderboard(text, integer);
+
+create function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)
 returns table (rank bigint, handle text, prompt_chars integer, attacks_held integer)
 language sql
 security definer
