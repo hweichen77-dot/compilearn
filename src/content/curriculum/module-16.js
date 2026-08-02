@@ -60,6 +60,15 @@ The gap between "works in a notebook" and "works in production" is where most LL
 - **Hangs are invisible.** A model call with no timeout can stall for a minute; under load, stalled workers pile up until the service stops responding.
 - **You can't roll back what you can't version.** Production code ships as a tagged, reproducible build, not "the version that happened to be open in my editor."
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your API key turns up in a public repo or in git history | The key was pasted into the source, so it was committed along with the code | Read the key from an environment variable, then rotate the leaked one, since it stays in history forever |
+| One malformed request returns a stack trace and takes down other users on the same worker | The prompt was passed straight to the model with no validation, so the error was thrown deep inside the handler | Validate the input at the top of the endpoint and return a 400 before any model call happens |
+| The service stops responding under load even though the model is up | A model call with no timeout stalled, and stalled workers piled up until none were free | Set an explicit timeout on the call and return a 502 when it expires, so the worker is released |
+| Nobody can say which code produced yesterday's bad answer | Whatever was open in an editor got deployed, with no tag pointing at a reproducible build | Ship tagged builds so a version id names the exact code that was running |
+
 ## The mental model to keep
 
 A notebook is a conversation with yourself; production is a contract with strangers. Ship the wrapper, not just the cell. The model is the small, easy part, and the code around it is what keeps the service running.`,
@@ -380,6 +389,15 @@ Tracing is the foundation every other production practice stands on:
 - **Cost and abuse.** Token counts per call feed cost monitoring and expose the one user sending novel-length prompts.
 
 One caution: prompts and outputs can contain personal data. Mask or redact sensitive fields before logging, and set a retention window, observability is not an excuse to hoard private text forever.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A user reports a bad answer and you cannot find their request among thousands | The trace_id stayed inside the server and was never handed back, so the report has nothing to name | Return the trace_id with the response and show it on error screens so a bug report can quote it |
+| You cannot answer "show me every call over 5 seconds" without reading logs by hand | The records were written as prose lines instead of machine-readable fields | Emit one structured JSON record per call so the log store can filter and aggregate on latency_ms |
+| Customer personal data, or a key that a user pasted into their prompt, is sitting in your log store | The full prompt and output were logged verbatim with no redaction and no retention limit | Mask sensitive fields before the record is written and expire traces on a set retention window |
+| You know a request was slow but not which part of it | Timing was measured around the whole handler rather than the model call | Time each model call separately and store its latency on the record next to the model name |
 
 ## The mental model to keep
 
@@ -703,6 +721,15 @@ Evals turn prompt engineering from guesswork into engineering:
 
 Two pitfalls to respect. Evals are only as good as their cases, so build them from **real production traces** (the previous lesson), not toy inputs. And a single flaky example can make a green suite go red randomly, keep graders deterministic where you can, and treat model-as-judge graders as noisier than rule-based ones.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The suite passes at 100 percent but users keep hitting broken answers | The cases were toy inputs invented at the desk, so they never covered what real traffic asks | Build the case list from real production traces, including the requests that already failed |
+| The same commit goes red on one run and green on the next | A model-as-judge or otherwise nondeterministic grader scores borderline outputs differently each time | Use rule-based graders where the answer is checkable, and treat judge scores as noisy signals rather than gates |
+| A prompt change merges even though the score dropped | The eval was run by hand locally, so nothing in the pipeline blocked the merge | Run the suite in CI and exit nonzero below the threshold so the build fails |
+| An extraction feature ships with malformed output despite a passing score | One loose threshold was reused everywhere, and it was set for a task that tolerates misses | Set the threshold per task, high for extraction and structured output, lower where variation is fine |
+
 ## The mental model to keep
 
 A prompt is code, and **code without tests rots silently.** An eval suite in CI is the unit-test safety net that lets you change prompts and models without praying.`,
@@ -1007,6 +1034,15 @@ Cost is the variable that ends LLM projects that otherwise work:
 
 A caution: do not optimize cost blind to quality. Cutting to the cheapest model or the shortest output can tank your eval score, so watch cost and the evals from the previous lesson together.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A weekend bill arrives that is many times normal, with no matching jump in users | A retry loop or a single heavy user kept calling with nothing set to refuse the call | Track spend per user and raise a budget error once the ceiling is hit, so the loop dies instead of the account |
+| Spend is far above what you estimated from prompt length | Output tokens cost several times input, and max_tokens was left unbounded so answers ran long | Cap output length and price both directions separately when you estimate |
+| Total spend is known but nobody can say which feature caused the increase | Cost was computed globally instead of being attributed on each call | Attribute every call to a user and a feature at the moment you compute its cost |
+| Costs fall after a model swap and complaints rise the same week | The cheapest model was chosen on price alone, with no eval run afterward | Read the cost number and the eval score together, and treat a score drop as the real price |
+
 ## The mental model to keep
 
 Every token is a coin. **Count the coins as you spend them and set a ceiling**: because an LLM will happily spend at machine speed until something tells it to stop.`,
@@ -1310,6 +1346,15 @@ The difference between a toy and a product is what happens on a bad day:
 
 One caution: retries multiply cost and latency, and infinite retries can turn a brief blip into a self-inflicted outage. Cap the attempts, add a timeout, and pair this with the cost monitoring from the previous lesson.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One rate limit turns into a burst of hundreds of rejected calls | The retry ran in a tight loop with no wait, so every attempt hit the same throttle | Sleep with exponential backoff between attempts and cap how many you make |
+| Spend and latency spike during a provider wobble even though almost nothing succeeds | Every failure was retried, including the ones that will fail identically every time | Retry timeouts and rate limits, break out immediately on errors that are not transient |
+| The provider comes back, then buckles again the moment it does | Every client had been waiting on the same backoff schedule and reconnected at the same instant | Add jitter to the backoff so clients return at spread-out times |
+| Users get a spinner and then a stack trace during an outage | The call had no fallback, so an exhausted retry loop propagated the raw exception | Fall back to a backup model, a cached answer, or a plain busy message the user can act on |
+
 ## The mental model to keep
 
 Production is not "make it work." Production is **decide what happens when it breaks**: because it will. Layer retries for transient faults, fallbacks for the rest, and always leave the user with a working, if humbler, answer.`,
@@ -1604,6 +1649,15 @@ Versioning is what makes every other practice trustworthy:
 - **Attribution of change.** When quality shifts, the first question is "what version changed?" Without versions there is no answer, only blame.
 
 One caution: a floating alias like \`gpt-4o\` is a convenience that quietly breaks reproducibility, because the provider repoints it over time. Pin the dated snapshot in production and bump it deliberately.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Behavior changes overnight and no deploy went out | Production used a floating model alias, and the provider repointed it to a newer snapshot | Pin the dated model snapshot and change it as a deliberate, reviewed edit |
+| A reported bad answer cannot be reproduced | The trace recorded the output but not the prompt version or the model id that produced it | Stamp prompt_version and the pinned model on every traced record |
+| Quality shifted and nobody can name what changed | The prompt was edited in a dashboard text box, so the change left no trace anywhere | Derive the version from a content hash of the prompt text, so any edit produces a new version automatically |
+| Rolling back a bad prompt takes an hour of guessing | The previous prompt existed only as remembered text, with no id to redeploy | Keep prompt versions addressable by id so the last known-good one goes back out in seconds |
 
 ## The mental model to keep
 
@@ -1915,6 +1969,15 @@ A/B testing is how a change earns 100 percent of traffic instead of assuming it:
 
 A caution: do not peek and stop the instant B looks good. Early data is noisy, and stopping at the first favorable wobble manufactures false winners. Fix the sample size and margin in advance.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A user complains the answer style changes from one message to the next | The bucket was drawn at random per request instead of hashed from the user id | Bucket on a hash of the user id so the same person stays in the same arm |
+| B looks like a clear winner, then the lead evaporates as traffic accumulates | The call was made after peeking at a small, noisy sample | Set the sample size and the winning margin before the test starts, and decide only when both are met |
+| B has more successes than A but the two are not really comparable | Raw counts were compared while the arms received different amounts of traffic | Compare success rates per arm, not totals |
+| A change with a better eval score lowers the thumbs-up rate after it reaches everyone | The offline score was treated as sufficient evidence and shipped to full traffic | Roll the variant to a small slice first and let the live metric approve the rest of the rollout |
+
 ## The mental model to keep
 
 Opinions and offline scores propose; **live traffic decides.** An A/B test is the controlled experiment that turns "I think B is better" into "B wins by this much, on this metric, with this much data."`,
@@ -2225,6 +2288,15 @@ How you handle the bad night is what separates a hobby project from a service:
 - **Practice before the fire.** Teams that rehearse rollback and run game-days respond in minutes; teams seeing the runbook for the first time at 2 a.m. flail.
 
 A caution: an LLM incident is not always a crash. A subtle quality regression, politer but wrong answers, a creeping refusal rate, can do real damage while every server returns 200 OK. Alert on quality signals, not just errors.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A ten-minute problem stretches into an hour of degraded service | The on-call engineer tried to find the root cause while users were still failing | Page, roll back to the last known-good version, then investigate once the bleeding has stopped |
+| Rollback is proposed and turns out not to be available | Deploys were not versioned, so there is no previous id to redeploy | Deploy by version id so returning to the last good build is one command |
+| Users report worse answers while every dashboard stays green | Alerts watched error rates only, and a quality regression still returns 200 OK | Alert on quality signals too, such as refusal rate or a falling eval score on sampled traffic |
+| The same failure happens again a month after the postmortem | The write-up settled on who made the change instead of the missing alert or rollback path | Keep postmortems blameless and close them with action items that fix the systemic gap |
 
 ## The mental model to keep
 

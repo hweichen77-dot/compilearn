@@ -58,6 +58,14 @@ Most beginner chatbots feel broken because they only send the latest message and
 
 Build the message list by hand first and simulate the back-and-forth, no real API yet. Get the data shape right; the network call is the easy part.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You tell the bot your name, and one turn later it says it does not know your name | Only the newest user message was sent, so the earlier turn was never resent and the model has no record of it | Send the whole messages list on every call, not just the latest line |
+| The API rejects the request with an error about roles | The list has two user turns in a row, or it starts with an assistant turn | Append each assistant reply before the next user turn so the list starts with user and alternates |
+| The cost of a chat climbs every turn even though the messages stay short | Each call resends the entire history, so turn 41 pays for all 40 earlier turns again | Expect the growth, and trim old turns once the history gets long |
+
 ## The mental model to keep
 
 The model has amnesia, but it can read a whiteboard. Each turn you hand it the **entire whiteboard** of the conversation, it reads top to bottom, and writes one more line. Lose the whiteboard, lose the memory.`,
@@ -371,6 +379,14 @@ Two separate channels do two separate jobs:
 
 Mixing them up is the most common chatbot bug. Put persona in a user turn and it competes with (and loses to) later user messages, causing **character drift**: the bot slowly forgets its accent and rules. Put history in the system prompt and you can't trim it later without deleting the persona. Keep the channels clean and swapping personas becomes a one-string change.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot sounds like a pirate for three turns, then slides back into a neutral assistant | The persona was written into a user message, where it has the same priority as every later user turn | Move the persona into the top-level system parameter so it outranks user turns |
+| The user types "stop being a pirate" and the bot immediately drops the act | The system prompt describes a voice but never states a rule about holding it | Add an explicit line telling the character to stay in character no matter what the user says |
+| The first reply is in character and every reply after it is not | The system string was passed only on the first call, and each call is stateless | Resend the same system string on every call, alongside the growing history |
+
 ## The mental model to keep
 
 System prompt = the role the actor is cast in. Message history = the script so far. You hand over both on every call: the role never changes, the script keeps growing.`,
@@ -683,6 +699,14 @@ When the history grows too big, you **trim** it. Two common strategies:
 Most production chatbots start with a sliding window because it is simple and the cost is bounded: you always know your worst-case token count.
 
 Never blindly trim the **system prompt**. That is your persona: drop it and your pirate turns back into a generic assistant mid-conversation. Trim the oldest *conversation* turns only, keep \`system\` intact, and always keep enough recent turns that the current question still makes sense.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A chat that worked for ten turns starts erroring or costing three times as much around turn fifty | The history keeps growing, and the system prompt, the whole history, and the reply all share one token budget on every call | Apply a sliding window that drops the oldest conversation turns once the estimated total passes your budget |
+| After the trim kicks in, the bot loses its character | The trimming code cut from the front of everything and took the system prompt with the old turns | Trim conversation turns only, and pass the system string through untouched |
+| The bot can no longer answer a follow-up like "what about that one?" | The window was cut so aggressively that the turn the question refers to was dropped | Raise the number of recent turns you keep so the current question still has the context it needs |
 
 ## The mental model to keep
 
@@ -1009,6 +1033,14 @@ Streaming is about **display**. It does not change the memory rules from lesson 
 
 Skip the store step and your bot streams beautifully but forgets every reply the instant it finishes, back to goldfish-brain.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reply still lands in one block after a pause, with no live typing effect | Python buffers standard output, so the chunks pile up instead of reaching the screen | Print each chunk with end="" and flush=True so it is pushed out immediately |
+| The reply streams perfectly, then on the next turn the bot has no idea what it just said | The printed chunks were never assembled and appended as an assistant turn | After the stream ends, take the final assembled message and append it to the history |
+| Streaming is on, but the reply takes just as long to finish as before | Streaming changes when the first words arrive, not how long the model takes to generate the whole reply | Measure time to first token instead of total time, since that is what streaming improves |
+
 ## The mental model to keep
 
 You now have all four pieces of a character chatbot: a system-prompt persona, a growing message list, a sliding window to stay in budget, and streamed output so it feels responsive. Stream to the user, then store the result. Below you'll simulate streaming by yielding chunks and reassembling them into the message you'd save.`,
@@ -1319,6 +1351,14 @@ A \`session_id\` keys each user's history so two people chatting at once never s
 
 The cost is discipline: forget to save after a turn and that turn vanishes; forget to load and you start from scratch.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot remembers everything until you close the terminal, then knows nothing | The history lived only in a list inside the running process, so it died with the process | Persist the history to a store and load it back at the start of every turn |
+| Two people chatting at once see each other's messages | One shared history was used for everyone, with no key separating them | Key each history by a session id so every user loads only their own turns |
+| The bot's last reply is missing the next time the conversation is loaded | The turn was appended in memory but the save step after the reply was skipped | Save the updated history after the reply is appended, every single turn |
+
 ## The mental model to keep
 
 The model is a stateless function; **your store is the memory.** Each turn you fetch the history out of the store, run the function, and put the updated history back. Lose the store, lose the conversation.`,
@@ -1622,6 +1662,14 @@ The summary usually rides as a leading \`user\` (or system) note so the model tr
 - **A real trade-off.** Summaries lose detail such as exact quotes, precise numbers, and literal wording. The win is the substance at a fraction of the cost; the loss is fidelity. Choose it when long-run continuity matters more than verbatim recall.
 
 Compared to a plain sliding window, summarization costs more work (an extra call) but remembers far more of the conversation's substance.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Deep into a long chat the bot asks for a name the user gave in turn 2 | A plain sliding window dropped those early turns instead of compressing them | Summarize the old block and carry the recap forward in place of the raw turns |
+| The bot recalls the general story but gets an exact number or quote wrong | Summaries keep the substance and lose the literal wording, so precise details do not survive compression | Keep anything that has to stay exact in the verbatim recent window, or write it into the summary as a stated fact |
+| Every turn suddenly costs two calls and feels slower | The compression runs on each turn instead of only when the history is long enough | Trigger the summarizing pass at a length threshold, not on every turn |
 
 ## The mental model to keep
 
@@ -1940,6 +1988,14 @@ Two subtleties matter. On \`/clear\`, don't just empty the history, also re-inje
 - **A clean reset restores persona.** Wiping history without re-setting the system prompt is the classic reset bug: the chat is empty but the persona is gone or stale.
 - **Mid-chat persona swaps are one string.** Because \`system\` and \`history\` are separate channels, switching from pirate to wizard is a single assignment, with no rebuild of the conversation needed.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The user types /clear and the bot answers it in character, asking what to clear | The command was appended as a normal user turn and sent to the model instead of being intercepted | Check for commands first and return the app's own response before any model call happens |
+| After /clear the history is empty but the bot answers as a generic assistant | Clearing the list left the system string behind, since persona lives in a separate channel from history | Reset the system string back to the default persona in the same branch that empties the history |
+| Switching personas with /persona wipes or garbles the conversation so far | The switch rewrote the history instead of touching only the persona channel | Assign the new system string and leave the history list exactly as it is |
+
 ## The mental model to keep
 
 Treat \`/\`-commands like keyboard shortcuts, not dialogue. Your app catches them and acts (clear the list, re-inject the persona, switch the character) before a single token reaches the model. Conversation goes to the model; control stays with you.`,
@@ -2257,6 +2313,14 @@ Notice what's gone: there is no \`while\` loop and no in-memory \`messages\` var
 - **Statelessness scales.** Because each request rebuilds everything from the store, you can run many identical server copies behind a load balancer. Any one can handle any request. Hold memory in a process variable and that breaks the moment a follow-up lands on another server.
 - **The session id is the thread.** Without it, the endpoint can't tell whose conversation to load, and every user collides into one history.
 - **Persist before you respond.** If you return the reply but forget to save, the user's *next* request rebuilds a history missing this turn, so the bot forgets what it just said.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot remembers fine on your laptop, then forgets at random once it is deployed | The handler kept the history in a process variable, and a follow-up request landed on a different server copy | Load the history from a shared store at the start of every request so any server can serve any turn |
+| Every visitor drops into the same conversation | The endpoint has no session id, so there is nothing to tell whose history to load | Take a session id with each request and key the stored history by it |
+| The bot forgets the reply it gave one request ago | The response was returned before the updated history was written to the store | Save the history after appending the reply and before returning the response |
 
 ## The mental model to keep
 

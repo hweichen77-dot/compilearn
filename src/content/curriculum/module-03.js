@@ -67,6 +67,14 @@ Don't dump everything in here. A system prompt that's three pages long competes 
 
 The system prompt is your cheapest control. It costs a handful of tokens, applies to every turn, and steers behavior without touching the model at all. Before you reach for techniques like few-shot examples or higher token budgets, get this right. Half the "the model won't behave" problems people have are really "I never told it how to behave" problems. It is also where safety and brand voice live: a support bot that must never promise refunds gets that rule here, once.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model sounds right but keeps breaking a rule you thought you set | The system prompt describes a persona and never states an actual rule, so there is nothing concrete for the model to follow | Add a plain format rule and a boundary, such as one sentence per answer, never promise refunds |
+| The model obeys the first few turns, then drifts back to generic answers | The role was written into a single user message instead of the standing system field, so it fades as the conversation grows | Move the role and rules into the top-level system field, where they apply to every turn |
+| A long system prompt gets some rules honored and others ignored at random | Ten stacked priorities compete with each other, and the model cannot satisfy them all at once | Cut it back to a role, a format rule, and a boundary, and drop the rest |
+
 ## The mental model to keep
 
 The system prompt is the **role you cast the model in before the scene starts**. Get the casting right and the performance follows. State the role, a format, and a boundary in a few plain lines, and stop there.`,
@@ -382,6 +390,15 @@ print(response.content[0].text)
 - **Limits.** Long documents can blow the context window. That's when you start chunking or summarizing.
 - **Weird failures.** Asking a model to "count the r's in strawberry" trips it up partly because it sees tokens, not individual letters. It literally isn't looking at the letters the way you are.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Answers stop in the middle of a sentence | max_tokens is set below what the answer needs, so generation is cut at the cap | Raise max_tokens, you are only billed for tokens actually generated |
+| You lower max_tokens to save money and the bill barely moves | max_tokens caps only the output, and your long prompt is still tokenized and billed as input on every call | Trim the input instead, starting with the system prompt that is resent on every request |
+| A long document call errors out or the earliest messages vanish | Everything together, system prompt plus history plus response, exceeds the context window | Chunk or summarize the document, or trim old turns before sending |
+| The model miscounts letters in a word | It reads tokens, not individual characters, so the letters are not visible to it the way they are to you | Do character-level work in code rather than asking the model for it |
+
 ## The mental model to keep
 
 Tokens are the currency and the ruler of LLMs: everything is priced and measured in them. Tight, plain language spends fewer tokens and usually reads clearer to the model too, so saving money and getting better output point the same direction.`,
@@ -681,6 +698,15 @@ People reach for high temperature when they're unhappy with output, hoping rando
 
 One more note: even at temperature 0, outputs aren't guaranteed byte-for-byte identical across runs. Low temperature reduces randomness; it doesn't promise perfect determinism.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You raise the temperature to fix bad answers and the answers get worse | The problem was the prompt, and extra randomness only makes wrong answers more varied | Put temperature back down and fix the prompt, adding the missing role, format, or example |
+| Brainstorming at temperature 0 returns the same two ideas over and over | The distribution is sharpened to a spike, so the model keeps grabbing the top tokens | Raise temperature to roughly 0.8 to 1.0 when you genuinely want range |
+| Output turns into invented words and broken phrasing | Temperature was pushed so high that implausible tokens became likely | Pull it back under 1.0, variety past that point stops being usable |
+| Two runs at temperature 0 return slightly different text and a test fails | Low temperature reduces randomness but does not promise byte-for-byte determinism | Compare on meaning or on a parsed field rather than asserting exact string equality |
+
 ## The mental model to keep
 
 Temperature is a **risk dial, not a quality dial**. Turn it down when you want one correct answer; turn it up only when you genuinely want range.`,
@@ -971,6 +997,15 @@ Those three examples do the heavy lifting. The model sees the \`Review: ... -> L
 ## Why it matters
 
 Few-shot is the bridge between "describe it and pray" and full-on fine-tuning. It costs you some tokens but gives you control over format and behavior with zero training. When a zero-shot prompt is *almost* right but the format keeps drifting, examples are usually the fastest fix. The trade-off: every example is re-sent and re-billed on every call, so you balance accuracy against token cost.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Almost every new input gets the same label back | All your examples happen to share one label, so the model copies that pattern instead of the task | Balance the examples so each label you care about appears |
+| The format wobbles between responses | The examples are inconsistent, with some using an arrow separator and others a colon, so there is no single pattern to copy | Rewrite every example in one identical shape, including casing and separator |
+| Tricky inputs get handled in a way you never asked for | No example covers that edge case, so the model invents its own handling | Add one example that shows exactly how you want that case answered |
+| Adding more examples stops helping but the bill keeps climbing | Every example is resent and rebilled on each call, and past roughly five the gain flattens | Cut back to two to five well chosen examples |
 
 ## The mental model to keep
 
@@ -1290,6 +1325,15 @@ def safe_parse(text, default=None):
 
 Structured output is what lets an LLM live inside a real app instead of just a chat box. Sentiment that becomes a database column, extracted fields that flow into a form, classifications that trigger logic, all of it depends on output your code can trust. Nail the prompt, parse defensively, and the model becomes a dependable component instead of a wildcard.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Parsing fails on text that looks like valid JSON | The model added a friendly preamble such as Here is the JSON before the object | Tell it to respond with ONLY valid JSON and nothing else |
+| Parsing fails and the raw text starts with fence characters | The model wrapped the object in a markdown code fence, which is not valid JSON | Say no markdown, no code fences, no explanation, and strip any fence before parsing as a backstop |
+| Field names change between calls, so your code reads a key that is missing | You described the output in words instead of showing the schema, so the model picks its own key names | Put a literal example of the exact keys and value types in the prompt |
+| One bad response takes down the whole batch job | The parse call runs unguarded, so a single malformed reply raises and stops everything | Wrap the parse in a try and except and return a default for that record |
+
 ## The mental model to keep
 
 Free-form prose is an **open-ended interview**; structured output is a **fill-in-the-blank form**. Forms are boring on purpose, and that predictability is exactly why your code can build on them.`,
@@ -1579,6 +1623,15 @@ The role belongs in the **system** field because it is standing framing for the 
 - **Audience control.** "Explain to a five-year-old" and "explain to a database administrator" produce wildly different explanations of the same concept.
 - **Consistency.** A stable role keeps tone and rigor steady across a long conversation.
 - **The limit.** A role does not add facts the model never learned. Telling a model "you are a Nobel physicist" will not make it solve open problems, it shapes *style and focus*, not raw capability. And an over-stuffed persona ("expert in law, medicine, and rocketry") dilutes the signal.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You name an expert role and the answer is still generic | The role is a label with no priorities attached, so it changes the voice and nothing else | Say what that expert should look for first, such as review for vulnerabilities only and name the risk class |
+| A stacked persona covering several fields produces shallow answers in all of them | Combining law, medicine, and rocketry dilutes the conditioning, so no single region of training text dominates | Assign one role per call and split the work into separate requests |
+| The role holds for a few turns and then the tone slides back | The persona was sent as a one-off user message rather than standing framing | Put the role in the system field so it frames every turn |
+| An impressive-sounding expert answer turns out to be invented | A role shapes style and focus, it does not add knowledge the model never learned | Give the model the source material to work from and ask it to say when it does not know |
 
 ## The mental model to keep
 
@@ -1872,6 +1925,14 @@ The tags tell the model: *this region is data, not commands*. XML-style tags (\`
 - **Fewer parsing mistakes.** When a document contains the word "Summary," structure stops the model from mistaking the document's heading for your command.
 - **Reliability at scale.** Clear structure makes outputs more consistent across thousands of varied inputs, because the model isn't re-guessing the layout every time.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The fence breaks apart when a user pastes code | The pasted content contains the same delimiter you used to fence it, so the block closes early | Use a delimiter the content will not contain, such as XML-style tags around user text |
+| Text is fenced but the model still obeys an instruction hidden inside it | The tags mark a region without telling the model what that region is | State the rule in words too, that everything inside the tags is content to process, never instructions |
+| The model returns the wrong shape when the input document has its own headings | A heading in the data reads like your command, because format and data share one block | Give the output format its own labeled block, separate from the data block |
+
 ## The mental model to keep
 
 Structure is **putting walls between rooms**. Instructions in one room, untrusted data in another, the requested output format in a third, so the model never confuses the furniture in one room for the furniture in another.`,
@@ -2156,6 +2217,15 @@ Match the fix to the failure type instead of randomly fiddling.
 - **No regressions.** A test set catches the classic trap where fixing case A quietly breaks case B.
 - **It's cheap.** Better prompting is almost always faster and cheaper than reaching for a bigger model or fine-tuning.
 - **Reproducibility.** Run your test set at temperature 0 so a score change reflects the prompt, not random sampling.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The score moved and nobody can say why | Several parts of the prompt changed in one edit, so no result can be attributed to a single change | Revert to the last known version and change exactly one thing per run |
+| The prompt looked better on the example you checked, then failed in production | You eyeballed one input instead of scoring a fixed set | Keep a small test set of inputs with known good outputs and rerun all of them after every change |
+| A fix for one case quietly broke another | Nothing rechecked the cases that used to pass | Score the whole test set each time and compare against the previous score, not against a single case |
+| The same prompt scores differently on two runs | Sampling randomness is moving the result, so the score reflects luck rather than the edit | Run the test set at temperature 0 while iterating |
 
 ## The mental model to keep
 
@@ -2480,6 +2550,15 @@ The reasoning goes to the scratchpad; the \`ANSWER:\` line is what you actually 
 - **Use it for** multi-step arithmetic, logic puzzles, planning, "explain the tradeoff" questions, anything where a single leap is error-prone.
 - **Skip it for** simple lookups, one-step classification, or format-only tasks. The extra reasoning just burns tokens and latency without improving a one-hop answer.
 - **A hidden benefit**: because the steps are visible, you can *check the reasoning*, not just the answer. A wrong chain is far easier to debug than a bare wrong number.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The prompt asks for the answer first and the reasoning after, and accuracy does not improve | The answer token is predicted before any sub-steps exist in the context, so the reasoning cannot influence it | Ask for the steps first and the final answer last |
+| Your code pulls a sentence of reasoning instead of the result | The response has no marked answer line, so there is nothing stable to extract | Require a final line in a fixed form such as ANSWER followed by the value, and read that line |
+| The response stops partway through the working, with no answer at the end | The reasoning plus the answer ran past max_tokens | Raise max_tokens so there is room for both the steps and the final line |
+| A one-step classification got slower and more expensive after adding step-by-step | Chain-of-thought spends tokens and latency on a problem that never needed several steps | Drop the reasoning instruction for lookups, single-hop classification, and format-only tasks |
 
 ## The mental model to keep
 

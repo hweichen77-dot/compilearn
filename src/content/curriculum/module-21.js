@@ -52,6 +52,15 @@ print(f"total: \${total:.6f}")
 
 Because output is the pricey side, a model that writes long answers can cost more than one with a longer, denser prompt. If you want to control spend, the first lever is usually the length of the answer, not the length of the question.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill lands several times above the estimate you built from word counts | Billing is per token, and tokens are smaller than words, so a word-based count understates both sides | Count tokens, not words, and price the input count and output count separately |
+| Your spreadsheet total is far under the invoice even though the token counts are right | A single blended rate was applied to all tokens, but input and output are charged at their own per-million rates | Multiply input tokens by the input price and output tokens by the output price, then add the two |
+| A short prompt still produces an expensive call | The reply was long, and output tokens are billed at several times the input rate | Look at the length of the answer before you blame the prompt |
+| "$3 per million" reads as too small to model, so nobody budgets for it | Per-million pricing hides that thousands of tokens per call, repeated many times, becomes real money | Convert the rate into a per-call figure first, then multiply by how many calls you expect |
+
 ## The mental model to keep
 
 Two meters run on every call: one cheap for input, one expensive for output. Watch the expensive meter first.`,
@@ -341,6 +350,15 @@ For output you usually can't measure ahead of time, so you **assume a budget**: 
 
 The real power is multiplying by scale. One call at $0.0002 sounds free. The same call **100,000 times a day** is $20 a day, $600 a month. Estimating per-call cost and multiplying by expected volume turns a vague worry into a number you can plan around, and a number you can compare against alternatives before you commit.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your per-call estimate is accurate but the monthly bill is nowhere near it | The per-call cost was never multiplied by expected volume, so scale was left out of the estimate | Multiply the per-call figure by calls per day and per month before you ship the feature |
+| Real cost runs well above the estimate even though the prompt is exactly the size you predicted | Output was left out of the estimate, since you cannot measure a reply before you make the call | Assume an output budget, price against it, and then enforce that budget as an actual cap |
+| The characters-divided-by-four estimate is badly off | That rule is tuned for English prose, so code, other languages, and heavy punctuation tokenize differently | Keep it for rough English budgeting and check against the real tokenizer for anything else |
+| The estimate looked safe, then the feature fires far more often than planned | Volume was guessed from the number of users rather than from how often the code path actually runs | Count the real trigger frequency, for example one call per page load rather than one per user |
+
 ## The mental model to keep
 
 **Tokens first, then dollars, then multiply by volume.** A five-line estimate beats a five-figure surprise.`,
@@ -619,6 +637,15 @@ By turn 20 of a long chat, you might be paying to resend nineteen earlier messag
 ## Why it matters
 
 This explains the two classic bill shocks: a feature that lets the model write long answers, and a chat product where long sessions cost far more than short ones. Both are fixable, but only once you can name the culprit. Spotting *where* the money goes is the prerequisite for cutting it, which is the next lesson.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Input tokens per call keep climbing even though every message stays short | The model is stateless, so each turn resends the whole transcript and every earlier message gets billed again | Log input tokens per turn so the growth is visible, then trim or summarize the history you resend |
+| Cost per session looked fine in testing and is far higher in production | Test sessions ran two or three turns, while real sessions run long enough for the resend cost to compound | Measure cost against realistic session lengths, not the short ones you use while developing |
+| One feature costs several times more per call than the rest of the product | It lets the model write long answers, and output is the higher-priced side of the bill | Check that feature's output token counts first, and set a limit on how long a reply may run |
+| The team keeps shortening the system prompt and the bill barely moves | The prompt was never the driver; long replies and a resent transcript were | Break the bill down into output tokens and resent history before optimizing anything |
 
 ## The mental model to keep
 
@@ -901,6 +928,15 @@ print(f"saved {saved} input tokens this turn")  # saved 700 input tokens this tu
 
 The order matters: history trimming and an output cap are free to apply and hit the two biggest drivers head-on. Caching helps when you repeat a large fixed prefix. Model choice is the heaviest hammer, huge savings, but only when the smaller model's quality is good enough for the job. Reach for the cheap levers first; downgrade the model last, and only after checking it still works.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You switched to a cheaper model, quality dropped, and the bill barely moved | Model choice was reached for first, but the spend was really in resent history and long replies | Apply history trimming and an output cap first, and change models only if cost is still too high |
+| Trimming history breaks the assistant's answers | Too many turns were dropped, so context the reply depended on is gone | Keep the recent turns in full and replace older ones with a short summary rather than deleting them |
+| You wired up prompt caching and the bill did not change | Nothing is repeated across calls, so there was no fixed prefix for the cache to discount | Use caching only where a large chunk of input is sent identically on every call |
+| The output cap cuts replies off mid-sentence | The cap was set below what the task actually needs to say | Size the cap to the longest useful answer, and ask for brevity in the prompt so replies fit under it |
+
 ## The mental model to keep
 
 **Cut what you resend, cap what you generate, cache what repeats, and downgrade the model only when quality allows.**`,
@@ -1182,6 +1218,15 @@ Here 3,000 input tokens cost $0.009, but just 800 output tokens cost $0.012, few
 ## Why it matters
 
 The asymmetry flips your intuition about where to optimize. A bloated prompt feels wasteful, but it's billed on the *cheap* meter. A model that rambles a long answer is billed on the *expensive* meter. So the highest-impact knob is usually **how much the model writes**, not how much you send. If your bill surprises you, do the input-versus-output split first, it almost always points straight at the output side.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Two calls with the same total token count have very different bills | Cost depends on which meter the tokens landed on, and output is billed several times higher than input | Compare calls by their input and output split, never by the combined token total |
+| Days spent shortening prompts barely moved the bill | The prompt sits on the cheap meter, while the replies you left alone sit on the expensive one | Reduce how much the model writes, then revisit the prompt if there is still cost to cut |
+| A call with far fewer output tokens than input tokens is still dominated by output cost | A rate gap of roughly 5x means a few hundred output tokens can outweigh several thousand input tokens | Compute the two costs separately so you can see which side is actually carrying the bill |
+| A single blended per-token rate tracks some calls well and others badly | A blended rate only holds for calls with the same input to output ratio, and that ratio varies by feature | Model cost with two rates, one per side, so any mix of input and output prices correctly |
 
 ## The mental model to keep
 
@@ -1475,6 +1520,15 @@ The bigger and more repeated the prefix, the more caching saves. A tiny prefix t
 ## Why it matters
 
 Caching turns a fixed overhead into near-zero. If 90% of your input is a stable instruction block, caching can drop your input bill by most of that block's cost without changing a word of behavior. It is the rare lever that is free to quality: the model sees the exact same prompt either way. The only requirement is keeping that prefix **stable** - reorder or edit it and you bust the cache, paying full price again.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The cache almost never hits even though the system prompt never changes | Something variable sits at the front, such as a timestamp or a user id, so the prefix differs on every call | Put the fixed block at the very start and move all per-call text behind it |
+| Caching worked for weeks, then savings vanished after a small prompt edit | The cache matches byte for byte, so rewording or reordering the prefix stops it matching | Treat the prefix as frozen text and change it only on purpose, expecting full price on the calls after |
+| The first call costs more than it did before you enabled caching | The first call pays full price and sometimes a write fee to populate the cache | Judge caching across the repeated calls, not on a prompt that is only ever sent once |
+| Caching is on and the savings are barely visible | The cacheable prefix is small next to the input that changes on every call | Only cache when the repeated block is a large share of your input, such as a long system prompt or fixed document |
 
 ## The mental model to keep
 
@@ -1771,6 +1825,15 @@ So a job that can wait pays half; a job that cannot wait pays full. Sorting your
 ## Why it matters
 
 Most workloads are a mix. The user-facing chat must be real-time. But the analytics, the bulk classification, the offline summaries, the eval runs - none of those need a human-speed reply, and they are often the *bulk* of the token volume. Moving that bulk to the batch lane can halve a huge slice of the bill while the latency-sensitive part stays fast. The skill is recognizing which jobs are secretly patient.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A request comes back hours later while a user sits waiting on it | A latency-sensitive job was routed into the batch lane along with the offline work | Route by whether a human is waiting, and keep user-facing calls on the real-time lane at full price |
+| Everything runs at full price even though most of the token volume is offline work | The workload was never sorted into jobs that can wait and jobs that cannot | Tag each job with a latency tolerance and send every job that tolerates the turnaround to batch |
+| You enabled batch and the total bill dropped far less than half | The discount applies only to the jobs you routed, and those were a small slice of your token volume | Measure token volume per job type and move the largest patient workloads, not the easiest ones |
+| A nightly batch was not finished by the time the morning report needed it | The turnaround window can stretch to hours or a full day, and it is not a guaranteed delivery time | Submit against the worst case window, so the deadline sits well beyond the longest turnaround |
 
 ## The mental model to keep
 
@@ -2073,6 +2136,15 @@ The cap **stops** the spend; the alert **warns** before the cap. You want both -
 ## Why it matters
 
 Estimation tells you what a call *should* cost; it cannot stop abuse, bugs, or a retry loop gone wild. A single misbehaving client can generate cost faster than any human notices. Caps bound the damage to a chosen ceiling; per-user budgets keep one bad actor from starving everyone else; alerts buy you reaction time. Together they convert "we hope it stays cheap" into "it cannot exceed X, and we hear about it at 0.8X."
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You learn about the overspend from the invoice | The alert runs on a daily or monthly cycle, so it fires long after the money is gone | Compare the running total against the cap on every call and alert as soon as the threshold is crossed |
+| An overnight retry loop or abusive client runs the bill into the thousands | Nothing refused calls once spend passed a ceiling, so cost grew as fast as requests arrived | Set a hard spend cap that blocks further calls, so the worst case is a number you chose |
+| An account-wide cap is in place, yet one user still consumed the entire budget | A single shared total has no per-user limit, so one client can spend everyone else's room | Track spend per user and reject the call that would push that user past their own budget |
+| The cap kicked in with no warning and the product stopped serving anyone | Only the wall existed, with no tripwire in front of it to buy reaction time | Fire an alert at a fraction of the cap, around 80%, so a human can look into the cause before the block |
 
 ## The mental model to keep
 

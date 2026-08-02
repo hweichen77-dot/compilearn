@@ -57,6 +57,14 @@ Treating "the AI" as one fixed object leads to expensive, slow apps:
 - **One size fits nothing.** A chat app that labels spam, drafts emails, and reasons over contracts probably wants different tiers for each, not one giant model doing it all.
 - **The cheap tier is often plenty.** A huge fraction of real tasks are simple. Reaching for the flagship every time is like trucking your coffee.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill and the response times are far higher than the work seems to need | Every request goes to the largest tier, including simple tagging and extraction jobs | Pick a tier per task, and let the simple, high-volume work run on the small tier |
+| A newer flagship replaces the old model and the easy jobs come back no better | Bigger and newer mostly means stronger on hard problems, not better at everything | Keep the flagship for genuinely hard tasks and check whether a smaller tier already handles the easy ones |
+| One model serves ticket tagging, email drafting, and contract analysis, and it fits none of them well | A single tier was chosen once and reused everywhere, so it overpays on easy work and strains on hard work | Choose the tier per job instead of per app |
+
 ## The mental model to keep
 
 Stop thinking "the AI." Think **a menu of tiers**, small to large, each a different bundle of speed, cost, and capability, and your job is to order the right one for the task in front of you.`,
@@ -344,6 +352,15 @@ Naming the trade-off keeps you honest:
 - **Context sets the weights.** Real-time typing assistant → latency dominates. Bulk nightly summaries → cost dominates. Legal analysis → quality dominates.
 - **Small wins compound.** Shaving cost or latency on a high-volume path matters far more than on a once-a-day task. Spend your quality budget where it's actually felt.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Chat replies are accurate but users give up before the answer lands | The tier was picked on quality alone, and latency was never treated as something you spend | Decide which lever the use case rules on before comparing tiers, then hold that lever fixed |
+| Someone asks to "make it better" and the change ships without improving anything anyone cared about | Better was never defined as cheaper, faster, or more correct, so each person optimized a different lever | Name the lever you are spending on before you touch the model choice |
+| An overnight batch job runs on an expensive tier chosen for speed | Latency was optimized for work with no user waiting on it | Drop latency as a priority for batch work and choose on cost instead |
+| A cost tuning pass on a once-a-day report saves almost nothing while the high-volume path stays expensive | Effort went to a low-traffic call, where per-call savings barely multiply | Spend tuning effort on the highest-volume path, where small per-call gains compound |
+
 ## The mental model to keep
 
 There is no free lunch. **Every model choice spends from a budget of cost, latency, and quality, pick the two that matter most for this task and accept the trade on the third.**`,
@@ -629,6 +646,14 @@ Routing is where the cost-and-quality savings actually land:
 - **You stop overpaying on easy tasks.** If 80% of requests are simple classification, sending them to the small tier slashes the bill with no quality loss.
 - **You stop underperforming on hard tasks.** The 20% that need real reasoning still get the large tier, so quality stays high where it counts.
 - **It's a knob, not a rewrite.** Because tiers share an interface, the router changes one value; everything downstream stays the same.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill barely moves after a router is added | Only rare task types were routed down, while the high-volume easy work still lands on a bigger tier | Route by traffic share first, and send the bulk of the easy requests to the small tier |
+| Hard reasoning requests come back shallow once routing goes live | A hard task type was missing from the hard set, so it fell through to the default tier | List the clearly hard task types explicitly, and keep the default at a tier that is safe for unknown work |
+| The routing rules are hard to test and every check needs a live model call | The routing decision and the model call live in the same function | Keep the router as a function that takes a task and returns a tier, and call the model separately |
 
 ## The mental model to keep
 
@@ -939,6 +964,14 @@ Evals turn model choice from faith into evidence:
 - **Switching becomes safe.** A new tier drops? Add it to the eval, run, compare. If it wins on your metrics, change the id and ship.
 - **You catch silent regressions.** Re-running the eval after a change tells you if quality slipped, before your users do.
 - **You avoid lock-in.** Model-agnostic code means no single provider can trap you; the id is just a string you control.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Quality drops after a model swap and nobody can say when it started | The new model shipped without the eval set being re-run, so the regression stayed invisible until users hit it | Run the same eval on every candidate before switching, and compare the scores instead of impressions |
+| The team argues about which model is smarter and the argument never resolves | There is no eval set, so each person is describing a different handful of examples | Write ten representative tasks with known good answers and score every candidate on that same set |
+| Trying a new model turns into a multi-day change nobody starts | The model id is written into many call sites instead of one config value | Pass the model id in as a parameter or read it from a single config value so switching is one line |
 
 ## The mental model to keep
 
@@ -1253,6 +1286,14 @@ Overtrusting leaderboards leads to bad, expensive picks:
 - **Tiny gaps are noise.** 89.4 vs 89.1 tells you nothing actionable; treat near-ties as ties.
 - **The fix is your own eval.** Your tiny eval set from lesson 4 is contamination-proof by construction, the model never saw it.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A model that topped the leaderboard does worse on your tickets than the cheap tier it replaced | The benchmark scored a task that does not resemble your workload | Use leaderboards only to shortlist, then decide with your own eval built from real tasks |
+| A famous benchmark score is very high but nothing else the model does looks that strong | The benchmark questions leaked into training data, so the score reflects memorized answers | Discount benchmarks you suspect are contaminated and lean on tests the model has not seen |
+| A model is adopted because it scored 89.4 against another model's 89.1 | A gap that small sits inside the noise, so it carries no information | Treat near-ties as ties and break them on cost, latency, or how closely the test matches your task |
+
 ## The mental model to keep
 
 A benchmark is a **clue, not a verdict.** Read it skeptically: ask if the test resembles your task, whether the data could be contaminated, and whether the gap is bigger than the noise, then confirm with your own eval.`,
@@ -1559,6 +1600,15 @@ Each side wins on different axes:
 - **Privacy.** Open keeps data on hardware you control, which can be decisive for regulated or sensitive data; closed sends prompts to a third party.
 - **Effort.** Closed is a one-line API call; open means you run, scale, patch, and monitor the infrastructure yourself.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Self-hosting was chosen and the monthly bill is higher than the hosted API would have been | Call volume sits below the crossover point, so the fixed infrastructure cost never amortizes | Work out the crossover volume for your actual traffic, rent below it and own above it |
+| A small team picked open weights and now spends its weeks scaling, patching, and monitoring the serving stack | The ops work was left out when the two options were compared on price | Count the operations effort as part of the cost, and rent when shipping speed matters more than control |
+| The hosted model's behavior shifts or the version is deprecated and your output changes underneath you | With a closed model the provider owns versioning | Keep your eval running so you notice the shift, and move to open weights you can pin if a fixed version is a requirement |
+| Prompts containing sensitive records leave your infrastructure | A hosted API was chosen without checking where the prompt data ends up | Run open weights on hardware you control for data that cannot go to a third party |
+
 ## The mental model to keep
 
 Closed is **renting** capability; open is **owning** it. Rent when you want speed, low volume, and zero ops; own when you need control, privacy, or scale that makes the fixed cost pay off.`,
@@ -1855,6 +1905,14 @@ Cascades shine when difficulty is uneven:
 - **You pay strong-model prices only for hard inputs.** If 90% of traffic is easy, 90% runs at the cheap price.
 - **Latency stays low on the common path.** Most users get the fast model's quick reply; only the hard cases wait for the big model.
 - **Escalation isn't free.** Every escalated request pays for both models, so a cascade only wins when easy requests dominate. If everything is hard, skip the cheap step and route straight to strong.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A cascade ships and the bill goes up instead of down | Most inputs are hard, so nearly every request pays for the cheap call and the strong call | Measure how often requests escalate, and if hard inputs dominate, drop the cheap step and go straight to the strong model |
+| Quality falls with no errors anywhere in the logs | The escalation threshold is set too high, so hard requests get answered by the cheap model and never escalate | Lower the threshold and score escalated against non-escalated answers on your eval set |
+| Savings disappear while quality still looks fine | The threshold is set too low, so easy requests escalate and get charged twice | Raise the threshold until only the genuinely hard inputs cross it |
 
 ## The mental model to keep
 
@@ -2162,6 +2220,15 @@ This is what makes lessons 1-7 actually usable:
 - **No vendor lock-in.** Because nothing hardcodes a provider, no single company can trap you. The id is just a string you own.
 - **New providers slot in.** Adding a model means writing one adapter, not touching every call site.
 - **Routing lives here too.** A cascade or task router is just code that picks which registered provider to call, clean because the interface is uniform.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A cheaper, better model ships and adopting it becomes a quarter of work | Provider-specific SDK calls and parameter names are spread across the codebase | Route every call through one interface so a swap touches a single adapter |
+| Two parts of the app end up running different models by accident | The active model id is written in several files instead of held in one place | Keep one registry with a single active id, and have every call site read it |
+| Adding a second provider means editing every place that calls the model | Application code names a provider directly instead of calling the generic function | Write one adapter for the new provider, register it, and leave the calling code untouched |
+| A prompt tuned for the old model is moved across unchanged and the output format breaks | The adapter swapped the model but the prompt and its expected output were never re-checked | Re-run the eval set after every swap and adjust the prompt where the new model formats differently |
 
 ## The mental model to keep
 

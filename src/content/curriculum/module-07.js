@@ -50,6 +50,14 @@ The model stops being a fact source and becomes a reading-comprehension engine. 
 
 You're not making the model smarter. You're changing the job. "Remember this number" becomes "summarize this paragraph I just handed you." That swap is the difference between a demo that embarrasses you and one you can ship to customers.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An answer sounds authoritative and specific, so you pass it along without checking | You read confidence as evidence, but the model has no signal for uncertainty, so a guess reads exactly like a fact | Verify the claim against a source, or supply that source in the prompt so the model reads instead of recalls |
+| You ask about last quarter's numbers and get a plausible figure that matches nothing in your files | Your private data was never in the training set, so the model fills the gap with likely-looking text | Retrieve the real text and paste it into the prompt, then ask the model to answer only from it |
+| You add "be accurate" or "do not make things up" to the prompt and the invented facts keep coming | The instruction hands the model no facts, so it still has nothing to answer from | Supply the source text, because instructions cannot replace missing data |
+
 The rest of this module builds the retrieval half: how to chop documents into pieces, store them, search them by meaning, and stitch the best pieces into a prompt. The payoff is a working document Q&A tool that answers from your files and admits when it doesn't know.`,
       key_terms: [
         { term: "Hallucination", definition: "When an LLM generates fluent, confident text that is factually wrong because it's predicting likely words rather than retrieving known facts." },
@@ -390,6 +398,15 @@ With \`size=12, overlap=3\`, each chunk shares its last 3 words with the next ch
 
 Word-count chunking is blunt, it can slice mid-sentence. A better approach respects structure: split on sentences or paragraphs, then pack them into chunks up to a size limit. That keeps related sentences together so context survives. You'll build exactly that in the challenge.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A retrieved chunk starts mid-sentence, so the passage you hand the model is unusable | Fixed word-count splitting cuts wherever the counter lands and ignores sentence ends | Split on sentence or paragraph boundaries, then pack those pieces into chunks up to a size limit |
+| The fact is definitely in the document, but no single chunk contains it | The fact straddled a chunk boundary and got cut in half because the chunks have no overlap | Add overlap so each chunk repeats the last few words of the one before it |
+| Search returns a loosely matching chunk and ships paragraphs of unrelated text into the prompt | The chunks are too big, so each covers many topics and its similarity score gets diluted | Shrink chunk size toward a few hundred words, then measure retrieval quality and adjust |
+| A retrieved line like "It costs $4.2M" means nothing on its own | The chunks are too small, so the sentence naming what "it" is landed in a different chunk | Increase chunk size or overlap so the naming context travels with the fact |
+
 Chunking is unglamorous plumbing, but it's the foundation. Bad chunks mean bad retrieval mean bad answers, no clever prompt downstream can rescue them.`,
       key_terms: [
         { term: "Chunk", definition: "A small piece of a document, typically a few hundred words, sized to be searched and retrieved independently." },
@@ -704,7 +721,15 @@ scores = {cid: cosine_similarity(q_vec, v) for cid, v in vectors.items()}
 ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 \`\`\`
 
-In production you'd reach for a real vector database (Pinecone, Chroma, pgvector) that does this similarity search across millions of vectors fast, with indexes. But it's the exact same three steps, embed, compare, rank. Build it by hand once and the libraries stop being magic.`,
+In production you'd reach for a real vector database (Pinecone, Chroma, pgvector) that does this similarity search across millions of vectors fast, with indexes. But it's the exact same three steps, embed, compare, rank. Build it by hand once and the libraries stop being magic.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Scores are low and rankings look random, even for questions the documents clearly answer | The query and the stored chunks were embedded with two different models, so the vectors are not comparable | Embed queries with the same model that built the store, and re-embed every chunk whenever you switch models |
+| Cosine similarity throws a division error, or every score comes back as zero | A stored or query vector has zero magnitude, and dividing by that magnitude is undefined | Return zero similarity when either magnitude is zero, the guard shown in the function above |
+| A one-line query scores badly against a long chunk that obviously answers it | You compared raw distance, so the length difference between query and chunk swamped the meaning | Score with cosine similarity, which compares direction and ignores magnitude |`,
       key_terms: [
         { term: "Embedding", definition: "A fixed-length vector of floats representing the meaning of text, where similar meanings produce nearby vectors." },
         { term: "Cosine similarity", definition: "A score from -1 to 1 measuring the angle between two vectors; near 1 means very similar meaning, near 0 means unrelated." },
@@ -1042,6 +1067,15 @@ Retrieval decides *what* the model sees. Prompting decides *how* it's allowed to
 ## Format matters
 
 Notice the prompt labels the context block and separates it from the question. Models follow structure. A wall of undifferentiated text invites the model to blur the line between "given context" and "the actual question." Clear sections, \`Context:\` then \`Question:\`, keep those roles distinct.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model answers from general knowledge even though you pasted good context in | The prompt supplies the context but never tells the model to answer only from it | Add the grounding instruction telling it to use only the context above |
+| Retrieval misses, and the model invents an answer instead of admitting the gap | The prompt gives no permission to say "I don't know", so guessing is the only move left | Add the explicit escape hatch, telling it to say it doesn't know when the context lacks the answer |
+| The model answers a question you never asked, or treats part of the context as the question | Context and question were run together as one undifferentiated block of text | Label the sections, Context: then Question:, so the two roles stay distinct |
+| The prompt looks correct but the answer is grounded in the wrong facts | Retrieval returned the wrong chunks, so a tight prompt is faithfully grounding the model in irrelevant text | Inspect what retrieval returned before touching the prompt, since both stages have to be right |
 
 In the next lesson you'll plug a real Claude API call onto the end of this pipeline. For now, get the assembly right: retrieve, then build a prompt that grounds and constrains. That prompt *is* your RAG system's quality.`,
       key_terms: [
@@ -1442,6 +1476,15 @@ def answer_question(query, store, client):
 
 That's RAG end to end: chunk your docs once, embed them into a store, and every question flows through retrieve -> build prompt -> call Claude -> grounded answer.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Reading response.text raises an attribute error | The response is a list of content blocks, not a plain string | Read response.content[0].text, the text of the first block |
+| Your key leaks the moment the repo is shared, and the account starts racking up calls | The key was written into the source instead of read at runtime | Read it from os.environ["ANTHROPIC_API_KEY"] and keep it out of the code entirely |
+| The model follows the grounding rule at first, then starts answering from its own knowledge | The rule was buried in the user message next to the context and the question, so it reads as one more piece of text | Move the standing rules into the system prompt and leave only context and question in the user message |
+| The answer stops mid-sentence | max_tokens is smaller than the answer the question needs | Raise max_tokens to fit the length of answer you expect |
+
 You've built the thing. It hallucinates far less than a bare model because it answers from *your* documents, and it can say "I don't know" instead of bluffing. From here it's all upgrades, a real embedding model, a real vector database, smarter chunking, but the architecture you just built is the architecture the big systems use.`,
       key_terms: [
         { term: "Messages API", definition: "Anthropic's endpoint (client.messages.create) that takes a model, max_tokens, and a messages list, and returns content blocks." },
@@ -1800,6 +1843,14 @@ If the model emits a citation tag for a chunk it was never given, that is a **ci
 - **User trust.** Surfacing sources ("according to [policy1]...") is what makes people comfortable relying on the tool for real decisions.
 - **Debugging retrieval.** If answers cite the wrong chunks, your retrieval is pulling the wrong text, citations expose that immediately.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer carries tidy source tags that point to nothing in your store | You asked for citations but never showed the model any chunk IDs, so it invented labels that look right | Label each chunk with its ID in the context block, then check every tag the model emits against the retrieved IDs |
+| The answer is correct, but reviewers still refuse to act on it | The answer is grounded and not traceable, so nobody can follow a claim back to the sentence behind it | Ask the model to tag each claim with the ID of the chunk it used, then surface those sources to the reader |
+| Every citation is valid, yet they point at passages that do not support the claim | Retrieval pulled the wrong chunks and the model cited exactly what it was handed | Treat this as a retrieval bug and fix the search, since the citation layer is doing its job |
+
 ## The mental model to keep
 
 A grounded answer without citations is a witness who refuses to say how they know. **Make the model show its work: every claim points back to a numbered source, and you verify the pointer is real.**`,
@@ -2122,6 +2173,14 @@ Picking the threshold is empirical: too high and you refuse answerable questions
 - **Refusing is a feature, not a bug.** "I don't know" is the correct answer to an unanswerable question. A system that never refuses cannot be trusted on the questions it *should* refuse.
 - **It bounds the blast radius.** Out-of-scope questions, typos, and adversarial prompts all tend to produce low top scores, the threshold catches them in one cheap check.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A question your documents never cover comes back with a confident, detailed answer | Top-k search always returns something, so the model got the least irrelevant chunks and summarized them | Compare the best chunk's score against a similarity threshold and refuse before you build the prompt |
+| The system refuses questions the documents plainly answer | The threshold sits too high, so relevant chunks get filtered out along with the junk | Lower it, and tune the value against a test set instead of guessing |
+| You added a threshold, and bad answers still slip through now and then | Only the retrieval guard exists, so chunks that scrape past the cutoff reach the model unchallenged | Keep the prompt-side instruction to say the answer is not in the docs, as a second layer |
+
 ## The mental model to keep
 
 Top-k always hands you *something*. Your job is to ask, **"is the best thing it found actually good enough?"**: and to refuse out loud when the answer is no.`,
@@ -2422,6 +2481,14 @@ You run this over a **test set** of many questions and average. There's a tug-of
 - **You can't improve what you can't measure.** Metrics tell you *which* stage to fix, bad recall means tune chunking or the threshold; bad faithfulness means tighten the prompt.
 - **Regression detection.** A test set turns "it feels worse" into a number that drops, so you catch breakage before users do.
 - **Honest comparison.** Two chunking strategies, two thresholds, two models, metrics pick the winner instead of vibes.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The demos all look good, then users hit failures you never saw | You judged quality by reading a few outputs, so there is no number to compare versions against or to watch over time | Build a test set of questions with their gold chunks and score every version against it |
+| Answers are wrong, the prompt looks fine, and tightening it changes nothing | You measured the pipeline as one score, so you cannot see that retrieval is the stage that failed | Measure precision and recall for retrieval and faithfulness for the answer, separately |
+| You retrieve more chunks, recall improves, and the answers get noisier | Pulling more chunks catches more gold text but drags in junk too, so precision falls | Track both numbers and pick the operating point your app needs instead of chasing recall alone |
 
 ## The mental model to keep
 

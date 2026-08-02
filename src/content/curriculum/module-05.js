@@ -55,6 +55,14 @@ Notice the division applies to the **whole array at once**: that's NumPy doing e
 
 You will rarely hand-build pixel arrays. Libraries like Pillow or OpenCV load an image straight into a NumPy array for you. But internalizing that an image is *just numbers in a grid* demystifies everything downstream: convolutions slide over that grid, vision APIs encode that grid, classifiers score that grid. The picture is an illusion your eye assembles; the computer only ever touches the numbers.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Training is slow and unstable, or the loss jumps around from the first step | The pixel values were left at 0 to 255, so the network's internal math runs in extreme ranges | Divide the array by 255.0 before the image reaches the model, and subtract a per-channel mean if the model expects one |
+| An image comes out rotated or squashed, or an index lands outside the array | Height and width were read in the wrong order from the shape (height, width, channels) | Print the shape and treat the first number as height and the second as width every time |
+| Code that expects color crashes or reads only one plane of a photo | A grayscale image has shape (H, W) with one channel, not the three channels the code assumed | Check the shape before use and convert grayscale to three channels, or handle the one-channel case explicitly |
+
 ## The mental model to keep
 
 **An image is a spreadsheet of brightness, one sheet per color.** Height by width by channels. Normalize it, respect its grid, and the rest of computer vision is operations on that array.`,
@@ -375,6 +383,14 @@ Between convolution layers sits **pooling**, which shrinks each feature map by, 
 ## Why it matters
 
 CNNs slashed image-classification error rates and made vision practical at scale. Even though you'll rarely hand-code one today, every vision API, including the multimodal model in the next lesson, is built on these foundations. Understanding convolution means you understand what those APIs are doing under the hood.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The filter response is a grid instead of a single number, or the value is far larger than expected | The patch and kernel were combined with matrix multiplication instead of an element-wise multiply | Multiply the two arrays with the star operator, then reduce the result to one number with np.sum |
+| An obvious edge in the patch produces a response of 0 | The patch is symmetric, so the positive top row and the negative bottom row cancel exactly | Test the filter on a patch that goes bright to dark in one direction, and remember a zero response means no net edge in that orientation |
+| The feature map is smaller than the input, and later layer shapes stop lining up | A filter with no padding shrinks each side by the filter width minus one, and pooling halves it again | Compute the size at each layer with input minus filter plus one, then divide by the pool size, or add padding to keep the size fixed |
 
 ## The mental model to keep
 
@@ -717,6 +733,15 @@ The tradeoff is **cost and latency**. An API call per image isn't free, and it's
 ## Keep the key out of your code
 
 Notice \`Anthropic()\` is called with no arguments, it pulls the key from \`os.environ["ANTHROPIC_API_KEY"]\`. Never paste an API key into source. The moment you push to a repo, a hardcoded key leaks. Set it as an environment variable and let the client read it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The call fails with an authentication error even though the key works elsewhere | Anthropic() reads ANTHROPIC_API_KEY from the environment, and the variable is not set in the shell that runs the script | Export the key as an environment variable before running, and keep it out of the source file |
+| The request is rejected as an invalid image, or the model describes the wrong thing | The media_type does not match the real file format, for example a JPEG labelled image/png | Set media_type from the actual file, image/jpeg for JPEG and image/png for PNG |
+| The request fails to serialize, or the data field looks like a bytes object | The base64 output was passed straight through without being turned into a string | Call .decode("utf-8") on the result of standard_b64encode before putting it in the data field |
+| The model answers as if it never saw the picture | The image and the question were sent as two separate API calls, so the second call has no image in it | Put the image block and the text block in the content list of one user message |
 
 ## The mental model to keep
 
@@ -1102,6 +1127,15 @@ For production, the API also offers a structured-outputs mode that constrains th
 
 This pattern is what makes vision *operational*. A pile of photos becomes a queryable table; a stack of invoices becomes a sum; a folder of screenshots becomes filterable records. The expensive, fuzzy perception work goes to the model exactly once per image, and the cheap, exact processing stays in your code where you can test and trust it.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| json.loads raises a decode error on a reply that looks like valid JSON when you print it | The model wrapped the JSON in a friendly preamble such as "Here is the JSON:" | Add "Reply with only the JSON, no other text" to the prompt so the reply is pure JSON |
+| The keys change between runs, so data["total"] works on one image and fails on the next | The prompt described what you wanted in loose language instead of naming the exact keys and types | Spell out every field and its type in the prompt, for example store (string), total (number), item_count (integer) |
+| One bad image takes down a batch of 500 | json.loads and the key lookup ran without a guard, so a single malformed reply raised and stopped the loop | Wrap the parse and the field reads in try/except for JSONDecodeError, KeyError, ValueError and TypeError, then skip that row and continue |
+| Adding up the totals raises a type error partway through | The model returned the total as a string like "12.50" rather than a number | Coerce with float(data["total"]) inside the same guard, and treat a failed conversion as a miss |
+
 ## The mental model to keep
 
 **Structured output is the handoff line between perception and logic.** Tell the model the exact keys and types, demand JSON and nothing else, parse it behind a guard, then your deterministic code takes over.`,
@@ -1430,6 +1464,15 @@ Resolution is a tradeoff you control, not a setting to ignore:
 
 This is why "just send the original" is rarely the right answer. Match the resolution to the task.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model reads the big print on a label but gets the serial number or fine print wrong | The API capped the longest side and downscaled, leaving the small characters only a few pixels tall | Crop to the region that holds the detail and send that crop, or raise the resolution until the characters stay sharp after the resize |
+| The bill grows far faster than the images got bigger | Cost tracks pixel area, so doubling each side multiplies the pixel count by four, not two | Resize to the smallest size at which the feature you need is still clear, and estimate cost from width times height after the resize |
+| Objects in the resized image look stretched or squashed | Width and height were shrunk by different factors, so the aspect ratio was not preserved | Compute one scale factor from the longest side and divide both width and height by that same number |
+| A small image comes back larger than it started, or the resize math produces a bigger number | The scale factor was applied without first checking whether the longest side was already under the cap | Return the original dimensions unchanged when the longest side is at or below the cap |
+
 ## The mental model to keep
 
 **More pixels means more numbers, and area grows with the square of the side.** Resolution is a dial: turn it up for fine detail, down to save money, and find the lowest setting where the thing you need to see is still sharp.`,
@@ -1754,6 +1797,14 @@ Choosing the task is a real engineering decision:
 - **Use segmentation** when exact shape matters: medical imaging outlining a tumor, photo apps replacing a background, robotics gripping an oddly shaped part. Most precise, most expensive, most labeling effort to train.
 
 Asking for segmentation when a label would do wastes money and compute; asking for classification when you actually need locations leaves you unable to do the job.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model answers "car" for a traffic frame, but you needed to know how many cars and where they are | Classification returns one label for the whole image and carries no location or count | Switch to detection, which returns a labeled bounding box per object so you can count and locate them |
+| A project spends weeks on pixel labels for a job that only needed a yes or no per image | Segmentation was chosen when the question never required an exact outline | Match the task to the question: one label for a yes or no, boxes to count or locate, masks only when the exact shape matters |
+| A box area comes out negative or far too large | The four coordinates were paired in the wrong order, subtracting a y from an x | Read the box as x1, y1, x2, y2, then take width as x2 minus x1 and height as y2 minus y1 |
 
 ## The mental model to keep
 
@@ -2080,6 +2131,15 @@ The right threshold depends entirely on the cost of each kind of mistake:
 - **Cancer screening:** a miss (FN) is deadly, a false alarm (FP) just means another test. Favor **recall**: low threshold, catch everything, tolerate false alarms.
 - **Spam filter for important mail:** a false positive (real mail in spam) is awful, a miss (one spam in the inbox) is minor. Favor **precision**: high threshold.
 - **A confidence score is not a guarantee of truth.** As the hallucination lesson warned, a confident model can be confidently wrong. Confidence calibrates *the model's own certainty*, not reality.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A prediction scored 0.97 is treated as settled fact and ships without review | Confidence was read as a guarantee of correctness rather than the model's own certainty | Treat the score as a self-assessment, and add a human check or a second signal wherever the stakes are high |
+| One threshold makes the safety alerts miss real events while the spam filter buries real mail | A single global cutoff was applied across classes whose mistakes cost very different amounts | Set the threshold per class from the cost of each error, low where a miss is expensive and high where a false alarm is expensive |
+| Precision comes back as a divide-by-zero error or a misleading 1.0 | Nothing cleared the threshold, so TP plus FP is zero and the denominator collapses | Guard the division and return 0.0 when TP plus FP is zero, and report the flagged count alongside the metric |
+| A prediction sitting exactly on the threshold is dropped | The comparison used a strict greater-than instead of greater-than-or-equal | Use the at-or-above test so a score equal to t counts as positive, and keep that rule consistent everywhere |
 
 ## The mental model to keep
 
@@ -2411,6 +2471,15 @@ The cost of a silent failure scales with the stakes. A mislabeled vacation photo
 - **Never let a vision model be the sole authority on a high-stakes decision.** Put a human or a second check in the loop.
 - **Watch the known-hard cases:** bad lighting, occlusion, handwriting, rare inputs, anything that could be adversarial.
 - **Remember confidence isn't honesty.** As earlier lessons stressed, the model can be sure and wrong at the same time.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model gives a clean, sure-sounding answer about something the image never showed clearly | The frame was dark, occluded, or unlike the training data, and the model cannot say that it could not see | Route confident answers to a human whenever a known-hard condition is flagged, instead of trusting the score alone |
+| An OCR pass returns a serial number that reads plausibly but matches no real record | Handwriting, glare, skew, or low resolution left characters unreadable, so the model guessed the likeliest one | Check the reading against a known list or checksum, and re-capture the image when the check fails |
+| Accuracy looks fine in testing but drops for one group of users or one site | The training data underrepresented that group, lighting, or context, so the model learned less about it | Measure accuracy per group and per condition rather than only in aggregate, and expand the data where the gap shows |
+| A confidence gate alone still lets bad readings through | The score says how sure the model is, but it carries no information about the capture conditions | Combine the confidence check with capture flags such as dark, blurry, occluded, or glare, and send confident-but-risky cases to review |
 
 ## The mental model to keep
 

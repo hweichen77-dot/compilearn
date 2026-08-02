@@ -57,6 +57,14 @@ Once you see the model as a prediction machine, weird behavior stops being myste
 
 This is also why one wrong word early can derail an entire answer: the model keeps predicting *consistent* continuations of its own mistake.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An answer sounds authoritative, and later turns out to be wrong | Confident phrasing is the common continuation after a question, and there is no truth-checker anywhere in the loop | Treat fluency as style, not evidence, and check anything that matters against a real source |
+| You mention something in one chat, and the model has no idea about it in the next | Each request is a fresh prediction over only the text you send, so nothing carries over on its own | Put the detail back into the prompt, or let the app resend the earlier messages |
+| One small error early in an answer turns into a whole paragraph of wrong | Every new chunk is predicted to be consistent with the text before it, including the mistake | Stop, correct the text, and restart from the fixed version instead of asking it to keep going |
+
 ## The mental model to keep
 
 Picture a very well-read person who must answer every question by saying one word at a time, with no ability to pause and check anything. It is fast and fluent, often right, and sometimes wrong while sounding certain. The accurate image is autocomplete at large scale, not a robot brain.`,
@@ -368,6 +376,15 @@ Common text becomes few tokens. Rare or messy text becomes many. A clean English
 "Zx9_q4ß!"       -> many tiny pieces           (lots of tokens)
 \`\`\`
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You budget by word count, and the bill comes in higher than expected | Billing is per token, and tokens are word pieces, so 100 words is closer to 130 tokens | Estimate with 1 token per 4 characters, or run the text through a tokenizer before you budget |
+| Non-English text, ID strings, or emoji burn far more budget than English of the same length | Those chunks are not in the vocabulary as whole pieces, so they get rebuilt from many tiny tokens | Measure the real token count for that exact text instead of assuming the English rate |
+| You ask the model to count letters in a word and it gets the number wrong | It reads tokens, so the individual letters inside a chunk are not visible to it | Do character-level work in code and give the model the result |
+| A long conversation starts ignoring instructions you gave near the beginning | Total tokens passed the context window, so the oldest text fell off the edge | Trim the history and restate the instructions that still apply |
+
 The takeaway: when you write a prompt, you're spending tokens. Tight, plain language is cheaper and usually clearer to the model too. That's a rare case where saving money and getting better results point the same direction.`,
       key_terms: [
         { term: "Token", definition: "A common chunk of text (word, word-piece, space, or punctuation) that the model reads and writes." },
@@ -610,6 +627,14 @@ The freeze has consequences that trip everyone up:
 - **In-chat "memory" is an illusion.** When a chatbot remembers something you said five messages ago, the app is simply resending those earlier messages as part of each new prompt. Same frozen model, more input text, not learning.
 
 This also explains the cost shape of AI products: a giant up-front bill to train once, then a tiny per-request bill to serve answers forever.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You teach the model something in one session, and it is gone the next day | Inference never touches the weights, so nothing you typed was stored in the model | Send the detail again as part of the prompt, or have the app resend it every request |
+| The model answers confidently about a recent event and gets it wrong | The event happened after the training data ends, so the frozen model can only predict plausible text | Paste the current facts into the prompt rather than relying on its built-in knowledge |
+| You correct a mistake, it agrees, then repeats the same mistake in a new chat | The correction only lived in that conversation's text, and the weights did not change | Keep corrections in a system message or prompt template that gets resent each time |
 
 ## The mental model to keep
 
@@ -877,6 +902,14 @@ You don't need to fear the tool. You need to use it like a fast, fluent intern w
 Answer only from the text I pasted. If the answer isn't there,
 reply exactly: "Not stated in the source."
 \`\`\`
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A citation is formatted perfectly, and the case or paper does not exist | The model learned what real citations look like and filled in the specifics with plausible text | Look up every reference in a real source before you use it anywhere |
+| The answer includes exact dates or page numbers on an obscure topic | Thin training signal on that topic, and the model still has to continue the text somehow | Treat over-specific detail on niche subjects as your cue to verify, not as proof of accuracy |
+| You ask about a document you pasted and get claims that are not in it | The model answered from its fuzzy internal memory instead of the text you gave it | Tell it to answer only from the pasted text and to reply with a fixed phrase when the answer is not there |
 
 ## The mental model to keep
 
@@ -1174,6 +1207,14 @@ Then **sampling** draws one token according to those weights, ties back to the p
 - **"Confidence" is just a probability.** A token at 0.97 is not *verified*; it is only the model's predicted likelihood. Lesson 4 already warned: plausible is not true.
 - **The long tail is real.** Most probability piles onto a few tokens, but a tiny sliver is spread across thousands. Crank temperature up and you start drawing from that weird tail, which is how creative (and unhinged) outputs happen.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The same prompt run twice gives two different answers | The token is drawn from the distribution rather than always taken from the top, so the draw can differ | Take the highest-probability token (greedy) or set temperature to 0 when you need repeatable output |
+| You raise temperature for more creativity and get strange, off-topic words | A high temperature flattens the distribution, so draws start coming from the long tail of unlikely tokens | Raise it in small steps and pull it back as soon as the output drifts |
+| A token reported at 0.97 turns out to be factually wrong | That number is the model's predicted likelihood of the text, not a check that the text is true | Read probability as confidence about wording, and verify the claim separately |
+
 ## The mental model to keep
 
 The model does not choose a word. **It builds a full distribution over the whole vocabulary, then runs a weighted lottery.** Softmax sets the odds; sampling pulls the ticket.`,
@@ -1453,6 +1494,14 @@ A real model does this with billions of weights across dozens of layers. **Param
 - **Parameters are frozen at inference.** Lesson 3 again: when you chat, the weights do not move. You are reading the printed grid, not editing it.
 - **The number is marketing-adjacent.** A well-trained 13B model can beat a sloppy 70B one. Parameter count is a rough proxy for capability, not a guarantee.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A model with far more parameters loses to a smaller one on your task | Parameter count is storage capacity, and training quality decides what actually got stored in those dials | Compare candidates on your own task instead of on the headline parameter number |
+| A larger model will not run on the machine that ran the small one | Every parameter has to sit in memory, so size sets the floor on memory, latency, and price | Pick a size that fits your hardware, or run the big one on a server |
+| You go looking for where a fact is stored so you can edit it | No fact lives in one place; it is smeared across millions of weights as a pattern | Change what the model says through the prompt or the source text you give it, not by editing a stored fact |
+
 ## The mental model to keep
 
 A model is **billions of dials**, each holding one number. Training spent millions of dollars setting every dial. **Inference just reads the dials** to turn your prompt into a prediction, the dials never move while you use it.`,
@@ -1724,6 +1773,14 @@ The model does this for every token, in parallel, across many separate **attenti
 - **It captures long-range meaning.** Attention can link "it" back to a noun many words earlier, which is why models handle pronouns, context, and structure so well.
 - **It is the "T" in GPT.** GPT stands for Generative Pre-trained **Transformer**, and the Transformer is the architecture built around attention. No attention, no modern LLM.
 - **It explains the context window.** Every token attends to every other, so doubling the context roughly quadruples the attention work, which is why long contexts are expensive (lesson 2's token cost, now you know the deeper reason).
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Doubling the length of a prompt makes it far more than twice as slow and costly | Every token attends to every other token, so the attention work grows much faster than the token count | Send only the context the answer needs, and cut the rest |
+| The model attaches a pronoun to the wrong earlier word | Relevance weights are learned, so an ambiguous sentence can put weight on the wrong token | Name the thing instead of writing "it" or "that" when the reference could go either way |
+| A detail you pasted gets ignored even though it was in the prompt | Earlier tokens are blended by weight, and near-zero weights are effectively ignored | Cut the filler around it so the detail is clearly the relevant part of the context |
 
 ## The mental model to keep
 
@@ -2015,6 +2072,14 @@ Second, and this is the wild part, some abilities appear **emergently**. Below a
 - **It set the strategy of the whole field.** "Just scale it" became a multi-billion-dollar bet because the curves kept holding. Much of the 2020s AI boom is scaling, not new algorithms.
 - **Diminishing returns are real.** Each new tier of capability costs disproportionately more. That is why frontier models are so expensive and why the gap between releases can feel smaller over time.
 - **Bigger is not infinitely better.** You eventually run short of high-quality data and hit cost walls. Scaling is powerful, not magic, and lesson 6's lesson still holds: a well-trained smaller model can beat a poorly-trained giant.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A new generation costs far more to train and feels only a little better | Returns diminish, so each doubling of resources buys a smaller improvement than the last | Judge a release by what it does on your own task rather than by the size of the jump in resources |
+| You scale one ingredient and performance barely moves | Parameters, data, and compute have to grow together; a giant model starved of data wastes the extra size | Grow the training data and compute alongside the parameter count |
+| You write off a task because a smaller model could not do it | Some abilities only appear past a scale threshold, so a small model failing proves nothing about the task | Retest the same task on a larger model before deciding it cannot be done |
 
 ## The mental model to keep
 

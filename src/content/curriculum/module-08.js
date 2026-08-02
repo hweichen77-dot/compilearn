@@ -55,6 +55,14 @@ A concrete case where fine-tuning wins: you're classifying support tickets into 
 
 Now flip it: you're writing marketing copy in your founder's voice. The task is fuzzy, "right" is subjective, and you have nine examples. Don't fine-tune. Put those nine in the prompt and iterate. And remember, fine-tuning shifts *habits*, never *facts*. If the model doesn't know your Q3 numbers, no amount of style training will teach them; that's a job for retrieval or just pasting the facts in.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You fine-tuned on style examples and the model still gets your Q3 numbers wrong | Fine-tuning shifts habits and format, it does not load new facts into the weights | Put the facts in the prompt or fetch them with retrieval, and leave the fine-tune to handle behavior |
+| Two weeks of training work gets beaten by a prompt someone wrote in an afternoon | You skipped the ladder and jumped to fine-tuning before maxing out a plain prompt and few-shot examples | Climb the ladder in order and stop at the first rung that works |
+| The fine-tune comes out worse than the few-shot prompt it replaced | The task was fuzzy and you had far fewer than 300 clean examples, so training had no consistent pattern to learn | Go back to prompting until the task is stable and you can collect a few hundred consistent examples |
+
 ## The mental model to keep
 
 Prompting is writing a memo; fine-tuning is sending someone to a six-month training program. Most teams never need the program, they need a better memo and a way to measure it, which is the rest of this module.`,
@@ -362,6 +370,14 @@ The model nailed two and missed one (it said the sky is gray). Score: 0.67. Chan
 
 Evals are the difference between engineering and guessing. Eyeballing three outputs works; eyeballing the effect of a prompt change across 200 cases does not, your brain anchors on the last good example and you fool yourself. A single number across the whole set is the only honest read. It also makes progress *cumulative*: every improvement is measured against the same yardstick, so you can prove a change helped instead of arguing about it. And it scales, the same suite that catches one regression today catches a hundred over the project's life, automatically, on every commit.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You read a few outputs, call the prompt better, then find a week later that other answers quietly got worse | You judged the change from a handful of examples instead of running a fixed set of cases | Build a small dataset of inputs paired with reference answers and score every change against it |
+| A correct answer is marked wrong because the model wrote "The capital is Paris." instead of "Paris" | You scored with plain equality on a task that allows many correct wordings | Pick a scorer that fits the task, contains or similarity for free text, exact match only where one token is right |
+| You keep meaning to build an eval and never actually run one | You planned a thousand-row dataset instead of starting small | Hand-pick ten cases and run them today, then grow the set as failures show up |
+
 ## The mental model to keep
 
 An eval is a unit test that returns a *score* instead of pass/fail. Ten good cases you actually run beats a thousand-row set you keep meaning to build.`,
@@ -658,6 +674,14 @@ The first pair has identical word sets, so 1.0. The second swaps "paris" for "ly
 ## Why it matters
 
 The scorer choice directly controls whether your number is honest. Too **strict** (exact match on chatty output) and you get *false failures*, correct answers marked wrong, hiding real progress and making you chase ghosts. Too **loose** (contains, fooled by negation) and you get *false passes*, broken outputs marked right, so a regression sails through your eval undetected. Both failure modes corrupt the one number you're trusting to make decisions. A miscalibrated scorer is worse than no eval, because it gives you false confidence.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A perfectly correct answer scores zero | Exact match on a chatty output, the model said the right thing and wrapped it in extra words | Loosen to a contains or similarity scorer so acceptable rewording still passes |
+| A broken output sails through the eval | A contains scorer matched the reference inside a negation, "not Paris" contains "Paris" | Tighten the scorer and add cases that specifically test negated answers |
+| Two answers with opposite meanings get the same score | Jaccard compares word sets and ignores order, so "dog bites man" and "man bites dog" look identical | Move up to embedding cosine similarity or an LLM judge when word order carries the meaning |
 
 ## The mental model to keep
 
@@ -992,6 +1016,15 @@ def judge(customer_msg, reply):
 
 A judge is a model, so it inherits a model's biases. It tends to favor longer answers, can be swayed by confident tone, and may inflate scores for outputs that merely *sound* right. That makes an uncalibrated judge dangerous: it produces a number that looks rigorous but tracks length and confidence instead of quality. So before you rely on one, **calibrate it**: grade ~30 cases by hand, then check the judge agrees with you. If it doesn't, tighten the rubric and try again. **Judge calibration** is the step everyone skips and the reason most judge-based evals quietly lie. A judge you haven't checked against humans is a fancy random number generator with good PR.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The judge gives the same output different scores on different runs | The prompt asked for a rating with no rubric, so the judge invents its own scale each time | Spell out what each score level means and force a fixed output format |
+| Scores look rigorous but track answer length and confident tone instead of quality | You inherited the model's biases and never checked the judge against a human | Grade about 30 cases by hand and confirm the judge agrees before you trust it at scale |
+| You cannot pull scores out of thousands of judge responses | The judge replied in free prose instead of a parseable structure | Demand JSON or a single token, and discard any response that fails to parse |
+| Grades get mushy and stop separating good from bad | One call asked the judge to weigh several qualities at once | Judge one property per call, faithfulness in one, tone in another |
+
 ## The mental model to keep
 
 A rubric is a grading key: hand two teachers the same key and their marks converge. Used right, an LLM judge is the bridge between "this is too subjective to test" and "here's a number that tracks quality", but only after you've confirmed it agrees with you.`,
@@ -1315,6 +1348,14 @@ The math case passes (exact "4"). Paris passes (contains, even though the answer
 ## Why it matters
 
 A suite turns evals from a one-off check into a **gate**. Set a threshold, the suite must stay at or above its last pass rate, and wire it into CI or your pre-edit routine. If a change drops the number, you don't ship it. This is what makes AI development feel like software engineering instead of gambling: every change is measured, every regression is caught at the door, and progress compounds because nothing silently backslides. The most valuable move is turning each real-world failure into a new case, a **regression test**: so the same bug can never sneak back. Over months your suite becomes a museum of every mistake the system ever made and a guarantee none of them return.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The pass rate dropped but you cannot tell which behavior broke | The runner logged only the aggregate and threw away per-case results | Print pass or fail with the actual and expected output for every case, then read the failures |
+| A bug you already fixed shows up again months later | The fix never became a case, so nothing in the suite guarded it | Turn every real failure into a regression case before you close it out |
+| The number slides a little with each change and nobody stops it | The suite runs but no threshold blocks a drop | Gate on the last pass rate in CI and refuse changes that lower it |
 
 ## The mental model to keep
 
@@ -1695,6 +1736,15 @@ print("under-covered:", weak)      # classes needing more examples
 
 Dataset quality has a higher ceiling effect than almost any other knob. A pristine 400-row set routinely beats a careless 4,000-row one, because the careless set quietly teaches contradictions: two near-identical inputs labeled differently tell the model the task is random. **Deduplicate** too, copies don't add signal, they just over-weight whatever they happen to say, skewing balance without you noticing. And watch for leakage of the label into the input (a row that literally contains the answer): the model learns the shortcut, scores great in training, and falls apart on real inputs that lack the tell.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The fine-tune scores beautifully during training and falls apart on real user inputs | An input carried its own answer, so the model learned the shortcut instead of the task | Strip the label out of the input before you train |
+| The model answers with the same class no matter what you send it | One class dominated the examples, so always guessing it was the best strategy the data offered | Count examples per class and collect more for the starved ones until coverage is roughly even |
+| A bigger dataset performs worse than the smaller one it replaced | The extra rows were noisy or contradictory, near-identical inputs carrying different labels | Cut back to the clean, consistent examples and fix or drop the conflicting rows |
+| The model handles your test phrasings and fumbles the way users actually write | The dataset covered only the happy path, with no edge cases or rephrasings | Add the real formats, misspellings, and edge cases users send, then deduplicate |
+
 ## The mental model to keep
 
 A training set is a stack of worked examples handed to a very literal student. It copies your habits exactly, including your mistakes. Curate ruthlessly: clean, balanced, and covering the real distribution beats big every time.`,
@@ -2019,6 +2069,15 @@ A small gap means the model learned the rule. A large gap, high train, low test,
 
 Train accuracy is a vanity metric. A model can hit 100% on training data by simply memorizing every answer, and that number tells you *nothing* about the inputs your users will actually send. **Test accuracy is the honest number** because those examples were never part of learning, they stand in for the unseen real world. This is why the test set must stay sealed: the instant you tune your prompt or pick a model version based on the test score, that set has leaked into your decisions and stops being held-out. It's now training data with extra steps, and your reported number is inflated. Serious teams keep a third **validation set** for tuning and only touch the test set once, at the very end.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Training accuracy is 99% and production accuracy is 71% | The model memorized the training examples instead of learning the rule behind them | Score on a held-out test set and read any large train-test gap as overfitting |
+| The model nails the exact questions it studied and fails on slight rewordings | It learned the answer key, not the pattern | Add varied phrasings to training and confirm the gain shows up on data the model never saw |
+| Your reported test score looks great and never repeats in production | You picked a prompt or model version by watching the test score, so it leaked into your decisions | Tune against a separate validation set and open the test set once, at the end |
+| Training and test accuracy are both low with almost no gap between them | The model underfit, it never learned enough to begin with | Give it more or better examples, or train longer, before you worry about overfitting |
+
 ## The mental model to keep
 
 Training accuracy is the practice exam you've already seen the answers to; test accuracy is the real exam with fresh questions. Anyone can ace the practice. Only generalization counts, and you can only see it on data the model never studied.`,
@@ -2319,6 +2378,14 @@ The dashboard shows v1.2 dipped, a model swap that looked like an upgrade actual
 ## Why it matters
 
 Memory lies and vibes drift. Three weeks into a project nobody remembers whether the "improved" system prompt actually beat the original or just felt fresher, the trend line settles it with data. Tracking also makes regressions **attributable**: when the number drops, the version tag tells you exactly which change to blame, so you bisect in one glance instead of guessing. It turns the **best score** into a defensible baseline you can gate against (lesson 5), and it exposes slow erosion, the death-by-a-thousand-tweaks decline where each change costs half a point and nobody notices until you're ten points down. A chart of score-by-version is the difference between *managing* an AI system and *hoping*.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Today's score looks worse than last month's and nobody can explain it | The eval set itself changed between the two runs, so the numbers were never comparable | Freeze the eval set and compare only runs scored against the same version of it |
+| The number drops and you cannot tell which change caused it | Runs were logged without a version tag | Record every run against the prompt or model version that produced it |
+| The score slid ten points over months with no single obvious culprit | Each change cost a fraction of a point and nothing compared them against the running best | Track score by version and gate new changes against the best score so far |
 
 ## The mental model to keep
 

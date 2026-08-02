@@ -51,6 +51,14 @@ For you, that means you can build something that talks to one of the best AI mod
 
 There's a cost side too. Because the work happens on someone else's servers, every call travels the network (so it has **latency**, a small delay) and often costs money. That shapes how you design real programs: you batch calls, cache answers, and avoid hammering the API in a tight loop.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You go looking for the model file on your own machine and cannot find anything to run | The model never lives on your laptop, it runs on Anthropic's servers and your script only sends and receives text | Stop hunting for a local model and send a request over the network instead, then read the response |
+| Each call takes a noticeable moment even though your code is only a few lines | The work happens on someone else's servers, so every call pays the network round trip called latency | Expect the delay, and design around it by batching work into fewer calls |
+| A loop over a few thousand items runs slowly and costs far more than expected | Every iteration is a separate paid request instead of one shared result | Cache answers you have already received and avoid calling the API inside a tight loop |
+
 ## The mental model to keep
 
 An API is a counter, not a kitchen. You place an order, you wait, you get a result, and you never need to know how the kitchen works.`,
@@ -340,6 +348,15 @@ Only **text** can travel over a network, not a live Python object. JSON is the a
 
 JSON is also strict, and that strictness causes most beginner errors. Keys and string values **must** use double quotes; single quotes break it. A **trailing comma** after the last pair breaks it too. When an API rejects your request with a vague error, check for a stray quote or comma first.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Python raises "string indices must be integers" when you index the data you received | You are indexing a JSON string as if it were already a dictionary | Run json.loads on the text first, then index the dictionary it returns |
+| Printing the received data shows one long line of quoted text instead of separate fields | The value is still a JSON string, nothing has parsed it yet | Call json.loads once on arrival and work with the dictionary from then on |
+| The API rejects your body with a vague parse error | The JSON you wrote by hand uses single quotes or has a trailing comma after the last pair | Build a Python dictionary and let json.dumps write the JSON, or fix the quotes and drop the trailing comma |
+| A KeyError when you reach for the reply text | You indexed a key directly when the value in between is a list, not a box | Step through the list first, as in the content key followed by index zero, then the text key |
+
 ## The mental model to keep
 
 JSON is labeled boxes for data: \`dumps\` to pack them for the trip, \`loads\` to unpack them when they arrive.`,
@@ -627,6 +644,15 @@ A handful of status codes tell you what happened:
 401 -> your key is missing or wrong
 429 -> you're sending too fast, back off and retry
 \`\`\`
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A 401 on every call even though you set the key earlier | The export ran in a different terminal or a different session, so the variable was never loaded for the process running your script | Print whether os.environ.get returns a value, and export the key in the same shell that runs the script |
+| Your script crashes with a KeyError before it ever reaches the API | You read the variable with square brackets, which raises when the name is missing | Read it with os.environ.get so a missing variable returns None and you can print a clear message |
+| Your account shows usage you did not create | The key was pasted into code that got pushed, and scanners found it | Move the key to an environment variable, then rotate the exposed key in the console right away |
+| A 429 keeps coming back no matter how many times you resend | The retry fires immediately, so you stay above the rate limit the whole time | Wait before each retry and double the wait each attempt, one second, then two, then four, with a retry cap |
 
 ## The mental model to keep
 
@@ -927,6 +953,15 @@ Read it top to bottom:
 The reply comes back as an object, and the text lives at \`response.content[0].text\`. Why the \`[0]\`? Because \`content\` is a **list of blocks**. A plain text answer is one block (the first), so you grab \`content[0]\` and read its \`.text\`. (The list exists because richer replies can carry multiple blocks, like tool calls, which you'll meet later.)
 
 This is the full loop from lesson 1, made real: you built a request, sent it, the server ran Claude, and you read the response. Change the \`content\` string and you change the question. Wrap it in a loop and you have a chatbot; feed it a document and you have a summarizer. Every Claude program you ever write is a variation on these ten lines.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An AttributeError when you print response.text | The reply text is not a top level field, it sits inside a list of content blocks | Print response.content, index zero, then read text on that block |
+| Printing the response dumps a wall of object fields instead of the answer | You printed the whole response object rather than reaching into the text block | Print only the text of the first content block |
+| The answer stops in the middle of a sentence | max_tokens is set too low, so the reply ran out of room before Claude finished | Raise max_tokens until the reply has space to complete |
+| A 401 the moment the client is created | The client read an empty or missing key from the environment | Set the key in the environment first and confirm it loaded before calling messages.create |
 
 ## The mental model to keep
 
@@ -1230,6 +1265,14 @@ When a request fails, the error usually points at one of the three parts, and na
 - A \`400\` is usually a **body** problem, malformed JSON, a missing required field, or a value out of range.
 
 Mixing them up wastes hours. Separating endpoint, headers, and body in your head turns a vague "it broke" into a precise "the body is missing \`max_tokens\`."
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A 404 on a request whose key and body are both fine | The endpoint is wrong, either a typo in the path or a GET where the API expects a POST | Send a POST to the messages path exactly as written, with no extra or missing segments |
+| A 401 even though the key is correct and works elsewhere | The auth header was never attached, so the server has no key to check | Add the API key header to the request, and add the version header the API requires alongside it |
+| A 400 that mentions the body being unreadable or a field being absent | Either the content type header does not declare JSON, or a required body field such as model or max_tokens is missing | Set the content type header to application/json and print the body before sending to confirm every required field is there |
 
 ## The mental model to keep
 
@@ -1551,6 +1594,14 @@ The headline text is only part of the value:
 
 Ignoring these fields is how beginners ship apps that silently truncate long answers or quietly blow a token budget.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Users report summaries that end mid sentence, but your code reports success every time | Only the text block is read, so a reply that hit the length cap looks identical to a finished one | Check stop_reason after every call and treat max_tokens as a truncated answer worth retrying with a higher cap |
+| The token bill climbs and you cannot tell which calls caused it | The usage block is never read, so nothing records what each call cost | Read input_tokens and output_tokens from usage on every call and log the total |
+| A user reports a bad reply and you have no way to trace which call it came from | The call id and the model that answered were never logged | Log the response id and model alongside the answer so any single call can be traced later |
+
 ## The mental model to keep
 
 The response is a receipt, not just an answer. The text is the product; **usage** is the price, **stop_reason** is whether the order was complete, and **id** is the receipt number.`,
@@ -1851,6 +1902,15 @@ Doubling the wait keeps you from hammering a struggling server, and the retry ca
 ## Why it matters
 
 Retry logic is where reliability lives. Retry a \`401\` and you waste a thousand doomed calls; *don't* retry a \`429\` and a brief traffic spike crashes your whole job. Production SDKs (including Anthropic's) build sensible backoff in for you, but you must still decide what to do on a fatal error: surface it to the user, log it, fall back. **The status code is the instruction, read it before reacting.**
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A batch job burns hundreds of calls and every one of them fails the same way | A 400 or a 401 was fed into the retry loop, and a deterministic error fails identically forever | Classify 400 and 401 as fatal, stop on the first one, and fix the body or the key |
+| Retries during a traffic spike fail instantly, one after another | The retry fires with no wait, so you are still over the rate limit on every attempt | Sleep before each retry and double the delay each time, one second, then two, then four |
+| One item hangs and the whole job stops making progress | The request never returned and no timeout was set, so the client waits forever | Set a client timeout and treat a timeout like any other transient failure, wait and retry |
+| A broken request loops forever instead of failing | The retry logic has no cap, so it keeps trying an item that will never succeed | Cap the retries, then log the item and move on once the cap is reached |
 
 ## The mental model to keep
 
@@ -2172,6 +2232,15 @@ Three more practices separate hobby code from production:
 - **Rotation.** Keys should be rotated, replaced with fresh ones, periodically, and *immediately* if you suspect a leak. A leaked key you've already rotated is worthless to an attacker. Treat any key that ever touched a commit as compromised, even after you delete it: Git history remembers.
 - **Scoping (least privilege).** Give a key only the access it needs. A read-only key, or one capped to a small spending limit, limits the blast radius if it leaks. Never hand a production-grade key to a throwaway script.
 - **Never log it.** Printing a key to logs or error traces leaks it just as surely as committing it. Log \`key is set: True\`, never the key itself.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your .env file shows up in git status and lands in a commit | The file was never listed in .gitignore, so Git tracks it like any other file | Add .env to .gitignore, and treat any key that already reached a commit as compromised |
+| You deleted the key in a later commit and assume the problem is handled | Git keeps every past commit, so the old one still holds the key and scanners have likely already read it | Rotate the key now, generate a fresh one and revoke the exposed one in the console |
+| The key turns up in a log file or an error trace | Someone printed the value to confirm it had loaded | Log only whether the key is set, never the value itself |
+| A teammate clones the repo and cannot tell which variables to set | There is no committed example file naming the required variables | Commit a .env.example that lists the variable names with blank values |
 
 ## The mental model to keep
 

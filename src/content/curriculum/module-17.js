@@ -58,6 +58,14 @@ Thinking in messages instead of one big string enables everything else:
 - **The output is just another message.** The assistant's reply is a message of the same shape, which is why you can append it back and keep going.
 - **It's all one prediction.** No matter how many messages you send, the model still does one job: predict the next assistant message over the whole list.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model treats your setup instructions as one more request and can be argued out of them | The setup text was put on a user message instead of a system message, so it reads as something the human asked for | Move the setup text onto a system message and place it first in the list |
+| The reply answers a question from earlier in the chat instead of the latest one | Messages were added in the wrong sequence, and the model reads the list top to bottom | Keep the list in the order things actually happened, newest message last |
+| Role labels stop having any effect on behavior | The whole conversation was flattened into one string with labels typed inside it, so there are no roles left for the API to see | Send a list of message objects, each with its own role and content field |
+
 ## The mental model to keep
 
 A chat request is a **script with labeled speakers**, and the model is an actor hired to write the very next assistant line. It reads every line above, then delivers one.`,
@@ -336,6 +344,14 @@ The system prompt is where most behavior problems get fixed:
 - **Consistency.** It applies to every turn, so the persona doesn't drift halfway through the chat.
 - **Cheaper than fine-tuning.** You can completely change the assistant's behavior by editing one string, no retraining, no code changes elsewhere.
 - **It's still just text.** A determined user *can* push against it, and the model can still ignore parts of it. It's strong guidance, not an unbreakable law.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The persona holds for the first reply, then the assistant sounds generic again | The system message was sent only on the first request instead of leading the list on every request | Rebuild the list with the system message first every time you call the model |
+| Answers still vary in length and shape after you wrote a system prompt | The prompt says something vague like be helpful, which gives the model nothing to follow | Write concrete rules the model can obey, such as reply in under 20 words or return JSON only |
+| A user talks the assistant into breaking a rule you wrote in the system prompt | The system prompt is guidance, and it was treated as an enforcement boundary | Keep the prompt, and enforce anything that must always hold in your own code, by checking the output before you use it |
 
 ## The mental model to keep
 
@@ -621,6 +637,15 @@ This re-send mechanism explains a lot of real behavior:
 - **"Memory" is resent text.** The bot doesn't store your name. The app puts it back in the input every time. Start a fresh conversation and it's gone.
 - **History costs tokens, every turn.** Because the whole list is resent each time, long conversations get more expensive per turn, you're paying to re-read the entire transcript repeatedly.
 - **Old turns can fall off.** When the history outgrows the context window, the app must drop or summarize the oldest messages, and then the model genuinely "forgets" them.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot forgets your name one reply after you gave it | Only the newest user message was sent, and the model keeps nothing between requests | Store the history and send the whole list on every turn |
+| The assistant repeats an answer it already gave, or contradicts itself | The model's own replies were never appended to the history, so each turn starts from a transcript that ends on a user message | Append the returned assistant message to the history before the next turn |
+| Cost per turn keeps climbing in a long chat even though the user's messages stay short | The entire transcript is resent on every request, so you pay to re-read all of it each time | Trim or summarize the oldest turns once the history passes a size you pick |
+| The model loses a detail from early in the chat with no warning | The history outgrew the context window and the oldest messages were dropped | Summarize the dropped turns into one message and keep that summary in the list |
 
 ## The mental model to keep
 
@@ -917,6 +942,14 @@ Getting the array right is most of what a chat app does:
 - **One list, sent whole.** You don't send "just the new message", you send the entire array each turn.
 - **Append both sides.** User *and* assistant turns go in. Skip the assistant turns and the model loses track of its own answers.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot answers as if it never wrote its previous reply | The loop appends the user message but never appends the assistant message that came back | Append the returned assistant message right after each model call, before reading the next user input |
+| The system message has no effect on behavior | It was appended partway through the loop instead of seeding the list, so turns sit above it | Create the list with the system message as its first element, then append turns after it |
+| The conversation reads scrambled and replies answer the wrong turn | Messages were inserted somewhere other than the end of the list | Always append to the end so the list order matches the order things happened |
+
 ## The mental model to keep
 
 A chat app is a **list you keep appending to, in order, and resend in full**. Start with system, alternate user and assistant, never shuffle. Master that list and the rest is plumbing.`,
@@ -1199,6 +1232,15 @@ Prefilling is a cheap, reliable steering tool:
 - **It locks format.** Opening with \`{\` or \`[\` makes structured output far more likely than asking nicely.
 - **It has limits.** Not every provider supports prefill, and a clumsy prefill can box the model into a bad continuation. You also must remember the prefill text is part of the final answer, prepend it yourself when reading the output.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| JSON parsing fails because the returned text starts inside the object and has no opening brace | The response holds only the continuation, and the prefill you supplied is missing from it | Join your prefill and the returned text together before parsing |
+| The provider rejects a request whose last message is an assistant message | That provider does not support ending on a partial assistant turn | Check whether prefill is supported, and fall back to asking for the format in the system message |
+| The request is rejected over trailing whitespace in the last message | The prefill content ends with a space or newline, which some APIs will not accept | Strip trailing whitespace from the prefill and let the model supply it |
+| The reply is stilted or forced into a shape that does not fit the answer | The prefill committed the model to an opening it could not continue sensibly | Keep the prefill to the shortest opening that pins the format, such as a single brace or bullet |
+
 ## The mental model to keep
 
 The assistant turn is **a message you can start writing**. Hand the model the first few characters of its own reply, and it will faithfully continue the sentence you began.`,
@@ -1476,6 +1518,15 @@ Extra roles are how chat became *agentic*:
 - **Tools give the model fresh, real data.** Instead of guessing the weather, it reads a real API result you injected as a tool message.
 - **The name field disambiguates.** With several tools or several speakers, \`name\` says which one produced this message.
 - **It's still one transcript.** No magic, the assistant requests, your code runs, the result goes back as a message, and the loop continues exactly like multi-turn chat.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model asks for the same tool over and over | Your code ran the tool but never appended the output as a tool-role message, so the transcript still shows an unanswered request | Append a tool message holding the result before you call the model again |
+| Nothing happens after the assistant says it will check the weather | The tool call was treated as something the model executes, when the model only emits the request | Read the request out of the assistant message, run the tool in your code, and hand the output back |
+| The model quotes one tool's output as if it came from another | Several tools ran in the same turn and the results were appended without the name field | Set name on each tool message so every result stays tied to the call it answers |
+| The API rejects the request once tool messages appear | A tool result sits in the list with no matching tool call above it, or the pair is out of order | Keep each call and its result adjacent and in order, one result per call |
 
 ## The mental model to keep
 
@@ -1758,6 +1809,15 @@ Placement is the difference between a grounded answer and a confident hallucinat
 - **Buried context gets ignored.** Stuffed mid-paragraph or after the question, retrieved text is under-used. A clean, labeled block up front gets attended to.
 - **Mixing instruction and data invites injection.** If a retrieved doc says "ignore previous instructions," and you didn't delimit it, the model may obey it. Clear separation reduces that risk.
 - **System carries the rules, user carries the evidence.** This split keeps the "only answer from context" rule stable while the evidence rotates per query.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Retrieval returns the right paragraph and the bot still answers from memory | The document text was pasted inside the user's sentence with no markers, so it reads as part of the question rather than as evidence | Put the retrieved text in its own labeled block, with Context and Question markers around it |
+| A retrieved document changes the assistant's behavior, and it starts ignoring your rules | Text inside the document reached the model as an instruction because nothing marked where the data started and stopped | Delimit every retrieved block clearly and keep the rules in the system message, above the evidence |
+| The answer barely uses the context you injected | The context was placed after the question, so the model read the ask before the evidence | Put the context block before the question in the list |
+| Behavior shifts between queries even though your rules never changed | The system message is rebuilt each query with the retrieved text baked into it, so the stable part changes every time | Keep the rules in a fixed system message and put the rotating evidence in a user block |
 
 ## The mental model to keep
 
@@ -2048,6 +2108,15 @@ These bugs are silent and expensive:
 - **Missing system message means drift.** Without setup, tone and format wander, and you'll blame the model for being inconsistent.
 - **Role violations break or confuse the API.** Some providers reject non-alternating roles; others accept them but the model loses track of who said what.
 - **Typos hard-fail.** A misspelled role or key is the easiest bug to fix once you look, and the easiest to stare past.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The persona holds early in a long chat, then disappears once it runs long | The trimming code dropped the oldest messages to fit the context window, and the system message is the oldest one | Pin the first element and trim only the turns after it |
+| One user sees fragments of another user's conversation | A single message list was created once and shared by every request instead of per conversation | Create a fresh list for each conversation and store it against that session |
+| The same user message appears twice in the transcript | The append runs in two places, once where input is read and once inside the send helper | Append in one place only, and have the send helper take the list without changing it |
+| A validator you wrote says the list is fine, but the reply still ignores the last question | A retry after a failed call re-sent the list without the assistant reply that a later call did produce | Append the assistant reply as soon as a call succeeds, and keep the list unchanged when a call fails |
 
 ## The mental model to keep
 

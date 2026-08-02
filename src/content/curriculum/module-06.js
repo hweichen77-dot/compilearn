@@ -52,6 +52,14 @@ Representing words as coordinates is what makes meaning *computable*. Search, re
 
 There is a subtlety, though. You could measure plain straight-line (**Euclidean**) distance between two dots, the same Pythagorean idea as magnitude, but applied to the *gap* between two vectors: \`distance(a, b) = sqrt(sum((a_i - b_i)²))\`. For example, the distance from \`[0,0]\` to \`[3,4]\` is \`sqrt(3² + 4²) = sqrt(25) = 5\`. Sometimes that is fine. But for text, **direction usually matters more than length**. A long document about cats and a one-line tweet about cats should count as similar even though one vector is much "longer." That tension is exactly what the next lesson resolves with the angle between vectors.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A dot product runs without any error but the score is clearly wrong | The two vectors have different numbers of components, and zip stops at the shorter one instead of complaining | Check that both vectors have the same dimension before you compare them |
+| A long document outranks a short one that is obviously a better match | You ranked by the raw dot product, so the longer vector scores higher on length alone | Divide the length of each vector out of the score, which is exactly what cosine similarity does next lesson |
+| Magnitude comes back as 25 when you expected 5 | You summed the squared components but never took the square root | Wrap the sum in math.sqrt so the result is a length, not a squared length |
+
 ## The mental model to keep
 
 A vector is a word's address on a map of meaning. Comparing words is just measuring how their addresses relate, and you only ever need two tools to do it: dot product and magnitude.`,
@@ -342,6 +350,14 @@ So when you compute \`cosine(die_hard, mad_max) = 0.99\` and \`cosine(die_hard, 
 Cosine similarity is the workhorse of search, recommendations, RAG retrieval, and duplicate detection. Almost every "find me things like this" feature you have ever used runs cosine, or a close cousin, under the hood. It wins over plain dot product because real text varies wildly in length: a product description, a one-line review, and a full article about the same item should all match a query, and only an angle-based measure treats them fairly. Learn it once, recognize it everywhere.
 
 One gotcha to respect: if a vector is all zeros, its magnitude is zero and you divide by zero. Real embedding models never return a zero vector, but hand-built vectors can, so guard against it when you craft vectors yourself.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your cosine function raises a division by zero error | One of the vectors is all zeros, so its magnitude is 0 and the formula divides by it | Check both magnitudes before dividing and treat a zero-length vector as a score of 0 |
+| A short text that answers the query perfectly ranks below a long, half-relevant one | You compared with a raw dot product, which rewards length instead of direction | Divide the dot product by both magnitudes so only the angle survives |
+| Two visibly different vectors score exactly 1.0 and it looks like a bug | One vector is the other scaled up, and cosine strips length out on purpose | Nothing to fix here, and if length matters to you, compare the magnitudes separately |
 
 ## The mental model to keep
 
@@ -677,6 +693,15 @@ Normalization is a classic **precompute** move: do the expensive work once and s
 
 Prove it to yourself: compute cosine the long way, then normalize both vectors and take a bare dot product. Same answer. That equivalence is the entire reason normalization is worth doing.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Search is no faster after you added normalization | You normalize inside the comparison loop, so every query still pays for the square roots you meant to remove | Normalize the whole index once when it loads and leave only a dot product in the query path |
+| Scores go haywire once you switch to a bare dot product | Part of the index is normalized and part is not, so length leaks back into the ranking | Normalize every stored vector and the query with the same step before any dot product |
+| Normalizing crashes on a few rows of your data | Those rows are all-zero vectors, and dividing by a magnitude of 0 is undefined | Return the zero vector unchanged when the magnitude is 0 |
+| Every component now sits between -1 and 1 and the vectors look broken | Scaling to length 1 shrinks the numbers while leaving direction untouched | Nothing to fix, confirm it by checking that the magnitude is 1.0 |
+
 ## The mental model to keep
 
 Normalize once at index time so every search becomes a single fast dot product. You trade a bit of upfront work for cheap queries forever after.`,
@@ -984,6 +1009,14 @@ That \`if name != title\` is not optional. A movie is always perfectly similar t
 You could instead just filter by a single genre label, but movies are blends. Blade Runner is sci-fi *and* action *and* noir-drama at once. A vector captures that mix in one shot, so it finds Interstellar (another sci-fi/drama lean) even though their top genre tag differs. Tags cannot do that without a tangle of if-statements, and the tangle grows with every new genre. Vectors scale; rule-based tags do not.
 
 There is one more move that makes this production-ready. A real user likes several movies, not one. The standard trick: **average their liked vectors** into a single **taste vector**, then find the nearest movies to that average. One vector, one search, captures the blend of everything they enjoy, that is the challenge below.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The top recommendation for Die Hard is Die Hard | The seed item is still in the list you score, and a vector always matches itself with a cosine of 1.0 | Skip the seed before scoring, which is what the name check in the loop is for |
+| The recommender always returns three titles, even for a movie with nothing like it in the catalog | Taking the top N returns the closest items, not the good ones, and there is no floor on the score | Drop results below a minimum cosine so a weak match returns nothing instead of noise |
+| A taste vector built from several favorites recommends only what one of them is about | The averaged vectors have very different lengths, so the longest one dominates the average | Normalize each liked vector before averaging so every pick contributes equally |
 
 ## The mental model to keep
 
@@ -1352,6 +1385,15 @@ From there the loop is four steps:
 
 This is the engine behind modern search and **RAG** (Retrieval-Augmented Generation): you embed your documents, retrieve the relevant ones by similarity, and feed them to an LLM as grounded context. Done once at index time, document embeddings are reused across every query, so only the short query is embedded fresh, that is what keeps it fast and cheap at scale. The runnable code below uses pre-stored vectors so it is deterministic with no network call, but the logic is identical to production. Watch the payoff: the query has no words in common with "My login isn't working anymore," yet that doc still ranks second. Keyword search can never pull that off.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every result turns to garbage right after you swap in a different embedding model | The stored document vectors came from the old model and the query came from the new one, and two models do not share a vector space | Re-embed the whole document set with the same model and version that embeds the query |
+| Each search takes seconds and the API bill keeps climbing | You embed the documents again on every query instead of once at index time | Embed and store the document vectors up front, then embed only the incoming query |
+| A nonsense query still returns a confident top document | Cosine ranks the closest vector, and the closest of a bad set is still the closest | Require a minimum similarity before you show a result |
+| The key works on your laptop and leaks the moment you push | The API key was pasted into the source instead of read from the environment | Read the key from os.environ, and rotate any key that ever reached a commit |
+
 ## The mental model to keep
 
 The model turns text into coordinates; cosine ranks the coordinates. Embed once, query forever, and you have semantic search that understands meaning instead of matching spelling.`,
@@ -1687,6 +1729,14 @@ Dimension count is a real engineering trade-off, not a "bigger is better" knob:
 - **More dimensions** buy room to separate fine distinctions, but every extra axis costs memory and makes each cosine comparison slower. A million 3,072-float vectors is a lot of RAM.
 - That is why models offer a few sizes, and some let you **truncate** a long embedding to a shorter one when you would rather have speed than the last drop of accuracy.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Two vectors compare without error but the scores are meaningless | The vectors have different dimension counts, one truncated and one full, so the axes no longer line up | Compare only vectors of the same length, produced by the same model at the same setting |
+| Memory use and query time jump after you move to the largest model | Every extra axis is stored on every vector and touched on every comparison | Pick the smallest size that holds your quality bar, or truncate the embedding to a shorter one |
+| You read one axis of a real embedding and it means nothing you can name | Most learned dimensions are blends, not clean human concepts like the toy royalty axis | Judge vectors by similarity scores instead of trying to interpret single axes |
+
 ## The mental model to keep
 
 A dimension is one axis of meaning, and an embedding is a word's position along every axis at once. More axes give the model more room to keep different meanings apart, at a cost in memory and compute you pay on every single comparison.`,
@@ -1969,6 +2019,14 @@ Chunking is where most RAG quality is won or lost, well before any fancy model i
 
 Get chunking wrong and no amount of model quality saves you: the right answer simply never surfaces, because it was blurred into a giant vector or sliced clean in half.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every query returns the same long passage, with the real answer buried somewhere inside it | The chunk is so large that one vector averages several unrelated topics into a blur | Cut the chunk size so each vector carries one focused idea |
+| A retrieved chunk is on topic but too thin to answer the question | The chunks are so small that a single idea is split across two of them | Raise the chunk size, and split on paragraph or sentence seams instead of a raw word count |
+| The answer sits right on a chunk boundary and never comes back whole | Neighboring chunks share no text, so a sentence that straddles the split is cut in half | Add a small overlap so boundary text appears in both neighboring chunks |
+
 ## The mental model to keep
 
 Embed ideas, not documents. Chunk a long text into focused passages first, tune the size so each vector carries exactly one clear thought, and let a little overlap keep ideas from being cut at the seams.`,
@@ -2240,6 +2298,14 @@ This is the difference between a demo and a system that survives contact with re
 - **Cost and speed.** Cache hits cost nothing. Only changed chunks hit the API, so updates stay fast and cheap at scale.
 - **Correctness.** Stale vectors silently return wrong results, the index says one thing, the document says another. Hash checks catch exactly the chunks that drifted.
 - **Safe migrations.** Versioning the index means a model upgrade never leaves you comparing apples to oranges across two embedding spaces.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Search results contradict what the current document actually says | The source text was edited but the stored vector was never recomputed, so it is stale | Hash each chunk's text and re-embed whenever the stored hash stops matching |
+| Quality drops quietly after a model upgrade, with no error anywhere | The cache is keyed only on the text, so vectors from the old model are still served next to new ones | Stamp the index with the model version and re-embed everything when that version changes |
+| Every run re-embeds the whole knowledge base and the bill never drops | The hashed value carries something that changes each run, like a timestamp or reformatted whitespace | Hash only the chunk text, cleaned the same way every time |
 
 ## The mental model to keep
 

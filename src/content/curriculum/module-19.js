@@ -57,6 +57,14 @@ Once you see generation as a weighted draw, the day-to-day behavior stops being 
 - **A small early difference snowballs.** A different first token changes the context, which changes the next distribution, so answers drift apart, the same compounding you saw with prediction.
 - **You can turn the dial.** How "loose" the dice are is itself a setting (temperature, next lesson). Some tasks want repeatable; some want surprise.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Two identical calls come back with different text, so you file a bug against the model | Each call draws fresh from the distribution, so a different ticket can come out of the same hat | Nothing is broken. If you need the same answer twice, pin the sampling settings rather than hunting for a defect |
+| A test asserts on one exact generated string and starts failing on a rerun | The assertion assumes the model always returns its top token, but the default behavior is a weighted draw | Assert on the shape or a property of the output, or make the draw repeatable before comparing exact text |
+| Two runs open the same way and then end up completely unrelated | One early draw landed on a different token, which changed the context and every distribution after it | Expect that drift on long outputs and review the whole answer, not just the first line |
+
 ## The mental model to keep
 
 The model hands you a hat full of weighted tickets, then **draws one at random.** The favorite ticket usually comes out, but not every time. Same prompt, same hat, different draw. That's why your slogan keeps changing.`,
@@ -346,6 +354,14 @@ Temperature is the cheapest, most direct lever you have over a model's "personal
 - **Need the same answer twice?** Drop temperature to 0. Great for extraction, classification, and code where you want determinism.
 - **Need ten fresh ideas?** Raise it toward 1.0, 1.3. The model explores more of the distribution.
 - **Going too high backfires.** Past ~1.5 the distribution is so flat the model picks nonsense tokens and coherence falls apart. Higher is not "smarter," just looser.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A JSON extraction endpoint parses cleanly in testing, then throws parse errors in production | Temperature was left at the creative default, so now and then the sampler reaches past the top token and breaks the format | Set temperature to 0 for extraction, where the sharp distribution keeps the output exact and repeatable |
+| Someone raises temperature to 1.8 hoping for better answers and gets word salad | A very flat distribution gives genuinely unlikely tokens real probability mass | Treat temperature as looseness, not intelligence. Stay near 1.0 and improve the prompt when you want better content |
+| A brainstorm at temperature 0 returns the same idea every single time | Temperature 0 makes the distribution maximally sharp, so the model effectively takes the top token every step | Raise temperature toward 1.0 for tasks where many answers are good |
 
 ## The mental model to keep
 
@@ -657,6 +673,14 @@ These run *alongside* temperature, not instead of it. A common recipe is "temper
 - **Top-k** is simpler and predictable, useful when you want a hard cap on how many options exist.
 - They mostly cut **garbage**, not creativity. Removing the bottom 0.1% of probability mass rarely costs you a good idea, but it sharply reduces "where did *that* word come from?" moments.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Output reads fine for paragraphs, then drops in one bizarre word | The long tail of near-zero tokens is still in the pool, and enough tiny slivers add up to a real chance of drawing junk | Set top-p to about 0.9 so the tail is cut before the draw happens |
+| You set top-k to 5, but junk tokens still get picked when the model is clearly confident | Top-k keeps a fixed count no matter what, so four near-zero tokens stay eligible next to a 0.97 favorite | Switch to top-p, which keeps only as many tokens as it takes to cover the probability mass |
+| After filtering, the kept probabilities no longer sum to 1 and the sampler behaves oddly | The tail was dropped without rescaling the survivors | Renormalize by dividing each kept probability by the sum of the kept probabilities before sampling |
+
 ## The mental model to keep
 
 Temperature decides how loose the dice are; **top-k/top-p decide which dice are even on the table.** Top-k keeps a fixed number of options; top-p keeps just enough to cover most of the probability, wide when the model is unsure, narrow when it's confident.`,
@@ -944,6 +968,14 @@ A few rules that keep you out of trouble:
 ## Why it matters
 
 The single most common cause of "the AI keeps making stuff up" or "the AI is so boring" is a temperature mismatch. A factual task at temperature 1.2 invites hallucination; a brainstorm at temperature 0 returns the same tired idea every time. Matching the dial to the job fixes both, for free, instantly, no prompt rewriting.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You push temperature up and top-p up at the same time and the output turns incoherent | Both dials loosen the draw, so the effects compound instead of trading off | Move temperature first and leave top-p near 0.9 |
+| A factual question-and-answer feature starts inventing details that sound right | A verifiable task is running at a temperature high enough to reach less-likely, often wrong tokens | Bring temperature down to the 0.2 to 0.4 range where answers stay grounded |
+| A title generator hands back the same three ideas on every request | Temperature is too low for a task with many good answers, so the same favorites keep winning | Raise temperature toward 0.9 or 1.1, and ask for several options in one call |
 
 ## The mental model to keep
 
@@ -1234,6 +1266,14 @@ Softmax is the hinge the whole sampling story turns on:
 - **Temperature is just a softmax input.** When the last lesson said "temperature reshapes the distribution," this is the literal mechanism: scale the logits, then softmax.
 - **The \`exp\` step is why high temperature gets chaotic.** Because exponentials magnify differences, flattening the logits enough lets genuinely unlikely tokens grab real probability mass.
 - **The max-subtraction trick is everywhere.** Subtracting the largest scaled logit before \`exp\` never changes the answer (it cancels in the division) but keeps the exponents small so they don't overflow to \`inf\`. Every production inference stack does this.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The probabilities come back as nan, or one of them is inf | The logits were exponentiated directly, and a large scaled logit overflowed | Subtract the maximum scaled logit from each before exp. The result is identical and the exponents stay small |
+| You expect a logit of 4 to be twice as likely as a logit of 2 and the real gap is far wider | Softmax uses the difference between logits, not their ratio, and exp amplifies that difference | Reason about gaps, and compute the distribution rather than estimating it from the raw scores |
+| You add a constant to every logit and the distribution does not move | Shifting all logits by the same amount cancels in the division, so only the gaps matter | Change the spacing between logits, which is exactly what dividing by temperature does |
 
 ## The mental model to keep
 
@@ -1545,6 +1585,14 @@ The right choice is entirely about the task:
 - **Sampling wins when you want variety or naturalness.** Chat, brainstorming, stories, flat greedy text feels robotic and loops; sampled text feels alive.
 - **Greedy can be subtly worse even on "best" grounds.** Locking onto each local maximum can paint the model into a corner, where a slightly-less-likely early token would have led somewhere far better. This is why pure greedy is rarely used for long-form generation.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A greedy chatbot keeps repeating the same phrase and users call it robotic | Greedy takes the local favorite every step, and if that phrase's continuation is itself the favorite it loops | Switch to sampled decoding at a moderate temperature so the model can leave the rut |
+| Long greedy output reads flat, and a better answer was clearly available | A chain of locally best tokens is not the best sequence overall, so greedy can walk itself into a corner | Keep greedy for short one-right-answer output and sample for anything long-form |
+| QA cannot diff generated output against golden files because it changes each run | The feature is using sampled decoding, which draws differently on every run | Use greedy decoding, or temperature 0, for structured output that has to match byte for byte |
+
 ## The mental model to keep
 
 **Greedy = always the favorite, perfectly repeatable, can loop and feel flat. Sampled = a weighted dice roll, varied and natural, not reproducible.** Reach for greedy when one right answer must come back every time; reach for sampling when you want range.`,
@@ -1842,6 +1890,14 @@ With a frequency penalty of 0.5 and a count of 3, \`the\` loses 1.5 from its log
 - **Presence vs frequency is "any vs how much."** Presence penalizes a token the same whether it appeared once or ten times, good for encouraging topic variety. Frequency ramps up with each reuse, good for stopping a single word from dominating.
 - **They usually run together.** A small presence penalty plus a small frequency penalty is a common recipe to keep long outputs fresh.
 - **Too high backfires.** Crank the penalties up and the model avoids common, necessary words (like \`the\` or \`is\`), producing stilted or broken text. They are a nudge, not a hammer.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Generated code stops reusing a variable name it needs and invents a new one halfway through | The penalty docks any token with a count above zero, including names the text has to repeat | Keep penalties small, or turn them off for code, where reuse is correct rather than a loop |
+| Prose turns stilted and starts dodging words like "the" and "is" | The penalties are large enough to push essential common words below fresh alternatives | Lower both values until the loops stop and fluency returns |
+| A presence penalty is set and one word still appears ten times in a paragraph | Presence is a flat toll charged once, so the tenth use costs exactly what the first did | Add a frequency penalty, which scales with the count and pushes a heavily reused token further down each time |
 
 ## The mental model to keep
 
@@ -2151,6 +2207,15 @@ Reproducibility is what makes a random system *engineerable*:
 - **Debugging.** A user reports a bad output. With the seed (and the same prompt and settings), you can reproduce the exact failure instead of chasing a ghost.
 - **Fair comparison.** Comparing two prompts or two models? Use the same seed so any difference comes from what you changed, not from luck.
 - **A caveat:** reproducibility usually requires the *same everything*, same model version, settings, and often the same hardware. Seeds pin the randomness, but other moving parts can still shift results.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A user reports a bad answer and the team cannot reproduce it | The run was not seeded and the sampling settings were never recorded, so the draws cannot be replayed | Log the seed, prompt, and settings with every generation so any run can be replayed later |
+| You set a seed and the output still changes between runs | A seed only pins the draws when everything else matches, and the model version or a setting like temperature moved | Pin the full configuration alongside the seed, not the seed on its own |
+| The same seed and settings give different results on a colleague's machine | Reproducibility can also depend on hardware and library versions, which the seed does not control | Compare runs inside one environment and treat cross-machine matches as something to verify, not assume |
+| Two prompts are compared and the winner flips each time you rerun the test | Both runs were unseeded, so the difference came from the draws rather than the prompt change | Use the same seed for both so the only thing that varies is what you changed |
 
 ## The mental model to keep
 

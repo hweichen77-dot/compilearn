@@ -50,6 +50,14 @@ The window is the single most important constraint shaping how you use a model:
 - It caps how much you can paste in: a 500-page book will not fit in a small window all at once.
 - It forces real trade-offs: more context for the question means less room for the reply.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer stops mid-sentence for no obvious reason | The prompt used most of the window, so there was almost nothing left for the model to write with | Shorten the input or move to a model whose window comfortably fits the prompt plus the reply |
+| The model insists it cannot see a document you talked about | Referring to a file is not the same as putting its text in the window, so the content was never there | Paste the actual text into the request instead of naming it |
+| A request that worked yesterday fails the moment you paste a long file | The combined input and reserved output went over the hard ceiling | Measure the input size before sending and leave room for the answer |
+
 ## The mental model to keep
 
 Don't picture infinite memory. Picture a **desk of fixed size**. Everything the model thinks about for this one request, your instructions, the conversation, and its own reply, has to fit on that desk at the same time.`,
@@ -323,6 +331,14 @@ Knowing what counts changes how you think about long sessions:
 - **History grows every turn.** Each exchange adds both your message and the reply to what gets re-sent next time. The budget creeps upward on its own.
 - **The system prompt is a fixed tax.** It's paid on every request, so bloated system prompts quietly shrink the room for everything else.
 - **You must reserve answer space.** If history eats the whole window, there's nothing left for the model to respond with.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You type five words and the request still costs over a thousand tokens | The hidden system prompt and the entire chat history are re-sent alongside your message | Measure the whole request, not just what you typed, and shorten the system prompt |
+| The same conversation gets more expensive with every turn | Each exchange adds your message and the model's reply to the history that gets resent next time | Trim or summarize old turns instead of letting history grow without limit |
+| Replies get shorter and shorter deep into a long chat | History filled the window and squeezed the space left for the answer | Reserve a fixed output budget and cap how much history can be sent |
 
 ## The mental model to keep
 
@@ -614,6 +630,15 @@ Silent truncation produces confusing, hard-to-debug behavior:
 
 None of this is the model "losing focus." It's literally not in the window anymore.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An instruction you gave at the start of a long chat quietly stops being followed | The trimming code dropped the oldest turns, and that instruction went with them | Move standing instructions into the system prompt so they are never in the droppable range |
+| The model asks again for details you already supplied | Those turns were cut to make the request fit, and nothing warned you | Summarize old turns before dropping them, and log when truncation happens |
+| The call fails with "context length exceeded" instead of just working | This API refuses over-budget requests rather than silently trimming them | Count the request before sending and trim on your own terms |
+| A bug only shows up after a user has been chatting for a while | Truncation only starts once the conversation passes the window, so short test chats never trigger it | Test with a history as long as a real session, not a three-turn example |
+
 ## The mental model to keep
 
 When a chat gets long, the **beginning is the first casualty.** If something matters and the conversation is dragging on, don't assume the model still sees it, it may have already fallen off the front of the desk.`,
@@ -888,6 +913,15 @@ Good context management is what separates a flaky demo from a dependable assista
 - It **prevents silent forgetting** by keeping the essentials in the window on purpose.
 - It **cuts cost**, since fewer tokens in means a cheaper, faster request.
 - It **improves answers**, because a focused window of relevant context beats a bloated one full of noise.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| History stays small after summarizing, but the model loses an exact number or name it was given | Summarizing keeps the gist and throws away specifics, and that specific was the part that mattered | Keep must-have details verbatim next to the summary instead of folding them into it |
+| The model contradicts a rule you set once you start trimming | Trimming dropped the turn that carried the rule | Pin the rule in the system prompt and summarize the middle rather than deleting it |
+| The window still fills quickly even though you trim every turn | Whole documents are being pasted each request instead of the sections the question needs | Include only the relevant chunks for the current question |
+| The running summary itself grows until it costs as much as the history did | Each new summary is appended to the old one instead of replacing it | Re-summarize the summary so it stays a fixed size |
 
 ## The mental model to keep
 
@@ -1176,6 +1210,15 @@ The estimate **drifts** from the truth in predictable ways, and the drift bites 
 
 Use the rule for quick "is this roughly affordable?" math. Use the real tokenizer before you send something that must fit, or when money is on the line.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A prompt that fit in testing overflows the window in production | The size was estimated from word or character count instead of the model's real tokenizer | Run the tokenizer on the assembled prompt before sending it |
+| A code file uses far more tokens than the 4-chars rule predicted | Symbols and rare identifiers break into many small tokens, so the rule undercounts | Count code and structured text exactly rather than estimating |
+| Non-English text blows the budget even though the character count looked fine | The 4-characters ratio is tuned for English and does not hold for other scripts | Tokenize the actual text in its own language instead of trusting the ratio |
+| The bill comes in higher than the estimate you gave | Estimates were used where exact counts were needed | Base any cost you charge or report on tokenizer output |
+
 ## The mental model to keep
 
 The 4-chars rule is a **speedometer guess**; the tokenizer is the **odometer**. Estimate freely while you're sketching. **When it actually has to fit, count for real.**`,
@@ -1458,6 +1501,14 @@ The window you choose drives both capability and cost:
 - **Capability.** A task that needs a 300-page document in view is simply impossible on an 8k model. Sometimes you *need* the big window.
 - **Cost and speed.** Larger windows mean you can stuff in more tokens, and more tokens means a bigger, slower, pricier request. Paying for a 200k window to answer a one-line question is waste.
 - **Bigger isn't free quality.** A giant window full of irrelevant text can actually *hurt* answers (you'll see why in the next lesson). Room to fit something is not the same as it helping.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You moved to a large-window model and requests got slower and pricier with no better answers | The task never needed that much text in view, so the extra capacity is pure cost | Pick the smallest tier that comfortably fits the job |
+| A long document keeps getting cut no matter how you phrase the request | The document genuinely exceeds the model's fixed window, and no prompt wording changes that ceiling | Move to a larger tier, or split the document and process it in parts |
+| Answers got worse after you started filling a huge window with everything you had | Room to fit text is not a reason to include it, and irrelevant context competes with the parts that matter | Send only what the question needs, whatever the window allows |
 
 ## The mental model to keep
 
@@ -1751,6 +1802,14 @@ This quietly breaks long-context features that "should" work:
 - **Order is a lever you control.** Putting instructions first and the critical reference last is a free, reliable quality boost, no model change required.
 - **The longer the context, the worse the sag.** A bigger window gives you more room *and* a bigger middle for things to get lost in.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model ignores a fact that is clearly in the prompt, but finds it when you move the same fact to the end | The fact was sitting in the middle of a long context, where attention is weakest | Place the information the answer depends on at the start or the end |
+| Instructions are followed on short prompts and drifted from on long ones | The instructions got pushed into the middle once the reference material grew around them | Keep instructions at the very top and let the filler occupy the middle |
+| Adding a bigger window made the misses more frequent, not fewer | A longer context has a longer middle, so there is more dead zone for content to fall into | Cut the filler rather than relying on a larger window to carry it |
+
 ## The mental model to keep
 
 A long context is like a **speech the model half-listens to.** It remembers the opening and the closing; the middle blurs. **Put what must not be missed at the start or the end, never in the murky middle.**`,
@@ -2034,6 +2093,14 @@ Each strategy fails in its own way, and matching the failure mode to your task i
 - **Retrieval** is precise and cheap but **fails silently** when it fetches the wrong chunk: the model then answers confidently from incomplete context.
 
 Real systems often **combine** them: retrieve the relevant chunks, summarize the older history, and stuff the small, recent, must-have details verbatim.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer gets the general shape right but the exact clause wrong | Summarization compressed away the detail the question actually hinged on | Retrieve the exact passage verbatim when the answer depends on specific wording |
+| The model answers confidently from context that does not contain the answer | Retrieval fetched the wrong chunk and failed without any error | Inspect the retrieved chunks, and have the model say when the context does not cover the question |
+| Stuffing the whole document works in a demo and blows up costs in production | Stuffing scales cost with input size and creates a long middle where facts get missed | Switch to retrieval once the input outgrows what you can afford to send every request |
 
 ## The mental model to keep
 

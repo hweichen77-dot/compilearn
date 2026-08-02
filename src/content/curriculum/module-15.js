@@ -57,6 +57,15 @@ CoT moves the needle most on multi-step problems: arithmetic, logic puzzles, wor
 
 The catch: more reasoning is not always better. On trivial tasks CoT can introduce errors by overthinking, and a confidently wrong chain of reasoning still produces a confidently wrong answer.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your code stores a number from the middle of the reasoning as the answer | The parser grabs the first number it finds instead of the value at the end of the trail | Ask for a fixed final line, such as Answer: followed by the value, and parse only that line |
+| Adding a step-by-step trigger makes a simple lookup slower and occasionally wrong | Reasoning was requested on a task with no intermediate steps, so the model invents steps and talks itself out of the right answer | Reserve chain of thought for multi-step problems and keep short direct prompts for lookups |
+| Users see paragraphs of reasoning you meant to keep internal | The full model output was rendered instead of the extracted final answer | Strip the reasoning in code and display only the parsed final answer |
+| The steps read convincingly but the final answer is wrong | The chain went off course early and every later step built on that mistake | Read the steps to find the first wrong one rather than trusting an answer because the reasoning looks thorough |
+
 ## The mental model to keep
 
 **The model thinks by writing. Give it room to write the steps, and you give it room to think.**`,
@@ -346,6 +355,15 @@ Few-shot is the cheapest reliability upgrade you have: no fine-tuning and no inf
 - **It costs tokens.** Every example sits in the context window on every call, so there is a real trade-off between more examples and prompt size or cost. Two to five good examples usually beats ten mediocre ones.
 
 The classic mistake is unbalanced or sloppy examples. Garbage examples teach the model garbage patterns, confidently.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model returns the same label for nearly every input | Every example carries one label, so the model copies the label instead of the classification pattern | Balance the examples across each label you expect back |
+| A valid category never shows up in the output | No example demonstrated that label, so the model does not know it is allowed | Include at least one example per label, edge cases like neutral included |
+| The output format drifts between calls and your parser breaks | The examples differ in layout or label spelling, so there is no single shape to copy | Make every example identical in layout, casing, and label vocabulary |
+| Predictions lean toward whatever label appeared in the last example | Models sometimes favor the label they saw most recently | Shuffle or balance the example order and re-check accuracy with the order changed |
 
 ## The mental model to keep
 
@@ -647,6 +665,15 @@ Self-consistency buys accuracy with money and latency rather than a smarter mode
 
 A common upgrade is to weight or filter votes, for example ignoring runs whose reasoning is obviously malformed before counting.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every sample comes back identical and the vote decides nothing | The sampling ran at temperature zero, so all runs follow the same reasoning path | Raise the temperature enough to get diverse paths, then confirm the samples actually differ |
+| Cost and latency multiply with almost no accuracy gain | N chains are being sampled on easy questions a single chain already answered correctly | Reserve self-consistency for hard or high-value questions and use one call for the rest |
+| The votes scatter and nothing has a real majority | Temperature is high enough that the reasoning itself is degrading, not just varying | Bring the temperature back toward the middle, and read an even split as a sign the question is ambiguous |
+| The majority answer is confidently wrong | Voting cancels random error but not a bias every run shares | Treat agreement as a confidence signal, not proof, and verify majority answers against a source when correctness matters |
+
 ## The mental model to keep
 
 **Ask the same hard question several times and trust the answer that keeps coming back. Agreement across diverse reasoning paths is a confidence signal.**`,
@@ -923,6 +950,15 @@ ReAct is the backbone of modern AI **agents**: systems that take real actions, n
 - **It offloads exact work.** Math, code execution, and lookups go to tools that don't make arithmetic mistakes.
 - **It makes behavior traceable.** The Thought and Action log shows exactly why the system did what it did, which is invaluable for debugging.
 - **It adds failure modes.** Tools can error, return junk, or be called with bad arguments. A reliable ReAct loop must handle a failed Observation, cap the number of steps, and avoid infinite loops.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The loop never ends, calling tools over and over | Nothing stops the loop, so the model keeps acting instead of committing to a final answer | Cap the step count in your code and end the loop as soon as a Final Answer line appears |
+| The tool never runs even though the model clearly asked for it | Your code could not parse the Action line because the model wrote it in a slightly different shape | Prompt for a strict Action format, and when parsing fails, feed that failure back as an Observation |
+| The model answers from memory and ignores what the tool returned | The Observation was never appended to the prompt, so the model never read it | Append every tool result to the prompt as an Observation before the next model call |
+| One failing tool call takes down the whole run | The tool raised an error and nothing handled it, leaving the loop with no Observation to continue from | Catch tool errors and pass the failure back as an Observation so the model can try something else |
 
 ## The mental model to keep
 
@@ -1211,6 +1247,14 @@ Decomposition is the difference between a demo and a dependable system.
 
 The risk to watch: **errors compound.** A bad early step poisons everything downstream, so the earliest stages deserve the most care and validation.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A later step returns nonsense or nothing at all | An earlier step returned an empty string and it was passed straight along as the next input | Validate each stage output before feeding it forward and halt the chain when a stage returns nothing |
+| The final output is wrong even though every prompt looks correct on its own | An early stage dropped or mangled items and every stage after it built on that bad input | Inspect the intermediate output of each stage in order and fix the earliest one that is wrong |
+| The pipeline costs more and runs slower than the single prompt it replaced | Each stage is its own round trip, so four prompts mean four calls worth of tokens and latency | Split only where the extra accuracy earns the extra call, and merge stages that were doing the same job |
+
 ## The mental model to keep
 
 **Don't ask one prompt to do five things. Build an assembly line of small prompts, each doing one job and handing its output to the next.**`,
@@ -1493,6 +1537,14 @@ ToT shines exactly where a single chain is fragile: puzzles, planning, math with
 - **It costs a lot more.** You run many partial reasonings and score each, so token and latency cost scale with branching factor times depth. Reserve it for genuinely hard problems.
 - **It needs a usable evaluator.** Pruning is only as good as the score. A misleading scorer prunes the right branch, and you're worse off than plain CoT.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The search returns the same answer as plain chain of thought, at a higher cost | Beam width is 1, so the frontier keeps one branch and the search can never back out of a bad turn | Set beam width above 1 so a slightly weaker branch stays alive long enough to pay off |
+| The one branch that would have solved the problem gets pruned | The scorer ranks branches badly, and pruning can only be as good as the score | Test the scorer on problems where you know the winning path before letting it prune anything |
+| Token cost and latency blow up | Cost scales with branching factor times depth, so a small bump in either multiplies the work | Keep the branching factor and depth small and use tree search only where a single chain fails |
+
 ## The mental model to keep
 
 **Don't bet everything on the first idea. Sprout several, judge them, keep the best few, and search, reasoning as a pruned tree, not a single rope.**`,
@@ -1766,6 +1818,15 @@ Reflection catches a whole class of errors that one-shot prompting ships straigh
 - **It costs extra calls.** Draft plus critique plus revise is at least three passes, so reserve it for answers where correctness matters more than latency.
 - **It has a ceiling.** The model can only catch flaws it is capable of recognizing. If it didn't know a fact was wrong when it wrote it, it usually won't catch it on review. Reflection sharpens, it does not add knowledge.
 - **Anchored critique beats vanity critique.** Grounding the critic in tests, specs, or rules makes the difference between real fixes and the model congratulating itself.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The critique says the draft looks good and the revision changes nothing | The critic had no external standard to judge against, so it rubber-stamped its own work | Anchor the critic in a spec, checklist, or test output and ask it to list every violation it finds |
+| The revision reads differently but fixes nothing specific | The critique asked for general improvement, so there was no concrete flaw for the rewrite to act on | Have the critic name specific violations tied to stated criteria |
+| The loop keeps running while the answer stops improving | Nothing ends the cycle once the critic has run out of real findings | Stop when the critique reports no violations or when a step budget runs out |
+| A factual error survives every round of critique | The model did not know the fact was wrong when it wrote it, so it cannot recognize it on review | Verify facts with a tool or source, since reflection sharpens what the model already knows and adds nothing new |
 
 ## The mental model to keep
 
@@ -2045,6 +2106,14 @@ Meta-prompting scales prompt quality past what hand-tuning can reach.
 - **It enables systematic optimization.** Instead of guessing which wording works, you measure candidates against real examples and pick the best objectively.
 - **It costs extra calls.** Generating and evaluating candidates burns tokens before the real task even runs, so it pays off most when a prompt will be reused many times.
 - **You still need an evaluator.** Picking the best candidate requires a way to score them. Garbage scoring picks garbage prompts, confidently.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The user gets a prompt back instead of an answer | The first call's output is itself a prompt, and the code returned it rather than running it | Keep the two calls separate, one writes the prompt and the second runs it on the real input |
+| The winning candidate performs worse in production than it did during selection | The evaluator scored candidates on too few examples, or on examples that do not look like real traffic | Score candidates on a labeled set that covers your actual inputs and their edge cases |
+| Meta-prompting costs more than the prompt it produced ever saves | Generating and scoring candidates burns tokens before the real task runs, on a prompt used only once | Reserve automatic optimization for prompts that will be reused many times |
 
 ## The mental model to keep
 

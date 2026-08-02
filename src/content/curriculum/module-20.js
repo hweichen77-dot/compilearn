@@ -56,6 +56,15 @@ Reaching for the wrong key is the number-one beginner bug:
 - **Confusing the layers.** \`resp["content"]\` doesn't exist; the content lives under \`message\`. The error you get ("KeyError") is just telling you which door you skipped.
 - **Ignoring the metadata.** The text is only half the response. Real apps read \`finish_reason\` and \`usage\` on every call to stay correct and on budget.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A KeyError names a string key, but the value you printed was a list | The code skipped the index on choices, which is a list of candidate answers, not a single answer | Index choices first, then read message, then content |
+| Reading content straight off the response raises a KeyError | content is nested inside a choice's message, not at the top level of the response | Walk the full path: choices, first item, message, content |
+| The app displays something like a dict or a list instead of a sentence | The access path stopped one or two layers short of the actual string | Follow the path all the way down to content before displaying it |
+| Truncated or filtered answers reach users looking normal | Only the text was read, and the metadata riding alongside it was ignored | Read finish_reason and usage on every call, not just content |
+
 ## The mental model to keep
 
 The response is **a wrapper, not a string.** The words you want are real, but they sit at the bottom of a known path: choices → first item → message → content. Learn that path once and every chat API stops being a maze.`,
@@ -356,6 +365,15 @@ The finish_reason is your early-warning system:
 - **It catches truncation silently.** A "length" answer often *looks* fine until the last line trails off. Checking the reason catches it before a user does.
 - **It tells stop from blocked.** "content_filter" means there's no usable answer to show, handle it differently from a normal stop.
 - **It guides retries.** "length" → give more room and retry. "stop" → you're done. The reason tells you which branch to take.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An answer that reads well but trails off in the middle of a sentence | finish_reason was "length", so the model ran out of its max_tokens allowance instead of finishing | Raise max_tokens and call again, or ask the model to continue from where it stopped |
+| A JSON parser fails on output that looks almost complete | The response was cut at the length cap before the closing brace was generated | Check finish_reason before parsing and treat "length" as a failed call, not a result |
+| A user sees an empty chat bubble with no error anywhere | finish_reason was "content_filter", so the text was withheld and there is nothing in content to show | Branch on content_filter and show a fallback message instead of blank text |
+| A retry loop keeps resending the same request and getting the same broken output | Every finish reason is handled the same way, so a natural stop and a truncation take the same path | Branch on the reason: retry "length" with more room, accept "stop" as done |
 
 ## The mental model to keep
 
@@ -661,6 +679,15 @@ The usage block is your meter:
 - **Catch runaway prompts.** If you re-feed a growing conversation each turn, prompt_tokens climbs every call. Watching it spot-checks a ballooning bill before it surprises you.
 - **Stay under the limit.** total_tokens must fit the context window. If it creeps toward the cap, you need to trim old messages or summarize.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill is far higher than a token count times one rate suggested | Input and output are billed at different rates, and output is usually the pricier side | Price prompt_tokens and completion_tokens separately with their own rates |
+| prompt_tokens climbs on every turn of the same conversation | The whole history is re-fed with each call, so the input grows as the chat gets longer | Trim or summarize older messages before sending, and watch prompt_tokens per turn |
+| Calls start failing once a conversation runs long | total_tokens grew past the context window, so input plus output no longer fit | Track total_tokens against the window and cut history before it reaches the cap |
+| A cost estimate built from character counts does not match the invoice | Character counts approximate tokens, they do not equal the counts the provider billed | Read the usage block from each response instead of estimating from text length |
+
 ## The mental model to keep
 
 usage is the **receipt** for each call: input tokens, output tokens, total. Output costs more than input, so the answer, not the question, usually drives the bill. **Read the receipt every call and you'll never be surprised by it.**`,
@@ -957,6 +984,15 @@ Stop sequences buy you precision without post-processing:
 
 The catch: choose a stop string that *won't* appear in the legitimate answer, or you'll cut the output short by accident.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Answers stop early, sometimes after a single line | The stop string also occurs inside legitimate content, so the tripwire fires on the real answer | Pick a marker that cannot appear in a genuine answer, and test it against real outputs |
+| The model invents a second and third question after answering the first | No stop sequence was set, so nothing halts generation at the end of the first answer | Set the boundary marker of your format, such as a newline followed by Q:, as a stop sequence |
+| Code that splits on the marker finds nothing to split | Most APIs cut the stop string out of the returned content, so it is not in the text you get back | Treat the content as already trimmed and use finish_reason to confirm the tripwire fired |
+| A truncated answer is treated as complete | The code only checks for finish_reason "stop" and ignores the stop_sequence value | Handle stop_sequence as its own case so you know your marker caused the halt |
+
 ## The mental model to keep
 
 A stop sequence is a **tripwire you plant in the output stream.** The model walks forward generating tokens; the instant it steps on your wire, it halts and hands you everything up to that point. **You decide where the answer ends, not the model.**`,
@@ -1245,6 +1281,15 @@ Streaming changes how you write the receiving code:
 - **You own the assembly.** The API will not hand you a finished string, partial-message handling is your job. Forget to concatenate and you display only the last fragment.
 - **The end is a separate signal.** The stream finishes with a terminal chunk (empty delta plus a finish_reason), not by the text simply stopping. Watch for it so you know when you have the complete answer.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The screen shows only the last word or two of the answer | Each chunk is treated as a full message and overwrites the display instead of adding to it | Keep a buffer and append every delta to it, then render the buffer |
+| The loop crashes with a KeyError on the very last chunk | The terminal chunk carries an empty delta and a finish_reason, so there is no content key to read | Read the delta with a default of an empty string rather than indexing content directly |
+| Words arrive out of order or the sentence reads scrambled | Deltas were joined in the order they were processed rather than the order they arrived | Preserve arrival order when appending, and do not process chunks concurrently |
+| The app never knows the answer is finished | The code waits for the text to stop instead of watching for the terminal signal | Treat the chunk carrying finish_reason as the end of the stream |
+
 ## The mental model to keep
 
 A streamed answer is a **river of fragments, not a bucket of water.** Each delta is one more drop. Your job is to catch them in order and let them fill the buffer, and to notice the final empty chunk that says the river has run dry.`,
@@ -1519,6 +1564,15 @@ Handling refusals gracefully is what separates a toy from a product:
 - **Don't present a refusal as the answer.** A user who asked a legitimate question and got "I can't help" deserves a fallback, rephrase, escalate to a human, or show a helpful message, not a dead end dressed up as a result.
 - **Distinguish refusal from blocked.** A refusal has explanatory text you might surface; a content-filter block has *no* usable content at all and must be handled as a hard stop.
 - **Don't retry blindly.** Re-sending the exact same request that got refused usually earns the same refusal, and burns tokens. Change the request or route it elsewhere.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| "I'm sorry, but I can't help with that" saved in the database as a real result | The refusal arrived in the normal content field with finish_reason "stop", so the code counted it as a success | Check the message for a refusal field before treating content as an answer |
+| A message bubble renders completely empty | finish_reason was content_filter, so the output was withheld and there is no content to display | Handle a filtered response as a hard stop with its own message, separate from a refusal |
+| A retry loop burns tokens and keeps getting the same decline | The identical request is resent, and the same input produces the same refusal | Change the request or route it to a fallback instead of retrying unchanged |
+| Legitimate answers get flagged as refusals | Text matching on phrases like "I can't" fires on answers that merely contain those words | Use the structured refusal signal when the API offers one, and keep phrase matching as a fallback only |
 
 ## The mental model to keep
 
@@ -1807,6 +1861,15 @@ Branching on tool calls is the foundation of every "agent" you'll build:
 - **Tools are how the model acts.** Looking things up, doing math, hitting an API, sending an email, all happen because the model emitted a tool call and your code honored it.
 - **The loop depends on it.** Miss the tool-call branch and the conversation stalls: the model is waiting for a result you never ran.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The assistant shows nothing at all for a question it should be able to answer | The response was a tool call, so content was None and the app rendered an empty string | Check for tool_calls on the message before reaching for content |
+| A TypeError fires when the reply is passed to string handling | content is None on a tool-call response, and None is not text | Branch on tool_calls first and only touch content on the text branch |
+| The conversation stalls after the model asks for a function | The tool was never run, or its result was never sent back, so the model has nothing to finish with | Run the named function, send the result back, and let the model produce the final answer |
+| A finish_reason of tool_calls is logged as an unexpected value | The code assumes every completed response reports "stop" | Treat a tool_calls finish reason as the signal that the model paused to call a function |
+
 ## The mental model to keep
 
 A tool-aware response is **a fork in the road, not a single destination.** One branch is "here's your answer" (text); the other is "please run this for me" (a tool call). Check which branch you're on *before* you reach for the content, because on the tool-call branch, there may be no content to read.`,
@@ -2091,6 +2154,15 @@ Logprobs turn a black-box answer into something you can inspect:
 - **Flag shaky output.** Tokens below a confidence threshold are worth a second look, surface a warning, ask for verification, or re-ask.
 - **Compare candidates.** When the model returns several answers, the one with higher total logprob was, on average, the more confident path.
 - **Calibrate automation.** A pipeline can auto-accept high-confidence outputs and route low-confidence ones to a human, instead of treating every answer the same.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Nearly every token gets flagged, or none of them do | The threshold was compared against the size of the number instead of its value, so -0.01 and -2.80 sort backwards | Compare the logprob itself, where more negative means less confident, and pick the threshold from real outputs |
+| The response has no per-token scores to read | Logprobs were not requested on the call, so the provider did not include them | Turn on the logprobs option in the request before trying to read the scores |
+| A high-confidence answer turns out to be factually wrong | A high logprob means the token was a likely continuation, not that the statement is true | Use logprobs to spot uncertainty, and verify facts against a source instead |
+| Longer answers always score worse than short ones | Total logprob is a sum across tokens, so every extra token pushes the total further from zero | Compare the average logprob per token when you rank answers of different lengths |
 
 ## The mental model to keep
 
