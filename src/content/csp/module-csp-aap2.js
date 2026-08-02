@@ -122,16 +122,34 @@ export default {
       "challenge_solution_code": "line = input().split()\na = int(line[0])\nb = int(line[1])\nprint(a > 0 and b > 0)\n",
       "challenge_test_cases": [
         {
-          "input": "3 5\n",
-          "expected_output": "True"
+          "input": "3 5",
+          "expected_output": "True",
+          "description": "both values are positive"
         },
         {
-          "input": "-1 4\n",
-          "expected_output": "False"
+          "input": "-1 4",
+          "expected_output": "False",
+          "description": "only the second value is positive"
         },
         {
-          "input": "0 0\n",
-          "expected_output": "False"
+          "input": "0 0",
+          "expected_output": "False",
+          "description": "zero is not positive"
+        },
+        {
+          "input": "5 0",
+          "expected_output": "False",
+          "description": "second value is zero"
+        },
+        {
+          "input": "1 1",
+          "expected_output": "True",
+          "description": "smallest positive values"
+        },
+        {
+          "input": "-3 -8",
+          "expected_output": "False",
+          "description": "both values are negative"
         }
       ]
     },
@@ -240,16 +258,34 @@ export default {
       "challenge_solution_code": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelse:\n    print(\"F\")\n",
       "challenge_test_cases": [
         {
-          "input": "95\n",
-          "expected_output": "A"
+          "input": "95",
+          "expected_output": "A",
+          "description": "clearly in the A range"
         },
         {
-          "input": "82\n",
-          "expected_output": "B"
+          "input": "82",
+          "expected_output": "B",
+          "description": "clearly in the B range"
         },
         {
-          "input": "65\n",
-          "expected_output": "F"
+          "input": "90",
+          "expected_output": "A",
+          "description": "exactly on the A cutoff"
+        },
+        {
+          "input": "79",
+          "expected_output": "C",
+          "description": "one point below the B cutoff"
+        },
+        {
+          "input": "70",
+          "expected_output": "C",
+          "description": "exactly on the lowest passing cutoff"
+        },
+        {
+          "input": "65",
+          "expected_output": "F",
+          "description": "below every cutoff"
         }
       ]
     },
@@ -360,16 +396,34 @@ export default {
       "challenge_solution_code": "age = int(input())\nmember = input().strip()\nif age < 13:\n    price = 5\nelse:\n    if member == \"yes\":\n        price = 8\n    else:\n        price = 12\nprint(price)\n",
       "challenge_test_cases": [
         {
-          "input": "10\nno\n",
-          "expected_output": "5"
+          "input": "10\nno",
+          "expected_output": "5",
+          "description": "child price ignores membership"
         },
         {
-          "input": "30\nyes\n",
-          "expected_output": "8"
+          "input": "30\nyes",
+          "expected_output": "8",
+          "description": "adult member price"
         },
         {
-          "input": "30\nno\n",
-          "expected_output": "12"
+          "input": "30\nno",
+          "expected_output": "12",
+          "description": "adult non member price"
+        },
+        {
+          "input": "12\nyes",
+          "expected_output": "5",
+          "description": "one year under the child cutoff, membership ignored"
+        },
+        {
+          "input": "13\nno",
+          "expected_output": "12",
+          "description": "exactly on the cutoff, so no longer a child"
+        },
+        {
+          "input": "13\nyes",
+          "expected_output": "8",
+          "description": "exactly on the cutoff and a member"
         }
       ]
     },
@@ -479,16 +533,34 @@ export default {
       "challenge_solution_code": "n = int(input())\nsteps = 0\nwhile n != 1:\n    if n % 2 == 0:\n        n = n // 2\n    else:\n        n = 3 * n + 1\n    steps = steps + 1\nprint(steps)\n",
       "challenge_test_cases": [
         {
-          "input": "1\n",
-          "expected_output": "0"
+          "input": "6",
+          "expected_output": "8",
+          "description": "even start needs several steps"
         },
         {
-          "input": "6\n",
-          "expected_output": "8"
+          "input": "1",
+          "expected_output": "0",
+          "description": "already at one, so zero steps"
         },
         {
-          "input": "7\n",
-          "expected_output": "16"
+          "input": "2",
+          "expected_output": "1",
+          "description": "a single halving step"
+        },
+        {
+          "input": "7",
+          "expected_output": "16",
+          "description": "odd start with a long chain"
+        },
+        {
+          "input": "16",
+          "expected_output": "4",
+          "description": "power of two halves all the way down"
+        },
+        {
+          "input": "27",
+          "expected_output": "111",
+          "description": "very long chain"
         }
       ]
     },
@@ -600,16 +672,34 @@ export default {
       "challenge_solution_code": "n = int(input())\nnums = list(map(int, input().split()))\ncount = 0\nfor v in nums:\n    if v % 2 == 0:\n        count = count + 1\nprint(count)\n",
       "challenge_test_cases": [
         {
-          "input": "5\n1 2 3 4 6\n",
-          "expected_output": "3"
+          "input": "5\n1 2 3 4 6",
+          "expected_output": "3",
+          "description": "a mix of even and odd values"
         },
         {
-          "input": "3\n1 3 5\n",
-          "expected_output": "0"
+          "input": "3\n1 3 5",
+          "expected_output": "0",
+          "description": "no even values"
         },
         {
-          "input": "4\n2 4 6 8\n",
-          "expected_output": "4"
+          "input": "4\n2 4 6 8",
+          "expected_output": "4",
+          "description": "every value is even"
+        },
+        {
+          "input": "1\n2",
+          "expected_output": "1",
+          "description": "single even value"
+        },
+        {
+          "input": "1\n3",
+          "expected_output": "0",
+          "description": "single odd value"
+        },
+        {
+          "input": "5\n0 -2 -3 7 -4",
+          "expected_output": "3",
+          "description": "zero and negatives, where zero counts as even"
         }
       ]
     },
@@ -718,16 +808,34 @@ export default {
       "challenge_solution_code": "n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n",
       "challenge_test_cases": [
         {
-          "input": "5\n4 8 15 16 23\n15\n",
-          "expected_output": "2"
+          "input": "5\n4 8 15 16 23\n15",
+          "expected_output": "2",
+          "description": "target sits in the middle"
         },
         {
-          "input": "3\n1 2 3\n9\n",
-          "expected_output": "-1"
+          "input": "3\n1 2 3\n9",
+          "expected_output": "-1",
+          "description": "target is absent"
         },
         {
-          "input": "4\n7 7 7 7\n7\n",
-          "expected_output": "0"
+          "input": "5\n4 8 15 16 23\n4",
+          "expected_output": "0",
+          "description": "target is the first item"
+        },
+        {
+          "input": "5\n4 8 15 16 23\n23",
+          "expected_output": "4",
+          "description": "target is the last item"
+        },
+        {
+          "input": "4\n7 7 7 7\n7",
+          "expected_output": "0",
+          "description": "only the first of several matches counts"
+        },
+        {
+          "input": "1\n5\n5",
+          "expected_output": "0",
+          "description": "single item list"
         }
       ]
     },
@@ -835,16 +943,34 @@ export default {
       "challenge_solution_code": "n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\nlo = 0\nhi = len(nums) - 1\nidx = -1\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if nums[mid] == target:\n        idx = mid\n        break\n    elif nums[mid] < target:\n        lo = mid + 1\n    else:\n        hi = mid - 1\nprint(idx)\n",
       "challenge_test_cases": [
         {
-          "input": "6\n2 5 8 12 16 23\n16\n",
-          "expected_output": "4"
+          "input": "6\n2 5 8 12 16 23\n16",
+          "expected_output": "4",
+          "description": "target in the upper half"
         },
         {
-          "input": "5\n1 3 5 7 9\n4\n",
-          "expected_output": "-1"
+          "input": "5\n1 3 5 7 9\n4",
+          "expected_output": "-1",
+          "description": "target is absent from the middle of the range"
         },
         {
-          "input": "1\n10\n10\n",
-          "expected_output": "0"
+          "input": "6\n2 5 8 12 16 23\n2",
+          "expected_output": "0",
+          "description": "target is the first item"
+        },
+        {
+          "input": "6\n2 5 8 12 16 23\n23",
+          "expected_output": "5",
+          "description": "target is the last item"
+        },
+        {
+          "input": "1\n10\n10",
+          "expected_output": "0",
+          "description": "single item list"
+        },
+        {
+          "input": "5\n1 3 5 7 9\n10",
+          "expected_output": "-1",
+          "description": "target is larger than every item"
         }
       ]
     },
@@ -956,16 +1082,29 @@ export default {
       "challenge_solution_code": "steps = input().split()\npos = 0\nfor s in steps:\n    if s == \"L\":\n        pos = pos - 1\n    else:\n        pos = pos + 1\nprint(pos)\n",
       "challenge_test_cases": [
         {
-          "input": "R R R\n",
-          "expected_output": "3"
+          "input": "R R R",
+          "expected_output": "3",
+          "description": "every step goes right"
         },
         {
-          "input": "L L R\n",
-          "expected_output": "-1"
+          "input": "L L R",
+          "expected_output": "-1",
+          "description": "more left steps than right"
         },
         {
-          "input": "L R L R\n",
-          "expected_output": "0"
+          "input": "L R L R",
+          "expected_output": "0",
+          "description": "steps cancel back to the start"
+        },
+        {
+          "input": "R",
+          "expected_output": "1",
+          "description": "a single step"
+        },
+        {
+          "input": "L L L L L",
+          "expected_output": "-5",
+          "description": "every step goes left"
         }
       ]
     }

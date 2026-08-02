@@ -103,6 +103,14 @@ The model reads the schema like a menu. \`name\` is how it refers to the tool. \
 
 Everything downstream depends on this schema being precise. A vague description like "does math stuff" means the model might skip the tool when it should call it, or call it when it shouldn't. A loose \`input_schema\` with no \`required\` and a wrong \`type\` means you get called with arguments you don't know how to handle. The schema is a contract. You are telling the model exactly what it can ask for and exactly what shape the answer will come back in. Get that contract right before you write a single line of execution logic.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model answers an arithmetic question from its own head and never asks for the calculator | The description is too vague for the model to tell when this tool applies | Rewrite the description to say exactly what the tool does and when to reach for it |
+| The tool request arrives without the argument your function needs | required was left out of input_schema, so nothing obliged the model to supply it | List every argument your function cannot run without inside required |
+| The API rejects the request the moment you pass tools | A tool dict is missing name, description, or input_schema, or input_schema is not an object schema | Check all three keys are present and that input_schema has type object with a properties dict |
+
 ## The mental model to keep
 
 A tool definition is a job posting, not a job. You aren't giving the model the ability to run code. You are giving it the ability to request that you run code, with a precise form to fill out. Below you'll build that job-posting dict by hand and check that it has the shape the API expects. No network call yet.`,
@@ -292,6 +300,14 @@ Three fields matter on a \`tool_use\` block. \`id\` tags this specific request s
 ## The model can talk and call in the same turn
 
 Sometimes the model writes a sentence like "Let me calculate that for you" as a text block before the tool_use block. Both live in the same \`content\` list. For running the tool you only care about the tool_use block. The leading text is narration you can show the user or ignore.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Reading resp.content[0].text prints nothing useful or raises an attribute error | The first block is a tool_use block, not text, because the model paused to ask for a tool | Branch on stop_reason first and only read text when it is end_turn |
+| You scan the reply and never find the tool request | The model wrote a line of narration first and you only looked at the first block | Walk the whole content list and pick the block whose type is tool_use |
+| Passing block.input to json.loads raises a type error | input already arrives as a parsed Python dict, not a JSON string | Read the keys straight off input |
 
 ## The mental model to keep
 
@@ -502,6 +518,14 @@ print(final.content[0].text)
 ## Why this is the whole mechanism
 
 This round trip is all there is to tool use: the assistant asks, you run the function, you answer, the model responds. Three messages appended to a list, one Python function call in between. Everything harder in later lessons, like multiple tools and loops and error handling, is this same pattern repeated and made sturdier.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The next API call fails with an error about a tool_use block that was never answered | You appended the tool_result without first appending the assistant turn that carried the request | Append the assistant content, then the user message holding the tool_result, in that order |
+| The model asks for the same tool again instead of answering | The tool_result never made it into messages, so from the model's side nothing has run yet | Append the tool_result to the same messages list you pass on the next call |
+| Two tools ran in one turn and the model folds the wrong value into its answer | tool_use_id was copied from the wrong block, so each result was stitched to the wrong request | Take tool_use_id from the same block whose input you just executed |
 
 ## The mental model to keep
 
@@ -729,6 +753,14 @@ def execute_tool(block):
 
 A dispatch dict scales to ten tools as easily as three, while an if/elif chain gets uglier every time you add one. It also turns an unknown tool name into a single clean check, \`if block["name"] not in TOOLS\`, instead of a silent fall-through. That check matters once you harden the agent in lesson 6.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model calls web_search for a question that is plain arithmetic | Two descriptions overlap enough that both look like a match | Sharpen each description so it names what its own tool does and nothing more |
+| execute_tool raises a key error on the tool name | The model asked for a name that is not a key in TOOLS | Check the name is in TOOLS before the lookup and return an error string when it is not |
+| The dispatch fires but Python complains about an unexpected keyword argument | Your function parameter name does not match the property name in the schema | Spell the parameter and the schema property the same way |
+
 ## The mental model to keep
 
 Think of the model as a customer at an information desk with three counters: math, weather, facts. It reads the signage, your descriptions, and walks to the right counter itself. Your job is to staff each counter with the right clerk, keyed by name, in a dict.`,
@@ -933,6 +965,14 @@ You don't know in advance how many tool calls a question needs. Some need zero a
 ## Why this loop is the agent
 
 Everything before this lesson was pieces: define a tool, read a request, run it, answer once. This lesson assembles them into something that keeps working turn after turn until the model has what it needs. That is the difference between a script that calls a tool and an agent that solves a task.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The loop runs one tool, then keeps requesting that same tool forever | The tool_result went into a different list than the one you pass on the next call | Append both the assistant turn and the tool_result to the same messages list every pass |
+| The loop keeps spinning even though the model looks finished | You broke only when stop_reason equals end_turn, so any other ending keeps it going | Break whenever stop_reason is anything other than tool_use |
+| Pulling the final text raises StopIteration | The turn ended without a text block, so the generator found nothing to return | Give next a default value instead of assuming a text block is there |
 
 ## The mental model to keep
 
@@ -1152,6 +1192,15 @@ def run_calculator(expression):
 ## Why this matters
 
 An agent that trusts every tool call blindly is one bad model output away from a stack trace in production, or from running an expression that reaches outside the sandbox. Validating before you execute turns a crash into a recoverable error message. The model sees the error and often tries again with corrected input, which beats the whole agent dying in the middle of an answer.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The agent dies with a key error inside the executor | An unregistered tool name was looked up in the registry with no check first | Return an unknown tool error string before you touch the registry |
+| A tool raises a type error about a missing argument | The model left out an argument the schema marked required and nothing checked beforehand | Walk the schema's required list and return a missing argument error when a key is absent |
+| A tool runs but the answer is nonsense, or it blows up on a value like the word three | The model filled the schema loosely, so the value came in as the wrong type or out of range | Check the type and range before running and send back an error string the model can read and correct |
+| eval runs something that is not arithmetic at all | The expression string reached eval with no restriction on which characters are allowed | Match the expression against an allowed character pattern first and reject anything else |
 
 ## The mental model to keep
 
@@ -1418,6 +1467,14 @@ That error string flows back as a normal \`tool_result\`. The model sees that th
 
 What you gain here is cost control and reliability at scale, not prettier error messages. An uncapped loop against a paid API is a runaway bill waiting to happen. An unguarded tool call is one flaky dependency away from taking down every conversation that uses it. Both fixes are small, a loop counter and a try/except, and both are the difference between a demo and something you'd trust with real traffic.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The run burns through tokens and never prints an answer | The loop has no ceiling, so a model that never reaches end_turn keeps calling tools | Swap the unbounded loop for a range over MAX_ITERATIONS and return a give-up message when it runs out |
+| The whole program crashes several tool calls deep when a weather API times out | The tool call is unwrapped, so an exception raised inside the tool escapes the loop | Wrap the tool call in try and except and hand the failure back as a tool_result string |
+| A question that finishes on the last allowed pass gets reported as capped | The iteration cap is checked before the final answer check | Check stop_reason for a final answer first, then let the counter run out |
+
 ## The mental model to keep
 
 Give the agent a leash, \`MAX_ITERATIONS\`, and a helmet, the \`try/except\` around execution. Neither stops it from doing its job. Both stop one bad turn from becoming an unbounded, unrecoverable failure.`,
@@ -1624,6 +1681,14 @@ Three checks, from the playbook:
 ## Watching cost on a tool-using agent
 
 Every extra tool call is another full round trip through the API, system prompt and growing history included. \`MAX_ITERATIONS\` is not only a guard against infinite loops. It is a cost ceiling per question. If real usage keeps hitting the cap, that is a sign to raise it deliberately or tighten your tool descriptions so the model needs fewer calls.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The script exits at once with a key error on ANTHROPIC_API_KEY | The environment variable is not set in the shell you ran it from | Export the key before running and say so in the README you hand over |
+| Every question comes back with the give-up message | The descriptions are loose enough that the model keeps calling tools without converging | Tighten the tool descriptions, and raise MAX_ITERATIONS only once you know why the extra calls happen |
+| Someone else clones the script and it fails on the first tool call | The schemas, the run functions, or safe_execute were left behind in earlier lesson files | Put the schemas, the tool implementations, and safe_execute in the one file you ship |
 
 ## Into your Portfolio
 

@@ -55,6 +55,14 @@ Two rules save you from the most common beginner bug: the model answering the me
 
 The rest of this product (tone capture, few-shot examples, picking among drafts) hangs off this skeleton. Get the request shape right first and the smart parts slot in later.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model answers the incoming message back at you instead of writing something you could send | The request read as a chat turn, because nothing named the ghostwriting job | Put "draft a reply in the user's voice" in the system prompt and treat the incoming message as data you wrap |
+| The draft arrives with "Sure, here's a reply you could send:" in front of it | The request never asked for the reply on its own | Add "Return only the reply" so there is no preamble to strip later |
+| The user turn holds the bare incoming message with no instruction around it | The content field was set to the incoming text directly | Build the content as one string that frames the message and then asks for a reply |
+
 ## Keep this in mind
 
 Treat the incoming message as the subject line on a task, not a turn in a conversation. Your program reads the incoming message, wraps it in one clear instruction, and asks for exactly one thing back: a reply. In the drill below you build that request by hand. No network, just the messages list. Getting the data shape right is the part that actually matters.`,
@@ -248,6 +256,14 @@ def extract_draft(raw):
 ## Why bother this early
 
 You might want to skip cleaning until the harden lessons. But a draft with a preamble line looks fine in a print statement and breaks the moment a real user copies it. Parsing the reply into exactly the string you would send is part of the core loop, not a nicety. Later lessons add more cleaning for empty checks, length caps, and stray quotes. This is the first and most common case.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Printing the reply shows an object repr instead of the draft text | The response object was printed directly, without reaching the text inside it | Read content[0].text off the response, since content is a list of blocks |
+| A "Here's a draft:" line still reaches the user | The cleaner exists but only some code paths call it | Run extract_draft on every draft before it leaves your program |
+| The cleaned draft starts with a blank line | The preamble line was dropped, but the blank line after it survived the rejoin | Strip once more after joining the remaining lines |
 
 ## Keep this in mind
 
@@ -443,6 +459,14 @@ A \`build_profile\` function that walks the sample replies and returns the profi
 - \`exclaim\`: True if any sample uses "!".
 
 No API call. This is pure text analysis, and it is the piece that does the most to make replies feel personal.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Drafts come back polite and chirpy instead of sounding like the user | Tone was described with words like "casual and friendly", so the model picked its own reading of casual | Pass counted targets from the profile, such as "about 6 words" |
+| greeting is True for someone who never greets | The check matched a prefix, so words like "hidden" and "highlight" counted | Compare the whole first word against hi, hey, and hello |
+| The system prompt shows a length target like 5.333333 words | The average word count went into the profile unrounded | Round the average when you build the profile |
 
 ## Keep this in mind
 
@@ -651,6 +675,14 @@ You could write a paragraph describing your voice, but the model still has to in
 ## The shape rule that trips people up
 
 The turns must alternate user/assistant/user/assistant and start with a user turn, which is the Messages API rule. Each example is one user turn plus one assistant turn, so pairs keep the alternation intact. The final, real incoming message is one more user turn, leaving the model to produce the next assistant turn: your draft.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The API rejects the request over message ordering | Two user turns landed in a row, or the list did not start with a user turn | Append each example as one user turn then one assistant turn, so the alternation holds |
+| The examples steer nothing and the drafts sound generic | Your past replies were put in user turns, so the model read them as more incoming mail | The incoming message is the user turn and your reply is the assistant turn |
+| The model repeats one of your example replies instead of answering the new message | The new incoming message was never appended after the examples | Append the real incoming message as the final user turn |
 
 ## Keep this in mind
 
@@ -865,6 +897,14 @@ def tone_distance(draft, profile):
 ## Why this matters
 
 Picking among drafts is a general reliability pattern, not a one-off. Any time output quality varies, generate a few and select with a cheap scorer you control. You add a judgment step your program owns instead of trusting a single roll of the dice. The scorer here is deliberately simple; you can make it richer later.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| All three candidates come back with nearly identical wording | Temperature was left at its default, so repeated calls barely vary | Raise temperature on the generation calls before you bother ranking them |
+| The picker keeps a curt "Yes." over a draft that sounds like the user | Scoring compared length only, so a short draft won on the length gap alone | Add the energy penalty when the draft's use of "!" disagrees with the profile |
+| The same inputs choose a different draft on different runs | Tie handling let a later equal score replace the current best | Compare with a strict less-than so the earliest draft keeps the tie |
 
 ## Keep this in mind
 
@@ -1093,6 +1133,14 @@ def choose_reply(candidates, max_words, fallback="Thanks, I'll get back to you."
 
 The gap between a demo and a tool is exactly this code. The demo shows the model doing something clever once. The tool keeps working when the model returns garbage on a Tuesday. Each guard you add (empty check, quote strip, length cap) is the difference between "cool" and "I actually use this."
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The tool quietly pastes nothing into someone's inbox | The draft was empty or whitespace only, and no check caught it before sending | Treat an empty result after stripping as unusable and fall back |
+| The reply goes out wrapped in literal quote marks | Only whitespace was stripped, so the quotes the model added survived | Strip whitespace, then quotes, then whitespace again, in that order |
+| The program raises instead of replying when the model misbehaves | The code assumed at least one candidate would clean successfully | Return a safe fallback reply when no candidate survives cleaning |
+
 ## Keep this in mind
 
 Treat every draft as untrusted input, because it came from a probabilistic system. Clean it, validate it, and keep a fallback in your back pocket. In the drill you build the cleaner that rejects empty drafts and trims overlong ones.`,
@@ -1304,6 +1352,14 @@ Two knobs guard cost: a **token budget** (a hard ceiling on size) and a **max co
 ## Why bound it two ways
 
 A token budget alone could still pack in a dozen tiny examples, adding latency for little benefit. A count cap alone could still blow past your budget on long examples. Together they give you a predictable worst case: you always know the most this prompt can cost, which is what you want before shipping.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Cost per draft climbs as the user saves more replies | Every saved example was packed into the prompt, so the whole history got resent on each call | Bound the examples with a token budget and a count cap |
+| Cost still spikes even with a count cap in place | A handful of long examples fit under the count but ran past the token budget | Check both limits on every example before you keep it |
+| The prompt shows replies from months ago while recent ones are dropped | The loop walked the examples oldest-first and filled up before reaching the new ones | Walk the list reversed so the newest replies get packed first |
 
 ## Keep this in mind
 
@@ -1526,6 +1582,14 @@ Shipped does not require a server. It means the tool runs from a clean start, ha
 ## It lands in your Portfolio
 
 Completing this lesson records the Smart Reply Generator in your **Portfolio** tab, with a note on what it does: drafts on-tone replies from a message plus a few samples. That is the point of the whole track, a shelf of working tools you built rather than a score. Keep an example input and its output next to it as proof it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The pipeline raises on a message where every draft came back empty | Nothing survived cleaning, and the code indexed into the usable list anyway | Check the usable list and return the fallback when it is empty |
+| The final reply runs three times longer than the user ever writes | Drafts went straight from generation to scoring, so the word cap never ran | Clean every draft before you score it |
+| The chosen reply matches the target length but not the user's energy | Selection used the length gap only and dropped the rest of the profile | Score survivors with tone_distance so length and energy both count |
 
 ## Keep this in mind
 

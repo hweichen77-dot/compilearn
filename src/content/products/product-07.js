@@ -60,6 +60,14 @@ That works, but the reply is loose prose. The next seven lessons turn that loose
 
 The first instinct is to send everything to the model, and eventually we will. But it helps to see the shape of the problem first with plain Python. Not every line is an action item. Lines that create a commitment tend to contain trigger words: "will", "todo", "action". Filtering for those is a crude first pass a human would do too, and it makes the extraction job smaller.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You get a paragraph describing the meeting instead of a list of who owes what | The prompt asked for a description, so the model summarized rather than extracting fields | Ask for named fields, owner, task, and due, so the reply is records your code can sort and group |
+| A line like "TODO: Sam books the conference room" is skipped by the filter | The trigger match ran on the raw line, so uppercase TODO never matched the lowercase trigger | Lowercase the line before checking it against the trigger words |
+| A real commitment such as "I can take the wiki page" never reaches the model | The trigger list is a crude first pass and misses phrasings it does not contain | Treat the filter as a cheap narrowing step, not as the extractor itself |
+
 ## The mental model to keep
 
 Think of the transcript as raw ore and the action items as the metal you want out of it. The model does the smelting later, but you still decide what goes in and what a clean result looks like. Below, build the candidate filter by hand, no API yet, so you get a feel for the raw material before you automate it.`,
@@ -273,6 +281,14 @@ Now "Alex | Send the Q3 report | Friday" becomes \`{"owner": "Alex", "task": "Se
 
 Extraction is a contract with two sides you both control. The **prompt** promises a shape ("owner | task | due"); the **parser** assumes that shape. Keep them in lockstep. If you change the delimiter in the prompt, change the split in the parser. Most extraction bugs are a prompt and a parser that quietly disagree about the format.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The due field holds half a task, or reading parts[2] raises an IndexError | The transcript text itself contained a pipe, so the split produced more fields than three | Pick a delimiter the content will not contain, or move to JSON as lesson 4 does |
+| Owner values print with a leading space and stop matching anything later | The pieces came straight out of split, keeping the spaces the model puts around separators | Strip every piece before you build the record |
+| Extraction works one day and returns garbage after a prompt edit | The prompt's delimiter changed but the parser still splits on the old one | Change the prompt and the parser together, they are two sides of one contract |
+
 ## The mental model to keep
 
 The model is a translator from messy language to a fixed shape you designed. You wrote the shape; the model fills it in. Below, skip the network and practice the parser side: turn one delimited reply into a clean three-field record.`,
@@ -448,6 +464,14 @@ The \`x or default\` idiom is the workhorse here: an empty string is falsy, so \
 ## Why the split of duties matters
 
 There are two places a rule can live: in the prompt (the model applies it) or in your code (you apply it). Extraction rules ("what was actually said") belong to the model because only it can read the language. Policy rules ("blanks display as Unassigned") belong to your code because they're deterministic and free, so there's no reason to spend a token or risk the model forgetting. Get this division wrong and your extractor turns flaky; get it right and it stays predictable.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An item carries a deadline nobody stated in the meeting | The prompt never forbade inventing, so the model filled the field to look complete | Tell it to leave the field empty and never invent an owner or a deadline that was not said |
+| "Unassigned" shows up in the report as if it were a real person's name | The default label was put in the prompt, so the model returned it as extracted data | Keep the model reporting only what was said and apply display defaults in code |
+| A line with no owner shifts the task into the owner field and the due into the task | The model omitted the empty field instead of emitting it, so the split returned two parts, not three | Require all three fields even when blank, and check the part count before mapping them |
 
 ## The mental model to keep
 
@@ -651,6 +675,14 @@ def is_valid(item):
 \`\`\`
 
 \`item.get(k)\` returns None for a missing key (falsy) and "" for a blank value (also falsy), so one \`all(...)\` catches both problems. Keep the valid items, count or log the rest.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| json.loads raises even though the model clearly returned an array | The reply is wrapped in a code fence or a lead-in like "Here are the items:" | Slice from the first bracket to the last one before parsing |
+| A reply with no array at all crashes the run instead of returning nothing | index and rindex raise when the bracket is missing, unlike find and rfind | Use find and rfind, check for -1, and return an empty list |
+| An item reaches the report with a blank owner, or with no due key at all | Parsing succeeded, so the items were trusted without checking their keys | Run all(item.get(k) for k in REQUIRED) and keep only the items that pass |
 
 ## The mental model to keep
 
@@ -856,6 +888,14 @@ Within each owner, the tasks stay in transcript order, which is usually the orde
 
 Notice the division of labor across this project. The model did the hard, fuzzy part: reading language and pulling out commitments. Everything since, defaulting fields, validating, and now grouping and sorting, is plain deterministic Python. Use the model for the one thing only it can do, and use ordinary code for the transforms that are simple and predictable. Ordinary code is cheaper, and it will never hallucinate a group that wasn't there.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One person gets two separate sections in the report | The owner strings differ by casing or spacing, so "alex" and "Alex" became two dict keys | Normalize the owner before grouping, strip it and settle on one consistent casing |
+| The same transcript prints its owners in a different order than the last run | The loop iterated the dict directly, which yields owners in whatever order the transcript mentioned them | Iterate sorted(groups) so the report is alphabetical and stable |
+| Grouping raises a KeyError on "owner" | Raw items went into the grouper without the cleaning step that guarantees all three fields | Group only items that already passed validation |
+
 ## The mental model to keep
 
 Grouping turns a pile into folders, one per person, each holding just their work. The model filled the pile; a dict of lists sorts it into folders. Below, group a list of action items by owner and print each person's tasks with a count.`,
@@ -1053,6 +1093,14 @@ The rule of thumb: distrust data exactly once, at the edge where it enters your 
 
 Every one of these items came from a model call you paid for. When you retry a malformed reply or re-run on an edited transcript, those tokens add up. Cleaning in code, rather than asking the model to re-extract, is free, so prefer a Python repair over another round-trip whenever the fix is deterministic.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| AttributeError: 'NoneType' object has no attribute 'strip' | The key was missing, so .get returned None and .strip ran on it | Write it as (it.get("task") or "").strip() so a missing key becomes an empty string |
+| A meeting with no action items throws instead of reporting nothing | The code assumed at least one item would survive cleaning | Let an empty list flow through and print "No action items found" |
+| The bill grows every time you correct a malformed reply | Each repair went back to the model instead of being handled in Python | Repair deterministically in code and save the round-trip for what only the model can do |
+
 ## The mental model to keep
 
 Cleaning is the bouncer at the door: junk gets turned away and the incomplete get patched up, so everything past that point is in order. Below, write the one pass that drops taskless items and defaults the blanks.`,
@@ -1248,6 +1296,15 @@ def dedup(items):
 \`\`\`
 
 A \`set\` gives O(1) membership checks, so this stays fast even on a long day's worth of items. The \`seen\` set remembers what you've already emitted; the \`out\` list keeps them in first-seen order. This same pattern deduplicates almost anything: keep a set of what you've seen, skip repeats.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The same action item appears twice in the final report | An item sitting near a chunk boundary was extracted once in each neighboring chunk | Dedup the merged list before you render it |
+| TypeError: unhashable type: 'dict' when adding an item to the seen set | A set needs hashable members, and the parsed items are dicts | Add a tuple of the fields, such as (owner, task, due), to the seen set instead |
+| Two genuinely different tasks collapse into one after dedup | The dedup key was too loose, so similar wording matched | Key on the full field tuple, not on a shortened or fuzzy version of the task |
+| One transcript costs far more than you expected | More chunks means more calls, and every call resends its own chunk | Estimate tokens per chunk before running and pick a chunk size that fits the budget |
 
 ## The mental model to keep
 
@@ -1486,6 +1543,14 @@ Now each person sees their section, their tasks, their deadlines. That's the thi
 ## What "shipped" means here
 
 Three checks, the same three every project ends on: it runs from a clean start on one transcript; it handles an empty transcript or a meeting with no action items without crashing (an empty report, not an exception); and someone else could paste in their own transcript and get a useful result from your instructions alone. Hit those and it's real.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Junk items and duplicates show up in the shipped report | The renderer ran on the parsed items before clean and dedup did | Keep the pipeline order: parse, clean, dedup, then render |
+| The report lists owners in a different order on every run | render_report looped the groups dict directly instead of sorted(groups) | Sort the owner keys so one transcript always renders the same document |
+| A meeting with no action items crashes, or prints a bare heading | The renderer was never run against an empty list | Cover the empty case in your ship checks and return a report that says there were none |
 
 ## It lands in your Portfolio
 

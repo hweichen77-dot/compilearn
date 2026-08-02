@@ -57,6 +57,14 @@ for token in ["Once", "upon", "a", "time"]:
 
 Every later lesson builds on this one function. Whatever you want to send, you wrap it in \`data: ...\\n\\n\` before it goes out the socket. A real endpoint sets the content-type header to \`text/event-stream\`, which tells the browser to hand you pieces as they arrive instead of buffering them.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The receiver shows one run-on blob such as Onceupona time with no event boundaries | format_sse ended the frame with a single newline instead of two, so nothing marked the end of an event | Return the payload followed by two newlines, which is the blank line the receiver looks for |
+| One token arrives at the client as two separate events | The payload contained a newline of its own, and that newline ended the data line early | Split multi-line payloads into one data line each before framing them |
+| The browser shows nothing until the request finishes, even though frames left the server one at a time | The response went out without the text/event-stream content type, so the browser buffered the whole body | Set the content type to text/event-stream on the streaming response |
+
 ## The mental model
 
 Think of SSE as a radio broadcast rather than a phone call. The server keeps transmitting frames, and anyone tuned in receives them in order, one at a time, with a clear end-of-message marker between them. Below, you'll write the framing function by hand and run it on a list of words. No network yet, just the wire format, because every bug in later lessons traces back to getting this shape right.`,
@@ -257,6 +265,14 @@ The endpoint's job is thin. It doesn't decide *what* to write, it just re-frames
 
 If \`token_stream\` built a list of all frames and returned it, you'd be back to waiting for the whole reply before sending anything. Streaming would be a false label on a blocking call. The generator is what makes "send as it's produced" literally true: each \`yield\` hands one piece to the framework immediately instead of accumulating.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The page still waits for the whole reply before anything appears, even though the route is wired | token_stream built a list of frames and returned it, so the framework received one finished value instead of a generator | Use yield inside token_stream so each frame is handed to StreamingResponse as it is produced |
+| The stream stops after the first delta, or the connection closes before the model is done | The yield loop sat outside the with client.messages.stream block, so the context manager closed while text_stream was still producing | Keep the whole yield loop inside the with block |
+| run_endpoint prints None instead of the assembled stream | The function accumulated into a local string but never returned it | Return the accumulated string at the end of run_endpoint |
+
 ## The mental model
 
 A streaming endpoint is a pipe, not a bucket. A bucket fills up and then you dump it out all at once; a pipe lets water flow through as it arrives at one end. Below, build the generator and framing together in pure Python. Simulate the model's output as a list of words, wrap each in SSE, and print the assembled stream. No network yet, just the shape of the endpoint's core loop.`,
@@ -431,6 +447,14 @@ No spaces added, no separators. The deltas already contain any spacing the model
 ## Chunk size is a knob, not a rule
 
 If you're chunking text yourself, say replaying a cached reply or building a demo without live network calls, you get to pick the delta size. Small chunks of a few characters feel smoother and more like live typing, but they mean more frames and slightly more overhead per character. Larger chunks are cheaper per byte but feel more like stutter-then-dump. Most production streams don't chunk at a fixed size at all: the model decides and you relay. You'll only pick a chunk size yourself when simulating or testing.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The rebuilt reply reads hel lo wor ld instead of hello world | The deltas were joined with a space instead of an empty separator | Join with an empty string, since each delta already carries whatever spacing the model produced |
+| split_into_deltas silently loses the last few characters of the text | The loop stopped one window early instead of walking all the way to len(text) | Step the range from 0 to len(text) and let the final slice come up short |
+| Half-words such as Ra and in look like corruption, so the code tries to merge them back to word boundaries | Delta boundaries from stream.text_stream are arbitrary and were mistaken for a bug | Relay each delta unchanged, because concatenating in arrival order gives back the exact original |
 
 ## The mental model
 
@@ -609,6 +633,14 @@ Look closely at \`frames.pop()\`. \`buffer.split("\\n\\n")\` may cut a frame in 
 
 The client-side parser and the SSE format from lesson 1 are two ends of the same contract. The server promises that every event ends in a blank line, and the client's whole parsing strategy is built on trusting that promise: buffer bytes, split on \`\\n\\n\`, keep the remainder. Get the framing wrong on either side and the other side's assumptions break.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A half-word lands on the page and the rest of it never shows up | The last element of the split buffer was rendered instead of held, so a frame the network cut in two was painted and then orphaned | Pop the last element back into buffer and render only the frames before it |
+| Every line on the page starts with the literal data: prefix | The six-character prefix was never sliced off before appending to textContent | Slice the frame from index 6 so only the payload reaches the DOM |
+| Accented or non-Latin characters render as garbage in the middle of the draft | decode was called without the stream option, so a multi-byte character split across two reads was decoded as two broken halves | Pass stream true to TextDecoder decode so it holds partial characters until the rest arrives |
+
 ## The mental model
 
 The reader is a person transcribing a radio broadcast live. They write down each complete sentence the instant they hear it end, but they hold an unfinished sentence in their head until the rest of it arrives. Below, you'll write that same parser in pure Python: given raw multi-frame text, split it into individual payloads, exactly what the JavaScript above does one \`fetch\` chunk at a time.`,
@@ -780,6 +812,14 @@ A summarizer or chatbot needs history so the model remembers earlier turns. A wr
 ## The failure mode this prevents
 
 Picture a UI that streams beautifully, tokens flowing onto the page, users happy, but the JavaScript never saves the assembled text. Refresh the page and the draft is gone. Ask for a revision and the model has no prior draft to revise. The stream looked complete, but nothing was stored, and that gap stays invisible until a user hits it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The user asks to shorten the second paragraph and the model replies as if it never wrote a draft | Each delta was printed but never added to full_reply, so no assistant turn was appended to history | Concatenate every delta onto full_reply in the same loop that displays it |
+| The stored draft is missing its final sentence | history.append ran inside the delta loop, capturing full_reply before the stream finished | Append the assistant turn after the with block exits and the stream is drained |
+| store returns None and the print of history raises a TypeError | store appended to the list but had no return statement, so the caller reassigned history to None | Return history after the append |
 
 ## The mental model
 
@@ -975,6 +1015,14 @@ Suppose a chunk splits mid-frame: \`"data: hello wo"\` arrives, then \`"rld\\n\\
 
 If you're handed a complete raw stream all at once, a saved log, a test fixture, a full response body, the same logic applies: split on \`\\n\\n\`, and treat only the pieces **before** the final split as guaranteed complete. If the stream ends without a trailing \`\\n\\n\`, that last piece is an unfinished frame that was cut off, and it's correctly discarded rather than rendered as garbled text.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The final sentence of a completed reply never reaches the screen | frames[:-1] dropped a real frame because the server ended the stream without a trailing blank line | Terminate every frame on the server with the blank line, so the last split piece is an empty string that is safe to drop |
+| A broken half-word is painted and its second half then vanishes | The tail was handled as a complete frame instead of being kept for the next read | Hold the last split piece in buffer and let the next chunk stitch onto it |
+| recover_frames returns an empty list for a stream that plainly carried events | The handler rebound buffer as a local name, so the leftover tail never survived from one read to the next | Declare buffer global, or hold it as an attribute on the reader object |
+
 ## The mental model
 
 You're assembling a jigsaw puzzle from a box that gets refilled while you work. You never place a piece you're not sure is whole; you set uncertain pieces aside and check again once more pieces arrive. Below, you'll implement exactly that: recover every complete frame from a raw stream, and drop anything left dangling at the end.`,
@@ -1157,6 +1205,14 @@ The check happens before \`used\` is updated: \`if used + cost > budget_tokens\`
 ## Why this matters for a writing assistant specifically
 
 Essay drafts, email rewrites, and outline generators are exactly what users click "regenerate" on repeatedly. Without a budget guard, a single runaway prompt, or a user mashing the button, can quietly rack up a large bill across dozens of long, unwatched generations. A budget check turns "hope it stays cheap" into "guaranteed under this number."
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reported token total comes back above the budget you set | used was updated before the comparison, so the chunk that crossed the cap was counted anyway | Test used plus cost against the budget first, and break before updating used |
+| The draft stops growing on screen but the bill for that request is the same as an uncapped run | continue was used instead of break, so text_stream ran to exhaustion and every generated token was still billed | Break out of the loop, which exits the with block and closes the connection |
+| A budget of 0 still admits the first chunk | estimate_tokens returned 0 for a short chunk, so the comparison never tripped | Floor the estimate at one token with max(1, len(text) // 4), so no chunk is free |
 
 ## The mental model
 
@@ -1376,6 +1432,14 @@ It's tempting to wire the happy path (lessons 1-5) and call it done. The two har
 ## Into your Portfolio
 
 Finishing this lesson records the Streaming Writing Assistant in your **Portfolio** tab: its title, what it does, and that it's built. Keep an example prompt and a screenshot of it mid-stream next to it as proof it works. A live-streaming UI is one of the more visually convincing things you can put on your shelf of built products.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| run_pipeline prints None instead of the four-part result | The body was left at pass, or the steps ran but the tuple was never returned | Return the assembled text along with the chunk counts and the token total |
+| The round trip loses the last chunk even when the budget is generous | The final chunk was framed without its trailing blank line, so the slice that drops the last split piece removed a real frame | Frame every chunk with the blank-line terminator before concatenating the raw stream |
+| The app looks perfect on your machine and the first user on a slow connection sees half-words | Only the happy path from lessons 1 to 5 was wired, leaving the client with no partial-frame buffer | Add the buffering from lesson 6 to the client and the budget guard from lesson 7 to the route before calling it shipped |
 
 ## The mental model
 

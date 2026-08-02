@@ -56,6 +56,14 @@ In the next lesson, every chunk gets turned into a vector, called an **embedding
 
 Without chunking you are stuck between two bad options. Send the whole vault every time and you pay for slow, noisy prompts. Send nothing and the model guesses from thin air, which sounds confident and is often wrong. Chunking is what makes precise search over your own notes possible.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A retrieved note answers a different part of the day than the question asked about | The note was indexed whole, so one entry covers several unrelated topics at once | Split each note on blank lines into paragraph-sized chunks before indexing |
+| You have a good answer and no way to say which note it came from | The chunk text was stored without its note title and chunk id | Record note and chunk_id on every chunk at split time, because you cannot recover them afterwards |
+| The index fills up with blank entries that match nothing | Splitting on blank lines leaves whitespace-only pieces in the list | Strip each paragraph and drop the ones that are empty |
+
 ## The mental model
 
 Picture a librarian who cuts every book into index cards instead of shelving it whole, one idea per card, each card labeled with its book and page. When you ask a question she does not hand you a book. She hands you the three cards that answer it. Below you build that card-cutting step in pure Python. No network yet.`,
@@ -257,6 +265,15 @@ The dot product measures raw alignment. Dividing by both magnitudes normalizes i
 
 Retrieval is only as good as this one number. Rank every chunk's embedding against the question's embedding by cosine similarity, and the highest scores are your most relevant notes, whatever the exact wording was. Get this step wrong, or skip normalizing, and your search turns into noise.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Two notes that clearly mean the same thing score far apart | The chunk and the question were embedded by different models, so their vectors are not comparable | Embed every chunk and every question with the same model, and rebuild the index if you switch models |
+| cosine_similarity crashes with a division by zero | A chunk was empty, so its vector is all zeros and its norm is 0 | Return 0.0 when either norm is 0, before dividing |
+| Long chunks outrank short ones no matter what the question is | You compared raw dot products without dividing by both magnitudes | Divide by both norms so the score reflects direction only, not length |
+| Every question takes seconds and costs an embedding call per note | Chunks are being embedded at query time instead of once when the index is built | Embed chunks once into the index and embed only the question on each query |
+
 ## The mental model
 
 Picture every sentence as an arrow pointing somewhere in a giant idea-space. Similar ideas point roughly the same way. Cosine similarity answers how parallel two arrows are, and it gives you a number you can sort by. Below you implement it in pure Python and use it to rank a few toy vectors. No network call here. The real embedding call is the code you just read above.`,
@@ -440,6 +457,14 @@ There is no universal right number. It depends on your embedding model and how t
 ## Why this matters
 
 An empty result after filtering is not a failure. It is information. It tells the next stage of the pipeline that the vault has nothing on this question, which is the exact signal a later lesson uses to skip the API call and return an honest "I don't know" instead of letting the model improvise from nothing.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The assistant confidently answers a question your notes never covered | The top k was sliced before the threshold was applied, so the least-bad chunk still got through | Filter by threshold first, then slice to k, and let the result come back empty |
+| Answers get vaguer as you raise k | More chunks means more weakly related context competing with the one that actually answers | Keep k small, around 3 to 5, and let the threshold do the filtering |
+| A threshold copied from somewhere else drops everything, or nothing | Score ranges depend on your embedding model and how tightly your notes are written | Start near 0.3 to 0.4 and adjust by running real questions against your own vault |
 
 ## The mental model
 
@@ -675,6 +700,14 @@ Numbers are compact and unambiguous. "According to [2]" is one token. "According
 
 Without an explicit citation rule, a model answering from context still writes fluent, confident prose, and you cannot tell which sentence came from which note, or whether it came from the notes at all instead of the model's general knowledge. The instruction to cite is what turns a plausible-sounding answer into one you can verify by clicking through to the source.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer reads well but you cannot tell which note any sentence came from | The prompt asked for an answer and never required a marker on each claim | Put the cite-every-claim rule in the system prompt and number the sources in the user turn |
+| The model names your sources differently on every call | The prompt referred to sources by title instead of by number | Give each chunk a number, ask for that number, and map it back to the real title yourself after the reply |
+| The model answers from general knowledge when the notes do not cover the question | The prompt never said what to do when the retrieved notes fall short | Add an explicit refusal line telling it to say plainly that the notes do not contain the answer |
+
 ## The mental model
 
 You are handing the model a numbered stack of index cards and one strict rule: every sentence needs a card number, or it does not get written. Below you build the numbered context block and the combined prompt in pure Python. The actual API call is the two lines shown above.`,
@@ -845,6 +878,15 @@ Citations only build trust if you actually check them. A UI that prints "[1] Rec
 
 - **Out-of-range citation**: the model wrote \`[7]\` when you gave it 3 sources. Always a bug, never valid.
 - **No citations at all**: the model answered with zero \`[n]\` markers. That is not automatically wrong, since a "the notes don't say" answer needs none, but for a factual claim it is a red flag worth surfacing to the user or retrying.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer cites [7] when you only sent three sources | The model invented a citation number and nothing checked it before display | Run every extracted number against the source count and treat anything out of range as a failure |
+| Footnotes point at the note next to the right one | Citation numbers start at 1 while the chunk list is indexed from 0 | Look up chunks[n - 1], and bounds-check n before you index with it |
+| The same source is listed three times under one answer | Every [n] occurrence was collected, repeats included | Dedupe the extracted numbers while keeping first-seen order |
+| A factual answer with no citation markers at all still displays as sourced | Zero markers passes the out-of-range check trivially, because there is nothing to check | Treat an empty citation list on a factual claim as its own red flag rather than a pass |
 
 ## The mental model
 
@@ -1043,6 +1085,14 @@ Confidence bands catch the case where nothing obviously matched. But even a CONF
 
 A tool that says "I don't know" when it genuinely does not know is more useful than one that never admits uncertainty. Users learn fast which assistants they can trust, and one confidently wrong answer costs more trust than ten honest "not found in your notes."
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The tool produces a phone number that was never anywhere in your notes | Empty or barely relevant context still went to the model, which filled the gap fluently | Classify the top retrieval score and return the fallback on NO_MATCH without calling the model at all |
+| You get billed for questions your vault obviously cannot answer | The confidence check ran after the API call instead of before it | Gate on the top score first, then decide whether to spend a call |
+| A weak but genuine match gets refused outright | A single threshold collapses weak and no-match into one bucket | Use bands, answer normally above the high bar, hedge in the middle, refuse only below both |
+
 ## The mental model
 
 A good research assistant has three gears: answer confidently, answer with a hedge, or say she could not find anything on that in your files. She picks the gear before opening her mouth, not after. Below you build the classifier and the fallback dispatcher in pure Python.`,
@@ -1239,6 +1289,15 @@ Dedup first, then estimate. Dropping duplicate chunks lowers this number directl
 ## Why this matters
 
 At ten notes, duplication is a curiosity. At a thousand notes with a shared daily template, it can be a third of your entire index. That triples embedding cost and dilutes every retrieval with repeated boilerplate that was never worth searching.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Retrieval keeps returning the same template header from twenty different notes | Boilerplate repeats across the vault and every copy got its own index entry | Dedupe chunks by normalized text before you embed anything |
+| Buy milk and BUY  MILK both survive dedup | The comparison used the raw text, so casing and spacing made them look different | Compare on a normalized key, lowercased with whitespace collapsed, and keep the original text for display |
+| Two chunks that say the same thing in different words both stay in the index | Exact-text dedup cannot see a paraphrase | Run a near-duplicate pass over the embeddings and drop pairs above a very high cosine bar such as 0.98 |
+| Your cost estimate comes in well above the bill | The estimate ran before dedup, so it counted chunks that never get embedded | Dedupe first, then estimate |
 
 ## The mental model
 
@@ -1445,6 +1504,14 @@ Now \`python notes_brain.py "what did I decide about the budget?"\` reads your r
 ## What "shipped" means here
 
 It runs from a clean start with one command. It handles an empty vault or an off-topic question without crashing or fabricating. And someone else could point it at their own notes folder from your instructions alone.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every question takes seconds and costs money before it reaches the model | The index is rebuilt from scratch on each run instead of being cached | Save vectors keyed by a hash of each chunk's text and re-embed only the chunks whose text changed |
+| A broken citation is shown under an answer that otherwise looks fine | The footnote list was built before verification ran, or the verification result was ignored | Return an empty footnote list when verification fails, rather than a footnote you cannot back |
+| The CLI hangs with no output when you run it with no arguments | It falls through to reading stdin and waits for input that never arrives | Handle the no-argument case explicitly and print usage instead of blocking |
 
 ## Into your Portfolio
 

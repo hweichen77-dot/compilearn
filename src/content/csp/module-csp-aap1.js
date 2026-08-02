@@ -125,15 +125,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3\n10\n20\n30\n",
-          "expected_output": "60"
-        },
-        {
-          "input": "1\n5\n",
-          "expected_output": "5"
+          "expected_output": "60",
+          "description": "three values sum normally"
         },
         {
           "input": "4\n-2\n2\n-3\n3\n",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "negatives cancel out to zero"
+        },
+        {
+          "input": "1\n5\n",
+          "expected_output": "5",
+          "description": "only one value to read"
+        },
+        {
+          "input": "0\n",
+          "expected_output": "0",
+          "description": "count is zero, so the loop never runs"
+        },
+        {
+          "input": "4\n0\n0\n0\n5\n",
+          "expected_output": "5",
+          "description": "the last value must be included"
         }
       ]
     },
@@ -249,15 +262,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n3 9 2 7 4\n",
-          "expected_output": "9"
-        },
-        {
-          "input": "1\n42\n",
-          "expected_output": "42"
+          "expected_output": "9",
+          "description": "largest sits in the middle"
         },
         {
           "input": "4\n-5 -1 -8 -3\n",
-          "expected_output": "-1"
+          "expected_output": "-1",
+          "description": "every value is negative"
+        },
+        {
+          "input": "1\n42\n",
+          "expected_output": "42",
+          "description": "single item list"
+        },
+        {
+          "input": "5\n9 3 2 7 4\n",
+          "expected_output": "9",
+          "description": "largest is the first item"
+        },
+        {
+          "input": "5\n3 2 7 4 9\n",
+          "expected_output": "9",
+          "description": "largest is the last item"
+        },
+        {
+          "input": "4\n5 5 5 5\n",
+          "expected_output": "5",
+          "description": "every value is the same"
         }
       ]
     },
@@ -372,15 +403,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "287\n",
-          "expected_output": "2 dollars and 87 cents"
+          "expected_output": "2 dollars and 87 cents",
+          "description": "dollars and cents both nonzero"
         },
         {
           "input": "5\n",
-          "expected_output": "0 dollars and 5 cents"
+          "expected_output": "0 dollars and 5 cents",
+          "description": "less than one dollar"
+        },
+        {
+          "input": "100\n",
+          "expected_output": "1 dollars and 0 cents",
+          "description": "exactly one dollar"
+        },
+        {
+          "input": "0\n",
+          "expected_output": "0 dollars and 0 cents",
+          "description": "input is zero"
+        },
+        {
+          "input": "99\n",
+          "expected_output": "0 dollars and 99 cents",
+          "description": "one cent short of a dollar"
         },
         {
           "input": "1000\n",
-          "expected_output": "10 dollars and 0 cents"
+          "expected_output": "10 dollars and 0 cents",
+          "description": "whole dollars with no cents left"
         }
       ]
     },
@@ -495,15 +544,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "programming\n",
-          "expected_output": "gnimmargorp\n3"
+          "expected_output": "gnimmargorp\n3",
+          "description": "ordinary word"
         },
         {
           "input": "AEIOU\n",
-          "expected_output": "UOIEA\n5"
+          "expected_output": "UOIEA\n5",
+          "description": "uppercase vowels still count"
         },
         {
           "input": "xyz\n",
-          "expected_output": "zyx\n0"
+          "expected_output": "zyx\n0",
+          "description": "no vowels at all"
+        },
+        {
+          "input": "Hello World\n",
+          "expected_output": "dlroW olleH\n3",
+          "description": "mixed case with a space"
+        },
+        {
+          "input": "a\n",
+          "expected_output": "a\n1",
+          "description": "single vowel character"
+        },
+        {
+          "input": "y\n",
+          "expected_output": "y\n0",
+          "description": "y is not counted as a vowel"
         }
       ]
     },
@@ -619,15 +686,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "6\n4 2 4 1 4 3\n4\n",
-          "expected_output": "2 1 3"
-        },
-        {
-          "input": "3\n1 2 3\n9\n",
-          "expected_output": "1 2 3"
+          "expected_output": "2 1 3",
+          "description": "several scattered occurrences removed"
         },
         {
           "input": "4\n7 7 7 7\n7\n",
-          "expected_output": ""
+          "expected_output": "",
+          "description": "every value is removed"
+        },
+        {
+          "input": "3\n1 2 3\n9\n",
+          "expected_output": "1 2 3",
+          "description": "target is absent, list is unchanged"
+        },
+        {
+          "input": "1\n5\n5\n",
+          "expected_output": "",
+          "description": "single item list is emptied"
+        },
+        {
+          "input": "5\n4 1 2 3 4\n4\n",
+          "expected_output": "1 2 3",
+          "description": "first and last items are both removed"
+        },
+        {
+          "input": "4\n-1 0 -1 2\n-1\n",
+          "expected_output": "0 2",
+          "description": "negative target with a zero in the list"
         }
       ]
     },
@@ -742,15 +827,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3\n4\n",
-          "expected_output": "12\n14"
-        },
-        {
-          "input": "5\n5\n",
-          "expected_output": "25\n20"
+          "expected_output": "12\n14",
+          "description": "ordinary rectangle"
         },
         {
           "input": "10\n1\n",
-          "expected_output": "10\n22"
+          "expected_output": "10\n22",
+          "description": "long thin rectangle"
+        },
+        {
+          "input": "5\n5\n",
+          "expected_output": "25\n20",
+          "description": "square, where width equals height"
+        },
+        {
+          "input": "1\n1\n",
+          "expected_output": "1\n4",
+          "description": "smallest rectangle"
+        },
+        {
+          "input": "0\n7\n",
+          "expected_output": "0\n14",
+          "description": "zero width gives zero area"
         }
       ]
     },
@@ -868,16 +966,34 @@ export default {
       "challenge_solution_code": "def max_of_three(a, b, c):\n    largest = a\n    if b > largest:\n        largest = b\n    if c > largest:\n        largest = c\n    return largest\n\na, b, c = map(int, input().split())\nprint(max_of_three(a, b, c))\n",
       "challenge_test_cases": [
         {
-          "input": "3 9 5\n",
-          "expected_output": "9"
+          "input": "3 9 5",
+          "expected_output": "9",
+          "description": "largest is the middle value"
         },
         {
-          "input": "10 10 2\n",
-          "expected_output": "10"
+          "input": "-1 -7 -4",
+          "expected_output": "-1",
+          "description": "every value is negative"
         },
         {
-          "input": "-1 -7 -4\n",
-          "expected_output": "-1"
+          "input": "9 3 5",
+          "expected_output": "9",
+          "description": "largest is the first value"
+        },
+        {
+          "input": "3 5 9",
+          "expected_output": "9",
+          "description": "largest is the last value"
+        },
+        {
+          "input": "10 10 2",
+          "expected_output": "10",
+          "description": "the two largest values tie"
+        },
+        {
+          "input": "4 4 4",
+          "expected_output": "4",
+          "description": "all three values are equal"
         }
       ]
     },
@@ -981,16 +1097,29 @@ export default {
       "challenge_solution_code": "def countdown(start):\n    line = \"\"\n    for i in range(start, 0, -1):\n        line = line + str(i) + \" \"\n    return line.strip()\n\nn = int(input())\nprint(countdown(n))\n",
       "challenge_test_cases": [
         {
-          "input": "5\n",
-          "expected_output": "5 4 3 2 1"
+          "input": "5",
+          "expected_output": "5 4 3 2 1",
+          "description": "counts down from five"
         },
         {
-          "input": "3\n",
-          "expected_output": "3 2 1"
+          "input": "1",
+          "expected_output": "1",
+          "description": "start is one, so the count is a single number"
         },
         {
-          "input": "1\n",
-          "expected_output": "1"
+          "input": "2",
+          "expected_output": "2 1",
+          "description": "shortest count with more than one number"
+        },
+        {
+          "input": "3",
+          "expected_output": "3 2 1",
+          "description": "short count"
+        },
+        {
+          "input": "10",
+          "expected_output": "10 9 8 7 6 5 4 3 2 1",
+          "description": "two digit start"
         }
       ]
     }

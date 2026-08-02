@@ -60,6 +60,14 @@ categories = json.loads(resp.content[0].text)
 
 Note the model choice: classification doesn't need your best (and priciest) model. A fast, cheap model is usually enough, since the job is a yes/no label, not creative reasoning.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| json.loads on resp.content[0].text raises JSONDecodeError | The text to check was placed in the system field and the classifier instructions went into the user turn, so the model answered the content instead of labeling it | Keep CLASSIFY_SYSTEM as the only system text and pass the content to check as the user message |
+| The moderation calls cost about as much as the feature itself | The classify call reused the same expensive model as the user-facing call | Set model to claude-haiku-4-5 on the classify call, since a yes/no label does not need the top model |
+| The JSON comes back cut off partway through a key | max_tokens is 100 and the model spent part of it on a preamble before the object started | Tell the classifier to return no prose and no code fences so the whole budget goes to the object |
+
 ## The mental model
 
 Think of guardrails as airport security, not a single guard at one gate: a cheap metal detector (the blocklist) catches the obvious stuff for free, a classifier (a smarter check) catches what slips past, and a supervisor's rulebook (the policy config) decides what each finding actually means. Every layer is allowed to be imperfect, because the next layer covers for it. Below, build the shape of a single classification request; you'll wire the real layers together lesson by lesson.`,
@@ -246,6 +254,14 @@ def screen_input(text):
         return "block"
     return classify_with_model(text)   # only reached if the blocklist is clean
 \`\`\`
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Users report the filter firing on the sentence "I am taking this class seriously" | The check was written as term in text, which matches inside other words | Tokenize with re.findall of the pattern for word-like chunks, then intersect the token set with the blocked set |
+| blocklist_hit returns an empty set for "He will Kill the process" | The text was tokenized without lowercasing, so Kill never equals the entry kill | Call text.lower() before re.findall and keep every BLOCKED_TERMS entry lowercase |
+| A request that plainly asks for harm passes the blocklist untouched | The wording paraphrased around every banned term, and a blocklist only matches exact vocabulary | Treat the blocklist as the free first pass and send whatever it clears on to classify_with_model |
 
 ## The mental model
 
@@ -437,6 +453,14 @@ def input_gate(text):
 ## Why this runs before the real call
 
 Input moderation is a **gate**. It runs before the expensive, user-facing model call, so a blocked request never reaches the feature itself and never pays for it. The ordering matters for cost and for safety. Check after the fact and you've already spent the tokens, and maybe already generated the harmful continuation.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| parse_categories raises ValueError saying substring not found | The reply contained no brace at all, because the classifier answered in prose or declined, so text.index of the opening brace failed | Catch that case and treat an unparseable reply as flagged, rather than letting the message through |
+| json.loads chokes on a reply that opens with a code fence | The slice started at position zero instead of the first brace, so the fence characters went into json.loads | Slice from text.index of the opening brace to text.rindex of the closing brace plus one |
+| Every message comes back blocked, even a question about baking bread | The classifier returned the strings "false" instead of booleans, and any() reads a non-empty string as true | Pin the boolean schema in CLASSIFY_SYSTEM and compare each value against True when the source cannot be trusted |
 
 ## The mental model
 
@@ -630,6 +654,14 @@ A useful shape for output handling: hard-block categories that are always unacce
 ## Why this matters
 
 Products that only check input feel safe in testing and leak in production, because testers type the obviously bad prompts and never see what a long, meandering, mostly-innocent conversation eventually coaxes out of the model. Output moderation is the seatbelt for the reply your input gate was never going to catch.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| redact leaves the word untouched when the reply spells it Secret with a capital S | re.sub ran without flags=re.IGNORECASE, so only the exact casing matched | Pass flags=re.IGNORECASE to re.sub so both casings hit the same pattern |
+| Redacting a term like a.b also wipes out unrelated text such as acb | The period reached the regex engine as a metacharacter matching any character | Build the pattern with re.escape around the term so every character is matched literally |
+| A long, useful reply vanishes because one sentence mentioned a phone number | The output gate blocked on any flagged category instead of separating severities | Hard-block only the always-unacceptable categories and send the situational ones through redact |
 
 ## The mental model
 
@@ -837,6 +869,14 @@ This is the same trick as the blocklist from lesson 2, applied to a different th
 
 Prompt injection is the guardrails category people forget. It doesn't read like "bad content." It reads like an ordinary request to summarize a document. Any feature that pulls in outside text (search results, browsing, file upload, email) needs this defense, or a user-supplied document becomes a way to remote-control your bot.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| looks_injected returns an empty list for a document shouting IGNORE ALL PREVIOUS INSTRUCTIONS | The phrases were tested against the raw text, and every INJECTION_PHRASES entry is lowercase | Lower the text once into a local variable and test each phrase against that |
+| A pasted article tells the model to reveal the system prompt and it complies | The untrusted text was concatenated straight into the prompt with nothing marking where your instructions ended | Wrap it in document tags and state in SYSTEM that tagged text is content to summarize, never instructions to follow |
+| The phrase scan reports nothing, yet the injection still worked, worded as forget everything above | INJECTION_PHRASES only holds the exact wordings you thought of | Keep the delimiter defense as the primary layer and read looks_injected as one more signal for the policy, not the whole defense |
+
 ## The mental model
 
 Instructions and data look identical to a model unless you label them. Delimiters are the label; phrase detection is a smoke alarm for when the label gets ignored anyway. Below, build the phrase-based detector.`,
@@ -1031,6 +1071,14 @@ The \`policy.get(cat, default)\` line is the most important line in this lesson.
 ## Why config beats hardcoded logic
 
 Three concrete wins. You can unit-test the policy table without mocking any API. You can diff it in a pull request and see exactly what changed. And you can load it from a JSON file or a database, so tuning a threshold in production doesn't mean redeploying code. None of that is exotic engineering. It's just refusing to let business rules and plumbing code share a function.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| apply_policy raises KeyError on PRIORITY | A POLICY entry used an action word such as review, which PRIORITY has no score for | Restrict POLICY values to block, flag, and allow, the three keys PRIORITY defines |
+| A category the classifier invented sails through as allowed | The lookup fell back to a permissive default instead of the strict one | Set DEFAULT_ACTION to block and pass it as the second argument of policy.get |
+| Changing what happens to harassment means hunting through several functions | The action was decided by if-statements sitting next to the classifier call | Move the mapping into POLICY so the change is one line in the table |
 
 ## The mental model
 
@@ -1262,6 +1310,14 @@ def normalize(text):
 
 A guardrails layer that only works when the network is perfect and users type exactly the cases you imagined will pass every test and still fall over in production. Fail-closed defaults, caching, and text normalization separate "passed my test suite" from "survived real adversarial users," and adversarial users are exactly who a safety layer exists for.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A stretch of API timeouts shows up later as a spike in allowed content | safe_classify handed back an empty result on error, and any() over no values reads as clean | Return the error marker and check for it before the any() call, so a failed check blocks |
+| The bill keeps climbing on a batch that reprocesses the same paragraphs | Call sites reached call_classifier directly and never consulted the cache | Route every check through cached_classify so a repeat of the exact text is served from the dict |
+| A banned word appears in the logged text but the blocklist never fired | A zero-width character sat between two letters, so the token never equaled the blocklist entry | Run normalize first to strip the Unicode Cf characters, then tokenize and match |
+
 ## The mental model
 
 Treat every check like a lock, not a suggestion: if you can't verify the lock is engaged, assume it's unlocked and act accordingly. That's failing closed. Below, build the caching layer that avoids re-billing identical checks.`,
@@ -1461,6 +1517,14 @@ Shipping this finishes the layer for now, not forever. Real traffic will surface
 ## Into your Portfolio
 
 Finishing this lesson records the Guardrails & Moderation Filter in your **Portfolio** tab. It's the one product in this track other products can plug into: the summarizer, the chatbot, the code generator all get safer the moment they call \`guard()\` instead of calling the model directly.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| guard returns a status of ok and the reply still shows the sensitive term | The redact call ran but its result was thrown away, since redact returns a new string instead of editing in place | Assign the result back with reply set to redact of reply and SENSITIVE_TERMS before returning |
+| Blocked requests still show up on the bill as full model calls | call_model_fn ran before the input gate had finished deciding | Keep the blocklist, injection, and classifier checks above the call_model_fn line so a block returns first |
+| The calling feature prints None where the answer should be | The caller read the reply field without looking at status | Branch on status first, because a blocked result carries a reply of None by design |
 
 ## The mental model
 

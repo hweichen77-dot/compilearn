@@ -73,6 +73,14 @@ print(msg.content[0].text)
 
 Extracting one clean business card is a demo. Extracting ten thousand is the product, and some are missing a phone, some carry two emails, some arrive wrapped in chatty text. The schema is what makes that survivable. Once you know the exact shape you want, you can check the model against it and repair whatever is off.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your code crashes with a KeyError on record["phone"] for a handful of inputs | The source text had no phone, so the model left the key off entirely and the record came back a different shape than the last one | Define the schema up front and force every key onto every record, using null for anything absent |
+| A record passes your check but the field is blank downstream | The presence check only asked whether the key existed, and an empty string counted as present | Treat both an absent key and an empty value as missing, as record.get(field) in (None, "") does |
+| The reply is a friendly paragraph and json.loads throws | Nothing in the request named an exact shape, so the model answered in prose the way a human would | Send a schema that names every field and its type, then check the reply against it |
+
 ## The drill below
 
 No network here. You'll define a schema and write the check that reports which required fields a record is **missing**. That's the smallest piece of the validation you'll build up over the next seven lessons.`,
@@ -258,6 +266,14 @@ That \`json.loads\` is the happy path. It works when the model returns bare JSON
 
 The prompt is the cheapest reliability you can buy. Every field name you spell out, every "use null when absent," every one-shot example is a bug you don't have to catch downstream. A vague prompt fails silently. The reply looks plausible and then breaks your parser one call in a hundred.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A contact comes back with a phone number that appears nowhere in the source text | The prompt never said what to do about absent data, so the model filled the gap with something plausible | Add "If a field is not present in the text, use null. Never guess" to the system prompt |
+| You add a field to the schema dict and the model keeps returning the old keys | The instruction was written by hand, so it drifted from the schema your code now expects | Build the instruction from schema.items() so one dict drives both sides |
+| json.loads throws on a reply that clearly contains the right object | The model wrapped the JSON in a sentence or a code fence, and json.loads only accepts bare JSON | Ask for JSON with no prose and no code fences, and still parse defensively, which is the next lesson |
+
 ## The drill below
 
 You'll build the system prompt from a schema dict, then parse a clean sample reply with \`json.loads\` and confirm its keys match the schema exactly.`,
@@ -416,6 +432,14 @@ You do, in the prompt, and it helps. But "return only JSON" is a strong nudge, n
 ## The mental model to keep
 
 The reply is a haystack and the JSON is the needle. Rather than demand a needle-only haystack, learn to find the needle. First brace to last brace is your magnet.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The slice parses but the record is nonsense, with fields from two different contacts | The reply held two separate objects, and first brace to last brace swallowed both plus the text between them | Ask for exactly one object, and treat a reply with two top-level objects as a failure to retry rather than a slice to widen |
+| The parser raises a confusing error deep inside json.loads on a reply with no JSON at all | find returned -1, and text[-1:0] sliced garbage that was passed along as if it were an object | Check for -1 before slicing and raise a clear error saying no JSON object was found |
+| The prompt says "return only JSON" and a small share of replies still carry a trailing note | "Return only JSON" is a strong nudge, not a guarantee the model always honors | Keep the instruction and slice out the object anyway, so a nudge that fails costs you nothing |
 
 ## The drill below
 
@@ -588,6 +612,14 @@ Return \`None\` on failure rather than crashing. \`None\` is a signal the caller
 
 Every repair rule is a small risk of corrupting good data. Keep the set tiny and boring. Fences and trailing commas cover most of what you'll see. When those aren't enough, the right move is to **ask the model again** (next lesson), not to bolt on ten more fragile regexes.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Replies that used to parse start failing after you added another repair rule | A regex meant to fix broken JSON also rewrote valid JSON, for example a quote-swapping rule hitting an apostrophe inside a name | Keep the repair set to fences and trailing commas, and send anything else back to the model |
+| A batch of ten thousand records dies on row 4,000 with a JSONDecodeError | repair_json ran but json.loads was called without a try/except, so one unfixable reply took down the run | Wrap the parse and return None on failure, so the caller can log, retry, or flag that one record |
+| A reply with single quotes or unquoted keys still will not parse after repair | Those breakages cannot be fixed safely with string surgery, since quotes also appear inside values | Leave them to a retry, where the model rewrites the whole object rather than you patching it |
+
 ## The drill below
 
 You'll write \`repair_json\`, feed it a fenced object with a trailing comma, and confirm it parses cleanly afterward.`,
@@ -745,6 +777,14 @@ Now downstream code can write \`record["phone"]\` without a \`KeyError\`, whethe
 ## Why this is the product
 
 An extractor without validation is a guess with extra steps. What matters is that you can **prove** the returned record meets the contract before it lands in your database. Validation is the difference between "the model usually gets it right" and "bad records never reach production." When a record fails, you don't ship it. You retry or flag it, which is exactly the next lesson.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A row lands in the database with amount stored as the text "50" and arithmetic on it fails later | json.loads accepted the payload because it was well-formed, and nothing checked that amount was a number | Run a type check with isinstance against the schema, not just a presence check |
+| Downstream code hits a KeyError on an optional field that was found for most records | An absent field left the key off entirely, so records did not all share the same shape | Normalize with {key: record.get(key) for key in schema} so every record carries every key |
+| One absent field produces two errors, a missing and a wrong type, for the same key | The type check ran on a None value that the presence check had already flagged | Guard the type check with value is not None so each problem is reported once |
 
 ## The drill below
 
@@ -924,6 +964,14 @@ Retries cost money and time, and some inputs genuinely lack the data. No amount 
 
 The gap between a demo and a tool is exactly this behavior: it fails politely, recovers when it can, and gives up cleanly when it can't. An extractor that surfaces "3 records need review" is trustworthy. One that silently writes garbage, or crashes on row 4,000, is not.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One record burns hundreds of calls and a large bill while the run hangs | The loop retried until the record validated, and the text genuinely never contained the missing phone | Cap attempts, two retries is a sane default, and return the best record with valid: False after that |
+| Retry after retry comes back with the same field still missing | The retry resent the original text unchanged, so the model had no reason to answer differently | Append the validation errors to the prompt, so attempt two is told exactly what was wrong |
+| Your token bill includes calls on rows that were blank | Empty and whitespace-only input still went to the model, which then invented a record out of nothing | Short-circuit on not text.strip() and return an all-null record without making a call |
+
 ## The drill below
 
 You'll simulate the retry loop over a sequence of fake replies, the first invalid and the next fixed, and confirm it stops as soon as a valid one arrives, reporting how many attempts it took.`,
@@ -1101,6 +1149,14 @@ def estimate_tokens(text):
 \`\`\`
 
 A few practical levers: don't retry more than you must, extract only the fields you actually need, and for a batch, measure the average document size before you run ten thousand of them.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An invoice passes presence and type checks but its stored total is short by one line | The model dropped a line item or misread a price, which leaves every field present and correctly typed | Sum qty times price across the items and compare it to the stated total before you trust the record |
+| A correct invoice is flagged as a mismatch, off by a fraction of a cent | The totals are floats, and float arithmetic does not compare exactly, since 0.1 plus 0.2 is not 0.3 | Compare within a one-cent tolerance, or store money as integer cents and compare exactly |
+| A batch of invoices costs several times what your contact extraction did | Invoices are pages rather than sentences, and every retry resends the whole document as input | Estimate tokens before the run, extract only the fields you need, and keep the retry cap tight |
 
 ## The drill below
 
@@ -1299,6 +1355,14 @@ Now \`cat email.txt | python extractor.py\` prints validated JSON. That's shippa
 ## It lands in your Portfolio
 
 Finishing this lesson saves the **Structured JSON Extractor** to your **Portfolio** tab: a real tool that turns messy contacts and invoices into JSON you can trust. Keep a sample input and its output next to it. That pair is the proof it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Half-empty records sit in the database next to good ones with nothing marking them | The caller stored whatever extract returned and ignored the status it came back with | Branch on the status and hold INCOMPLETE and PARSE_ERROR records for review instead of writing them |
+| A record comes back with only the keys the model happened to return | The parsed dict was passed straight through instead of being forced onto the schema | Build the result as {k: record.get(k) for k in SCHEMA} so the shape never varies |
+| A malformed reply takes down the whole batch instead of one row | repair_and_parse returned None and the caller kept using it as a dict | Return an all-null record with status PARSE_ERROR, so a bad row is labeled rather than fatal |
 
 ## The drill below
 

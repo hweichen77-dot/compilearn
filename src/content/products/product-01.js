@@ -67,6 +67,14 @@ Vague prompts fail quietly. "Be concise" hands you something plausible that's st
 2. **Forbid invention.** "Add no new facts" stops the model from hallucinating details that were never in the source, the number-one summarizer bug.
 3. **Constrain scope.** "Only the main points" tells it what to drop.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every run comes back a different length, often three paragraphs | The prompt said "be concise" instead of naming a count | Name the length exactly, like "3 short sentences" |
+| The summary states a detail that was never in the article | Nothing in the system prompt forbids adding facts | Add a rule such as "Add no new facts" so invention is ruled out |
+| You end up rewriting the rules every time the article changes | The article was pasted into the system prompt, mixing config with data | Keep the rules in system and send the article as one user turn in messages |
+
 ## The mental model
 
 A summarizer is a plain program with one unusual function call in the middle. The model is a very capable, slightly unreliable \`compress()\` function, and the system prompt is its configuration. Get the prompt shape right first; the network call is the easy part.
@@ -282,6 +290,15 @@ Three defensive moves: drop lone code-fence lines, drop a leading label line tha
 
 You can also tell the model "no preamble, output only the summary," and you should. But models still slip, so a tiny cleaning pass is cheap insurance. Prompt for the format you want, then defensively strip what you don't. Belt and suspenders.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Printing the reply gives an object repr instead of the summary | You printed \`resp\` rather than reading the text out of the first content block | Read \`resp.content[0].text\` |
+| The saved summary opens with "Here is a summary:" | The model's preamble was kept as part of the content | Drop a leading line that ends with a colon before using the text |
+| The output still carries backtick lines above and below it | The model fenced its answer and nothing stripped the fences | Filter out any line whose stripped value is a code fence |
+| Word counts downstream come out higher than the summary looks | Blank lines and packaging were counted as summary content | Trim leading and trailing blank lines after removing the fences and the label |
+
 ## The mental model
 
 The model returns a rough draft in an envelope. Your job is to open the envelope (\`content[0].text\`) and throw away the packaging (preamble, fences, blank lines) before anyone downstream touches it. Below, practice the cleaning pass on a realistic messy reply, no network needed.`,
@@ -494,6 +511,14 @@ Prompt for the length, then trim as a backstop. That trailing \`...\` signals tr
 
 Length control is where a summarizer becomes reusable. The same code produces a tweet, a paragraph, or a briefing just by changing one number. And the trim backstop means a downstream field never overflows, no matter how chatty the model gets on a weird input.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The summary stops mid-sentence | max_tokens was used as the length control, so generation was cut off before the model finished | Ask for the length in the prompt and keep max_tokens comfortably above it |
+| You asked for 40 words and got 46 | Models aim for about a count, they do not count exactly | Measure the result and trim it yourself when the cap is hard |
+| A trimmed summary reads as though it were complete | The trim dropped the extra words without marking the cut | Append a marker like " ..." so the truncation is visible |
+
 ## The mental model
 
 The prompt asks for a length; \`max_tokens\` prevents runaway cost; your own word-cap enforces the hard limit. Three layers, each doing one job. Below, build the enforcement layer in pure Python.`,
@@ -689,6 +714,14 @@ A summarizer that only makes paragraphs is a toy. The one that also emits \`{"he
 
 One more habit pays off: when you ask for JSON, ask for a **fixed** set of keys and say each one. "Return name, email, phone" is reliable; "return the relevant fields" invites the model to invent a different shape every run, and your parser breaks. Pin the schema in the prompt and your parsing code can trust it.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| \`json.loads\` raises even though the JSON in the reply looks valid | The model wrapped the object in a greeting or a code fence | Slice from the first \`{\` to the last \`}\` before parsing |
+| Your parser breaks on a run that worked yesterday | The prompt asked for "the relevant fields", so the key set changed between runs | Name every key in the prompt and pin the schema |
+| You asked for bullets and got a paragraph with a lead-in | The prompt named the format but not the line shape or the no-preamble rule | Spell out the bullet prefix and say to output only the bullets |
+
 ## The mental model
 
 Prompt decides the shape; parser trusts the shape but verifies it. Prose formats need no parsing. Structured formats need a defensive extractor because the model's "JSON" occasionally arrives gift-wrapped. Below, build the formatter that turns summary points into either bullets or a numbered list on demand.`,
@@ -873,6 +906,14 @@ This greedily fills each chunk up to \`max_chars\` and starts a new one only whe
 Once split, you summarize each chunk on its own, then decide how to combine the pieces. That combine step, turning many chunk summaries into one, is the next lesson (map-reduce). For now the job is clean, boundary-respecting chunks of a predictable size.
 
 A subtle knob you'll meet later: **overlap**. Repeating a sentence or two between adjacent chunks keeps an idea that straddles a boundary from being lost. Start without it; add it if summaries feel like they drop the seams.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Chunks begin or end with half a word | The split cut at a fixed character count instead of a boundary | Pack whole words and roll over only when the next one will not fit |
+| The tail of the document never shows up in any summary | The final partial chunk was left in \`current\` and never appended after the loop | Append \`current\` after the loop when it still holds text |
+| An idea that spans a chunk boundary vanishes from the summary | Adjacent chunks split cleanly, so neither one holds the whole idea | Add a small overlap so the boundary sentences appear in both chunks |
 
 ## The mental model
 
@@ -1069,6 +1110,14 @@ Because a single chunk summary already loses detail, and stacking 60 of them re-
 ## The cost you're signing up for
 
 Map-reduce trades calls for capacity. Sixty chunks is sixty map calls plus a handful of reduce calls. That's the price of summarizing something that could never fit in one window. Two levers keep it sane: bigger chunks (fewer map calls) and a bigger reduce group size (fewer reduce passes). You'll count these calls exactly in the drill, because on a big document, calls are dollars.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The final summary states something no chunk summary said | The reduce prompt synthesized across summaries with no rule against adding facts | Carry the no-new-facts rule into the reduce prompt, not just the map prompt |
+| The reduce loop runs forever | The group size was 1, so each pass returned the same count it started with | Require a group size above 1 so the count shrinks every pass |
+| A modest document costs far more than expected | Chunks were small, so the map phase spent one call on each tiny piece | Raise the chunk size and the reduce group size to cut the call count |
 
 ## The mental model
 
@@ -1277,6 +1326,15 @@ The final successful attempt adds output tokens; every attempt (including the fa
 
 On a long run, one bad chunk shouldn't sink everything. Catch a chunk that fails all its retries, substitute a placeholder like "[section could not be summarized]", and keep going. A summary missing one section out of sixty still beats a crash on section fifty-nine that throws away the other fifty-eight.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A 60-chunk run dies at chunk 59 and the other 58 summaries are lost | One chunk's failure was allowed to escape the loop | Catch the chunk that exhausted its retries, substitute a placeholder, and keep going |
+| The token bill is much higher than your estimate | Failed attempts were left out of the tally, but every retry re-sends and re-bills the input | Count \`attempts * input + output\` per call, not just the successful attempt |
+| An empty or one-line file still costs an API call | No guard ran before the request | Strip the input and return early when it is blank or already short |
+| A network failure yields an empty summary instead of an error | The retry helper swallowed the exception on the last attempt | Re-raise on the final attempt so the failure is loud |
+
 ## Why this matters
 
 Summarizers eat unpredictable input by nature: whatever a user pastes. Hardening is what keeps a weird input from crashing the tool, an empty input from wasting a call, and a flaky network from taking down a batch job halfway through. The difference between a demo and a tool is entirely in this layer. Below, tally the real token bill of a run where some chunks needed retries.`,
@@ -1484,6 +1542,14 @@ Three tests, borrowed from the playbook: it runs from a clean start with one com
 ## Into your Portfolio
 
 Finishing this lesson records the AI Text Summarizer in your **Portfolio** tab: title, what it does, and that it's built. It joins the shelf of working tools you're assembling across the track. Keep an example input and its summary next to it as proof it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An input of exactly the threshold length takes the wrong branch | The comparison used \`<\` instead of \`<=\`, so the inclusive boundary shifted | Compare with \`<=\` and check the smallest threshold first |
+| Piping a file into the tool produces nothing | The code only reads \`sys.argv\` and never falls back to standard input | Open the file when a path is given, otherwise read \`sys.stdin\` |
+| A medium document routes to map-reduce and costs more than it should | The thresholds were never tuned against the chunk size the tool actually uses | Set single_max and chunk_max from your real chunk budget |
 
 ## The mental model
 

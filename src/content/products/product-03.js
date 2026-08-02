@@ -76,6 +76,14 @@ card = {"question": question, "answer": answer}
 
 We told the model to answer in a rigid \`Q:\`/\`A:\` layout so parsing is trivial: split the lines, strip the labels, done. Later we switch to JSON so we can pull many cards at once, but the idea stays the same. Constrain the output so your code can read it. Ask vaguely for "some flashcards" and you get chatty prose no parser can touch.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| IndexError on \`lines[1]\` | The model replied with prose or a single line instead of the two-line shape, so there is no second line to read | Check you have at least two lines before indexing, and tighten the system prompt so the reply is only the Q: and A: lines |
+| The question comes out as "Sure! Here is your card" | The model added a friendly opener, so line 0 is the preamble and not the question | Find the line that starts with "Q:" instead of trusting position 0, and tell the model to reply with no preamble |
+| The answer is cut off partway through | The answer ran onto a third line and you only read \`lines[1]\` | Join everything after the A: label back together, or ask for an answer short enough to fit one line |
+
 ## The runnable drill
 
 The sandbox has no network, so below you build the same messages list and parse a *sample* reply string exactly as the real code would, with no API call. Get the parse right here and the live version is the same three lines.`,
@@ -293,6 +301,14 @@ for chunk in chunk_notes(raw_notes):
 
 More chunks means more API calls, which means more cost and time, so you don't want chunks that are too tiny either. A few hundred characters per chunk is a sane default: big enough to hold real context, small enough that the model reads it carefully.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A card asks about a term the answer never names, or the answer has no matching question | A chunk boundary landed between a term and its definition, so neither half held the whole fact | Keep related sentences together by raising max_chars, or overlap the last sentence of each chunk into the next |
+| Chunks split in odd places like "Water boils at 100" and "5C" | Splitting on "." also splits decimals, abbreviations, and initials | Split on sentence-ending punctuation followed by a space, or keep a short list of abbreviations you never split after |
+| The run costs far more than expected and takes minutes | max_chars was set very small, so a page of notes became dozens of chunks and dozens of calls | Raise the chunk size until each chunk still holds real context, and count the chunks before you call the model |
+
 ## The runnable drill
 
 No network needed to practice this, chunking is pure text handling. Below you implement the greedy packer and run it on a sample note. Getting the boundary logic right (never exceed the limit, never lose a sentence) is the whole skill.`,
@@ -505,6 +521,15 @@ for c in cards:
 
 That \`json.loads\` is why you asked for JSON in the first place. The text becomes a real Python list you can loop over and count. (The next lesson hardens the parse, since models sometimes wrap the JSON in extra text.)
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| \`json.loads\` raises JSONDecodeError on a reply that looks like valid JSON | The model wrapped the array in a code fence or opened with "Here are your cards:", so the string is not pure JSON | Slice from the first [ to the last ] before parsing, which is exactly what the next lesson builds |
+| KeyError on \`c["question"]\` | The model used its own key names, such as q and a, or front and back | Name the exact keys in the prompt and show one example object, then read fields with .get so a stray shape does not crash the loop |
+| The last card in the array is cut off mid-string | The reply hit max_tokens before the model could close the array | Raise max_tokens for the call, or send smaller chunks so each reply has room to finish |
+| Cards come back for a chunk that held no real facts | The prompt never gave the model a way to say nothing, so it invented filler | Keep the rule that an empty array is a valid answer, and drop the filler cards in the validator later |
+
 ## The runnable drill
 
 Below you don't call the API. Instead you take a *sample* parsed list of cards and validate it against the schema: every element must be a dict with non-empty \`question\` and \`answer\` strings. Counting the valid cards is the check every extraction step needs before trusting the model's output.`,
@@ -710,6 +735,15 @@ def extract_with_retry(chunk, tries=2):
 
 Often a second call returns clean JSON when the first didn't. This "extract, and retry if empty" shape is the same defensive pattern you'll reuse across every AI product.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The retry fails the same way, every time | \`extract_with_retry\` resends an identical prompt, so the model has no reason to answer differently | Change something on the second attempt, such as restating the JSON-only rule or lowering the chunk size, before giving up |
+| A chunk that clearly had facts produces zero cards and nothing explains why | \`parse_cards\` swallows the failure and returns [], so a bad reply looks the same as an empty note | Log the raw reply when the parse fails, and count failed chunks so a run that lost half its notes is visible |
+| The parse still crashes on some replies | The two guards only catch ValueError and JSONDecodeError, and \`json.loads\` on a valid object or number returns something that is not a list | Keep the final \`isinstance(cards, list)\` check, and return [] whenever the parsed value is not a list of cards |
+| The slice grabs too much text | The reply contained a bracket in the card text itself, so the span from the first [ to the last ] pulled in surrounding prose | Accept that the slice is a heuristic, let \`json.loads\` reject the bad span, and rely on the retry instead of widening the search |
+
 ## The runnable drill
 
 Below you implement \`parse_cards\` and run it against several messy replies, one clean, one fenced, one with chatter, one with no array at all, and confirm each returns a sensible list without crashing. The \`json\` module works offline, so this drill exercises the real parse logic end to end.`,
@@ -910,6 +944,14 @@ The pattern is the classic **seen-set dedup**: walk the deck once, compute each 
 ## How aggressive to be
 
 Normalization is a dial. Lowercasing and trimming punctuation is safe, it only merges cards that are truly the same question. You *could* go further (strip filler words, compare meaning with embeddings), but that risks merging two genuinely different cards into one and silently losing a fact. For a flashcard tool, conservative normalization is the right call: better a rare duplicate slips through than a real card disappears.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The deck still has three cards about the mitochondria | You compared the raw question strings, so a stray question mark or a capital letter made them look different | Compare the normalized key, not the raw text, and normalize both sides the same way |
+| A fact you know was in your notes is missing from the deck | Normalization went too far and collapsed two different questions onto one key, so the second card was dropped as a repeat | Keep normalization to case, whitespace, and trailing punctuation, and print which cards were skipped as duplicates |
+| A surviving card has a worse answer than the copy that got dropped | Dedup keys on the question only, so the first occurrence wins even when a later card answers it better | Keep first-seen order for predictability, or break ties by preferring the longer, more complete answer |
 
 ## The runnable drill
 
@@ -1114,6 +1156,15 @@ This is the greedy packer again, now measured in tokens instead of characters. E
 ## The tradeoff to hold in mind
 
 Batching trades attention for cost. A batch that's too big is back to the lesson-2 problem: the model skims and misses facts. So batch *small related* chunks together, not the whole document. A budget of a few hundred to a couple thousand tokens per batch is a reasonable middle: cheaper than one-call-per-chunk, still small enough to extract carefully. Don't hunt for a magic number. *Measure* a run before you ship, so the cost shows up in your terminal and not on your billing dashboard.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You raised the budget to save money and the deck came back smaller | Bigger batches put more text in front of the model per call, so it summarized the highlights and skipped the small facts | Lower the budget until card counts recover, and compare cards per chunk before and after any batching change |
+| The reply for a batch stops partway through the array | Batching raised the input but max_tokens stayed where it was, so the output ran out of room | Scale max_tokens with the batch size, or cap how many chunks go into one call |
+| The real bill is well above your estimate | The estimate summed the chunks but ignored the system prompt, which you resend on every single call | Add the system prompt cost once per call to the estimate, not once per run |
+| Two unrelated topics end up in one card | Batching packed chunks from different parts of the notes together and the model blended them | Batch neighboring chunks only, and keep a separator between chunks so the model treats them as distinct notes |
 
 ## The runnable drill
 
@@ -1325,6 +1376,15 @@ Print how many cards you dropped. A run that quietly discards half its cards is 
 \`\`\`python
 print(f"Kept {len(good)} cards, dropped {dropped}.")
 \`\`\`
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The deck is much shorter than the number of cards the model returned, and nothing says why | The filter drops bad cards silently, so the count never adds up and you cannot tell a thin note from a broken chunk | Print kept versus dropped every run, and print the first few rejected cards while you are tuning the rules |
+| Good cards keep disappearing | max_len is set too low, so real answers that run a couple of sentences get rejected along with the paragraph dumps | Raise max_len until only the note dumps fail, and check what the longest kept card actually looks like |
+| \`len()\` or \`.lower()\` raises TypeError inside the validator | A field came back as a number or null and the type checks ran after the checks that touch the value | Keep the guard clauses in order: dict first, then field types, then everything that reads the strings |
+| Duplicate cards survive validation | The validator runs on each card alone and has no view of the rest of the deck, so it cannot see repeats | Leave repeats to the dedup pass from lesson 5 and run it before this filter |
 
 ## The runnable drill
 
@@ -1540,6 +1600,15 @@ Notes in one end, an Anki-ready deck out the other. That's the whole product.
 ## What "shipped" means here
 
 It's shipped when it runs from a clean start with one command, survives an empty or junk notes file without crashing (you return \`[]\` and write a header-only file instead of throwing), and someone else could run it from your README. Keep a sample \`notes.txt\` and the \`deck.csv\` it produces as proof it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A card lands split across two columns after import | The row was built by joining fields with a comma, so a comma inside the question became a column break | Pass the fields to \`csv.writer\` as a list and let it quote them for you |
+| Answers show up wrapped in stray double-quotes | Interior quotes were escaped by hand and doubled the wrong number of times | Hand the raw string to \`csv.writer\` unchanged; it doubles interior quotes correctly on its own |
+| Every other row in the file is blank | \`open\` was called without \`newline=""\`, so line endings got written twice on some platforms | Always open the file with \`newline=""\` when a \`csv.writer\` is attached to it |
+| Accented or non-English characters import as garbage | The file was written in the platform default encoding rather than UTF-8 | Pass \`encoding="utf-8"\` on the \`open\` call and import the deck as UTF-8 |
 
 ## It lands in your Portfolio
 

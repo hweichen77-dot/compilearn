@@ -101,15 +101,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5",
-          "expected_output": "15"
-        },
-        {
-          "input": "0",
-          "expected_output": "10"
+          "expected_output": "15",
+          "description": "normal positive number"
         },
         {
           "input": "-4",
-          "expected_output": "6"
+          "expected_output": "6",
+          "description": "negative input crosses back above zero"
+        },
+        {
+          "input": "0",
+          "expected_output": "10",
+          "description": "input is zero"
+        },
+        {
+          "input": "-10",
+          "expected_output": "0",
+          "description": "result lands exactly on zero"
+        },
+        {
+          "input": "1000000",
+          "expected_output": "1000010",
+          "description": "large value"
         }
       ]
     },
@@ -202,15 +215,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "6",
-          "expected_output": "12"
+          "expected_output": "12",
+          "description": "single digit doubles"
+        },
+        {
+          "input": "12",
+          "expected_output": "24",
+          "description": "two digits, so repeating the text instead of doubling fails"
         },
         {
           "input": "0",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "input is zero"
         },
         {
-          "input": "25",
-          "expected_output": "50"
+          "input": "-7",
+          "expected_output": "-14",
+          "description": "negative input"
+        },
+        {
+          "input": "250",
+          "expected_output": "500",
+          "description": "larger value"
         }
       ]
     },
@@ -303,15 +329,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "4",
-          "expected_output": "even"
+          "expected_output": "even",
+          "description": "even number"
         },
         {
           "input": "7",
-          "expected_output": "odd"
+          "expected_output": "odd",
+          "description": "odd number"
         },
         {
           "input": "0",
-          "expected_output": "even"
+          "expected_output": "even",
+          "description": "zero counts as even"
+        },
+        {
+          "input": "-3",
+          "expected_output": "odd",
+          "description": "negative odd number"
+        },
+        {
+          "input": "1",
+          "expected_output": "odd",
+          "description": "smallest odd number"
         }
       ]
     },
@@ -400,15 +439,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "10 20 30 40",
-          "expected_output": "10\n40"
-        },
-        {
-          "input": "7 8",
-          "expected_output": "7\n8"
+          "expected_output": "10\n40",
+          "description": "several values"
         },
         {
           "input": "5",
-          "expected_output": "5\n5"
+          "expected_output": "5\n5",
+          "description": "single item, first and last are the same"
+        },
+        {
+          "input": "7 8",
+          "expected_output": "7\n8",
+          "description": "exactly two items"
+        },
+        {
+          "input": "-5 0 12",
+          "expected_output": "-5\n12",
+          "description": "negative first value"
+        },
+        {
+          "input": "  3   9   4  ",
+          "expected_output": "3\n4",
+          "description": "extra spaces around and between values"
         }
       ]
     },
@@ -502,15 +554,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3",
-          "expected_output": "1\n2\n3"
+          "expected_output": "1\n2\n3",
+          "description": "counts up to n"
         },
         {
           "input": "1",
-          "expected_output": "1"
+          "expected_output": "1",
+          "description": "n is one, so only one line prints"
         },
         {
           "input": "5",
-          "expected_output": "1\n2\n3\n4\n5"
+          "expected_output": "1\n2\n3\n4\n5",
+          "description": "longer count reaches the last number"
+        },
+        {
+          "input": "0",
+          "expected_output": "",
+          "description": "n is zero, so nothing prints"
+        },
+        {
+          "input": "2",
+          "expected_output": "1\n2",
+          "description": "smallest count with more than one line"
         }
       ]
     },
@@ -603,15 +668,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5",
-          "expected_output": "25"
+          "expected_output": "25",
+          "description": "normal positive number"
+        },
+        {
+          "input": "-6",
+          "expected_output": "36",
+          "description": "negative input squares to a positive result"
         },
         {
           "input": "0",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "input is zero"
+        },
+        {
+          "input": "1",
+          "expected_output": "1",
+          "description": "one squared is still one"
         },
         {
           "input": "12",
-          "expected_output": "144"
+          "expected_output": "144",
+          "description": "larger value"
         }
       ]
     },
@@ -707,15 +785,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "cat dog fish\ndog",
-          "expected_output": "yes"
+          "expected_output": "yes",
+          "description": "target sits in the middle"
         },
         {
           "input": "cat dog fish\nbird",
-          "expected_output": "no"
+          "expected_output": "no",
+          "description": "target is not in the list"
+        },
+        {
+          "input": "cat dog fish\nfish",
+          "expected_output": "yes",
+          "description": "target is the last word"
+        },
+        {
+          "input": "cat dog fish\ncat",
+          "expected_output": "yes",
+          "description": "target is the first word"
         },
         {
           "input": "apple\napple",
-          "expected_output": "yes"
+          "expected_output": "yes",
+          "description": "single word list"
+        },
+        {
+          "input": "cat dog fish\nog",
+          "expected_output": "no",
+          "description": "partial word must not count as a match"
         }
       ]
     },
@@ -804,15 +900,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "10\n5\n20",
-          "expected_output": "2"
-        },
-        {
-          "input": "0\n10\n25",
-          "expected_output": "3"
+          "expected_output": "2",
+          "description": "reaches the goal in two weeks"
         },
         {
           "input": "50\n5\n20",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "savings already exceed the goal"
+        },
+        {
+          "input": "20\n5\n20",
+          "expected_output": "0",
+          "description": "savings exactly meet the goal, so zero weeks"
+        },
+        {
+          "input": "0\n10\n25",
+          "expected_output": "3",
+          "description": "last week overshoots the goal"
+        },
+        {
+          "input": "0\n10\n30",
+          "expected_output": "3",
+          "description": "goal is an exact multiple of the weekly amount"
+        },
+        {
+          "input": "0\n1\n1",
+          "expected_output": "1",
+          "description": "a single week is enough"
         }
       ]
     }

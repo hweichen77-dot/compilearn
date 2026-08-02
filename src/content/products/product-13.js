@@ -79,6 +79,14 @@ print(response.content[0].text)
 
 If the file is actually a PNG but you label it \`image/jpeg\`, decoding can fail or the model can misread the picture. Nothing on your side sniffs the real format. You are declaring what the bytes are, so pull the type from the actual file extension rather than a hopeful guess. One more thing to file away: base64 inflates the payload by about a third. A 3 MB photo becomes roughly 4 MB of text on the wire. That matters later, once this scanner is chewing through a whole batch of receipts.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The API rejects the image, or the model describes something that is not on your receipt | The media_type says image/jpeg but the file is really a PNG, and nothing on your side sniffs the true format | Derive the media_type from the file's actual extension instead of hardcoding one value for every photo |
+| The request fails to serialize, with an error about bytes | base64.standard_b64encode returns bytes, and those went into the message without being turned into text | Call .decode("utf-8") on the encoded value so the data field holds a plain string |
+| A photo that looked small on disk pushes the request past a size limit | Base64 inflates the payload by about a third, so a 3 MB photo travels as roughly 4 MB of text | Measure the size after encoding, not before, and scale the photo down before you encode it |
+
 ## What to hold onto
 
 There is no special "vision endpoint" here. It's the message-list shape you already know, with one block that happens to be a photo instead of a sentence. The send-and-parse loop around it works exactly as it did for text.`,
@@ -280,6 +288,14 @@ Getting valid JSON is not the same as getting the JSON you asked for. A well-for
 required = ["merchant", "date", "total"]
 missing = [k for k in required if k not in data]
 \`\`\`
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| json.loads raises a decode error even though you can see a JSON object in the reply | The whole reply went to json.loads, and the model wrapped the object in a greeting or a markdown code fence | Slice from the first brace to the last with index and rindex, then parse only that slice |
+| The parse cuts the object short once the receipt carries nested data | The slice ended at the first closing brace instead of the last one, so a nested object closed it early | Use rindex to find the final closing brace of the outer object |
+| Code downstream raises a KeyError on total even though parsing worked | Valid JSON is not complete JSON, and the model can omit a field it could not read off the photo | Check that every required key is present right after parsing, and handle the missing ones before you use the data |
 
 ## What to hold onto
 
@@ -489,6 +505,14 @@ The \`not isinstance(x, bool)\` checks look fussy, but they earn their place. In
 ## What to do with a mixed bag
 
 Once you know which items are valid and which aren't, you get to choose. Drop the bad ones and keep going with what parsed, or reject the whole receipt until someone re-scans it. This project takes the first path: keep the valid items and record the indexes that failed. You end up with a usable partial result and a short list of what a human should double check.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Summing the line items raises a type error partway through the list | The model returned a price as the string "4.50" with a currency symbol attached instead of the number 4.5 | Check the price type with isinstance before using it, and send string prices through normalization first |
+| An item whose quantity is True passes validation and counts as one unit | bool is a subclass of int in Python, so isinstance(True, int) is True | Keep the not isinstance(quantity, bool) guard next to the int check, as is_valid_item does |
+| One garbled row makes the entire receipt fail even though most items read fine | The validator handed down a single verdict for the whole items list instead of one per entry | Validate each item on its own, keep the ones that pass, and record the indexes that failed |
 
 ## What to hold onto
 
@@ -713,6 +737,14 @@ The numbers alone won't tell you which. So the right move is to **flag it** rath
 
 This one arithmetic check catches a large share of misreads for almost no extra API cost. It's pure math on data you already pulled out. It's the cheapest reliability you'll add anywhere in this project, and it's what separates a tool that prints numbers from a tool that tells you when to stop trusting them.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The check fails on a receipt where every number was read correctly | The comparison used ==, and floats plus rounding to the cent almost never land on exact equality | Compare through approx_equal so anything within a cent or two counts as a match |
+| The items sum comes out low on receipts that repeat an item | The sum added each price once and ignored the quantity beside it | Multiply price by quantity for every item, the way items_sum does |
+| A receipt keeps failing the total check while the subtotal check passes | The paper carries a tip or discount line your schema does not capture, so subtotal plus tax cannot reach the printed total | Mark the receipt needs_review and report which check failed, instead of quietly accepting or rejecting it |
+
 ## What to hold onto
 
 Trust, but verify with a calculator. The model read the receipt. A few lines of arithmetic check that reading against itself before you write anything down as fact.`,
@@ -898,6 +930,14 @@ Each \`strptime\` attempt either succeeds and returns a \`datetime\` or raises \
 ## Where this fits in the pipeline
 
 Normalize right after you extract the JSON and before you run last lesson's totals check. Feeding \`"$12.00"\` and the float \`12.0\` into \`abs()\` crashes; feeding it \`12.0\` and \`12.0\` doesn't. Everything downstream, whether it's math, storage, or display, assumes clean types. Clean each field once, right after parsing, so you're not re-cleaning the same value in five different places.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The totals check raises a type error inside abs() | An amount is still a currency string, because normalization ran after the check instead of before it | Normalize every amount right after you extract the JSON, so the math only ever sees floats |
+| normalize_amount returns None on an amount you can read perfectly well | The pattern strips exactly one symbol pinned to the front, so anything else sitting before the digits survives and float() rejects it | Treat the None as a field flagged for a human, and widen the pattern only for the symbols your receipts actually print |
+| normalize_date returns None on a date that looks ordinary | The receipt's format is not in the formats tuple, so every strptime attempt raised ValueError | Add that format to the list once you see it, and keep returning None so an unrecognized date is visible rather than guessed |
 
 ## What to hold onto
 
@@ -1089,6 +1129,14 @@ for that field instead of guessing."""
 
 A model allowed to say "I don't know" for one blurry field gives you far better data than one that feels obliged to invent a plausible total. A guessed \`$47.32\` that happens to be wrong is worse than an honest \`null\`, because the guess looks right until someone checks it by hand.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A run hangs on one file and the API bill keeps climbing | The retry loop has no cap, so a photo that will never parse gets sent again forever | Bound the loop with max_retries and give up deliberately once the attempts are used |
+| A stored total looks plausible but does not match the paper | The prompt demanded a value for every field, so the model invented one for the part of the photo it could not read | Tell the model to use null for any unreadable field instead of guessing |
+| One bad photo partway through a folder stops the remaining receipts | scan_receipt raised instead of returning, so the exception traveled up and ended the batch | Return None on give-up and let the caller log it, skip it, or queue it for manual entry |
+
 ## What to hold onto
 
 Any real system that leans on an unreliable process needs two things: a bounded retry count and a defined give-up state that downstream code can check. \`scan_receipt\` returns a receipt or returns \`None\`. There is no third outcome where it hangs or crashes. That is exactly what makes it safe to point at a whole folder of photos and walk away.`,
@@ -1271,6 +1319,14 @@ You pay for the API call whether or not it gave you anything usable. A receipt t
 ## Tallying the damage
 
 At the end of a batch run you want two numbers: how many receipts succeeded, and what the batch cost in estimated tokens across successes and failures together. That second number is the one you'd quote if someone asked what scanning this month's receipts cost.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One photo costs far more tokens than expected even though the file looks small | Image tokens are billed by pixel count, not by bytes on disk, so a well-compressed 4000x3000 shot still bills like a huge image | Resize before you encode and cap the longest side, the way resize_and_encode does |
+| After a resize the model starts missing line items it used to read | max_dim went low enough that the small print on the receipt is no longer legible in the image | Raise the cap until the item text reads cleanly again; 1200 keeps most receipts legible |
+| The batch cost more than the number of successful receipts suggests | Each retry on a doomed photo was a billed image call, and failures land on the same bill as successes | Tally tokens across failures and successes together, and keep the retry cap in place |
 
 ## What to hold onto
 
@@ -1500,6 +1556,14 @@ python scan_receipt.py path/to/photo.jpg
 \`\`\`
 
 That's the whole thing: one command in, a JSON file out, and a status you can trust because it survived a retry loop and an arithmetic check instead of a single hopeful API call.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A HEIC or PDF gets sent labelled as image/png and the call fails | The media_type line falls back to PNG for anything that is not a JPEG extension | Check for the extensions you actually support and reject the rest before you spend a call |
+| process_receipt raises a KeyError on a reply that parsed fine | It indexes subtotal, tax, and total directly, so any field the model omitted crashes the pass | Confirm the required keys are present, or read them with .get, before the arithmetic runs |
+| A run ends in manual_review and there is nothing to debug from | The give-up branch records only the path, so the replies that failed to parse are gone | Keep the last reply next to the path in that result so you can see what the model kept returning |
 
 ## It lands in your Portfolio
 

@@ -84,6 +84,14 @@ That \`plan\` is now a list of dicts like \`{"step": 1, "tool": "search", "instr
 
 A plan you can read before you run it earns its keep. You can check it before spending a single tool call: are the tool names real, is the step order sane? You can show it to a user for approval when a step looks risky. And you can report progress against it ("on step 3 of 5") instead of guessing whether the agent is nearly done or lost in the weeds.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The planner call crashes on json.loads before a single step runs | The model wrapped the array in prose or a code fence, so the reply text is not valid JSON | Tell the planner to return only the JSON array, and treat a parse failure as a rejected plan instead of letting it raise |
+| The agent runs a step whose instruction makes no sense yet | The step numbers came back with gaps or out of order, and the executor trusted the list order | Check that step values run 1, 2, 3 with no gaps before executing anything |
+| A step blows up on a missing key deep inside the executor | One plan item was missing instruction, or carried an extra key nothing ever checked for | Require exactly the three keys on every item and reject the whole plan when one item does not match |
+
 ## The mental model to keep
 
 Treat a plan like a recipe. The planner call happens once, up front, and decides what needs to happen. Everything after that is mechanical: work through the recipe step by step, checking off each one. Below, you'll validate a plan's shape in pure Python, no network involved, so you know exactly what a plan step must contain before your executor ever touches it.`,
@@ -309,6 +317,14 @@ Every step of every plan runs through this same two-line dispatch, whatever the 
 
 A planner can hallucinate a tool name you never registered, "browse_web" where you have "search." Skip the membership check and that hits a raw \`KeyError\` deep inside your executor. Keep it and dispatch hands back a clean error string. The agent can log that, retry with a corrected plan, or mark the step failed, which is how a real tool should fall over.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The executor dies with a KeyError on a tool name you never wrote | The planner invented a name like browse_web and dispatch looked it up without checking membership first | Check the name against the registry before the lookup and hand back an error string the agent can log or replan against |
+| Dispatch raises a TypeError about an unexpected keyword argument | The model guessed argument names that do not match the Python function's parameters | Keep the input_schema property names identical to the function's parameter names so the unpacked args line up |
+| Every step returns the same value no matter what you pass it | The registry stored the result of calling the function instead of the function itself | Map each name to the bare function, search rather than search(), and let dispatch do the calling |
+
 ## The mental model
 
 The registry is your agent's toolbox. A plan step names a tool; dispatch reaches into the box, finds it by name, and passes it the arguments. Below, you'll build the registry and dispatcher in pure Python and watch the unknown-tool guard fire.`,
@@ -517,6 +533,14 @@ If the loop ever finds **no** ready step while steps still remain, the leftovers
 
 A listed-order executor works fine on simple plans, then quietly produces wrong results the moment a planner reorders things or a step fans in from several earlier ones. Sort by dependency once, up front, and the execution order stays correct no matter what order the JSON array happened to list.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A step gets an empty or nonsense input even though every earlier step succeeded | The executor ran steps in the order the JSON listed them rather than the order depends_on requires | Compute a topological order once, up front, and iterate that order instead of the raw list |
+| The ordering pass hangs or never terminates before a single tool runs | Two steps depend on each other, so nothing is ever ready and nothing is ever removed from remaining | Return None the moment a pass finds no ready step, and reject the plan as cyclic |
+| A KeyError on depends_on while building the order | The planner left depends_on off the steps that need nothing instead of sending an empty list | Default a missing depends_on to an empty list as you read the plan |
+
 ## The mental model
 
 Think of the plan as a course schedule with prerequisites. You can't take the capstone before its prerequisites clear. A topological sort is that same rule: take everything whose prerequisites are satisfied, in any batch, then repeat. Below, you'll implement this ordering and watch it catch a circular dependency.`,
@@ -717,6 +741,14 @@ This is a simplified reference format, \`"$step1"\` instead of \`"{{step1.result
 
 Dependency-ordered execution should never hit a missing reference; the topological sort from the last lesson guarantees it. Guard against it anyway, because guards catch bugs the guarantee assumes away: a planner typo pointing at a step number that doesn't exist, or a step that failed and never wrote a result. Returning \`None\` here, rather than crashing on a \`KeyError\`, gives your executor a clean signal to abort that step instead of a stack trace.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A tool receives the literal string $step1 instead of the value step 1 produced | The step's args went straight from the plan into dispatch without passing through the resolver | Resolve args against results immediately before dispatching each step, never at plan time |
+| The resolver returns None on a step your dependency order said was safe to run | The referenced step failed and never wrote a result, or the planner pointed at a step number that does not exist | Treat None as an aborted step and report which reference was missing rather than dispatching anyway |
+| A plain number or string never reaches the tool | The resolver only wrote into the resolved dict inside the reference branch | Copy non-reference values through unchanged in the else branch |
+
 ## The mental model
 
 Think of \`results\` as a running ledger, one row per finished step, keyed by step number. Resolving arguments means reading that ledger just before you dispatch: swap each reference for its real value, then hand concrete arguments to the tool. Below, you'll build that resolver and watch it catch a reference to a step that never ran.`,
@@ -914,6 +946,14 @@ Keep the most recent \`keep\` entries verbatim, since those are the ones most li
 
 On a ten-step plan, keeping everything is fine. On a fifty-step research agent it is not: resending the full log on every replan makes the last plan call pay for the tokens of the first forty-nine steps. Bound the log the way you'd bound chat history and a long-running agent stops being its own worst cost problem.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Each replanning call is slower and costs more than the one before it | The whole state log is resent every turn, so the last step pays for the tokens of every earlier one | Bound the log: keep the most recent entries verbatim and fold the older ones into one omitted marker |
+| A retry or a second run reads a log that no longer matches what actually happened | The compressor mutated the caller's log in place instead of returning a new one | Build and return a new list, and leave the log you were handed untouched |
+| The omitted marker shows up on a run that only had three steps | The marker is prepended without first checking whether the log already fits inside the keep limit | Return a plain copy when the log length is at or under keep |
+
 ## The mental model
 
 Treat state as a scratchpad rather than a diary. You want the last few entries in full, plus a one-line note that older ones existed. You do not want a running transcript of everything the agent has ever done. Below, build the compressor and watch it collapse a four-step log down to its most recent entries.`,
@@ -1097,6 +1137,14 @@ That one flag on each step is what keeps a single flaky tool call from sinking a
 
 Real tool calls fail more often than demos let on. Networks blip, APIs rate-limit, and inputs arrive messier than expected. An agent that treats every failure as fatal is too brittle to trust with a long task. An agent that treats every failure as ignorable ships confidently wrong results. The required/optional split gets you out of that bind cheaply: it fails loud on the steps that carry the answer and fails quiet on the ones that don't.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A whole plan dies because posting a summary to Slack failed | Every step defaults to required, so any step that exhausts its retries raises and ends the run | Mark steps nothing downstream depends on as optional so they are skipped instead of fatal |
+| The run reports success but the answer is missing a number | A step whose result later steps need was marked optional, so it was skipped and execution carried on without it | Mark any step whose result gets referenced later as required and let it fail loud |
+| A step spends all three attempts on an error that could never have succeeded | The retry loop catches every exception, so a malformed argument is retried exactly like a network blip | Retry the transient failures and let a clearly invalid input fail on the first attempt |
+
 ## The mental model
 
 Required steps are load-bearing walls; optional steps are decoration. Lose a wall and the structure comes down, so you stop and report it. Lose the decoration and it's a shame, but the building still stands. Below, you'll simulate a plan's step outcomes and work out whether the whole thing succeeds.`,
@@ -1272,6 +1320,14 @@ Check \`finish\` before anything else, an agent that just succeeded shouldn't ge
 ## Why this matters
 
 A stuck agent doesn't announce itself, it just keeps calling the same tool with the same arguments, each call looking individually reasonable. Without a repeat check, that pattern runs until the step budget is exhausted, wasting every remaining call on a search that already failed twice. Stopping the instant a loop is detected, rather than waiting out the clock, is the difference between a cheap failure and an expensive one.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A run that actually succeeded is reported as a detected loop | Loop detection ran before the finish check, and the closing actions happened to look alike | Check the finish signal first, the step budget second, and repeats last |
+| The agent burns its whole step budget re-running a search that already failed twice | There is no repeat check, so identical calls with identical arguments each look individually reasonable | Count how often the last tool and arguments already appear and stop as soon as the repeat limit is reached |
+| The stop check raises an IndexError on the very first turn | history[-1] is read before anything has been appended to history | Return early while history is still empty, before touching the last entry |
 
 ## The mental model
 
@@ -1471,6 +1527,14 @@ Every line of \`run\` traces back to a lesson you've already built: \`topo_order
 ## What "shipped" means here
 
 The same three tests as every product in this track. It runs from a clean start with one command. It survives an empty or malformed plan without crashing. And someone else could hand it a goal working from your instructions alone. An agent that plans, runs steps in dependency order, resolves references, tracks bounded state, retries while telling required failures from optional ones, and stops itself has crossed the line from demo to deliverable.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| run returns FAILURE with a cyclic plan reason and nothing executes | The planner produced steps that depend on each other, so topo_order refused to give an execution order | Replan the goal rather than falling back to running the steps in listed order |
+| A later step hits a missing reference right after an optional step was skipped | A skipped step writes nothing into results, so anything pointing at it has no value to read | Keep steps optional only when nothing references them, or handle the missing result explicitly in the step that reads it |
+| The agent works in your editor but crashes on a clean checkout | The earlier lessons' pieces were pasted around instead of imported, so run calls names that are not defined there | Run it start to finish with one command in a fresh environment before you call it shipped |
 
 ## Into your Portfolio
 

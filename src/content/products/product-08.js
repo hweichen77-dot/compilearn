@@ -54,6 +54,14 @@ Most broken beginner bots send only the latest message and wonder why the bot is
 
 Build the list by hand first and get the data shape right. The network call is the easy part.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot answers the newest question fine but has no idea what was said one turn ago | Only the latest message was sent, so the model never saw the earlier turns | Send the whole list every call, since the model keeps nothing between calls |
+| The bot repeats itself and never builds on its own last answer | The reply was printed but never appended to the list, so it is missing from the next call | Append the reply as an assistant turn before you read the next user line |
+| The API rejects the request over the message roles | The list starts with an assistant turn, or two user turns sit next to each other | Start with a user turn and keep roles strictly alternating |
+
 ## The mental model
 
 The model has amnesia but can read a whiteboard. Each turn you hand it the entire whiteboard, it reads top to bottom and writes one more line. Lose the whiteboard, lose the memory.`,
@@ -243,6 +251,14 @@ The system prompt is constant but not optional on later calls. Each call is stat
 - \`messages\` → **what's been said** (grows each turn)
 
 Mixing them is the most common chatbot bug. Persona in a user turn competes with (and loses to) later user turns, causing **character drift**: the bot slowly forgets its accent and rules. History in the system prompt means you can't trim it later without deleting the persona. Keep the channels clean and swapping personas becomes a one-string change.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot sounds like a pirate for three turns, then answers like a plain assistant | The persona was put in the messages list, where later user turns outweigh it | Move the persona into the top-level system parameter, where it carries more weight |
+| The persona holds on the first call and fades on every call after it | The system string was sent once instead of every call, and each call is independent | Resend the same system string with every request alongside the growing history |
+| A user types "stop being a pirate" and the character collapses immediately | The persona had no rule about staying in character | Add an explicit stay-in-character line to the system prompt along with identity, voice, and boundaries |
 
 ## The mental model
 
@@ -458,6 +474,14 @@ The response isn't a plain string. It's an object; the text lives at \`resp.cont
 
 This loop is the product. Everything after this lesson, budgets, streaming, error handling, wraps around these five steps without changing them. Get the append discipline right here and the hard lessons become additions, not rewrites.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The second turn fails with a roles error | The assistant reply was never appended, so two user turns ended up next to each other | Append the assistant turn every iteration, before you read the next user line |
+| The API rejects the history even though nothing looks missing | The whole response object was stored instead of the reply text | Pull the string out at resp.content[0].text and store that in a role and content dict |
+| The bot answers a question the user already asked and ignores its own last answer | The model never saw its previous reply because it is not in the list you resend | Keep the invariant that every user append is matched by an assistant append |
+
 ## The drill below
 
 You'll simulate the loop with a deterministic stand-in reply (no network), so you can watch the history stay balanced and alternating turn after turn.`,
@@ -649,6 +673,14 @@ One rule that saves you later: the system prompt counts too, but you never drop 
 ## The mental model
 
 The context window is the model's **desk, not a warehouse**. Everything it needs to answer must fit on the desk at once. A bigger desk helps, but a long enough chat still runs out of room. This lesson is the tape measure; the next one is where you clear the desk.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill grows every turn even though the messages stay short | The whole history is resent on every call, so turn 51 pays for all 50 earlier turns again | Track the running total per call so you know which turn crossed the line and when to trim |
+| A long chat suddenly errors out mid-conversation | History plus system prompt plus the reply no longer fit in one window | Measure before each call and trim the conversation once the total nears your ceiling |
+| Your estimate is close on short chats and far off on a real one | The character-based rule of thumb is only an approximation | Use client.messages.count_tokens for the exact number when money depends on it |
 
 ## The drill below
 
@@ -842,6 +874,14 @@ Start with a sliding window: it's free and bounded, the right default for most b
 ## Never trim the persona
 
 The system prompt is not in the history list and never gets dropped. Trim it and your pirate turns into a generic assistant mid-conversation. Trim the oldest *conversation* turns only; keep enough recent turns that the current question still makes sense.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot drops its accent and rules the moment the chat gets long | The persona was inside the list the trimmer pops from, so trimming deleted it | Keep the persona in the system channel, and only ever pop from the front of the conversation list |
+| The API rejects a call after a long chat with an empty message list | The trim loop kept popping until nothing was left | Stop the loop while at least one turn remains, so you never send an empty history |
+| After a summarize step the bot forgets the user's name or a fact stated earlier | The summary prompt compressed the old turns without being told to keep names and facts | Ask the summary to preserve names and concrete facts, and keep the most recent turns verbatim |
 
 ## The drill below
 
@@ -1037,6 +1077,15 @@ Skip the store step and your bot streams beautifully but forgets every reply the
 
 If you accumulate chunks by hand (say, to send them somewhere else), you concatenate them **with no separator**: chunks already include their own spacing. \`"".join(chunks)\` reconstructs the exact reply. And watch for a stop marker, some pipelines end a stream on a sentinel chunk you must not include in the stored text.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reply streams beautifully on screen, then the next turn acts as if it never happened | The chunks were printed but never assembled and appended to history | Accumulate the chunks or call get_final_message, then append the full reply as an assistant turn |
+| Nothing shows until the whole reply is done, so streaming looks broken | Python buffered stdout because the print call did not flush | Print each chunk with end="" and flush=True so it reaches the screen immediately |
+| The stored reply ends with a stray marker like [END] | The sentinel chunk was concatenated along with the text | Stop at the sentinel and leave it out of the stored string |
+| The reassembled reply has extra spaces between words | The chunks were joined with a separator | Join with no separator, since each chunk already carries its own spacing |
+
 ## The drill below
 
 You'll reassemble a stream: concatenate chunks in order, stop at an end marker, and report the assembled message, exactly the "store to remember" half of the loop.`,
@@ -1229,6 +1278,15 @@ Before sending, check the estimated tokens (lesson 4) against a ceiling. Over it
 ## Why it matters
 
 Every \`try/except\` and every input guard is the difference between a bot that dies on the first weird input and one someone can actually rely on. That hardening is most of what "production" means.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An outage turns into a loop that keeps calling and keeps spending | The retry had no ceiling, so it retried forever | Bound the retries and raise once the budget is spent |
+| The API returns an error the moment the user hits enter on a blank line | An empty user turn was appended and sent | Strip the input and skip the call when nothing is left |
+| Retries pile onto a struggling server and still fail | Every retry fired immediately with no wait between attempts | Back off between attempts so the tries spread out |
+| The bill is higher than the number of successful replies suggests | Failed attempts are billed too, so each retry costs tokens whether or not it works | Treat the retry count as a cost decision and check the estimated tokens against a ceiling before sending |
 
 ## The drill below
 
@@ -1448,6 +1506,15 @@ Run it, chat with your character for a dozen turns, watch it stay in persona and
 ## Your Portfolio
 
 Completing this final lesson records the project in your **Portfolio** with its title and what you built: a stateful, streaming, in-character chatbot. That shelf of working products is the point of this track. Keep a one-line description ("a pirate chatbot that remembers your name and streams its replies") and one saved example exchange as proof it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The session works for a while, then the first turn in the list is an assistant turn and the call fails | _trim popped from the front and left the history starting on a reply | Pop turns in pairs, or check the first remaining turn is a user turn after trimming |
+| The reply streams to the screen but the next turn has no memory of it | The chunks were printed without being accumulated into the reply string | Add each chunk to the buffer as you print it, then append that string as an assistant turn |
+| A blank line from the user crashes the session or wastes a call | The input guard was skipped, so an empty turn reached the API | Strip the text and return early when nothing is left, before touching history |
+| The persona quietly disappears in a long session | The persona was moved into the history list instead of staying in self.system | Keep the persona in the system channel, which the sliding window never touches |
 
 ## The drill below
 

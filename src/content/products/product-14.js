@@ -76,6 +76,14 @@ Every image turn has the same skeleton. An image block first, with a nested \`so
 
 Get this shape wrong (wrong key name, forgotten \`decode\`, mismatched \`media_type\`) and the API rejects the call before your prompt even gets read. Get it right once here and every later lesson just reuses \`build_image_message\`.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The API rejects the call before the model ever reads your prompt | The media_type says image/png but the file is really a JPEG, or a key inside the source dict is misspelled | Set media_type from the file's real format and match the source keys exactly: type, media_type, data |
+| The request fails saying the data field is not a string | b64encode returns a bytes object and the decode("utf-8") step was left off | Decode the encoded bytes to a string before putting them in the dict |
+| The model answers as if no image had been attached | content was passed as a plain string instead of a list of blocks, so the image block was never sent | Pass content as a list holding the image block and the text block together |
+
 ## The mental model
 
 Text prompts are one string in a dict. Image prompts are two dicts in a list: a picture wrapped in an envelope labeled with its encoding, next to your instruction. Below, build that envelope in pure Python with no network, so you own the exact structure before you spend an API call on it.`,
@@ -241,6 +249,14 @@ This never assumes the reply is exactly one block. It filters by \`type\` and st
 ## Why bother when \`[0].text\` "works"
 
 It works until the day it doesn't: some input, some model version, some case where the API adds a block you didn't expect. \`extract_text\` costs four lines and never breaks that way. It's the "handle reality" step applied to the read side instead of the write side. Don't trust the shape of what comes back. Filter it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The description comes out empty, or the code raises an attribute error on .text | The first block in resp.content was not a text block, and reading index 0 assumed it was | Loop the blocks, keep the ones whose type is text, and join those |
+| Part of the answer is missing and what prints reads like it was cut off | The reply held more than one text block and only the first was read | Collect text from every text block, in order, into one string |
+| Working code starts failing after a model version change, with no edit on your side | A fixed index bakes in an assumption about reply shape that the API is free to change | Filter by block type so an unexpected block is skipped instead of crashing |
 
 ## The mental model
 
@@ -422,6 +438,14 @@ Finding the first \`{\` and the last \`}\` throws away any wrapper text and hand
 
 Everything from lesson 4 onward reads fields off this dictionary: HTML generation, layout CSS, validation. A vague prompt gives you keys that change shape every run, and every downstream lesson breaks on it. Pin the schema down here, once, and the rest of the build gets to assume it holds.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| json.loads raises a decode error on a reply that plainly contains JSON | The model wrapped the object in a sentence or a code fence despite the instruction | Slice from the first { to the last } before parsing |
+| Downstream code raises a KeyError because the key names moved between runs | The prompt described the shape loosely instead of naming the exact keys and allowed type values | Name every key and list the allowed type values in the system prompt |
+| The description lists buttons and headings that are not in the screenshot | The model filled in what a page like that usually has instead of what it could see | Keep the instruction not to invent components that aren't visible in the image |
+
 ## The mental model
 
 Prose is for humans. JSON is for the next function in your pipeline. The prompt is where you trade the model's freedom for your code's ability to trust the shape of what it gets. Below, parse a sample structured reply and count what it found, no network call needed.`,
@@ -592,6 +616,14 @@ Six \`type\` values today might be twelve next month once you add a nav bar or a
 ## Why this matters
 
 This step turns "the model described a UI" into "here's a file to edit." A description that only prints prose is a novelty. One that emits structurally correct starter tags is something someone can build on. It doesn't have to produce pixel-perfect final markup, just a sane starting skeleton, which is what "starter code" means.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Generating HTML raises a KeyError partway through a real description | The lookup assumed every type has an entry, so a type the model invented had none | Look the tag up with a "div" default so an unknown type degrades quietly |
+| An img or input tag comes out wrapping text, and the browser ignores it | A self-closing tag went through the same branch as the text-carrying tags | Check SELF_CLOSING first and emit that tag with no children |
+| A tag renders with the literal word None inside it | A component had no text key and the missing value went straight into the f-string | Read text with an empty-string default so a missing label renders as nothing |
 
 ## The mental model
 
@@ -813,6 +845,15 @@ Now the starter bundle has matching parts: an HTML element, an id, and a CSS rul
 
 You could ask the model for x/y coordinates and hard-code absolute positions, but that freezes the layout to one screen size and breaks the moment the window resizes. Naming a *region* instead of a *coordinate* is the same idea as writing "sidebar" instead of "the box at x=0, y=140." It survives resizing, content changes, and a human editing it afterward. That's the difference between a screenshot clone and reusable starter code.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The layout matches at one window width and falls apart the moment it is resized | The generator hardcoded x and y positions read off one screenshot at one size | Name a region such as header or sidebar and let grid-area place the element |
+| Every element piles into the same grid area and the layout does nothing | Components came back with no region, so nothing got assigned a named area | Fall back to main when region is missing or empty |
+| The CSS rules have no effect on the markup | The generated element ids and the ids in the CSS selectors don't match | Generate the id and the rule from the same index inside one loop |
+| Regions come back naming visual style, like "the blue panel", instead of a place | The prompt asked what the area looks like instead of which part of the page it is | Restrict region to the fixed set header, sidebar, main, footer |
+
 ## The mental model
 
 A component's type says what it is. Its region says where it roughly belongs. Grid areas are the bridge between "roughly belongs in the sidebar" and working CSS. Below, generate the grid-area rule for a list of components in pure Python, no browser needed to check your work.`,
@@ -976,6 +1017,15 @@ If \`json.loads\` fails outright (the model's "JSON" wasn't valid JSON at all), 
 ## Why this matters
 
 A description tool that throws a \`KeyError\` on a live screenshot isn't a tool. It's a demo that works on your test image. Normalizing turns "the model's JSON was almost right" into "the JSON is exactly right, and downstream code never has to know it was ever wrong."
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A KeyError on layout partway through a run that worked all week | The parsed description was read directly, and this time the model left the key out | Normalize first so layout always holds a value before anything reads it |
+| The loop over components raises a TypeError about something not being iterable | components came back as null rather than a list, and null can't be looped | Default a missing or null components to an empty list |
+| A type the model invented reaches the renderer and produces strange markup | Nothing compared the type against the allowed set before rendering | Downgrade any type outside ALLOWED_TYPES to div during normalization |
+| Normalization is in place and the run still fails, before it ever reaches normalize | The reply wasn't valid JSON at all, which no default value can repair | Catch the parse error, retry with a firmer instruction, then give up gracefully |
 
 ## The mental model
 
@@ -1178,6 +1228,15 @@ img = img.resize((new_w, new_h))
 
 A describer tool that works fine on your 800px test image but silently costs ten times as much (or times out) on a real user's 4K screenshot isn't production-ready. Capping dimensions before every call is a cheap, boring guard that makes the cost predictable no matter what gets uploaded.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One call on a real user's screenshot costs many times what your test image cost | Token cost tracks pixel area, and a full-resolution capture holds many times the pixels of a small test image | Cap the longest side before every call so cost stops depending on the user's monitor |
+| The image was resized and the token bill didn't move | The resize ran after base64 encoding, and base64 only re-encodes the bytes handed to it | Shrink the pixels first, then encode the smaller image |
+| The description invents button labels and small text that aren't on the screen | The image was downscaled so far the labels became unreadable, so the model guessed at them | Keep the cap high enough to read text, around 1024 to 1568 on the longest side |
+| The resized screenshot looks stretched or squashed | Only one side was scaled, so the aspect ratio was lost | Scale both sides by the same factor, derived from the longest side |
+
 ## The mental model
 
 Every extra pixel is tokens you pay for and didn't need to read a button label. Resize down to just enough to read, and both your latency and your bill stop depending on what monitor the user happened to screenshot from. Below, compute the resized dimensions and the resulting token estimate. Pure math, no image library needed.`,
@@ -1374,6 +1433,14 @@ if __name__ == "__main__":
 ## What "shipped" means here
 
 The same three checks as every product in this track. It runs from a clean start with one command. It survives a broken reply or an oversized image without crashing, which is lessons 6 and 7 doing their job. And someone else could point it at their own screenshot from your instructions alone.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The tool exits with an IndexError before it does anything | No image path was passed, so sys.argv[1] doesn't exist | Check the argument count and print a usage line instead of indexing blindly |
+| A mistyped mode prints a traceback instead of output | dispatch raises ValueError for anything that isn't describe or code | Catch that ValueError and print the two valid mode names |
+| Code mode runs but describe mode crashes on the same screenshot | The two render functions read different fields, and one of them met an unnormalized description | Run normalize before dispatch so both modes see the same guaranteed shape |
 
 ## Into your Portfolio
 

@@ -62,6 +62,14 @@ They change at different rates. The rules ("keep the meaning, change the style")
 
 No network yet. First you'll assemble the exact request by hand, a system string plus a user message, so you can see the data shape the API expects. Once the shape is right, the real call is a one-liner.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You send "hey can u send that over?" and get back "Sure, I'll send it right now" instead of a rewrite | Nothing in the request told the model the user turn is material to rewrite, so it read the text as a question aimed at it | Put the rewrite instruction in the system prompt so the user turn is always treated as text to transform, never as a request to answer |
+| Changing the tone means editing the same rules again in another place | The rules and the tone were pasted together into the user message, so every tone carries its own copy of the wording | Keep the standing rules and the tone in the system string and let the user message carry only the raw text |
+| The rewrite says something the original did not, like a deadline that was never mentioned | The prompt asked for a tone change without stating that facts must stay fixed, so the model treated invention as part of the style | Say in the system prompt that names, numbers, and intent stay identical and only phrasing may change |
+
 ## The mental model to keep
 
 A tone rewriter is a volume knob for *style* wired to a lock on *meaning*. You turn the style knob (formal, casual, friendly) while the meaning stays bolted down. The rest of this project is building that knob and making sure the lock holds.`,
@@ -223,6 +231,14 @@ One tone, one function, one clean return. That's a checkpoint you can run and be
 
 The exercise below simulates a model reply, a plain dict like the SDK gives you, and makes you pull the rewritten text out and clean it. That extract-and-strip step is the exact code you'd run on a real response, minus the network.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Printing the result shows an object full of metadata instead of a sentence | The response was used directly, but the SDK returns a structured object and the rewrite sits one level down | Read resp.content[0].text to reach the actual rewritten string |
+| The stored rewrite is "Here is the rewritten text: Could you please send that over?" | The whole reply was saved as the rewrite, preamble included | Strip a known label prefix before saving, and never assume the reply contains only the rewrite |
+| Saved rewrites have a leading space or a trailing newline that shows up in the display | The extracted text was used without trimming, and models often pad replies at the edges | Call .strip() on the extracted text at the moment you pull it out |
+
 ## The mental model to keep
 
 The model hands you a *box*, not a *string*. The rewrite is inside the box, sometimes with packing peanuts around it. Your job on every call is the same: open the box, take the rewrite, brush off the peanuts.`,
@@ -380,6 +396,14 @@ You could use an f-string inline. Pulling the template out as a named constant w
 
 \`str.format\` treats every \`{...}\` as a field to fill. If your prompt genuinely contains braces, say you're asking for JSON output, \`format\` will try to fill those too and crash. Tone prompts rarely hit this, but keep it in mind: with \`.format\`, literal braces must be doubled (\`{{\` and \`}}\`).
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model rewrites the text into a tone literally called "{tone}" | The template was passed to the API without calling .format, so the placeholder reached the model unfilled | Build the system string through build_system(tone) and never hand the raw template to the call |
+| .format raises a KeyError naming a field you did not expect | The keyword you passed does not match the field name in the braces, or the prompt has a literal brace .format is trying to fill | Match the keyword to the field name exactly, and double any literal braces as {{ and }} |
+| One tone gives polished output while another ignores half the rules | The tones were written as separate hardcoded prompts, so the wording drifted apart | Keep one template as the single source of truth and pass the tone in as a parameter |
+
 ## The mental model to keep
 
 The template is a rubber stamp with one blank line. You ink in the tone and stamp. The rest of the message, the rules and the format demand, comes out identical every time. One stamp, many tones.`,
@@ -531,6 +555,14 @@ The same preset produces the same style every time, because the model reads the 
 ## Looking one up safely
 
 Reaching for \`TONE_PRESETS[tone]\` crashes if the tone isn't there. Use \`.get\` with a fallback, or check membership first, so an unknown tone degrades gracefully instead of throwing. You'll build that fallback properly in lesson 6. For now, know that the lookup is the one spot where a bad tone name bites.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The same tone produces stiff legalese one run and a chatty note the next | The prompt carried a bare adjective, so the model was free to reinterpret it every call | Store a concrete description per tone and send that guidance, not just the label |
+| A KeyError crashes the tool when the user picks "Formal" or types a trailing space | The raw user string was used directly as a dict key, and dict lookup is exact | Normalize the string before lookup and use .get with a fallback so a miss degrades instead of raising |
+| A tone you added to the dict never shows up in the menu | The menu was a second hardcoded list that drifted from the preset dict | Build the menu from list(TONE_PRESETS) so the dict stays the only place a tone is defined |
 
 ## The mental model to keep
 
@@ -686,6 +718,14 @@ def meaning_preserved(original, rewrite):
 \`\`\`
 
 This won't catch every meaning change. Paraphrase can lose nuance a regex will never see. But a dropped number is the single most common and most damaging failure, and it's trivial to detect. Catch the easy cases cheaply and move on.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| "Ship 3 boxes by Friday" comes back as "Please send some boxes soon" | The prompt said keep the meaning without naming what that covers, so the model paraphrased the specifics away while chasing the tone | Spell out the constraint: keep all names, numbers, dates, and quantities unchanged, add nothing, drop nothing |
+| A rewrite quietly changes a price or a date and nobody notices until a customer does | The output was shipped straight from the model with no check on the facts | Pull the numbers from both sides and confirm every original number survives before you return the rewrite |
+| The number check passes but the rewrite still says something different | A subset check only sees digits, so a swapped name or a reversed instruction slips through untouched | Treat the check as a cheap floor, not proof, and keep the fact rules in the prompt doing the real work |
 
 ## The mental model to keep
 
@@ -868,6 +908,15 @@ Catching this early saves an API call, a token bill, and a confusing empty reply
 ## Order matters
 
 Check text first (fatal, stop), then resolve tone (recoverable, fall back). Validate in that order and the tool fails fast on the unrecoverable problem while quietly patching the recoverable one. Get the order wrong and you land somewhere between a helpful error and mysterious empty output.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A user types "  FORMAL " and the tool falls back to neutral even though the preset exists | The raw string was compared against the preset keys without normalizing, so the padding and casing made it a miss | Call .strip().lower() on the tone before you look it up |
+| An unknown tone like "sarcastic" takes down the whole request with a KeyError | The preset was read with square brackets, which raises on a missing key | Fall back to a default tone and tell the user which tone was used instead |
+| You get billed for a call that returned an empty or nonsense reply | Whitespace-only text reached the API because nothing checked it first | Reject empty text before the request; the cheapest call is the one you never make |
+| A blank submission returns a confusing error about the tone | The tone was resolved before the text was checked, so the wrong problem got reported | Check the fatal case first, then handle the recoverable one |
 
 ## The mental model to keep
 
@@ -1058,6 +1107,15 @@ def guard_cost(text):
 
 Networks drop and models occasionally return junk. Wrap the call so a failure hands the user their original text back with a note rather than a stack trace. A rewriter that returns the original when it fails is still useful. One that crashes is not.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The user sees code fence lines and a chatty label wrapped around their rewrite | The reply was displayed raw because the prompt asked for clean output, and asking is not the same as getting it | Run every reply through a cleaner that drops fence lines, a leading label, and blank edges |
+| A single paste of a long document produces one enormous bill | Nothing capped the input, so the whole thing went out in one call | Estimate the tokens up front and refuse or chunk anything over your ceiling |
+| A long rewrite stops mid-sentence | max_tokens was set below what the rewrite needed, so the output was cut off | Size max_tokens against the input length, since a rewrite runs about as long as the original |
+| A dropped connection surfaces to the user as a stack trace | The call was not wrapped, so a network error escaped the tool | Catch the failure and return the original text with a note explaining the rewrite did not run |
+
 ## The mental model to keep
 
 Treat the reply like produce from a market and rinse it before serving. Treat every call like it's on your credit card, because it is. Clean what comes back, cap what goes out, and the tool stays both presentable and affordable.`,
@@ -1225,6 +1283,14 @@ By now you've built all three parts of it. The tool runs from a clean start: pic
 ## It lands in your Portfolio
 
 Finishing this final lesson saves the **Tone Rewriter** to your Portfolio tab automatically, with the title and deliverable recorded. Keep an example alongside it. A scrappy original note next to its formal rewrite shows the tool working at a glance, and that before/after pair is your demo.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A blank submission still costs you an API call before it errors | The stages ran out of order, so the preset lookup and the request happened before the text was checked | Validate the text first, then resolve the preset, then call |
+| The assembled tool shows fences and preamble even though you wrote a cleaner in lesson 7 | The final call returned resp.content[0].text directly and skipped the cleaning stage | Route every reply through clean_reply as the last stage of the pipeline |
+| The tool works when you drive it but breaks the moment someone else types "Formal" | The pipeline was tested only on the exact inputs you had in mind | Run it against the messy cases too: padded casing, an unlisted tone, and empty text |
 
 ## The mental model to keep
 

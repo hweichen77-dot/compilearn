@@ -57,6 +57,14 @@ def rewrite(task):
 
 Left alone, a chat model gets chatty: "Sure! Here's a strong version:…". That preamble breaks everything downstream, because your tool expects a bare bullet and gets a friendly paragraph instead. Telling the model the **exact output shape**, one line, verb-first, nothing else, is the cheapest reliability you can buy. You'll still defend against a chatty reply in lesson 2, but a precise prompt means you rarely have to.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reply comes back as "Here's your improved bullet:" followed by the bullet | The prompt never stated the output shape, so the model wrapped the answer in conversation | Put "Return only the bullet, no preamble" in the system prompt so the reply is the bullet itself |
+| The rules stop being applied once you switch to a different task | The rules were pasted into the user message, so they changed or dropped out when the task changed | Keep the persona and rules in the system prompt and let the user message carry only the task |
+| The bullet arrives cut off mid-sentence | max_tokens was set too low to hold the bullet the model wanted to write | Raise max_tokens enough for one full bullet and keep the length rule in the prompt instead |
+
 ## The mental model
 
 The prompt is a set of instructions that will run on a thousand tasks you'll never see. Write it precise and a little dull: who the model is, what it does, and the format it returns. Below you'll build the request payload by hand, no network call, so the data shape is locked in before you ever hit the API.`,
@@ -217,6 +225,14 @@ Each step is dull on its own. Run them in sequence and the rest of your tool alw
 ## What cleanup does NOT fix
 
 Cleanup handles formatting noise, not bad content. If the model returns "Here is a great bullet for you: Managed the desk," stripping markers won't remove the preamble. That's a prompt problem, and the fix is the "Return only the bullet" line from lesson 1. Tighten the prompt first, then clean up whatever still slips through.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A leading dash survives cleanup, so the first word of the bullet is a dash | The marker check ran before the whitespace strip, so "  - Led" never matched "- " | Strip whitespace first, then remove the marker, then strip again |
+| "Here's your bullet:" is still glued to the front after cleanup | Cleanup removes formatting noise, not words the model wrote into the sentence | Tighten the prompt with "Return only the bullet", since cleanup cannot repair content |
+| A bullet loses a character off one end | The quote strip fired when only one end carried a quote | Remove quotes only when the first and last characters are both a double quote |
 
 ## The mental model
 
@@ -399,6 +415,14 @@ Because "asked" and "guaranteed" are different words. A model that follows your 
 
 Two details keep the check honest. **Lowercase both sides** so "Responsible" and "responsible" match. And match against the **opener**, not any occurrence: a bullet can legitimately contain "helped" mid-sentence, as in "Led a rewrite that helped cut load time." It's weak only when it *starts* that way, and \`startswith\` on the lowercased bullet gets both cases right.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A bullet opening with "Responsible for" is labeled STRONG | The comparison ran against the raw bullet, so a capital R never matched the lowercase opener | Lowercase and strip the bullet before testing it against the weak list |
+| "Led a rewrite that helped cut load time" is flagged WEAK | The check used "in" instead of startswith, so a mid-sentence "helped" matched | Test the opening only with startswith, since a weak word later in the line is fine |
+| Weak bullets still reach the resume even though the prompt bans them | The prompt was treated as a guarantee, with nothing checking the output | Prompt for quality and verify the opener yourself, then retry when the check fails |
+
 ## The mental model
 
 The prompt tells the model what good looks like. The verifier double-checks before the line goes on paper. Below you'll build \`starts_weak\` and score a batch of bullets.`,
@@ -567,6 +591,14 @@ That single line catches percentages, counts, dollar amounts, and time spans, an
 
 You don't need a full grammar of "impact." You need a fast, cheap flag that surfaces the bullets most likely to read as fluff, so a human spends thirty seconds adding the real figure. A digit check is the whole detector, and for the cost of one line it pays for itself.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bullet claims a percentage the original task never mentioned | The prompt asked for quantified impact, so the model filled the gap with a number it invented | Ask for a bracketed placeholder like [X%] when the task has no numbers, and check every figure against the original task |
+| A vague bullet is labeled QUANTIFIED | The only digit in the line came from a year or a product name, not from an impact figure | Treat the digit check as a flag, not proof, and read the flagged lines yourself |
+| A bullet reading "doubled signups" is labeled VAGUE | The check scans for digit characters and cannot read spelled-out numbers | Accept the miss or ask the prompt for a numeric figure, since the digit check is a heuristic |
+
 ## The mental model
 
 Numbers are the load-bearing wall of a resume bullet. Your tool's job here is a metal detector: sweep each bullet, beep on the ones with no metal in them, and tell you to go find the number. Below you'll build \`has_number\` and sort a batch into quantified vs vague.`,
@@ -730,6 +762,14 @@ Rejecting and retrying costs another API call and another few seconds. For lengt
 
 The one bug to avoid: never slice by character count in the middle of a word. \`bullet[:100]\` can produce "Automated the deploy pipeli", which is worse than the original. Splitting into words and rejoining the first N gives you clean, readable output every time, and \`split()\` collapses any accidental double spaces for free.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Bullets still run three lines long even though the prompt caps them | The word cap lived only in the prompt, with nothing checking the output | Count words after cleanup and trim, treating the prompt cap as a request rather than a guarantee |
+| A bullet ends in a half word like "pipeli" | The trim sliced by character count instead of by words | Split into words and rejoin the first N so the cut always lands on a word boundary |
+| The trimmed bullet lost the number it ended with | A hard trim cuts from the end, and the impact figure usually sits there | Return a flag when you trimmed, then rewrite shorter instead of shipping the chopped line |
+
 ## The mental model
 
 Think of the bullet as a headline with a fixed budget, like a tweet. When it runs over, you don't shrink the font, you cut words from the end, and if the cut hurt the meaning, you rewrite. Below you'll build \`enforce_length\` and trim to a limit.`,
@@ -891,6 +931,15 @@ Feeding the failure codes back is the trick. "You started weak and used no numbe
 ## Why empty input matters most
 
 The empty case is the one that crashes tools in the wild: a blank line in the input file, a task that's only whitespace. If \`validate\` didn't check it first, \`text.split()\` returns \`[]\`, "no number" fires, and you'd retry forever on a bullet that can never be filled. Handling empty up front turns a crash-or-loop into a clean, honest "EMPTY, skip this one."
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An empty or whitespace-only task keeps getting sent back to the model | The empty case was not checked first, so it failed the number rule and retried forever | Return the EMPTY code before any other check and skip that input |
+| The retry loop keeps calling the API and the bill climbs | The loop retried until a bullet passed, with no cap on attempts | Cap the attempts, then return the best bullet you got and flag it |
+| A clean bullet is reported WEAK | Validation ran on the raw reply, so the check saw the preamble instead of the first real word | Clean the reply first and validate second, the order decides what the check reads |
+| Every retry returns the same failing bullet | The retry repeated the original request without saying what failed | Feed the failure codes back into the next call so the model has a concrete correction |
 
 ## The mental model
 
@@ -1066,6 +1115,14 @@ This is deliberately rough (it ignores the system prompt and the output tokens),
 
 A demo rewrites the one bullet you tested. A real tool survives the messy input people actually give it: duplicates, blank lines, a paste of thirty tasks. Deduping and cost-estimating aren't glamorous, but they stop your tool from doing redundant work and handing someone a surprise bill. The guards are cheap and the payoff is large.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The same task is rewritten and paid for twice | Dedupe ran after the calls, or compared raw text so "Managed staff" and "managed staff" stayed separate | Dedupe on the stripped lowercase key before any call fires |
+| Blank lines in the paste turn into API calls that return nothing usable | The blank was never filtered, so it went through as a task | Skip empty keys during dedupe, an empty stripped string is already falsy |
+| A large paste runs up a bill the user never agreed to | The batch started calling straight away with no cost shown | Estimate the tokens and print the count before spending anything |
+
 ## The mental model
 
 Think of the batch as a shopping cart. Before checkout you pull out the duplicate items and glance at the total. Dedupe trims the cart, and the token estimate is the price tag you read before you swipe. Below you'll build both and produce a batch report.`,
@@ -1232,6 +1289,14 @@ If those three hold, it's a real deliverable, not a demo.
 ## It lands in your Portfolio
 
 Finishing this final lesson records the build in your **Portfolio** tab: the title, what it does, and that you built it. That shelf of finished tools (your summarizer, your chatbot, this bullet booster) is the actual point of the track. Keep a one-line description and one example, a raw task in and a strong bullet out, so the entry proves it works.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A bullet fails validation but lands in the final list with nothing marking it | The failure codes were collected and then never printed | Print a check line beside the failing bullet so the user knows what to fix |
+| The run starts calling on a thirty task paste before the user sees a cost | The estimate was printed after the loop, or never computed at all | Print the unique count and the token estimate before the first call |
+| A bullet is flagged WEAK even though it reads fine | The pipeline validated the raw reply instead of the cleaned one | Keep the order fixed: clean, then validate, then print |
 
 ## Ship it well
 

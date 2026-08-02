@@ -60,6 +60,14 @@ It also makes your app testable without a network. \`handle_request({"prompt": "
 
 Packaging is also your first line of defense. Check the input before you call the model. A missing or empty prompt should never reach the API, because you'd be paying to fail. Return a structured \`{"ok": False, "error": ...}\` instead of calling the model on garbage, and hand the caller a real reason instead of a stack trace.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A prompt of three spaces still reaches the API and you pay for a call that returns nothing useful | The prompt was tested for presence only, so a whitespace string counted as truthy | Strip the prompt and test the stripped value, since three spaces collapse to the falsy empty string |
+| handle_request raises KeyError on a payload that has no prompt field | The prompt was read with payload["prompt"] instead of a lookup with a default | Read it with payload.get("prompt", "") so a missing key gives back an empty string |
+| You add cost tracking and half the traffic still shows up untracked | Some callers reach client.messages.create directly instead of going through handle_request | Keep call_model as the only place the Anthropic client is touched and route every caller through handle_request |
+
 ## The mental model
 
 Think of \`handle_request\` as the front door to your whole app. The web server, a test, future-you debugging at 2am all walk through that same door with a dict and get a dict back. Below, build that validation gate in pure Python. No network yet, just the contract every layer after this depends on.`,
@@ -245,6 +253,14 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ## Why a health route
 
 \`/health\` isn't decoration. Deployment platforms, load balancers, and monitors ping a health route to decide whether the instance is alive. Return a fast \`{"status": "ok"}\` with no model call inside it, and infrastructure can check you're up without spending a token every few seconds.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| curl from another machine gets connection refused while localhost works fine | uvicorn bound only the loopback interface because --host was left at its default | Start it with uvicorn main:app --host 0.0.0.0 --port 8000 |
+| GET /generate returns 404 even though the route exists in the file | Routes are keyed on the method and path together, and this handler was registered for POST | Call the method the route was registered under, or add a second handler under its own method |
+| The bill climbs while nobody is using the service | The health route calls the model, and the platform pings it every few seconds | Return a fixed status ok from /health with no model call inside it |
 
 ## The mental model
 
@@ -439,6 +455,14 @@ def write_log(record, path="log.jsonl"):
 
 Without this, "how many requests did we serve today" and "why did the bill spike" have no answer after the fact. With it, every later feature is arithmetic over a list of records: cost totals, the dashboard, error rates, budget alerts. Logging isn't a nice-to-have bolted on at the end. It's the data source everything else in this capstone reads from.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Latency values jump around and some come out negative | The duration was measured with time.time, which shifts when the system clock adjusts | Measure the duration with time.perf_counter and keep time.time for the timestamp field |
+| The log file grows to gigabytes and contains what users typed | The full prompt and reply text were written into every record | Store token counts, latency, and status, and leave the text out of the record |
+| Reading the log back fails partway through with a JSON decode error | Records were appended without a trailing newline, so two of them share one line | Append a newline after each json.dumps call so every record sits on its own line |
+
 ## The mental model
 
 Every request leaves a receipt behind, even if nobody reads it that day. Below, build the record shape and a small in-memory log. No file or network yet, just the structure you'll aggregate in the coming lessons.`,
@@ -627,6 +651,14 @@ Your provider's dashboard eventually shows you a monthly bill, but by then it's 
 ## A note on precision
 
 Money math with floats can drift by fractions of a cent over millions of calls. This lesson uses plain floats since the scale is small, but production billing systems track cost in integer cents so rounding errors don't compound. Keep that in your back pocket if this ever has to reconcile against a real invoice.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your cost total lands several times below the provider's invoice | One rate was applied to both halves, and output tokens are priced around five times higher than input | Read the input rate and the output rate separately from PRICING and price each half on its own |
+| cost_for_call raises KeyError the first time a new model gets used | PRICING has no entry under that model name and the lookup indexes the dict directly | Add the model to PRICING, and fail with a message that names the missing model rather than a bare KeyError |
+| Summed spend drifts by fractions of a cent away from a recomputed total | Per-call costs were accumulated as floats across many calls | Track cost as integer cents with floor division so the arithmetic stays exact |
 
 ## The mental model
 
@@ -849,6 +881,14 @@ You don't need a charting library to start. A JSON summary endpoint, or even a p
 
 The point isn't the visual. It's catching problems early: a spike in requests from one model, a cost total climbing faster than usual, an error rate creeping up. You can only answer any of those if the aggregation is right. Get the grouping solid here, and rendering it prettier later is just formatting.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| build_dashboard raises KeyError on the first record for a model it has not seen before | The bucket was updated before anything created it | Create the bucket on first sight with an if model not in by_model check, or use collections.defaultdict |
+| The per-model costs on the dashboard do not add up to the grand total | Each number came from its own filtered scan, and the scans ran over different snapshots of the log | Compute every number in one pass over the same record list |
+| The dashboard lists models in a different order on every refresh | Dict iteration follows insertion order, which changes as traffic changes | Sort the model names before you print or return them |
+
 ## The mental model
 
 One pass over the log, one bucket per group, running totals updated as you go. That's every dashboard you'll ever build, whether it renders as a table, a JSON blob, or a chart. Below, build the same grouped aggregation in pure Python over a small in-memory record list.`,
@@ -1058,6 +1098,14 @@ An error is still a request that happened. Write a log record for it with \`stat
 ## Why it matters
 
 Without this, one flaky upstream response takes your whole service down, or half-crashes it in a way that's hard to reproduce. With it, a bad request gets a clean 400, a busy provider gets a clean 429 or 504, and your dashboard's error rate means something instead of quietly under-counting failures nobody logged.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One rate-limited call drops requests from other users at the same time | The exception escaped the route and killed the worker process serving all of them | Run the model call inside a try block and return a classified error response instead of letting it propagate |
+| A timeout and a malformed prompt come back to the caller as the same generic failure | A single except Exception caught both and returned one response for everything | Catch anthropic.RateLimitError and anthropic.APITimeoutError in their own branches ahead of the generic fallback |
+| The dashboard reports a 0 percent error rate while users are reporting failures | Failed requests returned early without writing a log record | Write a record with status error and cost 0 on the failure path too |
 
 ## The mental model
 
@@ -1311,6 +1359,14 @@ A budget guards a dollar amount. A rate limiter guards a request count over a ti
 
 A guard that silently rejects is only half the job. You want to know before you hit the wall. In production this usually means firing a Slack or email webhook when spend crosses 80% of the cap, so a human can look before requests start getting rejected. The mechanism (an HTTP POST to a webhook URL) is simple. The part that matters is picking a threshold below 100% so you have time to react.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| spent_cents climbs past the limit even on requests where charge returned False | spent_cents was incremented before the comparison, so a denied charge still counted against the budget | Compare spent_cents plus cost to limit_cents first, and add the cost only on the allowed path |
+| Requests start coming back as 402 and the first you hear of it is a user complaint | The guard rejects silently, with no signal before the cap is reached | Fire the webhook when spend crosses 80 percent of the cap so someone can look before calls get refused |
+| The budget is still exhausted the morning after a busy day | spent_cents is never reset, so the cap behaves as a lifetime total rather than a daily one | Reset spent_cents when the window rolls over |
+
 ## The mental model
 
 Every dollar spent clears the guard first. No exceptions, no "just this once." The guard's whole job is saying no consistently so a bug or a loop can't turn into a surprise invoice. Below, build the guard and run it against a sequence of charges.`,
@@ -1527,6 +1583,14 @@ Before you call it shipped, three questions, now with teeth:
 ## What actually got built
 
 Trace the arc. Lesson 1 packaged the model call into one function. Lesson 2 put an HTTP route in front of it. Lessons 3-5 built logging, cost, and the dashboard. Lessons 6-7 hardened it against failures and runaway spend. None of that was throwaway scaffolding. It's the shape of a small production LLM service.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The deployed service returns an error on its first request while the same code worked locally | ANTHROPIC_API_KEY came from a local file that was never set on the deploy platform | Set the key as an environment variable in the platform's settings before the process starts |
+| GET /dashboard raises ZeroDivisionError right after a fresh deploy | The error rate divides by the request count, which is 0 until the first call arrives | Guard both percentages with an if requests else 0 style check |
+| The budget guard resets to zero every time the platform restarts the process | spent_cents lives in memory on a BudgetGuard instance that dies with the worker | Recompute spend from the log records on startup, or hold the running total outside the process |
 
 ## Into your Portfolio
 

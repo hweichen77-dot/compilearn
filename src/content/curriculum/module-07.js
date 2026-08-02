@@ -729,7 +729,11 @@ In production you'd reach for a real vector database (Pinecone, Chroma, pgvector
 | --- | --- | --- |
 | Scores are low and rankings look random, even for questions the documents clearly answer | The query and the stored chunks were embedded with two different models, so the vectors are not comparable | Embed queries with the same model that built the store, and re-embed every chunk whenever you switch models |
 | Cosine similarity throws a division error, or every score comes back as zero | A stored or query vector has zero magnitude, and dividing by that magnitude is undefined | Return zero similarity when either magnitude is zero, the guard shown in the function above |
-| A one-line query scores badly against a long chunk that obviously answers it | You compared raw distance, so the length difference between query and chunk swamped the meaning | Score with cosine similarity, which compares direction and ignores magnitude |`,
+| A one-line query scores badly against a long chunk that obviously answers it | You compared raw distance, so the length difference between query and chunk swamped the meaning | Score with cosine similarity, which compares direction and ignores magnitude |
+
+## The mental model to keep
+
+Meaning becomes geometry. **Two texts match when their vectors point the same direction, which is why a query and a chunk can agree without sharing a single word.**`,
       key_terms: [
         { term: "Embedding", definition: "A fixed-length vector of floats representing the meaning of text, where similar meanings produce nearby vectors." },
         { term: "Cosine similarity", definition: "A score from -1 to 1 measuring the angle between two vectors; near 1 means very similar meaning, near 0 means unrelated." },

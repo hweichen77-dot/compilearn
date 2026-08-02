@@ -54,6 +54,14 @@ Hand the model a raw FAQ and ask it to cite its source, and it will invent somet
 
 This project works with a **small** FAQ, a handful to a few dozen lines. That's the right scope for this build, not a shortcut you patch later. Once a knowledge base grows past what fits in one prompt, you add a search step to pick the relevant chunk first, and that's a bigger, different project. Here the whole FAQ fits in context every time, so there's no retrieval to get wrong. What's left is grounding and refusal, which is what these lessons are about.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An answer cites line 4, but line 4 is about something else entirely | Someone edited the FAQ and inserted a line, which shifts the number of every line below it | Renumber by reloading the FAQ whenever the text changes, and treat a line number as valid only for the version the model was shown |
+| The number beside a line does not match the line number your text editor shows | load_faq drops blank lines, so positions in the file and positions in the numbered list drift apart | Trust the numbers you handed the model, not the editor gutter, since those are the only ones the model ever saw |
+| Every citation comes back one lower than the line you meant | enumerate starts at 0, and the plus one was dropped | Keep the i plus one so the first FAQ line is line 1 |
+
 ## The mental model to keep
 
 Picture the FAQ as a numbered exhibit list before a trial. Nobody testifies from memory; every claim points at "Exhibit 7." Over the next few lessons you're building the bot that only ever testifies from the exhibit list and says "not in evidence" when the answer isn't there.`,
@@ -259,6 +267,14 @@ The FAQ lives in \`system\` because it's the standing reference material for eve
 
 "Answer using the FAQ" alone is too soft. The model still reaches for its general knowledge when the FAQ is thin. Two things tighten it. First, **"ONLY"** appears in the system prompt and again in the rules; that redundancy is deliberate, because a single soft instruction gets ignored more often than a rule stated twice. Second, an **explicit instruction for the "not covered" case**. Without it, the model fills gaps with invented answers instead of admitting the FAQ is silent. Lesson 4 turns this into a real, checkable refusal. For now you're just planting the instruction.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot answers a question your FAQ never mentions, with details that sound right | The rule read as a preference, so the model filled the gap from its own general knowledge | Put ONLY in the opening line and again in the rules, and add an explicit instruction for the not covered case |
+| The first question works, then the model seems to forget the FAQ | The FAQ was pasted into the user message instead of the system prompt, so it left with that one turn | Keep the doc in system as standing reference material and send only the question in messages |
+| Answers look correct but you cannot tell which FAQ line produced them | The prompt asks the model to use the FAQ but never asks it to name a line | Require a line number in the reply, which is what lesson 5 adds and verifies |
+
 ## The mental model to keep
 
 Picture handing someone a single-page reference sheet and saying "answer questions using only this page." That's the whole system prompt: FAQ text plus a leash. Later lessons tighten the leash with a strict refusal (lesson 4) and a citation requirement (lesson 5), but the shape never changes: doc in the system prompt, question in messages.`,
@@ -459,6 +475,14 @@ def best_match(question, numbered_faq):
 ## What this buys you
 
 This doesn't replace the model reading the FAQ. It's a cheap, deterministic sanity check in pure Python with no network call, and two things fall out of it. The highest-scoring line is your best guess at "the line this question is about," which feeds lesson 5's citation requirement. And a score of 0 across every line means you can refuse before spending a single token on an API call.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A question the FAQ plainly answers scores 0 | The user said deliver and the FAQ says ship, and overlap counts exact words, not meaning | Treat a 0 as a cheap signal rather than proof, and widen the check with the wordings your users actually type |
+| Every question matches the same line with a high score | The stop list is short, so ordinary filler words survive and overlap with any line | Add the filler words your questions repeat to the stop set so only content words score |
+| Real terms like US or ID never contribute to a score | The length filter drops every word of two characters or fewer | Lower the length threshold or keep a short list of meaningful abbreviations |
 
 ## The mental model to keep
 
@@ -692,6 +716,14 @@ When the keyword overlap is zero, you **override** whatever the model said and f
 ## Why this is the core of the whole product
 
 Everything else here, numbering, stuffing, citing, serves this one behavior: never say something your docs don't back up. A bot that answers 80% of questions correctly and confidently makes up the other 20% is unusable in support, because the user can't tell which 20% to distrust. A bot that either answers correctly or clearly says "I don't know" stays trustworthy even when it can't help, and that's the bar for shipping something like this.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reply reads like a refusal but the equality check against REFUSAL never matches | The prompt asked the model to say it does not know instead of giving it one exact sentence | Hand the model the literal refusal string and tell it to reply with exactly that and nothing else |
+| A refusal-sounding sentence still slips a guess in at the end | A hedge is not a refusal, and only the fixed string is detectable in code | Compare against the exact string, and treat anything that is not that string as an answer that must pass the other checks |
+| The bot refuses a question the FAQ does cover | The zero-score override fired because the question shared no words with the line that answers it | Leave the override in place, since it fails safe, and fix the keyword layer that scored the match wrong |
 
 ## The mental model to keep
 
@@ -935,6 +967,14 @@ def verify_citation(reply, numbered_faq):
 
 Asking the model to cite is a prompting trick. Verifying the citation is a code guarantee. The distinction matters because a model under load, or handed an ambiguous question, will sometimes cite line 12 when line 12 doesn't exist in a 9-line FAQ. Catching that with one \`in\` check is nearly free, and it's the difference between a bot that looks trustworthy and one that is.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| verify_citation reports no citation found on a reply that clearly names a source | The model wrote a variation the pattern does not match, such as a capital L on line or the number in brackets | Keep the literal format in the prompt and let a parse failure refuse, rather than loosening the pattern until it matches anything |
+| The cited number is in range, so the check passes, but the line says nothing about the answer | The check only confirms the number exists, never that the text supports the claim | Print the cited line back and compare it with the answer, and treat the range check as the floor rather than the whole test |
+| The model cites line 12 in a nine-line FAQ | The model invented a number that looks plausible for a longer document | Test membership against the set of numbers you actually sent and refuse when it is missing |
+
 ## The mental model to keep
 
 Every non-refused answer now carries a receipt. You don't re-read the whole FAQ to trust the bot; you check the receipt. Does this line number exist, and does it say roughly what the bot claimed? That receipt turns "the bot said so" into "the bot said so, and here's exactly where."`,
@@ -1151,6 +1191,14 @@ A bot with five different failure messages ("hmm", "unclear", "error", "not sure
 ## Logging the reason, even if the user doesn't see it
 
 The second return value in \`guarded_answer\`, the reason or citation, isn't for the user. It's for you. When you're debugging why the bot refused something it should have answered, "score was 0" versus "citation was invalid" versus "input was empty" are three different bugs to chase. Keep that detail even though the user-facing message stays identical.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A question that is only spaces gets scored and billed instead of refused | A string of spaces is truthy, so a plain emptiness test lets it through | Test the stripped question as well, and put that guard before any scoring or API call |
+| Users say the bot breaks at random | Each failure path returns its own wording, so the same refusal looks like several different bugs | Route every failure to the one REFUSAL string so a decline reads as a decision |
+| You cannot tell why the bot refused something it should have answered | The reason was collapsed into the user-facing message and thrown away | Return the reason as the second value and log it, while the user keeps seeing the same calm sentence |
 
 ## The mental model to keep
 
@@ -1420,6 +1468,14 @@ This check runs once when the FAQ loads, not on every question, since the doc si
 
 A warning gets ignored. A raised exception forces a decision at the moment the FAQ is edited, right when a human is looking at it, instead of surfacing as a slow-creeping bill three weeks later. Cost bugs are uniquely nasty because nothing looks broken: the bot still answers correctly, it just quietly costs ten times what it should. Catching it loudly at load time is the cheap fix.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bill climbs month after month while traffic stays flat | The FAQ kept growing, and every single call resends the whole document | Run the budget check when the FAQ loads so an oversized doc fails at edit time instead of on every question |
+| Trimming questions down to a few words changes the cost by almost nothing | The FAQ dominates the token count, so the question is a rounding error | Cut the FAQ or move to a retrieval design, since doc size is the only lever that moves the number |
+| The budget check passes but the real invoice comes in higher | The four characters per token estimate is rough and the fixed prompt wording costs tokens too | Add the template overhead explicitly and set the ceiling below the number you can actually afford |
+
 ## The mental model to keep
 
 Every call to this bot is billed for the whole reference sheet, not just the question asked. That's fine at FAQ size 20 and a real problem at FAQ size 2000. The budget check is a smoke alarm for that one failure mode. Cheap to install, easy to ignore until it matters, and the one thing standing between "small doc, small bill" and a bill nobody predicted.`,
@@ -1650,6 +1706,14 @@ If those four hold, you've got a shippable support bot, not a demo that happens 
 ## Where this fits, and where it doesn't
 
 This design is right for a small, stable FAQ: a handful to a few dozen entries that don't change every day. It's the wrong tool for a large, growing knowledge base. That's a retrieval system's job, picking the relevant few chunks out of thousands before touching the model. Knowing the boundary of what you built is part of shipping. This bot is honest about what it can answer and just as honest that it wasn't built to scale past a small FAQ.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| answer_question fails with a name error the first time you run it | The pipeline calls helpers built across lessons 3, 5, and 7, and one of them was never defined in this file | Put every helper in one module and import or define all of them before the pipeline runs |
+| Costs are higher than expected even though most questions get refused | The model call happens before the cheap guards, so refusals still pay for a request | Keep the order: budget, input guard, keyword pre-check, then the model call |
+| Every question now raises from the budget check | The FAQ outgrew what context stuffing can carry | Treat this as the design boundary, not a bug, and split the doc or move to retrieval |
 
 ## Your Portfolio
 

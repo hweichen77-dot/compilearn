@@ -62,6 +62,14 @@ The harness compares that output to \`expected\`, case by case, and records a pa
 
 Prompts drift. You tweak a system prompt to fix one bad answer and quietly break two others you never re-checked. Without a harness you find out when a user complains. With one you re-run the whole test set in seconds and see exactly what changed before it ships.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The script raises KeyError before a single case is graded | os.environ["ANTHROPIC_API_KEY"] is read at import time and the variable is not set in that shell | Export the key before the run, or read it with a check that names the missing variable |
+| Every case prints FAIL even though the model replies read correct | The reply came back as "Positive." with a capital letter and a period, and expected holds the bare lowercase word | Keep the .strip().lower() on resp.content[0].text before comparing to expected |
+| Every case grades against the output "unknown" | FAKE_MODEL_OUTPUTS.get fell through to its default because the input string in the test case does not match the dict key character for character | Build the test case inputs from the same strings used as keys in FAKE_MODEL_OUTPUTS |
+
 ## The mental model to keep
 
 An eval harness is a test suite where the assertions come from comparing model output to an expected answer. The real engineering lives in the grader, not the loop. Below, wire up the loop against a stand-in for the model so you can see the whole shape before any network call enters the picture.`,
@@ -259,6 +267,14 @@ This is the same idea as a unit test suite failing the build when coverage drops
 
 There's no universal number. A feature where mistakes are cheap, like a fun chatbot persona, can ship at 70%. A feature where mistakes are expensive, like extracting refund amounts, might need 98%. The threshold is a product decision you encode once, so every future run is judged by the same bar you chose deliberately, not whatever felt okay that day.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A run that lands exactly on the threshold is reported as HARNESS FAILED | The gate was written as rate > threshold, so 8 of 10 against a bar of 0.8 falls out | Compare with rate >= threshold so a run that meets the bar ships |
+| pass_rate raises ZeroDivisionError on a fresh test file | An empty results list still divides by len(results) | Return 0.0 when results is empty, before the division |
+| The report prints 79% while the gate says PASS at a threshold of 80 | The printed percent was floored by passed * 100 // n while the gate compares the raw counts | Treat the floored percent as display only and keep the gate on passed * 100 >= threshold * n |
+
 ## The mental model to keep
 
 Per-case grading tells you *what* broke. The pass rate and gate tell you *whether to ship*. Below, build both pieces in pure Python. Turn a list of results into a percentage, then turn that percentage into a pass or fail verdict against a threshold.`,
@@ -425,6 +441,14 @@ def report_by_category(results):
 ## Why this matters
 
 An overall pass rate can hide exactly the thing you need to see. A feature that's great at small talk and bad at the one task customers actually rely on can still post an impressive-looking 85%. Category breakdowns are how you find that before a customer does.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every category in the report shows a total of 1 | The tuple was assigned fresh each time instead of rebuilt from the value already in the dict | Read the running tally with report.get(category, (0, 0)) and add to it before storing |
+| A category's numbers are split across two lines of the report | The same tag was written as "Refund" in one case and "refund" in another, so they land in different buckets | Normalize the category tag when the test set is loaded |
+| The overall pass rate stays high while support tickets keep arriving | The test set holds only typical cases you picked yourself, with no failures pulled from production | Turn the real complaints into known failure cases so the score reflects traffic that hurts |
 
 ## The mental model to keep
 
@@ -637,6 +661,14 @@ That one dictionary lookup lets a single harness grade a sentiment classifier, a
 ## Why this matters
 
 A harness that only does exact match will reject perfectly good free-form answers for being too strict, or get quietly replaced with something looser that lets real bugs through. Naming the grader per test case, instead of hard-coding one comparison everywhere, makes the harness reusable across an entire product rather than one endpoint.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The whole run dies on a KeyError partway through the test set | A case named a grader such as "regex" that has no entry in GRADERS | Look the name up with a default that fails that one case loudly and lets the rest of the run finish |
+| in_range raises TypeError on unsupported operand type for minus | actual and expected arrived as strings from a JSON test file and were never converted | Cast the numeric fields to float when the test set is loaded |
+| contains passes a support reply that never mentions the amount | The arguments were flipped, so expected in actual became actual in expected | Keep every grader on the (actual, expected) order the dispatcher calls with |
 
 ## The mental model to keep
 
@@ -864,6 +896,14 @@ def parse_judgment(raw_reply):
 
 An LLM judge lets you grade tone, helpfulness, or faithfulness to a source document, things a rule can't cleanly check. But the judge is not ground truth. It can be miscalibrated, inconsistent, or fooled by a confident-sounding wrong answer. Treat it as a second opinion you spot-check against a handful of human ratings now and then, not an oracle you trust blindly.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| parse_judgment returns None for a reply that plainly holds a valid verdict | The judge wrapped the object in a code fence and json.loads was handed the whole string | Slice from the first brace found by index to the last one found by rindex before parsing |
+| A verdict of {"score": true} is accepted and reported as a score of 1 | isinstance(True, int) is True in Python, so a boolean slips past the type check | Reject bools with an isinstance(score, bool) test before the 1 to 5 range check |
+| Long replies come back None every time while short ones parse | max_tokens of 150 cut the reply off before the closing brace, so rindex finds no brace or the wrong one | Hold the rubric to a one-sentence reasoning and give the call enough tokens to close the object |
+
 ## The mental model to keep
 
 A rule-based grader answers "did it match a pattern?" A judge answers "would a careful reader say this is good?" Both hand your harness the same thing in the end, a pass/fail or a score, just computed differently. Below, build the defensive parser and watch it reject a malformed verdict the way a real one would.`,
@@ -1067,6 +1107,14 @@ If every attempt for a case comes back \`None\`, that case gets \`"NO_VERDICT"\`
 
 An eval harness that crashes on a malformed judge reply, or reports a false regression because one noisy judge call landed low, trains people to ignore it. The point of automating grading is that people can trust the number without re-checking it by hand. That trust depends on the harness handling its own failure modes as carefully as it grades the feature under test.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| statistics.StatisticsError saying no median exists for empty data | Every attempt for that case returned None and the filtered list was still passed to statistics.median | Return NO_VERDICT when the filtered list is empty, before calling median |
+| A case reports a score of 4.5 instead of an integer | An even count of valid scores makes statistics.median average the two middle values | Wrap the median in round() so the reported score stays an integer |
+| Feature quality appears to drop on a day the model API was returning errors | Unparseable judge replies were counted as failures instead of recorded as judge errors | Keep NO_VERDICT as its own outcome and leave those cases out of the quality rate |
+
 ## The mental model to keep
 
 Never let the grader's own flakiness look like the feature's flakiness. Retry judge calls before giving up, vote across repeats to smooth real noise, and label total failure as \`NO_VERDICT\` rather than a silent zero. Below, build the aggregator over a small batch of repeated judge scores, some of them missing entirely.`,
@@ -1265,6 +1313,14 @@ def check_regression(overall, baseline, tolerance=0.05):
 ## Why this matters
 
 Without a baseline, "68%" is a number with no context. With one, it's a decision: better, about the same, or a real regression worth blocking on. That's the difference between an eval harness you run once out of curiosity and one that guards a shipped feature over time.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A composite comes out negative and drags the overall score under zero | The -1 sentinel for an unjudged case was divided by 5 like a real judge score | Branch on the sentinel first and fall back to rule_part when there is no judge score |
+| A run that drops by exactly the tolerance is flagged as a REGRESSION | The check was written as baseline - overall >= tolerance | Use a strict greater-than so the boundary drop passes |
+| The API bill climbs sharply the week the judge went in | The judge runs on every case on every commit | Run the rule grader on the full set each commit, sample the judge in CI, and judge the full set nightly |
 
 ## The mental model to keep
 
@@ -1480,6 +1536,14 @@ The same three checks as always. It runs from a clean start with one command. An
 ## Into your Portfolio
 
 Finishing this lesson records the AI Evals Harness in your **Portfolio** tab. It's the tool that answers "does it still work?" for every other project you've built in this track, and any AI feature you ship after it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| build_report raises KeyError on 'category' partway through a run | run_harness copies the case through with **case, and one case in the test file carries no category tag | Require a category when the test set loads, or default the untagged cases to one bucket |
+| CI raises KeyError on report["regression"] | The key is added only when baseline is not None, so a first run without a baseline omits it | Set report["regression"] to False by default and overwrite it when a baseline exists |
+| The category lines come out in a different order after the test file is reordered, making every report diff noisy | The print loop walks the categories dict, whose order follows insertion | Iterate sorted(report["categories"]) so the report reads the same way every run |
 
 ## The mental model to keep
 

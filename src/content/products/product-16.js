@@ -54,6 +54,14 @@ print(len(vectors), len(vectors[0]))
 
 \`vo.embed\` sends a batch of texts and gets one vector back per text. The first two sentences are both about a cat resting somewhere, so they land close together. The third, about stock prices, lands far from both, even though it shares zero words with them.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The Claude Messages API rejects your embeddings call with an unknown endpoint error | The Messages API generates text, it does not produce embeddings | Call a dedicated embeddings provider such as Voyage, and keep it separate from your model calls |
+| The client raises an authentication error the moment you call embed | VOYAGE_API_KEY is not set in the environment the script actually runs in | Export the key before running and read it with os.environ so a missing key fails loudly |
+| You open a vector, look at the numbers, and cannot tell what any of them mean | A single dimension carries no meaning on its own, only a vector's position relative to other vectors does | Judge embeddings by comparing whole vectors to each other, never by reading one number |
+
 ## The mental model
 
 Picture every document as a dot dropped onto a giant map where meaning, not geography, sets its position. A query is one more dot on that same map. Semantic search asks "which dots sit nearest my query's dot?" Every lesson from here answers that one question quickly and correctly: how texts get onto the map (embedding), how we measure "nearest" (similarity), and how we return only the closest few (top-k).
@@ -239,6 +247,14 @@ Notice the \`input_type="document"\` argument. Voyage's models embed documents a
 ## Why batching matters as the corpus grows
 
 A batch call to an embeddings API caps how many texts (and total tokens) it accepts per request, and there's usually a per-minute rate limit on top. A 10,000-document corpus isn't one call. It's dozens of calls of a few hundred documents each. You'll build that chunking logic in a later lesson. The habit to form now: gather all the texts first, then embed them together, instead of interleaving embed calls with other work.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Embedding a few hundred documents takes minutes and costs more than you expected | The code calls embed once per document inside a loop, paying a network round trip every time | Collect every text first, then send them all in one batch call |
+| Vectors end up attached to the wrong documents | The returned embeddings were paired back by position after the text list had already been filtered or reordered | Zip the exact batch you sent with the embeddings you got back, in the same order |
+| Rankings are quietly worse than they should be, with no error anywhere | The query was embedded with input_type document, or the documents were embedded as queries | Use input_type document when indexing and input_type query when searching |
 
 ## The drill below
 
@@ -449,6 +465,14 @@ for doc in index:
 
 Real embeddings from Voyage are already close to unit length, so in practice scores land somewhere between about 0.0 and 1.0. Genuinely relevant matches often score 0.7 or higher; unrelated text scores closer to 0.2-0.4. Those numbers aren't universal thresholds, they shift by model, but the ordering (which document scores highest) is what your search depends on.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A long document on exactly the right topic ranks below a short, vaguely related one | You ranked by straight-line distance, so vector magnitude leaked into the score | Score with cosine similarity, which divides out both norms and compares direction only |
+| cosine_similarity raises a ZeroDivisionError | One vector is all zeros, so its norm is 0 and the division is undefined | Return 0.0 when either norm is 0, before you divide |
+| A fixed cutoff you copied from a tutorial filters out matches that are clearly good | Score ranges shift by embedding model, so a threshold from one model means nothing on another | Look at real scores on your own corpus and set the cutoff from those, or trust the ordering instead of an absolute number |
+
 ## The mental model
 
 Cosine similarity asks "are these two arrows pointing the same way?", not "are these two arrows the same length?" That is the question you want when the arrows represent meaning, and it's the one function every later lesson builds on.`,
@@ -633,6 +657,14 @@ Sorting by \`(-score, id)\` sorts descending by score first (the negative sign f
 ## Why you rank before you trim
 
 You might want to stop as soon as you've found "enough good" documents, but you can't know a document is in the top 5 until you've compared it against everything else. Score first, sort second, then decide how many to keep (the next lesson). Stopping early produces wrong results the moment the corpus order changes.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Sorting by score puts the worst matches first | Python sorts ascending by default, so the highest score lands at the end | Pass reverse=True, or negate the score inside the sort key |
+| The same query returns the same documents in a different order on different runs | Ties were left to sort stability, which only preserves whatever order the corpus happened to be built in | Sort by (-score, id) so ties break identically every time |
+| You stop scoring once enough good documents show up and the results come back wrong | A document cannot be ruled out of the top-k until it has been compared against every other document | Score the whole corpus, sort it, and only then trim |
 
 ## The mental model
 
@@ -861,6 +893,14 @@ This is the shape of a real semantic search function: embed the query, score and
 
 A bare list of matching documents throws away useful information. A score of 0.91 means "this is almost certainly what the user meant." A score of 0.31 on the last item in a top-5 list means "weak match, included only because the other four ranked higher," and it might not be relevant at all. Returning scores lets the caller decide whether to trust a result, show a "did you mean" fallback, or apply its own cutoff.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Asking for 10 results from a 3-document corpus breaks code that reads results[k-1] | k was never clamped to the corpus size, so callers assume k results always come back | Clamp with k = min(k, len(ranked)) and let callers handle a shorter list |
+| The result list looks confident but the last entries are unrelated to the question | Only ids were returned, so nothing told the caller that the fifth item scored 0.31 | Return the score next to each id so the caller can apply its own cutoff |
+| A single search makes far more embedding calls than you expected | The query is being re-embedded inside the scoring loop instead of once per search | Embed the query one time, then reuse that vector for every comparison |
+
 ## The mental model
 
 Top-k is a promise: here are the k most relevant documents, ranked, with a number showing how relevant each one is. Everything upstream (embedding, scoring, sorting) makes that promise trustworthy. The next two lessons keep it holding when the input is messy.`,
@@ -1040,6 +1080,14 @@ If the index is empty there is nothing to rank, and the right answer is an empty
 ## Why this matters in production
 
 A search engine that crashes on one malformed document, or silently returns garbage instead of skipping it, is worse than one that's a little slower. Real corpora get updated by many processes over time, and eventually something goes wrong with one document's embedding. You can't prevent that entirely. You can make one bad row degrade quietly instead of breaking search for everyone.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A search returns a plausible-looking ranking that turns out to be meaningless | A vector had the wrong dimension, and zip truncated to the shorter one instead of raising | Compare the document vector length to the query vector length and skip anything that does not match |
+| One malformed document takes down search for every query | An exception inside the scoring loop aborts the entire ranking | Guard the known failure cases, zero norms and mismatched dimensions, and skip that document instead of raising |
+| Searching a brand new index crashes somewhere downstream on results[0] | An empty corpus was ranked and the resulting empty list was never handled | Return an empty list as soon as the index is empty, before any scoring runs |
 
 ## The mental model
 
@@ -1292,6 +1340,14 @@ total = sum(estimate_tokens(t) for t in unique_texts)
 
 Sum the estimate over only the *unique* texts, not the duplicates the cache will skip, and you get a realistic number instead of an inflated one.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Re-indexing an unchanged corpus costs as much as the first build did | Nothing checks the cache before calling the API, so identical text is embedded all over again | Filter the texts against the cache first and embed only what is missing |
+| A large request is rejected by the embeddings API | The batch went over the provider's per-request limit on texts or total tokens | Chunk the list into fixed-size batches and send them one after another |
+| Your cost estimate comes in far above the bill you actually get | The estimate summed every text, including the duplicates the cache will skip | Estimate tokens over the unique texts only |
+
 ## The mental model
 
 Dedupe first, batch second, estimate third. Each step is cheap arithmetic that heads off an expensive mistake. Dedupe stops you paying twice for the same text. Batching stops a request getting rejected for being too large. Estimating stops "I built the index" from becoming a surprise bill.`,
@@ -1521,6 +1577,14 @@ No deployment needed. Shipped means three things are true:
 1. It runs from a clean start: point it at a folder of documents, call \`add_documents\`, then \`search\`.
 2. It handles an empty corpus, a repeated document, and a weird query without crashing.
 3. Someone else could use it from your instructions alone: \`engine.add_documents(docs)\`, then \`engine.search("your question", k=5)\`.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The engine works in your session but not from a clean start | The index was assembled by hand in a session that is now gone, and nothing rebuilds it | Make add_documents the only path into the index, then run the whole flow from scratch before calling it shipped |
+| The same document shows up twice in the results | The cache dedupes the embedding calls, but add_documents still appends one index entry per input document | Decide whether duplicates belong in the index and drop them on the way in if they do not |
+| Someone follows your instructions and search returns nothing | search returns an empty list on an empty index, and the instructions never said to add documents first | Document the two-call flow, add_documents then search, and keep a saved example query and its top result as proof |
 
 ## Your Portfolio
 

@@ -56,6 +56,14 @@ Two details matter. \`dirnames[:] = ...\` mutates the list \`os.walk\` is iterat
 
 Ingestion mistakes stay invisible until they get expensive. A repo that sort of works in a demo can quietly send megabytes of vendored JavaScript to the model on every question, which wastes money and buries the real answer in noise. Getting the file list right, before any chunking or embedding, is the cheapest correctness you'll buy in this project.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Ingestion takes minutes and the corpus turns out to be mostly vendored JavaScript | os.walk descended into node_modules because the results were filtered after the walk instead of during it | Assign into dirnames[:] so os.walk never enters a skipped directory in the first place |
+| The tool crashes decoding a file, or a chunk comes back full of binary garbage | A png or a lockfile was opened because filtering happened on content rather than on the path | Filter by extension before you open anything |
+| Two runs over the same repo produce chunk ids in a different order | os.walk makes no promise about ordering across filesystems | Sort the file list before chunking so ids and results stay reproducible |
+
 ## The mental model to keep
 
 Ingestion is triage at the door. Every file gets a fast yes or no from its path alone, so you never open a file just to reject it by name. Below, build that filter by hand on a small fake repo, with no real filesystem yet, and watch which files survive and which get turned away.`,
@@ -275,6 +283,14 @@ def chunk_by_function(source, path):
 ## Why it matters
 
 A chunk that's a whole function answers a question on its own. When a user asks how the app loads its config, a chunk that is \`load_config\` end to end is the right size to retrieve and to quote back with a citation. A 500-character window covering the last third of one function and the first two-thirds of another answers nothing cleanly.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A retrieved chunk shows a signature with no body, or a body with no signature | The file was split at a fixed character count that landed in the middle of a function | Split at function and class boundaries using the language's own parser |
+| async and decorated functions are missing from the corpus | A line scan for lines beginning with def or class never matches async def, and a decorator sits on the line above the def | Use ast, check for AsyncFunctionDef too, and take the line numbers from the node |
+| The line numbers in a chunk are off by one against the real file | node.lineno is 1-indexed while the list from splitlines is 0-indexed | Slice lines[start - 1:end] and keep the 1-indexed numbers in the metadata |
 
 ## The mental model to keep
 
@@ -505,6 +521,14 @@ The whole answer-with-file-and-line feature comes down to this: keep the ID atta
 
 It's tempting to store chunks as a flat list of strings and keep a separate parallel list of paths. That works until the two lists drift out of sync after one filtering step, and now your citations are wrong in the worst way: confident, specific, and pointing at the wrong file. Keep path, line numbers, and text together in one object per chunk.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A citation points confidently at the wrong file | Chunk text lived in one list and paths in a parallel list, and one filtering step made them drift apart | Keep path, line range, and text together in a single object per chunk |
+| The answer cites an id that tells the reader nothing | Chunks were given random UUIDs instead of readable ids | Build the id as path:start-end so it doubles as the instruction for where to look |
+| Citations vanish somewhere between retrieval and the final answer | The chunk was reduced to a bare string before it reached the prompt | Carry the id with the chunk through embedding, ranking, budgeting, and prompt building |
+
 ## The mental model to keep
 
 Every chunk is a **fact with a source**, not just a string. The ID is the footnote number; the path and line range are what the footnote says. Below, build a small corpus from a few files by hand and confirm every chunk's ID matches its path and line range.`,
@@ -720,6 +744,15 @@ def hybrid_score(cosine_sim, query, chunk_name):
 ## Why it matters
 
 Semantic search is tuned for "these two paragraphs mean similar things." Code search often needs "this exact name was mentioned," which is a precision problem, not a paraphrase problem. Blending the two covers both. A vague conceptual question still finds the right area of code through embeddings, and a specific "what does X do" question reliably finds X even when its embedding similarity is mediocre.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A question naming get_user_by_id does not return the function that defines it | Pure embedding similarity treats an identifier like any other word | Add an identifier bonus on top of cosine similarity when the chunk's name appears in the query |
+| Results are noticeably worse on code than the same setup was on prose | A general-purpose text model was used, trained mostly on prose | Embed both chunks and queries with a code-trained model such as voyage-code-2 |
+| cosine_similarity raises a ZeroDivisionError partway through ranking | The version above divides by both norms with no zero guard, and an empty chunk has a zero vector | Return 0.0 when either norm is 0, before dividing |
+| Almost every chunk picks up the identifier bonus | A short common name such as id or get matches as a substring inside unrelated words | Match on whole identifiers, and keep the bonus small enough to nudge the ranking rather than dominate it |
 
 ## The mental model to keep
 
@@ -946,6 +979,14 @@ def extract_citations(answer_text):
 
 Citations turn a code assistant from "trust me" into "check me." A user who reads \`[src/auth.py:40-52]\` in an answer can jump straight to that function and verify the claim in seconds, instead of grepping the whole repo to guess what the model meant.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer describes code that does not exist anywhere in the repo | Nothing restricted the model to the context block, so it filled the gap from general knowledge | Say in the system prompt that it may answer only from CONTEXT, and must say so when the answer is not there |
+| The regex returns nothing even though the answer plainly contains citations | The pattern does not allow the characters real paths contain, such as dots, slashes, and hyphens | Match the path with a character class that covers real repo paths, then capture start and end line separately |
+| The model follows an instruction it read inside a retrieved code comment | Rules and retrieved code were concatenated into the same turn with nothing separating them | Keep the rules in the system prompt and put the labeled context and the question in the user turn |
+
 ## The mental model to keep
 
 The context block is the evidence, the system prompt is the rule that the model may only speak from that evidence, and the citation is the receipt. Below, extract citations from a sample reply with plain regex, with no network call, so you can see what the parsing step has to handle.`,
@@ -1131,6 +1172,15 @@ Every chunk you include is code, and code is often denser than prose, so a chara
 ## Why it matters
 
 Without a budget, a big-repository question like "how does auth work end to end" can retrieve a dozen relevant functions that together blow past the context window, and the call fails. With a budget, you get a deterministic best-effort selection: the most relevant code that fits, and every call succeeds.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A broad question about a large repo fails the API call outright | Every relevant chunk was sent, and together they ran past the context window | Walk the ranked chunks and keep only what fits inside a fixed token budget |
+| The same forty lines of code appear twice in the context | One chunk ranked twice, once on embedding similarity and once through the identifier bonus | Dedupe on (path, start_line, end_line) before charging a chunk to the budget |
+| Half the budget goes unused and the answer is missing obvious context | The loop stopped at the first chunk that was too large to fit | Skip the oversized chunk and keep going, because smaller chunks further down still fit |
+| The budget is respected and the call still overflows | Four characters per token undercounts dense code | Leave headroom, and count with the real tokenizer before you ship |
 
 ## The mental model to keep
 
@@ -1359,6 +1409,14 @@ def classify_answer(answer_text, retrieved_ids):
 
 For a codebase assistant, a wrong citation is worse than no citation. It sends a developer to the wrong function while they trust the tool, so they lose time before they realize it. Checking every citation against the retrieved set before you show an answer is the cheapest way to keep that trust, and it costs nothing beyond a set difference.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An answer cites a real file with a line range you never retrieved | The model produced a plausible citation from its own training knowledge, and only the format was ever checked | Diff the cited ids against the retrieved ids and treat anything left over as fabricated |
+| Verification passes an answer that cites nothing at all | An empty citation set has nothing in it to fail a membership check | Handle the no-citation case separately and label it, instead of letting it through as grounded |
+| Verification flags a citation you can see is correct | The cited id was compared against ids built differently, for example a trimmed path or a different separator | Build both sides from the same id string you put into the context block |
+
 ## The mental model to keep
 
 Extraction tells you what the model *claimed*. Verification tells you whether the claim is *true*. Never ship the first without the second. A codebase assistant that can't tell you when it's guessing is more dangerous than one that admits it doesn't know.`,
@@ -1580,6 +1638,14 @@ If those three hold, you have a tool that works, not a demo that only works on t
 ## Why it matters
 
 A tool that answers questions about a codebase is only as trustworthy as its weakest link. Skip the budget step and it crashes on big repos. Skip the verification step and it lies convincingly. Shipping means every link holds, not just the happy path you tried in lesson 1.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The pipeline works on your test repo and falls over on a large one | The budget step was skipped or set too high, so the context window overflows | Keep the budget in the pipeline and test against a repo big enough to hit it |
+| An answer is displayed as grounded when it is not | classify_answer was computed and then ignored by the code that renders the answer | Branch the display on the status, and hide or flag anything that is not GROUNDED |
+| A question with no relevant code in the repo still gets a confident answer | Retrieval handed back the least-bad chunks and nothing checked whether they were relevant at all | Keep the refusal instruction in the prompt and surface the NO_CITATIONS status instead of the answer text |
 
 ## You're done, and it's in your Portfolio
 

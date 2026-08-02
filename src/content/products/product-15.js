@@ -62,6 +62,15 @@ def chunk_text(text, size=800, overlap=100):
 
 Two knobs matter. \`size\` sets how big each chunk is: big enough to hold a full idea, small enough to stay precise once retrieved. \`overlap\` repeats a little text between consecutive chunks so an idea sitting right on a boundary doesn't get sliced in half and lost from both windows.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A fact you can read on page 12 of the PDF is never found by any search | A chunk boundary landed in the middle of the sentence holding that fact, so the first half sits in one window and the second half in the next, and neither window says the whole thing | Raise the overlap so a sentence straddling a cut still survives whole inside at least one chunk |
+| Extracting the text crashes while joining the pages | A scanned image page has no extractable text and returns None, which cannot be joined with strings | Fall back to an empty string for any page that returns None, the way extract_text does above |
+| Chunking produces thousands of nearly identical windows and never seems to finish | The overlap was set as large as the size, so the step collapses to one character and each window advances almost nowhere | Keep the overlap well under the size, a hundred characters against eight hundred is a normal ratio |
+| Retrieved chunks are about the right topic but too broad to answer anything | The chunk size is large enough to swallow a whole section, so one chunk mixes the answer with several unrelated ideas | Shrink the size until a chunk holds roughly one idea, then let overlap protect the boundaries |
+
 ## A way to picture it
 
 Think of the document as a long hallway of paragraphs. Chunking drops a marker every few hundred characters and lets neighboring markers share a bit of hallway so nothing falls in a gap. None of this understands meaning yet. Ranking comes next lesson. Right now the job is exactly one long string in, a list of overlapping windows out. Build that below in pure Python. You don't need a PDF yet.`,
@@ -260,6 +269,15 @@ def normalize(v):
 
 You never write the embedding math. The model does that. Your job is the plumbing: embed each chunk once, store the vectors, embed the question at query time, and pass both to a similarity function. Get the vector bookkeeping right here and the retrieval logic next lesson is arithmetic on lists.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every chunk scores about the same against every question, and the ranking looks random | The question was embedded with a different model than the chunks were, so the two sets of vectors describe meaning on different maps and comparing them produces noise | Embed chunks and questions with the same model, and re-embed the whole store whenever you change models |
+| Comparing vectors raises a length error, or scores ignore most of the vector | Two embedding models return different vector lengths, so the stored vectors and the query vector do not line up entry by entry | Check that a stored vector and a fresh query vector report the same length before you compare them |
+| Normalizing a vector raises a division error | An empty or whitespace-only chunk embedded to a vector with zero magnitude, and dividing by that magnitude is undefined | Return the vector unchanged when its magnitude is zero, and drop empty chunks before you embed them |
+| The app is slow and expensive on every single question | The chunks are being re-embedded each time someone asks, instead of once at upload | Embed the chunks once after chunking, store the vectors beside the text, and embed only the question at query time |
+
 ## A way to picture it
 
 An embedding is a GPS coordinate for meaning. Two texts about the same topic sit near each other on the map. Two unrelated texts sit far apart. Below, practice the magnitude and normalization math you'll reach for in the next lesson. No network call needed.`,
@@ -448,6 +466,15 @@ That's the entire search engine underneath a RAG app. No keyword index, no query
 ## Where it earns its keep
 
 This one function is why RAG beats keyword search on real questions. A user asks "how much does it cost to cancel early" and matches a chunk that says "early termination incurs a fee." They share no words. The embeddings still land close in meaning-space, so the match holds.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The longest, most rambling chunk wins nearly every question | The ranking uses the raw dot product, which grows with vector length, so a verbose chunk scores high on size rather than on meaning | Divide by both magnitudes so only direction counts, which is exactly what cosine similarity does |
+| The top result has the highest score but is not the passage that answers the question | Highest similarity is not the same as most relevant, and a chunk that merely shares the topic can outrank the one holding the specific fact | Read the top several scores rather than only the first, and revisit chunk size so one chunk holds one idea |
+| Scoring raises a division error, or every chunk comes back at zero | A chunk or the question embedded to a vector with zero magnitude, and dividing by that magnitude is undefined | Return zero similarity when either magnitude is zero, as the function above does |
+| Your best score is around 0.4 and you assume retrieval is broken | Real questions against real documents rarely approach 1, since the question and the answer are worded differently | Judge the ranking by whether the right chunk sits on top, not by whether the number looks high |
 
 ## A way to picture it
 
@@ -659,6 +686,15 @@ answer = resp.content[0].text
 
 Everything before this call is search. Everything from here is a normal model call, the same shape as any other project in this track. The API call doesn't change for RAG. You just feed it smarter input.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The answer contains facts the document never mentions | The retrieved chunks went into the prompt without the rule that restricts the model to them, so it filled the gap from its own general knowledge | Send the system prompt on every call, including the line limiting the model to the provided context and the permission to say it does not know |
+| The citations are off by one, pointing at the chunk before the one actually used | The context labels were numbered from zero while you read them back as if they started at one | Number the labels from one when you build the context block, and use the same numbering when you check citations |
+| The model answers correctly but never cites anything | The context was joined into one undifferentiated block with no numbered labels, so there is nothing for the model to cite | Label each chunk before joining, so every retrieved passage carries its own bracketed number |
+| Building the context raises a key error | The chunks were passed as plain strings while the builder expects each one to carry its text under a key | Keep one chunk shape across retrieval and prompt building, and convert once at the boundary rather than in both places |
+
 ## A way to picture it
 
 A RAG prompt is an open-book exam question. You hand the model the exact pages it's allowed to use, numbered, and tell it to cite the page each fact came from. It can't flip to a page you never handed it. Below, build the context-assembly and prompt-building step in pure Python. No network call needed.`,
@@ -865,6 +901,15 @@ This keeps looking past the naive top-k cutoff, so a duplicate at rank 2 doesn't
 
 Without dedup, overlapping chunks eat your context budget. You can send 3 chunks that really cover 2 distinct ideas, paying tokens to repeat one sentence. Scanning past duplicates instead of cutting at a fixed rank means your k chunks are k genuinely different pieces of the document.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| You asked for four chunks and the prompt only carries two | The duplicates were removed after the top k was sliced, so every duplicate inside that slice shrank the final context | Scan in score order and skip duplicates as you go, stopping only once k unique chunks are collected |
+| The prompt repeats the same sentence under two different source numbers | Overlapping windows put nearly identical text in neighboring chunks, and both scored high on the same question | Drop a candidate whose text already sits inside a chunk you kept, or contains one you kept |
+| The passage that actually answers the question never reaches the model | Near-duplicate windows of one strong paragraph filled all k slots and crowded out the second, different passage that held the rest of the answer | Dedupe while scanning so the k slots hold k genuinely different pieces of the document |
+| Raising k makes the answers worse rather than better | A larger k pulls in low-scoring chunks that dilute the context and give the model more irrelevant text to answer from | Keep k in the range of three to six and improve chunking rather than reaching for more chunks |
+
 ## A way to picture it
 
 Top-k picks the highest scores. Dedup makes sure you don't pick the same paragraph twice under two different chunk IDs. Below, implement the scan-and-skip retrieval described above. No network needed, just ranking and substring checks.`,
@@ -1065,6 +1110,15 @@ If \`citations_valid\` fails, treat the answer as untrustworthy. Retry, strip th
 ## Where it earns its keep
 
 A RAG app that never says "I don't know" is harder to trust, because you can't tell its confident wrong answers from its confident right ones. The similarity floor and the citation check cost almost nothing. They're what separates a demo that shines on the happy path from a tool people rely on when the document falls short.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A question the document never covers still gets a confident, detailed answer | The similarity floor sits so low that the weak best match clears it, so the model is asked anyway and writes something plausible | Raise the floor until off-topic questions fall below it, and check the score your real questions actually produce before you pick the number |
+| The app refuses everything, including questions the document clearly answers | The floor was set near 1 on the assumption that good matches score high, when real matches land closer to 0.2 to 0.6 | Lower the floor into the range your own document produces, testing with a handful of questions you know the answer to |
+| The refusal check crashes before it can refuse | The ranked list was empty, and reading the top score from an empty list has nothing to read | Treat an empty ranking as a refusal, checking that a top result exists before you read its score |
+| The answer cites a source number larger than the number of chunks you sent | The model invented a citation, which the prompt alone cannot prevent | Extract the cited numbers and reject the answer when any of them falls outside the range of chunks you supplied |
 
 ## A way to picture it
 
@@ -1287,6 +1341,15 @@ def call_with_retry(fn, tries=3):
 
 RAG apps look cheap in a demo and turn expensive in production, because the embedding step scales with document size and re-uploads, not with how many questions people ask. Caching by content hash is the most effective fix here. Most re-uploads edit a handful of pages, not the whole document.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The embedding bill is the same on the fifth upload of a document as on the first | Nothing recognizes text that was already embedded, so every upload pays for the whole document again | Key the cache on a hash of each chunk's exact text, and embed only the chunks whose hash is missing |
+| The cache is in place but still misses on an unchanged document | The cache key is the filename, the upload time, or the chunk's position, all of which change even when the text does not | Hash the chunk text itself, so identical text produces the same key no matter which file or position it came from |
+| A user uploads a scanned PDF and the app crashes several steps later inside the similarity math | Nothing extractable came out of the file, so empty text flowed all the way into chunking and embedding before anything noticed | Reject empty text and blank questions at the entry point, before you spend a single embedding call |
+| The measured cost is lower than the invoice | Failed attempts spent input tokens too, and the retry loop only counts the attempt that finally succeeded | Count every attempt, not just the successful one, when you tally token spend |
+
 ## A way to picture it
 
 Never pay to embed the same sentence twice. Below, tally the real embedding bill for a batch of chunks where some are exact repeats of earlier ones. Pure Python, mirroring the content-hash cache above.`,
@@ -1485,6 +1548,15 @@ The same three checks from the playbook. It runs from a clean start with one com
 ## Into your Portfolio
 
 Finishing this lesson records Chat With Your PDF in your **Portfolio** tab. Keep one real document and a question-and-answer pair around as proof it retrieves and grounds correctly. That's your demo.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Every question is as slow and as expensive as the first one | Ingest is being called inside the question loop, so the document is chunked and embedded again before each answer | Run ingest once before the loop and pass the chunks and vectors into each call to ask |
+| Looking up a chunk's vector raises a key error | The chunks were re-created with a different size or overlap after embedding, so their hashes no longer match the keys in the vector store | Chunk once and carry that exact list through embedding and retrieval, re-embedding whenever the chunking settings change |
+| The shipped app answers off-topic questions confidently even though the refusal check is written | The pipeline skips straight from ranking to the prompt, so the similarity floor never runs on the path a real question takes | Check the top score before you build the request, and return the honest refusal from that branch |
+| The first question after startup fails on a document that loaded without complaint | The file yielded no extractable text, and the guards from the previous lesson were never wired into ingest | Validate the extracted text inside ingest, so a bad upload fails immediately with a clear message |
 
 ## A way to picture it
 
