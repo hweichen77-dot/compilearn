@@ -120,15 +120,23 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3\n5 10 15",
-          "expected_output": "5\n10\n15"
-        },
-        {
-          "input": "1\n42",
-          "expected_output": "42"
+          "expected_output": "5\n10\n15",
+          "description": "three values, one per line"
         },
         {
           "input": "4\n-1 0 7 7",
-          "expected_output": "-1\n0\n7\n7"
+          "expected_output": "-1\n0\n7\n7",
+          "description": "negatives, zero, and duplicates"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "42",
+          "description": "single element array"
+        },
+        {
+          "input": "0",
+          "expected_output": "",
+          "description": "zero-length array prints nothing"
         }
       ],
       "xp_reward": 100
@@ -238,15 +246,23 @@ export default {
       "challenge_test_cases": [
         {
           "input": "4\n1 2 3 4",
-          "expected_output": "4 2 3 1"
+          "expected_output": "4 2 3 1",
+          "description": "ends trade places, middle unchanged"
+        },
+        {
+          "input": "2\n8 5",
+          "expected_output": "5 8",
+          "description": "two elements, whole array swaps"
         },
         {
           "input": "1\n9",
-          "expected_output": "9"
+          "expected_output": "9",
+          "description": "single element swaps with itself"
         },
         {
-          "input": "5\n10 20 30 40 50",
-          "expected_output": "50 20 30 40 10"
+          "input": "5\n-3 20 30 40 -7",
+          "expected_output": "-7 20 30 40 -3",
+          "description": "negatives at both ends"
         }
       ],
       "xp_reward": 100
@@ -357,15 +373,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3\n1 2 3",
-          "expected_output": "3\n6"
-        },
-        {
-          "input": "1\n100",
-          "expected_output": "1\n100"
+          "expected_output": "3\n6",
+          "description": "length then sum"
         },
         {
           "input": "5\n2 4 6 8 10",
-          "expected_output": "5\n30"
+          "expected_output": "5\n30",
+          "description": "five elements"
+        },
+        {
+          "input": "1\n100",
+          "expected_output": "1\n100",
+          "description": "single element"
+        },
+        {
+          "input": "4\n-5 3 -8 10",
+          "expected_output": "4\n0",
+          "description": "mixed signs, sum stays correct"
+        },
+        {
+          "input": "0",
+          "expected_output": "0\n0",
+          "description": "empty array reports length 0 and sum 0"
         }
       ],
       "xp_reward": 100
@@ -475,15 +504,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n1 2 3 4 6",
-          "expected_output": "3"
+          "expected_output": "3",
+          "description": "mix of even and odd"
         },
         {
           "input": "3\n1 3 5",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "no evens at all"
         },
         {
           "input": "4\n2 4 6 8",
-          "expected_output": "4"
+          "expected_output": "4",
+          "description": "every value is even"
+        },
+        {
+          "input": "5\n0 -4 -3 7 -2",
+          "expected_output": "3",
+          "description": "zero and negative evens count"
+        },
+        {
+          "input": "1\n7",
+          "expected_output": "0",
+          "description": "single odd element"
         }
       ],
       "xp_reward": 100
@@ -593,15 +635,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "4\n4 9 2 7",
-          "expected_output": "9"
+          "expected_output": "9",
+          "description": "maximum in the middle"
         },
         {
           "input": "3\n-5 -2 -9",
-          "expected_output": "-2"
+          "expected_output": "-2",
+          "description": "all negative, max is not 0"
+        },
+        {
+          "input": "5\n1 2 3 4 100",
+          "expected_output": "100",
+          "description": "maximum at the last index"
+        },
+        {
+          "input": "4\n50 1 2 3",
+          "expected_output": "50",
+          "description": "maximum at index 0"
         },
         {
           "input": "1\n42",
-          "expected_output": "42"
+          "expected_output": "42",
+          "description": "single element array"
         }
       ],
       "xp_reward": 100
@@ -712,15 +767,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "4\n7 3 9 4\n9",
-          "expected_output": "2"
+          "expected_output": "2",
+          "description": "target found in the middle"
         },
         {
           "input": "3\n1 2 3\n5",
-          "expected_output": "-1"
+          "expected_output": "-1",
+          "description": "target absent returns -1"
+        },
+        {
+          "input": "5\n1 9 3 9 5\n9",
+          "expected_output": "1",
+          "description": "returns first match, not last"
+        },
+        {
+          "input": "4\n1 2 3 4\n4",
+          "expected_output": "3",
+          "description": "target at the last index"
         },
         {
           "input": "5\n8 8 8 8 8\n8",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "all elements match, index 0 wins"
+        },
+        {
+          "input": "1\n7\n3",
+          "expected_output": "-1",
+          "description": "single element, no match"
         }
       ],
       "xp_reward": 100
@@ -830,15 +903,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n1 1 2 2 2",
-          "expected_output": "3"
+          "expected_output": "3",
+          "description": "three in a row makes two pairs"
         },
         {
           "input": "4\n1 2 3 4",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "no adjacent pairs"
+        },
+        {
+          "input": "4\n5 5 5 5",
+          "expected_output": "3",
+          "description": "every adjacent pair matches"
+        },
+        {
+          "input": "4\n1 2 3 3",
+          "expected_output": "1",
+          "description": "pair sits at the very end"
+        },
+        {
+          "input": "5\n1 2 1 2 1",
+          "expected_output": "0",
+          "description": "equal values that are not adjacent"
         },
         {
           "input": "1\n7",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "single element has no pair to compare"
         }
       ],
       "xp_reward": 100
@@ -951,15 +1042,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n1 2 3 4 5",
-          "expected_output": "2"
+          "expected_output": "2",
+          "description": "two values above the mean"
         },
         {
           "input": "4\n10 10 10 10",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "all equal, none strictly above"
         },
         {
           "input": "3\n1 2 9",
-          "expected_output": "1"
+          "expected_output": "1",
+          "description": "one large value pulls the mean up"
+        },
+        {
+          "input": "2\n-2 -3",
+          "expected_output": "1",
+          "description": "negative mean must keep its fraction"
+        },
+        {
+          "input": "1\n5",
+          "expected_output": "0",
+          "description": "single element equals its own mean"
+        },
+        {
+          "input": "4\n1 1 1 5",
+          "expected_output": "1",
+          "description": "fractional mean between values"
         }
       ],
       "xp_reward": 100

@@ -120,15 +120,28 @@ export default {
       "challenge_test_cases": [
         {
           "input": "apple\nbanana\ncherry\n",
-          "expected_output": "3"
+          "expected_output": "3",
+          "description": "three lines counted"
+        },
+        {
+          "input": "hello world\nfoo bar baz\n",
+          "expected_output": "2",
+          "description": "whole lines, not words"
+        },
+        {
+          "input": "apple\n\nbanana\n",
+          "expected_output": "2",
+          "description": "blank line is skipped"
         },
         {
           "input": "only\n",
-          "expected_output": "1"
+          "expected_output": "1",
+          "description": "single line"
         },
         {
           "input": "a\nb\nc\nd\ne\n",
-          "expected_output": "5"
+          "expected_output": "5",
+          "description": "five short lines"
         }
       ]
     },
@@ -236,16 +249,29 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<String> list = new ArrayList<String>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.next());\n        }\n        int k = sc.nextInt();\n        System.out.println(list.get(k));\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "3\nalpha beta gamma\n2\n",
-          "expected_output": "gamma"
+          "input": "3\nalpha beta gamma\n2",
+          "expected_output": "gamma",
+          "description": "last valid index"
         },
         {
-          "input": "4\nred green blue yellow\n0\n",
-          "expected_output": "red"
+          "input": "4\nred green blue yellow\n0",
+          "expected_output": "red",
+          "description": "index 0 is the first word"
         },
         {
-          "input": "5\na b c d e\n3\n",
-          "expected_output": "d"
+          "input": "5\na b c d e\n3",
+          "expected_output": "d",
+          "description": "index in the middle"
+        },
+        {
+          "input": "1\nsolo\n0",
+          "expected_output": "solo",
+          "description": "single element list"
+        },
+        {
+          "input": "3\nalpha\nbeta\ngamma\n1",
+          "expected_output": "beta",
+          "description": "words split across lines"
         }
       ]
     },
@@ -353,16 +379,29 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<Integer> list = new ArrayList<Integer>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.nextInt());\n        }\n        list.set(0, 0);\n        list.remove(list.size() - 1);\n        for (int i = 0; i < list.size(); i++) {\n            if (i > 0) {\n                System.out.print(\" \");\n            }\n            System.out.print(list.get(i));\n        }\n        System.out.println();\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "4\n7 8 9 10\n",
-          "expected_output": "0 8 9"
+          "input": "4\n7 8 9 10",
+          "expected_output": "0 8 9",
+          "description": "index 0 zeroed, last removed"
         },
         {
-          "input": "3\n1 2 3\n",
-          "expected_output": "0 2"
+          "input": "3\n1 2 3",
+          "expected_output": "0 2",
+          "description": "three shrink to two"
         },
         {
-          "input": "2\n50 60\n",
-          "expected_output": "0"
+          "input": "4\n3 7 2 7",
+          "expected_output": "0 7 2",
+          "description": "removes by index, not by value"
+        },
+        {
+          "input": "2\n50 60",
+          "expected_output": "0",
+          "description": "two elements leave one behind"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "",
+          "description": "single element leaves an empty list"
         }
       ]
     },
@@ -472,16 +511,34 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<Integer> list = new ArrayList<Integer>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.nextInt());\n        }\n        int sum = 0;\n        for (int i = 0; i < list.size(); i++) {\n            sum += list.get(i);\n        }\n        System.out.println(sum);\n        System.out.println(sum / n);\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "4\n2 4 6 8\n",
-          "expected_output": "20\n5"
+          "input": "4\n2 4 6 8",
+          "expected_output": "20\n5",
+          "description": "sum divides evenly"
         },
         {
-          "input": "3\n1 2 4\n",
-          "expected_output": "7\n2"
+          "input": "3\n1 2 4",
+          "expected_output": "7\n2",
+          "description": "integer division truncates the average"
         },
         {
-          "input": "5\n10 10 10 10 10\n",
-          "expected_output": "50\n10"
+          "input": "5\n10 10 10 10 10",
+          "expected_output": "50\n10",
+          "description": "every value identical"
+        },
+        {
+          "input": "2\n-3 -4",
+          "expected_output": "-7\n-3",
+          "description": "negative average truncates toward zero"
+        },
+        {
+          "input": "2\n5 -5",
+          "expected_output": "0\n0",
+          "description": "values cancel to a sum of zero"
+        },
+        {
+          "input": "1\n7",
+          "expected_output": "7\n7",
+          "description": "single element is its own average"
         }
       ]
     },
@@ -589,16 +646,29 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<String> words = new ArrayList<String>();\n        for (int i = 0; i < n; i++) {\n            words.add(sc.next());\n        }\n        String longest = \"\";\n        for (String w : words) {\n            if (w.length() > longest.length()) {\n                longest = w;\n            }\n        }\n        System.out.println(longest);\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "3\ncat elephant dog\n",
-          "expected_output": "elephant"
+          "input": "3\ncat elephant dog",
+          "expected_output": "elephant",
+          "description": "longest word in the middle"
         },
         {
-          "input": "4\nhi hey hello yo\n",
-          "expected_output": "hello"
+          "input": "3\na bb ccc",
+          "expected_output": "ccc",
+          "description": "longest word is last"
         },
         {
-          "input": "2\nsame size\n",
-          "expected_output": "same"
+          "input": "2\nsame size",
+          "expected_output": "same",
+          "description": "tie keeps the first word"
+        },
+        {
+          "input": "3\nccc bb a",
+          "expected_output": "ccc",
+          "description": "longest word is first"
+        },
+        {
+          "input": "1\nsolo",
+          "expected_output": "solo",
+          "description": "single word list"
         }
       ]
     },
@@ -706,16 +776,34 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<Integer> list = new ArrayList<Integer>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.nextInt());\n        }\n        for (int i = list.size() - 1; i >= 0; i--) {\n            if (list.get(i) % 2 == 0) {\n                list.remove(i);\n            }\n        }\n        for (int i = 0; i < list.size(); i++) {\n            if (i > 0) {\n                System.out.print(\" \");\n            }\n            System.out.print(list.get(i));\n        }\n        System.out.println();\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "5\n1 2 3 4 5\n",
-          "expected_output": "1 3 5"
+          "input": "5\n1 2 3 4 5",
+          "expected_output": "1 3 5",
+          "description": "alternating odd and even"
         },
         {
-          "input": "4\n2 4 6 8\n",
-          "expected_output": ""
+          "input": "4\n2 4 6 8",
+          "expected_output": "",
+          "description": "every value removed"
         },
         {
-          "input": "6\n7 7 2 9 4 11\n",
-          "expected_output": "7 7 9 11"
+          "input": "6\n1 2 2 3 4 5",
+          "expected_output": "1 3 5",
+          "description": "back-to-back evens, none skipped"
+        },
+        {
+          "input": "3\n1 3 5",
+          "expected_output": "1 3 5",
+          "description": "all odd, list untouched"
+        },
+        {
+          "input": "4\n-4 -3 0 7",
+          "expected_output": "-3 7",
+          "description": "zero and negative evens removed"
+        },
+        {
+          "input": "1\n2",
+          "expected_output": "",
+          "description": "single even leaves nothing"
         }
       ]
     },
@@ -826,16 +914,34 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<Integer> list = new ArrayList<Integer>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.nextInt());\n        }\n        int max = list.get(0);\n        int idx = 0;\n        for (int i = 1; i < list.size(); i++) {\n            if (list.get(i) > max) {\n                max = list.get(i);\n                idx = i;\n            }\n        }\n        System.out.println(max);\n        System.out.println(idx);\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "5\n3 9 4 9 1\n",
-          "expected_output": "9\n1"
+          "input": "5\n3 9 4 9 1",
+          "expected_output": "9\n1",
+          "description": "ties report the first index"
         },
         {
-          "input": "3\n5 5 5\n",
-          "expected_output": "5\n0"
+          "input": "4\n1 2 3 8",
+          "expected_output": "8\n3",
+          "description": "maximum at the last index"
         },
         {
-          "input": "4\n1 2 3 8\n",
-          "expected_output": "8\n3"
+          "input": "4\n7 1 2 3",
+          "expected_output": "7\n0",
+          "description": "maximum at index 0"
+        },
+        {
+          "input": "3\n-5 -2 -9",
+          "expected_output": "-2\n1",
+          "description": "all negative, max is not 0"
+        },
+        {
+          "input": "3\n5 5 5",
+          "expected_output": "5\n0",
+          "description": "every value identical"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "42\n0",
+          "description": "single element list"
         }
       ]
     },
@@ -944,16 +1050,34 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        ArrayList<Integer> list = new ArrayList<Integer>();\n        for (int i = 0; i < n; i++) {\n            list.add(sc.nextInt());\n        }\n        for (int i = 1; i < list.size(); i++) {\n            int key = list.get(i);\n            int j = i - 1;\n            while (j >= 0 && list.get(j) > key) {\n                list.set(j + 1, list.get(j));\n                j--;\n            }\n            list.set(j + 1, key);\n        }\n        for (int i = 0; i < list.size(); i++) {\n            if (i > 0) {\n                System.out.print(\" \");\n            }\n            System.out.print(list.get(i));\n        }\n        System.out.println();\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "5\n3 1 4 1 5\n",
-          "expected_output": "1 1 3 4 5"
+          "input": "5\n3 1 4 1 5",
+          "expected_output": "1 1 3 4 5",
+          "description": "unsorted with a repeat"
         },
         {
-          "input": "4\n9 7 8 6\n",
-          "expected_output": "6 7 8 9"
+          "input": "5\n5 4 3 2 1",
+          "expected_output": "1 2 3 4 5",
+          "description": "fully reversed input"
         },
         {
-          "input": "3\n2 2 1\n",
-          "expected_output": "1 2 2"
+          "input": "4\n1 2 3 4",
+          "expected_output": "1 2 3 4",
+          "description": "already sorted stays put"
+        },
+        {
+          "input": "5\n0 -1 3 -7 2",
+          "expected_output": "-7 -1 0 2 3",
+          "description": "negatives sort before zero"
+        },
+        {
+          "input": "3\n2 2 1",
+          "expected_output": "1 2 2",
+          "description": "duplicates keep their order"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "42",
+          "description": "single element needs no work"
         }
       ]
     }

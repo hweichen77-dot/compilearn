@@ -56,6 +56,14 @@ Total time is roughly \`TTFT + (tokens - 1) * inter_token_latency\`. Streaming d
 
 The trade-off: streaming is harder to handle. You must parse a live event stream, deal with partial tokens, and decide what to do if the connection drops mid-answer.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The response still appears all at once, not word by word, even though streaming is turned on | A buffer sits between the client and server, often a proxy or the client code itself, and holds the chunks until the connection closes | Check for buffering at every hop and flush chunks immediately instead of waiting to accumulate them |
+| The API is streaming but the app still feels slow | TTFT was never measured on its own, so a slow first token gets blamed on generation speed instead of the delay before it starts | Log TTFT separately and treat it as the number that drives perceived speed |
+| Streaming was added but total request time barely changed, and someone calls it a failure | Streaming only changes when output becomes visible, not how long the model takes to generate it | Judge streaming by perceived wait and TTFT, not by total duration |
+
 ## The mental model to keep
 
 Streaming does not make the answer faster. It makes the wait feel faster by showing the work as it happens, and TTFT is the number your users actually feel.`,
@@ -348,6 +356,14 @@ You accumulate the tokens to rebuild the full message, while showing each one th
 - **It is the standard.** OpenAI, Anthropic, and most providers stream over SSE, so knowing the format means you can read any of them.
 - **It is reliable and simple.** Being plain HTTP, it survives most corporate proxies and load balancers that block fancier protocols.
 - **You must handle partial and broken streams.** A dropped connection can leave you with half an answer. Real clients buffer, detect the missing \`[DONE]\`, and decide whether to retry or surface what they have.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| JSON parsing crashes partway through a stream, or tokens show up broken or out of order | The reader split on every newline instead of waiting for the blank-line boundary, cutting a single event into pieces | Buffer lines until a blank line appears, then parse the completed event as one unit |
+| The client hangs and never finishes reading the stream | The code never checks for the [DONE] sentinel, so the read loop keeps waiting for data that is not coming | Explicitly test each payload for [DONE] and break the loop the moment it appears |
+| The reconstructed message ends with junk after what looked like a clean answer | Lines that arrived after [DONE] were still being read and parsed | Stop reading entirely once the sentinel is seen and discard anything after it |
 
 ## The mental model to keep
 
@@ -663,6 +679,14 @@ prompt = system_prompt + reference_doc + user_question
 - **Latency.** Skipping the prefill of a huge prefix cuts TTFT noticeably on follow-up calls.
 - **It is order-sensitive and fragile.** Change one token in the prefix, reorder sections, or even tweak whitespace, and the cache misses. You must design prompts deliberately to keep the cacheable part identical.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Cache hit rate stays near zero even though the same system prompt and document are sent every call | A timestamp, user id, or session token sits at the front of the prompt, so the very first bytes differ on every request | Move anything that changes per call to the end of the prompt, after the stable content |
+| Cost and TTFT don't improve after adding caching | The prefix order or exact text was never checked, so a small reorder or whitespace change between calls breaks the exact match the cache needs | Keep the cached portion byte for byte identical across calls, including whitespace and section order |
+| Caching helped earlier in a session but stops saving anything later | The cache entry expired after its time-to-live during a gap between calls | Send follow-up calls within the TTL window, since caching only helps bursts of related requests |
+
 ## The mental model to keep
 
 **Caching pays to read a fixed prefix once and then rents it out cheaply. Put everything stable first, everything variable last, and keep the cached part byte-for-byte identical, otherwise you pay full price every time.**`,
@@ -952,6 +976,14 @@ Batch APIs take this further: submit a big job offline, get results back later a
 - **Cost efficiency.** Batch endpoints often cost less per token because the provider can schedule the work efficiently.
 - **You must respect limits.** Naive "send everything at once" code hits rate limits and fails. Controlled concurrency with retries and a cap is the professional pattern.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Requests start failing with rate limit errors partway through a bulk job | Concurrency was raised past what the provider allows, so requests get throttled or rejected instead of finishing faster | Cap in-flight requests with a semaphore and back off when limits are hit |
+| Pushing concurrency higher makes the job slower overall, not faster | Too many simultaneous requests overwhelm the client or trigger retries, so total throughput drops past a certain point | Find the concurrency cap that maximizes completed requests per second, not just the highest number you can launch |
+| The job still takes about as long as running requests one at a time | The code awaits each call before starting the next, so requests never actually overlap | Launch requests together with something like asyncio.gather instead of blocking on each one in sequence |
+
 ## The mental model to keep
 
 **Latency is one request's clock; throughput is the whole job's clock. Overlap independent requests up to a safe cap to make a slow-per-call model finish a huge job fast.**`,
@@ -1227,6 +1259,14 @@ To measure well:
 - **Targets must be concrete.** "Fast" is not a spec; "p95 TTFT < 500ms" is testable and enforceable.
 - **You measure to improve.** Streaming, caching, and concurrency from this module are only worth shipping if you can prove they moved the percentiles you care about.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The dashboard shows a healthy average latency, but users still complain about slow responses | The average was tracked instead of a percentile, so a slow tail of requests gets smoothed away by many fast ones | Track p95 and p99 alongside the average, and judge health by the tail, not the mean |
+| A reported percentile jumps around a lot between checks | The percentile was computed from only a handful of samples, so one slow request swings the number heavily | Collect hundreds of samples before trusting a percentile |
+| An SLO like "TTFT under 500ms" is met on average but users still hit slow responses | The target was written against the mean instead of a specific percentile, so it says nothing about the slow tail | Write the target as a percentile, such as p95 TTFT under 500ms, and measure against that |
+
 ## The mental model to keep
 
 **Track TTFT, total latency, and tokens per second, and judge them by percentiles like p95 and p99, never the average. The tail is the user experience that decides whether they stay.**`,
@@ -1500,6 +1540,14 @@ This is why **output length is the most controllable latency lever you have**. Y
 - **Long outputs dominate total latency.** Summaries, code generation, and long-form drafts spend almost all their time in the throughput phase, not the TTFT phase.
 - **TPS picks the model for the job.** A high-TPS model is worth more for verbose tasks; a low-TTFT model wins for short, chatty replies.
 - **Capping length is a real speedup.** Halving \`max_tokens\` roughly halves the throughput-bound time, often the single biggest latency win available.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A model with a fast first token still takes many seconds to finish a long reply | Total time was assumed to track TTFT, but for a long response the tokens-per-second rate, not TTFT, dominates the wall clock | Measure throughput separately from TTFT and expect long replies to be throughput bound |
+| Switching to a model with a lower TTFT didn't meaningfully speed up long responses | The bottleneck was in the streaming phase, not the startup delay, so a better TTFT barely moved the total | Compare tokens-per-second across models for verbose tasks, not just TTFT |
+| A latency fix that helped short replies does nothing for long ones | Short and long replies are dominated by different terms, one by TTFT and one by throughput, so the same fix doesn't transfer | Cap max_tokens or shorten the expected output, since fewer tokens is the most reliable lever for long-reply latency |
 
 ## The mental model to keep
 
@@ -1785,6 +1833,14 @@ The **threshold** is the whole ballgame. Set it too low and you serve the wrong 
 - **Catches paraphrases.** FAQ-style and support traffic is full of the same question asked a thousand ways. Semantic caching collapses them into one model call.
 - **Bigger savings than exact match.** Real user wording varies endlessly, so an exact cache hits rarely; a semantic cache hits far more often.
 - **It can be dangerously wrong.** A too-loose threshold returns a confidently wrong cached answer. "Cancel my order" and "Can I change my order?" are close in vector space but need different replies, so the threshold must be conservative.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The cache returns a confident but wrong answer to a question that only sounds similar to a cached one | The similarity threshold was set too low, so an unrelated but nearby query counted as a match | Raise the threshold so only genuine paraphrases clear it, even if that means fewer hits |
+| The semantic cache barely saves any model calls | The threshold was set so high that only near-identical wording counts as a hit, missing real paraphrases | Lower the threshold gradually while checking for false hits, rather than leaving it at an overly strict default |
+| Two different requests, like "cancel my order" and "change my order", get the same cached reply | Their embeddings landed close together in vector space even though they need different answers | Test the threshold against known near-miss pairs, not just true paraphrases, before trusting it in production |
 
 ## The mental model to keep
 
@@ -2096,6 +2152,14 @@ The discipline is matching the strategy to the request. A simple, common questio
 - **There is no free lunch.** Push latency down hard and you usually pay more or accept a weaker model; squeeze cost and you usually wait longer.
 - **Routing beats one-size-fits-all.** Sending easy requests to a cheap path and hard ones to a strong path beats forcing every request through the same model.
 - **The dials compound.** Caching plus a right-sized model plus streaming together can cut both expected cost and felt latency far more than any one lever alone.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Streaming was added expecting the bill to drop, but cost per request stayed the same | Streaming only changes perceived latency, it does not change the number of tokens billed | Look to caching or a smaller model tier to actually cut cost, not streaming |
+| Expected latency numbers don't match what users experience | The expected value was computed as a plain average of the hit and miss paths instead of weighting by the actual hit rate | Weight hit and miss latency and cost by hit_rate and (1 - hit_rate) before comparing strategies |
+| One model and setting is used for a whole feature, and it is either too slow for hard requests or overkill for easy ones | Every request was routed through the same fixed strategy regardless of difficulty | Route easy, repeated requests to a small cached model and hard, novel ones to a bigger streamed model |
 
 ## The mental model to keep
 

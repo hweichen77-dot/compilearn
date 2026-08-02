@@ -58,6 +58,14 @@ Agents close the two biggest gaps in plain LLMs:
 - **They can chain steps.** "Book me a table near the office for Friday" is many actions: find the office, search restaurants, check availability, reserve. A loop handles that; a single prediction cannot.
 - **They cost more and fail in new ways.** Each loop is another model call, so agents are slower and pricier. And because they take real actions, a wrong decision can do real damage, not just produce a wrong sentence.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The agent's final answer is confident but is still just a guess, no real data behind it | No tool was ever wired into the loop, so the model only produced text like a plain chatbot | Give the agent an actual tool to call, not just a longer prompt |
+| The model requests a tool but nothing in the program actually changes | The agent runtime never executes the request, it only logs it or ignores it | Have the runtime call the real function named in the request and feed the result back in |
+| The loop runs forever and never prints a final answer | \`decide()\` never returns a final decision, so the loop has no stop condition | Give the loop a clear "done" condition, or cap the number of iterations |
+
 ## The mental model to keep
 
 A plain LLM is a brain in a jar that can only talk. An **agent is that same brain given hands and a to-do list**: it can reach out, touch the world, see what happened, and try again.`,
@@ -387,6 +395,14 @@ Function calling is what lets a "text predictor" reach into the real world relia
 - **You stay in control.** You write every tool. The model can only request the actions you chose to expose, with arguments you can validate before running.
 - **Good descriptions are everything.** The model picks tools based on your written descriptions. A vague description ("does stuff with data") leads to wrong or missed calls. A precise one ("returns current weather for a given city") leads to correct ones.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| \`json.loads(tool_call)\` raises a decode error | The model returned malformed or partial JSON instead of a clean structured call | Parse defensively and treat unparsable output as no tool call rather than crashing |
+| The model calls \`send_email\` when the user only asked about the weather | The tool descriptions are vague or overlap, so the model has nothing to match the goal against | Rewrite each description to say exactly what the tool does and when to use it |
+| Running the tool raises a missing-argument error | The model left out a required argument in the JSON it returned | Validate the arguments against the tool's required list before calling the function |
+
 ## The mental model to keep
 
 The model is a smart dispatcher filling out request forms. **You build the tools and check the forms; the model just decides which form to fill and what to write on it.**`,
@@ -692,6 +708,14 @@ ReAct is the workhorse pattern for building dependable agents:
 - **It is debuggable.** The thought trace is a readable log of *why* the agent did each thing, which is gold when something goes wrong.
 
 The cost: more model calls (every thought is generated text) and longer traces that eat context. ReAct trades tokens for reliability.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The agent searches the whole convoluted question and gets no useful result | It acted directly on the raw goal instead of writing a Thought that breaks it into a searchable piece | Force a reasoning step before every action so the model decomposes the question first |
+| The Observation is a disambiguation list, but the agent picks one option at random | No Thought reasoned about the observation before the next Action ran | Make every Action follow a Thought that actually reads the last Observation |
+| The trace repeats the same search and Observation without making progress | Nothing tracks whether an action already produced this exact result before | Track visited observations, or cap the steps, so a repeat triggers a stop or a different action |
 
 ## The mental model to keep
 
@@ -1024,6 +1048,14 @@ Planning and memory are what separate a toy demo from a useful agent:
 - **Order matters.** You can't book a hotel before searching, or add to a calendar before booking. A plan enforces dependencies between steps.
 - **Context windows are finite.** A long task overflows the window. Long-term memory lets the agent offload finished work and retrieve only what the current step needs.
 - **Failures need recovery.** When a step fails, the hotel is sold out, a good agent re-plans from where it is, rather than restarting or charging ahead with stale assumptions.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A \`KeyError\` when a later step reads an earlier step's result | The step tried to read from working memory before that dependency had run and written its result | Run steps in dependency order and check a dependency exists in memory before reading it |
+| The agent "forgets" the hotel it just booked as soon as it moves to the next step | The step's result was never written back into memory after it ran | Save every step's result into memory before starting the next step |
+| The task starts failing once the number of documents or steps grows large | Everything was kept in working memory, overflowing the context window | Push finished work to long-term storage and pull back only what the current step needs |
 
 ## The mental model to keep
 
@@ -1360,6 +1392,14 @@ Guardrails are the difference between a demo and something you can trust with re
 
 The trade-off is autonomy: every guardrail is a place the agent must stop or ask. Tighten too far and it can't get anything done; loosen too far and it can hurt you. Good agent design is choosing where on that dial each action belongs.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The agent keeps repeating the same call and never produces a final answer | There is no step limit, so a decision that never resolves to final loops indefinitely | Cap the loop at a fixed number of steps and stop it there |
+| One run's bill is far higher than expected | Nothing tracked spend, so every loop iteration made another paid model call with no ceiling | Track cumulative spend and halt the loop before it crosses the budget |
+| One bad tool result leads to a string of increasingly wrong actions | Nothing checked the action before running it, so a bad observation fed straight into the next decision unsupervised | Gate risky or unusual actions behind confirmation so one bad step can't compound on its own |
+
 ## The mental model to keep
 
 Never give an agent unbounded freedom to act. **Cap its steps, cap its spend, gate its dangerous actions, and keep a human on the high-stakes ones.** Assume it will fail, and make failure cheap and visible.`,
@@ -1682,6 +1722,14 @@ Schema quality is the single biggest lever on agent reliability:
 
 The cost is discipline: every tool needs documentation as careful as a public API. That work pays back every single call.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model calls the tool at the wrong moment, or skips it when it should be used | The tool is named and described vaguely, like "process" or "does stuff", giving the model nothing to match against the goal | Name and describe the tool by intent, stating exactly what it does and when to use it |
+| The tool raises a missing-argument error when it runs | The model omitted a required parameter and nothing checked for it first | Mark parameters as required in the schema and validate the call before executing |
+| The model picks one of two similar tools almost at random | Their descriptions overlap, like "get info" and "fetch data", with no distinguishing detail | Make each description specific enough that only one tool clearly fits a given goal |
+
 ## The mental model to keep
 
 The schema is the only window the model has into your tool. **Write it like API docs for a smart but literal new hire: clear name, exact purpose, named parameters, and which ones are mandatory.** Good schema, good calls.`,
@@ -1999,6 +2047,14 @@ Picking the wrong style is a common, expensive mistake:
 - **Reacting wins** on open-ended, uncertain tasks: web research, debugging, anything where each result changes what to do next. It adapts but costs more calls and can wander.
 - **The failure modes differ.** A rigid plan breaks the moment reality diverges from it. A pure reactor can loop, drift, or lose the thread of the overall goal because it never committed to one.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The agent aborts the whole task the moment one step in its plan fails | It committed to a full plan up front and had no way to adapt once reality diverged from it | Use reactive looping, or re-planning, for uncertain tasks instead of locking in one full route |
+| The agent gives a confident but wrong summary despite surprising results along the way | It kept following its original plan and never reasoned about the new observations | Let a surprising observation trigger re-planning instead of being ignored |
+| A simple, well-known pipeline uses far more model calls than expected | It was run reactively, deciding one step at a time, on a task whose path was already predictable | Use plan-then-execute for stable, known tasks and save reactive looping for uncertain ones |
+
 ## The mental model to keep
 
 A planner is a chess player who calculates the whole line before touching a piece; a reactor is a boxer reading the opponent punch by punch. **Plan when the path is knowable; react when it is not, and the best agents do a bit of both.**`,
@@ -2297,6 +2353,14 @@ Approvals are how you give an agent real power without handing it a loaded gun:
 - **They are a dial, not a switch.** Gate too many actions and the agent is useless and annoying; gate too few and it is dangerous. Good design gates precisely the irreversible-or-expensive set and lets the rest run.
 
 The trade-off is friction and speed: every gate is a place the agent must stop and wait for a human. You spend that friction only where the downside justifies it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An irreversible action, like a delete or a payment, ran without anyone approving it | The approval check happened after the action ran, or an unrecognized action was allowed by default | Put the gate before execution and default to blocking any unapproved risky action |
+| Operators start approving every prompt without reading them | Every action, including safe reversible ones, was gated, so people got flooded and began rubber-stamping | Gate only irreversible or expensive actions so each prompt stays rare and gets real attention |
+| The human approves something different from what actually ran | The approval prompt showed a vague summary instead of the exact tool call and its arguments | Show the literal action and arguments being approved, not a paraphrase |
 
 ## The mental model to keep
 

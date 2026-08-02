@@ -59,6 +59,14 @@ Brittle parsing is one of the top reasons AI prototypes never ship:
 
 The fix is not a smarter regex. The fix is to stop receiving prose at all, to make the model emit structured data in the first place, which the rest of this module is about.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The extracted total is wrong even though the code never crashed | A first-match regex grabbed the first dollar figure in the sentence, not the one actually labeled as the total | Never parse prose for money; require a single labeled field, like a JSON total, instead of scanning free text |
+| A parser that worked all week suddenly returns garbage after one reply | The model reworded its answer slightly, so the fixed pattern or string position no longer lines up | Stop chasing wording variations with more regex; make the model return a fixed shape instead of English |
+| \`match.group(1)\` raises an error on some replies | \`re.search\` returned \`None\` because that reply had no dollar sign at all, and the code read \`.group()\` without checking | Guard every regex result, check for \`None\` before calling \`.group()\` |
+
 ## The mental model to keep
 
 **Prose is for humans; structure is for code.** The moment a model's output feeds another program, you want JSON, not sentences. Don't parse English, demand a shape.`,
@@ -356,6 +364,14 @@ Schemas move you from hoping to knowing:
 - **Type guarantees.** \`age\` is an integer, not the string "thirty-four." You can do math without casting and crossing your fingers.
 
 There's one honest caveat: JSON mode guarantees *syntax*, and a strict schema guarantees *keys and types*, but neither guarantees the *values are correct*. The model can still return a plausible-but-wrong age. That's a job for validation, two lessons from now.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| \`json.loads\` raises even though JSON mode is supposedly on | The model wrapped the object in a markdown code fence or added a sentence before it, so the reply isn't pure JSON | Confirm \`response_format\` is actually set on the request, and strip any wrapper before parsing rather than assuming the raw reply is clean |
+| \`data["name"]\` throws a \`KeyError\` on some calls but not others | JSON mode guarantees valid syntax, not fixed keys, so the model used a different field name, like \`full_name\`, on that call | Describe the exact keys in the prompt or attach a JSON Schema so the key names stop drifting between calls |
+| A field parses as the right type but holds a nonsense value, like an age of 200 | JSON mode and a schema only check syntax and shape; neither checks whether the value itself makes sense | Add a separate validation step for value correctness, covered in a later lesson |
 
 ## The mental model to keep
 
@@ -659,6 +675,14 @@ Function calling is the backbone of agents and real integrations:
 
 The same honest caveat from JSON mode applies: the schema guarantees the *shape* of the arguments, not that the *values* are right. \`total\` will be a number, but it could be the wrong number. Validate before you act on anything that matters.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The dispatcher runs a tool call to a function you never defined, like \`delete_db\` | The model hallucinated or was steered into naming a tool outside your actual tool list | Branch only on an allow-list of known tool names and reject anything else before executing it |
+| Code reads \`tool_call["arguments"]["amount"]\` and gets a \`KeyError\` | The model picked a different tool than expected, so the arguments object matches a different schema than the one being assumed | Check \`tool_call["name"]\` first, then read the arguments using that specific tool's schema, not a generic one |
+| A refund tool call has well-typed arguments but refunds the wrong order or amount | The tool schema guarantees the shape of the arguments, not that the values are correct or the action is appropriate | Validate eligibility and amount against your business rules before executing anything that moves money |
+
 ## The mental model to keep
 
 **A tool schema is a job application form for the model.** You hand it the form (name, fields, types); it fills in the blanks with structured arguments. You never read prose, you read a completed form your code already knows how to process.`,
@@ -956,6 +980,14 @@ Validation is the difference between a toy and a system you can trust with real 
 - **Repair makes it self-healing.** Instead of crashing on a bad response, the pipeline asks the model to try again with feedback, recovering from the occasional miss automatically.
 
 The mindset: **never trust model output, even when it's well-formed.** Treat it like input from a stranger on the internet, because in effect, that's what it is.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A record with an obviously wrong value, like a negative age, gets inserted into the database anyway | The schema checked type and shape, not the value range, so a well-typed but nonsensical value sailed through | Add explicit business-rule checks after parsing, ranges, formats, allowed sets, before anything gets used |
+| The pipeline seems to hang or retries many times on the same bad reply | A repair loop kept re-prompting on failure with no retry cap, so a persistently malformed response just retried forever instead of surfacing | Cap the number of repair attempts, then reject or queue the record for manual review instead of retrying indefinitely |
+| A refund total of \`True\` gets treated as a valid amount of 1 | The check only tested \`isinstance(value, (int, float))\`, and in Python a bool is technically an int | Explicitly exclude booleans with \`isinstance(value, bool)\` before accepting a field as a number |
 
 ## The mental model to keep
 
@@ -1273,6 +1305,14 @@ Extraction is everywhere once you start looking:
 - **The same skeleton scales.** Swap the schema and the rules and the same pipeline extracts events, products, or medical fields. The architecture doesn't change.
 
 This is the payoff of the whole module: you no longer hope the model behaves. You hand it a target, constrain its output, validate the result, and only then act. The model is creative; your pipeline is strict. That division of labor is what production AI looks like.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One malformed reply crashes the whole batch job partway through | \`json.loads\` was called directly on every reply with no try/except around it | Wrap parsing in a try/except so one bad reply routes to a failure path instead of stopping the run |
+| A handful of orders are just missing from the output with no trace of what happened to them | Records that failed validation were dropped silently instead of being logged or queued | Route every failure to a retry-then-review queue so nothing is silently lost |
+| A record with a missing name or an invalid email still reaches the database | The validation step was skipped, or a record was emitted before its errors list was checked | Never emit a record until the errors list is confirmed empty; treat model output like input from a stranger |
 
 ## The mental model to keep
 
@@ -1594,6 +1634,14 @@ A well-designed schema does the work your defensive code would otherwise do:
 - **Enums kill branching bugs.** When a status can only be one of three values, you don't write a fallback for the surprise fourth value, it cannot exist.
 - **Narrow types remove casting.** An \`integer\` field never arrives as "5", so no \`int(...)\` call can throw later.
 - **Honest required lists prevent crashes and over-rejection.** Mark too few required and your code hits missing keys; mark too many and you reject good records that simply lacked an optional field.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A status field comes back as "Shipped", "shipped", and "in transit (probably)" across different calls | The field was declared as a plain string with no fixed set of allowed values | Constrain the field with an enum of the exact known values so anything else can't be expressed |
+| Downstream code throws when it tries to treat a quantity field as a number | The field was typed loosely, so the model sometimes returned it as the string "5" instead of an integer | Narrow the type to integer in the schema so a stringified number can never arrive in the first place |
+| Perfectly valid orders that simply have no discount are all rejected by the gate | An optional field like \`discount_code\` was marked required, so its normal absence looked like a missing key | Only mark a key required when the code genuinely cannot proceed without it |
 
 ## The mental model to keep
 
@@ -1923,6 +1971,14 @@ Nesting enables realistic data, but it multiplies the places things can go wrong
 - **Depth invites partial failure.** The top object can be fine while one item three levels down is malformed. Validate each item, not just the wrapper.
 - **Deeply nested schemas confuse the model.** Past two or three levels, models drop fields and lose consistency. Flatten when you can; a list of flat objects beats a five-level tree.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Code crashes with a \`KeyError\` on an order that legitimately has zero items | An empty or missing items list was treated as an error case instead of a normal one | Default with something like \`.get("items", [])\` so an empty or missing list flows through as zero, not a crash |
+| The invoice total is wrong even though the outer object looked fine | One line item three levels down was malformed while the rest of the structure validated fine | Validate every element of a list individually, not just the wrapper object around it |
+| A deep org chart keeps arriving with dropped names or swapped keys below the third level | The schema asked the model to fill five or more levels of nesting, past where models stay consistent | Flatten the tree into a list of flat objects with id and parent_id fields instead of deep nesting |
+
 ## The mental model to keep
 
 **Treat every level as its own little schema.** An array is "many of this shape"; a nested object is "one of that shape, here." Validate and walk each level on its own terms, and always assume a list might be empty.`,
@@ -2220,6 +2276,14 @@ Streaming is what makes structured AI features feel fast and alive:
 - **Perceived speed.** Showing the first list item at 200ms beats showing everything at 4s, even though the total time is the same. Users judge responsiveness by the first paint.
 - **Early failure detection.** If the stream stalls or the shape is going wrong, you can catch it mid-flight instead of after a long wait.
 - **A new failure mode.** Naively calling \`json.loads\` on every partial buffer throws constantly. You must expect and handle the "not valid yet" state as the normal case, not an error.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| \`json.loads\` throws on nearly every chunk while rendering a stream | A half-arrived object is syntactically invalid until its closing brace, and the code treated that exception as fatal | Catch the decode error as the expected "not complete yet" signal and keep accumulating the buffer |
+| The UI shows a blank placeholder the whole time and only renders at the very end | The code waited for one full parse instead of extracting sub-pieces that had already closed | Scan the buffer for fully-closed list items as it grows and render each one as soon as it completes |
+| The placeholder never resolves, even after the stream has clearly stopped sending chunks | The connection was cut or the response was truncated before the final closing brace ever arrived | Treat a buffer that never parses after the stream ends as a failed generation, not a case to wait on forever |
 
 ## The mental model to keep
 

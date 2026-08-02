@@ -71,15 +71,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6\n1 2",
-          "expected_output": "6"
-        },
-        {
-          "input": "2 2\n7 8\n9 10\n0 0",
-          "expected_output": "7"
+          "expected_output": "6",
+          "description": "last row, last column"
         },
         {
           "input": "3 3\n1 2 3\n4 5 6\n7 8 9\n2 1",
-          "expected_output": "8"
+          "expected_output": "8",
+          "description": "row 2 column 1, not the reverse"
+        },
+        {
+          "input": "2 2\n7 8\n9 10\n0 0",
+          "expected_output": "7",
+          "description": "top-left corner"
+        },
+        {
+          "input": "2 4\n1 2 3 4\n5 6 7 8\n1 0",
+          "expected_output": "5",
+          "description": "wide grid catches swapped indices"
+        },
+        {
+          "input": "1 4\n5 6 7 8\n0 3",
+          "expected_output": "8",
+          "description": "single row, last column"
+        },
+        {
+          "input": "4 1\n5\n6\n7\n8\n3 0",
+          "expected_output": "8",
+          "description": "single column, last row"
+        },
+        {
+          "input": "1 1\n99\n0 0",
+          "expected_output": "99",
+          "description": "one-cell grid"
         }
       ],
       "key_terms": [
@@ -191,15 +214,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6",
-          "expected_output": "1 2 3 4 5 6"
-        },
-        {
-          "input": "3 1\n9\n8\n7",
-          "expected_output": "9 8 7"
+          "expected_output": "1 2 3 4 5 6",
+          "description": "row by row, not column by column"
         },
         {
           "input": "1 4\n5 6 7 8",
-          "expected_output": "5 6 7 8"
+          "expected_output": "5 6 7 8",
+          "description": "single row"
+        },
+        {
+          "input": "3 2\n1 2\n3 4\n5 6",
+          "expected_output": "1 2 3 4 5 6",
+          "description": "tall grid keeps row order"
+        },
+        {
+          "input": "3 1\n9\n8\n7",
+          "expected_output": "9 8 7",
+          "description": "single column"
+        },
+        {
+          "input": "2 2\n-1 -2\n-3 -4",
+          "expected_output": "-1 -2 -3 -4",
+          "description": "negative values spaced correctly"
+        },
+        {
+          "input": "1 1\n5",
+          "expected_output": "5",
+          "description": "one cell, no separator"
         }
       ],
       "key_terms": [
@@ -314,15 +355,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6",
-          "expected_output": "21"
+          "expected_output": "21",
+          "description": "every cell contributes"
+        },
+        {
+          "input": "3 3\n1 2 3\n4 5 6\n7 8 9",
+          "expected_output": "45",
+          "description": "square grid, not just the diagonal"
         },
         {
           "input": "2 2\n10 10\n10 10",
-          "expected_output": "40"
+          "expected_output": "40",
+          "description": "all cells identical"
         },
         {
           "input": "1 3\n-1 -2 -3",
-          "expected_output": "-6"
+          "expected_output": "-6",
+          "description": "single row of negatives"
+        },
+        {
+          "input": "3 1\n4\n-2\n9",
+          "expected_output": "11",
+          "description": "single column"
+        },
+        {
+          "input": "2 2\n5 -5\n7 -7",
+          "expected_output": "0",
+          "description": "values cancel to zero"
+        },
+        {
+          "input": "1 1\n7",
+          "expected_output": "7",
+          "description": "one-cell grid"
         }
       ],
       "key_terms": [
@@ -432,15 +496,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 2\n2 3 4\n2",
-          "expected_output": "3"
+          "expected_output": "3",
+          "description": "three scattered matches"
+        },
+        {
+          "input": "2 3\n1 1 1\n1 1 9\n9",
+          "expected_output": "1",
+          "description": "only the final cell matches"
         },
         {
           "input": "2 2\n5 5\n5 5\n5",
-          "expected_output": "4"
+          "expected_output": "4",
+          "description": "every cell matches"
         },
         {
           "input": "2 2\n1 2\n3 4\n9",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "target absent from the grid"
+        },
+        {
+          "input": "2 2\n0 1\n0 0\n0",
+          "expected_output": "3",
+          "description": "counting zero as the target"
+        },
+        {
+          "input": "2 2\n-1 2\n-1 -1\n-1",
+          "expected_output": "3",
+          "description": "negative target"
+        },
+        {
+          "input": "1 1\n4\n4",
+          "expected_output": "1",
+          "description": "one-cell grid matches"
         }
       ],
       "key_terms": [
@@ -552,15 +639,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6",
-          "expected_output": "15"
+          "expected_output": "15",
+          "description": "best row is the last one"
         },
         {
           "input": "3 2\n10 1\n2 2\n5 5",
-          "expected_output": "11"
+          "expected_output": "11",
+          "description": "best row is the first one"
+        },
+        {
+          "input": "3 2\n1 1\n9 9\n2 2",
+          "expected_output": "18",
+          "description": "best row sits in the middle"
         },
         {
           "input": "2 2\n-1 -2\n-3 -1",
-          "expected_output": "-3"
+          "expected_output": "-3",
+          "description": "all negative, best is not 0"
+        },
+        {
+          "input": "1 3\n4 5 6",
+          "expected_output": "15",
+          "description": "single row is the answer"
+        },
+        {
+          "input": "3 1\n5\n-2\n9",
+          "expected_output": "9",
+          "description": "single column, rows of one"
+        },
+        {
+          "input": "2 2\n1 2\n2 1",
+          "expected_output": "3",
+          "description": "two rows tie on sum"
         }
       ],
       "key_terms": [
@@ -671,15 +781,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6",
-          "expected_output": "9"
+          "expected_output": "9",
+          "description": "best column is the last one"
         },
         {
           "input": "3 2\n1 9\n1 9\n1 9",
-          "expected_output": "27"
+          "expected_output": "27",
+          "description": "tall grid, second column wins"
+        },
+        {
+          "input": "2 3\n1 1 10\n1 1 1",
+          "expected_output": "11",
+          "description": "biggest row is not the biggest column"
+        },
+        {
+          "input": "2 3\n9 1 1\n9 1 1",
+          "expected_output": "18",
+          "description": "best column is the first one"
         },
         {
           "input": "2 2\n-1 -5\n-2 -1",
-          "expected_output": "-3"
+          "expected_output": "-3",
+          "description": "all negative, best is not 0"
+        },
+        {
+          "input": "1 3\n4 9 2",
+          "expected_output": "9",
+          "description": "single row, columns of one"
+        },
+        {
+          "input": "3 1\n1\n2\n3",
+          "expected_output": "6",
+          "description": "single column is the answer"
         }
       ],
       "key_terms": [
@@ -790,15 +923,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 2 6\n2",
-          "expected_output": "0 1"
-        },
-        {
-          "input": "2 2\n5 6\n7 8\n8",
-          "expected_output": "1 1"
+          "expected_output": "0 1",
+          "description": "first of two matches wins"
         },
         {
           "input": "2 2\n1 2\n3 4\n9",
-          "expected_output": "-1"
+          "expected_output": "-1",
+          "description": "target absent prints -1"
+        },
+        {
+          "input": "2 3\n1 1 5\n5 1 1\n5",
+          "expected_output": "0 2",
+          "description": "scans row by row, not column by column"
+        },
+        {
+          "input": "2 2\n5 6\n7 8\n8",
+          "expected_output": "1 1",
+          "description": "match in the last cell"
+        },
+        {
+          "input": "2 2\n9 1\n2 3\n9",
+          "expected_output": "0 0",
+          "description": "match at the top-left corner"
+        },
+        {
+          "input": "1 4\n7 3 7 3\n7",
+          "expected_output": "0 0",
+          "description": "duplicates inside one row"
+        },
+        {
+          "input": "1 1\n4\n4",
+          "expected_output": "0 0",
+          "description": "one-cell grid matches"
         }
       ],
       "key_terms": [
@@ -912,15 +1068,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "2 3\n1 2 3\n4 5 6",
-          "expected_output": "1 4\n2 5\n3 6"
+          "expected_output": "1 4\n2 5\n3 6",
+          "description": "2 by 3 becomes 3 by 2"
         },
         {
-          "input": "2 2\n1 2\n3 4",
-          "expected_output": "1 3\n2 4"
+          "input": "3 1\n7\n8\n9",
+          "expected_output": "7 8 9",
+          "description": "single column becomes a single row"
         },
         {
           "input": "1 3\n7 8 9",
-          "expected_output": "7\n8\n9"
+          "expected_output": "7\n8\n9",
+          "description": "single row becomes a single column"
+        },
+        {
+          "input": "2 2\n1 2\n3 4",
+          "expected_output": "1 3\n2 4",
+          "description": "square grid flips across the diagonal"
+        },
+        {
+          "input": "3 2\n1 2\n3 4\n5 6",
+          "expected_output": "1 3 5\n2 4 6",
+          "description": "tall grid becomes wide"
+        },
+        {
+          "input": "1 1\n5",
+          "expected_output": "5",
+          "description": "one-cell grid is unchanged"
         }
       ],
       "key_terms": [

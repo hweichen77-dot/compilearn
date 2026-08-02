@@ -57,6 +57,14 @@ This is correct but **O(n)** per query: double the data, double the time. At a m
 - **It powers RAG.** Retrieval-augmented generation lives or dies on fast, relevant retrieval. The vector DB is the "retrieval" half.
 - **More than similarity.** Production systems need filtering, hybrid keyword matching, and re-ranking, features a raw NumPy loop will never give you, and the rest of this module builds.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A demo search feels instant, then a real query takes several seconds once the data grows | The search is a brute-force loop that compares the query to every stored vector, so cost scales linearly with the data | Replace the loop with an indexed vector store built for approximate nearest neighbor search |
+| A teammate writes a SQL WHERE clause that computes similarity for every row and it crawls at scale | A computed similarity condition still has to run for every row, since ordinary indexes only work on scalar columns | Move similarity search into a vector database with a real ANN index instead of a WHERE clause |
+| Cosine similarity throws a division error, or every score comes back as zero | A stored or query vector has a zero norm, and dividing by that norm is undefined | Check for a zero norm before dividing and treat that case as zero similarity |
+
 ## The mental model to keep
 
 A vector database is a **search engine for meaning**: it trades a tiny bit of accuracy for an enormous amount of speed, so "find the closest vectors" stays fast no matter how much data you pour in.`,
@@ -377,6 +385,14 @@ This is the core tuning dial: **ef trades recall for speed.** Crank it up when a
 - **99% recall is often plenty.** Missing the true #1 result occasionally is fine when the #2 is nearly as relevant, and worth it for a 100x speedup.
 - **Index choice has costs.** HNSW gives great recall and speed but uses more memory and is slow to build. Other indexes (IVF, flat) trade differently. There is no free lunch.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Search misses a document you know is relevant, even though it is close to the query | efSearch is set low, so the graph walk only explores a small set of candidates | Raise efSearch and re-measure recall against exact search until it hits your target |
+| Recall quietly drops after someone tunes the index for speed | efSearch or a similar knob was lowered to cut latency, without checking recall afterward | Measure recall on a labeled set any time a speed-focused setting changes, don't tune by feel |
+| Queries are noticeably slower after chasing higher accuracy | efSearch was raised to improve recall, which increases how many candidates each query explores | Treat recall and latency as a dial, raise ef only as far as your recall target actually requires |
+
 ## The mental model to keep
 
 An ANN index is a **shortcut map**: instead of visiting every vector, you follow a few good roads toward the answer. You might miss the single closest house, but you'll reliably land on its street, far, far faster.`,
@@ -680,6 +696,14 @@ Good systems do filtering *inside* the index walk so you keep both speed and com
 - **Security and access control.** Filtering by access level is often the only thing standing between a user and documents they should never see. This is not optional.
 - **Correctness.** Language, date, region, and tenant filters keep answers relevant and current. Similarity alone has no idea a doc is outdated or off-limits.
 - **The empty-result trap.** Naive post-filtering can silently return zero rows. You must design for "filter matches nothing in the top-k" or users hit dead ends.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A filtered search returns nothing, even though matching documents exist | Post-filtering ranked by similarity first, then dropped every one of the top results for failing the filter | Filter inside the index search, or over-fetch a larger candidate set before filtering |
+| A user retrieves a document marked internal or restricted | The query had no access-level filter, so similarity alone decided the result | Treat metadata filtering as a required security boundary, not an optional refinement |
+| The top result is in the wrong language or clearly out of date | Similarity only measures closeness in meaning, it has no concept of language, date, or permissions | Attach the relevant metadata and require it to match before ranking by similarity |
 
 ## The mental model to keep
 
@@ -1006,6 +1030,14 @@ A document ranked near the top of *either* list gets a strong boost; a document 
 - **Vague intent breaks pure keyword search.** Synonyms and paraphrases share no words with the target. Vector search rescues those.
 - **Fusion beats either alone** on mixed real-world queries, which is most of them. Production search is almost always hybrid for this reason.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A search for an exact error code or SKU returns generic, off-topic documents | Vector search matches meaning, and an exact string like a code carries little semantic content | Add a keyword search pass and fuse its results with the vector results |
+| Combining a BM25 score and a cosine score produces a ranking that makes no sense | The two scores live on different scales, so adding or comparing them directly is meaningless | Fuse by each result's rank position, such as Reciprocal Rank Fusion, instead of raw scores |
+| A paraphrased question fails to find the obviously relevant how-to page | Keyword search only matches shared terms, and the question shares no words with the document | Add vector search so meaning-based matches are caught alongside exact terms |
+
 ## The mental model to keep
 
 Keyword search is a **precise scalpel** for exact terms; vector search is a **wide net** for meaning. **Hybrid search uses both tools and merges the catch** so you stop losing queries that only one of them could have answered.`,
@@ -1302,6 +1334,14 @@ You pay the cross-encoder cost on 50 items, not 50 million. The retriever's job 
 - **Scaling levers are real.** Larger datasets push you toward **sharding** (split vectors across machines) and **quantization** (compress vectors to use less memory), each trading a little accuracy or recall for capacity and speed.
 - **Recall before precision.** If stage 1 never retrieves a good doc, stage 2 can't rescue it. Tune the retriever for recall first, then let the re-ranker handle precision.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The reranker never surfaces a document you know is the right answer | The document never made it into the retrieved candidate set, so the reranker never saw it | Widen stage one, retrieve more candidates and tune the retriever for recall, not just the reranker |
+| Reranking every candidate over the full corpus takes far too long per query | A cross-encoder scores the query and document together, which is too slow to run at that scale | Run the cross-encoder only on the small candidate set that stage one already retrieved |
+| Final ranking looks accurate but each query still feels slow overall | Too many candidates are being passed into the expensive reranking stage | Keep the retrieved candidate set small, on the order of tens, not hundreds |
+
 ## The mental model to keep
 
 Retrieval is a **fast, generous first sweep**; re-ranking is a **slow, careful final judge** over the short list. **Cast a wide net cheaply, then spend your expensive compute only on what you caught.**`,
@@ -1582,6 +1622,14 @@ The decisive axes are usually: **scale** (thousands vs billions of vectors), **o
 - **Premature scale is a tax.** A managed cluster for 50,000 vectors burns money and complexity you do not need. pgvector would have been free and one migration away.
 - **Outgrowing your choice is real.** FAISS in a single process has no replication; the day you need high availability you are rebuilding the operational layer a service gives you out of the box.
 - **Filtering is a silent dealbreaker.** If you need strict metadata pre-filtering (from the earlier lesson), confirm the candidate supports it well before you commit, not after.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A small project is paying a large recurring bill and needs a team just to operate its search | A managed service or large cluster was chosen before the project's scale required it | Start with the cheapest option that clears your recall, latency, and filtering bars, and reevaluate only when a real limit is hit |
+| A self-hosted FAISS setup has no failover when a node goes down | FAISS is a library, so persistence, replication, and availability are entirely the team's own responsibility | Move to a managed service or build the missing operational layer once high availability is required |
+| The chosen store cannot express the metadata filters the product needs | Filtering support was never checked against requirements before the store was picked | Confirm filtering capability against your actual requirements before committing to a store |
 
 ## The mental model to keep
 
@@ -1875,6 +1923,14 @@ A query then carries its **tenant id**, the router maps it to the right partitio
 - **Capacity beyond one box.** Billions of vectors will not fit on a single machine. Sharding is the only way past that ceiling, and it makes each query parallel across machines.
 - **Isolation is a security boundary.** In multi-tenant SaaS, a missing namespace filter is a cross-customer data leak. Routing by tenant must be enforced, not assumed.
 - **Hot shards hurt.** If one tenant or hash bucket gets far more data or traffic than the rest, that shard becomes a bottleneck. Balancing load across shards keeps latency even.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A customer's search returns another customer's documents | The query had no namespace or tenant scope, so it searched across every tenant's data | Scope every query to the caller's tenant namespace, and treat that scoping as mandatory |
+| One shard is consistently slower than the others under the same load | Inserts were placed without balancing, so that shard grew disproportionately larger, a hot shard | Route new placements to the shard with the most remaining room, and monitor load across shards |
+| A batch insert is rejected even though the store overall has room | The specific shard it was routed to has no remaining capacity for that batch size | Route to a shard that can fit the batch, or add capacity before the store fills up |
 
 ## The mental model to keep
 
@@ -2195,6 +2251,14 @@ You measure **recall** by running a fixed set of labeled queries (a golden set) 
 - **Silent degradation is the default failure mode.** Vector search rarely throws; it just gets quietly worse. Without a golden set you have no way to know recall dropped.
 - **Tail latency is the real user experience.** An average of 30ms hides a p99 of 800ms that a fraction of users feel on every query. Watch the tail, not the mean.
 - **Stale indexes lie confidently.** If freshness lags, the system returns outdated documents with full confidence - the retrieval version of a hallucination.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Users get worse answers, but no errors fire and every dashboard stays green | Retrieval quality degraded silently, since a model change, corpus drift, or index rebuild rarely throws an error | Run a golden set of labeled queries continuously and alert when recall drops below a baseline threshold |
+| The latency dashboard looks fine but users keep reporting slow searches | The average is dominated by fast requests and hides a slow tail that a fraction of users hit on every query | Alert on p95 or p99 latency, not the mean |
+| Search confidently returns documents that no longer match the current source data | The index lags behind the source, so it serves outdated vectors as if they were current | Track the lag between source updates and index freshness, and alert when it grows too large |
 
 ## The mental model to keep
 

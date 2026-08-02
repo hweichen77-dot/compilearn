@@ -127,15 +127,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "4",
-          "expected_output": "24"
+          "expected_output": "24",
+          "description": "4 factorial"
         },
         {
           "input": "0",
-          "expected_output": "1"
+          "expected_output": "1",
+          "description": "base case at zero"
+        },
+        {
+          "input": "1",
+          "expected_output": "1",
+          "description": "base case at one"
+        },
+        {
+          "input": "2",
+          "expected_output": "2",
+          "description": "smallest recursive step"
         },
         {
           "input": "6",
-          "expected_output": "720"
+          "expected_output": "720",
+          "description": "six levels of recursion"
+        },
+        {
+          "input": "13",
+          "expected_output": "6227020800",
+          "description": "result too large for an int"
+        },
+        {
+          "input": "20",
+          "expected_output": "2432902008176640000",
+          "description": "largest factorial that fits in a long"
         }
       ]
     },
@@ -251,15 +274,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3",
-          "expected_output": "1\n2\n3"
+          "expected_output": "1\n2\n3",
+          "description": "counts up, not down"
         },
         {
           "input": "1",
-          "expected_output": "1"
+          "expected_output": "1",
+          "description": "single line of output"
+        },
+        {
+          "input": "0",
+          "expected_output": "",
+          "description": "base case prints nothing"
+        },
+        {
+          "input": "2",
+          "expected_output": "1\n2",
+          "description": "smallest case with two lines"
         },
         {
           "input": "5",
-          "expected_output": "1\n2\n3\n4\n5"
+          "expected_output": "1\n2\n3\n4\n5",
+          "description": "five lines in ascending order"
+        },
+        {
+          "input": "10",
+          "expected_output": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10",
+          "description": "double digits stay in order"
         }
       ]
     },
@@ -375,16 +416,39 @@ export default {
       "challenge_solution_code": "import java.util.*;\n\npublic class Main {\n    public static long fib(int n) {\n        if (n < 2) {\n            return n;\n        }\n        return fib(n - 1) + fib(n - 2);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(fib(n));\n    }\n}\n",
       "challenge_test_cases": [
         {
-          "input": "0",
-          "expected_output": "0"
+          "input": "7",
+          "expected_output": "13",
+          "description": "seventh Fibonacci number"
         },
         {
-          "input": "7",
-          "expected_output": "13"
+          "input": "0",
+          "expected_output": "0",
+          "description": "base case fib(0)"
+        },
+        {
+          "input": "1",
+          "expected_output": "1",
+          "description": "base case fib(1)"
+        },
+        {
+          "input": "2",
+          "expected_output": "1",
+          "description": "first recursive call"
         },
         {
           "input": "10",
-          "expected_output": "55"
+          "expected_output": "55",
+          "description": "tenth Fibonacci number"
+        },
+        {
+          "input": "20",
+          "expected_output": "6765",
+          "description": "deeper recursion"
+        },
+        {
+          "input": "30",
+          "expected_output": "832040",
+          "description": "large enough to expose an off-by-one"
         }
       ]
     },
@@ -500,15 +564,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "cat",
-          "expected_output": "tac"
+          "expected_output": "tac",
+          "description": "three characters reversed"
         },
         {
           "input": "hello",
-          "expected_output": "olleh"
+          "expected_output": "olleh",
+          "description": "repeated letter reversed"
         },
         {
           "input": "a",
-          "expected_output": "a"
+          "expected_output": "a",
+          "description": "single character base case"
+        },
+        {
+          "input": "ab",
+          "expected_output": "ba",
+          "description": "two characters swap"
+        },
+        {
+          "input": "aab",
+          "expected_output": "baa",
+          "description": "leading repeats move to the end"
+        },
+        {
+          "input": "abcdefgh",
+          "expected_output": "hgfedcba",
+          "description": "eight levels of recursion"
         }
       ]
     },
@@ -624,15 +706,33 @@ export default {
       "challenge_test_cases": [
         {
           "input": "3\n4 2 7",
-          "expected_output": "13"
-        },
-        {
-          "input": "1\n99",
-          "expected_output": "99"
+          "expected_output": "13",
+          "description": "three elements summed"
         },
         {
           "input": "5\n1 2 3 4 5",
-          "expected_output": "15"
+          "expected_output": "15",
+          "description": "five elements, last one included"
+        },
+        {
+          "input": "1\n99",
+          "expected_output": "99",
+          "description": "single element"
+        },
+        {
+          "input": "0",
+          "expected_output": "0",
+          "description": "empty array sums to zero"
+        },
+        {
+          "input": "4\n-1 5 -3 2",
+          "expected_output": "3",
+          "description": "mixed signs"
+        },
+        {
+          "input": "2\n-5 5",
+          "expected_output": "0",
+          "description": "values cancel to zero"
         }
       ]
     },
@@ -745,15 +845,48 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n1 3 5 7 9\n7",
-          "expected_output": "3"
+          "expected_output": "3",
+          "description": "target in the right half"
         },
         {
           "input": "5\n1 3 5 7 9\n4",
-          "expected_output": "-1"
+          "expected_output": "-1",
+          "description": "target missing from the middle"
         },
         {
           "input": "6\n2 4 6 8 10 12\n2",
-          "expected_output": "0"
+          "expected_output": "0",
+          "description": "target at index 0"
+        },
+        {
+          "input": "6\n2 4 6 8 10 12\n12",
+          "expected_output": "5",
+          "description": "target at the last index"
+        },
+        {
+          "input": "4\n1 2 3 4\n2",
+          "expected_output": "1",
+          "description": "even length picks the lower middle"
+        },
+        {
+          "input": "4\n10 20 30 40\n5",
+          "expected_output": "-1",
+          "description": "target below the whole range"
+        },
+        {
+          "input": "4\n10 20 30 40\n50",
+          "expected_output": "-1",
+          "description": "target above the whole range"
+        },
+        {
+          "input": "1\n5\n5",
+          "expected_output": "0",
+          "description": "single element array, found"
+        },
+        {
+          "input": "1\n5\n3",
+          "expected_output": "-1",
+          "description": "single element array, missing"
         }
       ]
     },
@@ -868,15 +1001,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n5 2 4 1 3",
-          "expected_output": "1 2 3 4 5"
-        },
-        {
-          "input": "1\n42",
-          "expected_output": "42"
+          "expected_output": "1 2 3 4 5",
+          "description": "odd length splits unevenly"
         },
         {
           "input": "6\n9 9 1 5 1 0",
-          "expected_output": "0 1 1 5 9 9"
+          "expected_output": "0 1 1 5 9 9",
+          "description": "duplicates merge correctly"
+        },
+        {
+          "input": "2\n2 1",
+          "expected_output": "1 2",
+          "description": "smallest array that splits"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "42",
+          "description": "base case, no split"
+        },
+        {
+          "input": "4\n1 2 3 4",
+          "expected_output": "1 2 3 4",
+          "description": "already sorted stays put"
+        },
+        {
+          "input": "6\n6 5 4 3 2 1",
+          "expected_output": "1 2 3 4 5 6",
+          "description": "fully reversed input"
+        },
+        {
+          "input": "5\n0 -3 7 -1 2",
+          "expected_output": "-3 -1 0 2 7",
+          "description": "negatives sort before zero"
         }
       ]
     },
@@ -992,15 +1148,38 @@ export default {
       "challenge_test_cases": [
         {
           "input": "5\n5 2 4 1 3",
-          "expected_output": "1 2 3 4 5"
+          "expected_output": "1 2 3 4 5",
+          "description": "unsorted five elements"
         },
         {
           "input": "4\n4 3 2 1",
-          "expected_output": "1 2 3 4"
+          "expected_output": "1 2 3 4",
+          "description": "fully reversed input"
+        },
+        {
+          "input": "2\n2 1",
+          "expected_output": "1 2",
+          "description": "smallest recursive step"
+        },
+        {
+          "input": "1\n42",
+          "expected_output": "42",
+          "description": "base case, single element"
+        },
+        {
+          "input": "4\n1 2 3 4",
+          "expected_output": "1 2 3 4",
+          "description": "already sorted stays put"
         },
         {
           "input": "3\n7 7 2",
-          "expected_output": "2 7 7"
+          "expected_output": "2 7 7",
+          "description": "duplicates keep their order"
+        },
+        {
+          "input": "5\n3 -1 0 -5 2",
+          "expected_output": "-5 -1 0 2 3",
+          "description": "negatives sort before zero"
         }
       ]
     }

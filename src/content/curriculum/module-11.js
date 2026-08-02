@@ -52,6 +52,14 @@ Seeing vision as "images turned into tokens" explains the behavior you'll hit:
 - **Detail has a price.** Higher resolution means more patches means more tokens. You can often choose a "low detail" mode to save money when fine detail doesn't matter.
 - **It is one model, not a pipeline.** Because text and image share the same space, the model can reason across them. "Circle the cheapest item on this menu" works because the menu and the instruction live together.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Your token estimate for a bigger photo is way off from the actual bill | Resolution cost grows with the area of the image, not with one side, so doubling both width and height quadruples the patches | Account for squared growth when sizing images, halving one dimension is not enough |
+| A photo that is mostly empty background costs just as many tokens as a busy one | Patches are cut on a fixed grid across the whole image regardless of what is in each tile | Downscale or crop tightly before sending, content sparsity does not reduce the patch count |
+| A question about one small detail in a large photo comes back vague or wrong | A detail smaller than a single patch gets pooled into that patch's token and can wash out | Crop tightly around the region you are asking about instead of sending the full frame |
+
 ## The mental model to keep
 
 A vision model doesn't have eyes bolted onto a text brain. It chops your image into tiles, turns each tile into a token, and reads those tokens alongside your words: one stream, one model, the same prediction loop you already know.`,
@@ -353,6 +361,14 @@ The format choice has real consequences:
 - **URL vs base64 is a trade-off.** A URL keeps the request tiny but requires the image to be publicly reachable. Base64 works for private or local files but inflates the request and counts toward size limits.
 - **Wrong media_type is the top beginner bug.** A JPEG labeled image/png often errors out or silently garbles.
 - **Huge images get rejected or downscaled.** APIs cap image dimensions and request size, so a 50-megapixel photo may be resized before the model ever sees it.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model errors out, or describes something that does not match the photo | The media_type label does not match the real file bytes, for example a jpeg labeled as png | Set media_type from the actual file format, not the extension you assumed |
+| The request fails to decode even though the file itself is fine | The base64 string still has the data:image/png;base64, prefix left on it from copying it out of a browser or file | Strip the prefix and send only the raw base64 characters after the comma |
+| The model says it cannot see any image at all | A local file path was passed as plain text instead of a URL or a base64-encoded image block | The model never opens files, give it a link it can fetch or embed the bytes as base64 |
 
 ## The mental model to keep
 
@@ -673,6 +689,14 @@ Document understanding is one of the highest-value vision uses, but it has sharp
 - **It can hallucinate fields.** If a value is unreadable, the model may invent a plausible one rather than admit it can't see it. Tell it to return null or "unreadable" for missing fields.
 - **Handwriting and dense tables are hard.** Messy handwriting and tightly packed spreadsheets trip even strong models. Verify the numbers that matter.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| An extracted total or date looks suspiciously clean on a blurry receipt | The model guessed a plausible value instead of admitting it could not read the field | Instruct it to return null or "unreadable" for low-confidence fields, and verify a sample against the source image |
+| Numbers or text come back wrong across a whole batch of scans | The source images are blurry, skewed, low-light, or low-resolution | Improve capture quality before OCR, garbage pixels in still means garbage text out |
+| Handwritten notes or a dense table come back scrambled or misaligned | Messy handwriting and tightly packed layouts trip even strong models | Verify by hand any number that actually matters rather than trusting the transcription blindly |
+
 ## The mental model to keep
 
 A vision model doesn't just transcribe, it reads and understands in one pass. **Treat OCR results like any model output: powerful, fast, and worth verifying when the number on the line is the one that matters.**`,
@@ -964,6 +988,14 @@ Generation has its own rules and limits, different from vision-reading:
 - **Same prompt, different images.** A random **seed** starts the noise, so the same prompt yields different pictures unless you fix the seed for reproducibility.
 - **Rights and safety matter.** Generated images raise copyright, likeness, and misuse questions that text rarely does.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The generated image is chaotic or generic, nothing like what you had in mind | The prompt named a style or mood but never named the subject, composition, or details | Include what the subject actually is, along with style, lighting, and composition, in one prompt |
+| Text or lettering inside the image is garbled or misspelled | The generator synthesizes shapes rather than typing characters, so words are just approximated patterns | Generate the image without embedded text, then add real text afterward in a design tool |
+| Running the same prompt twice gives two noticeably different images | A random seed starts the denoising noise differently on each run | Fix the seed if you need the same prompt to reproduce the same image |
+
 ## The mental model to keep
 
 An image generator is a noise-remover, not a painter. **It begins with random static and, guided by your words, subtracts noise step by step until a matching picture appears**: so the clearer your words, the better the steering.`,
@@ -1233,6 +1265,14 @@ Vision economics shape what is worth building:
 - **Downscale before you send.** Resizing a 12-megapixel photo to what the model actually needs can cut image tokens dramatically with no loss in answer quality.
 - **Latency, not just money.** More image tokens also mean slower responses, which hurts real-time apps.
 - **Hard limits exist.** APIs cap image dimensions, file size, and images per request, so plan around them.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A vision feature that works fine racks up a far bigger bill than expected | Every request defaults to high detail even for coarse tasks like classifying or describing a scene | Match detail level to the task, use low detail unless the task truly needs fine resolution |
+| Users uploading full-size phone photos make each request slow and expensive | A 12-megapixel upload becomes thousands of image tokens with no benefit to the answer | Downscale images to what the task actually needs before sending |
+| A request with several large images gets rejected or truncated | The API enforces hard caps on image dimensions, file size, or images per request | Check the provider's limits and resize or split images before sending |
 
 ## The mental model to keep
 
@@ -1564,6 +1604,14 @@ Steering with text is what turns a vision model from a party trick into a reliab
 - **Constraints curb hallucination.** "If you cannot read it, answer UNKNOWN" stops the model from inventing a confident guess.
 - **Negative instructions narrow scope.** "Ignore reflections and watermarks" removes distractors before they pollute the answer.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The response is a long generic description instead of the one fact you needed | The prompt was vague, like "describe this image," leaving the model free to wander | State the exact task, scope, and answer format in the instruction |
+| Your code cannot parse the response, it comes back as a paragraph instead of one value | No format instruction was given | Ask explicitly for one word, an integer, or JSON with named keys |
+| The model confidently answers about something it could not actually see clearly | No grounding constraint was given for uncertain cases | Add an instruction like "answer UNKNOWN if you cannot tell" to curb invented answers |
+
 ## The mental model to keep
 
 The picture is the dataset; your prompt is the query. **Aim the words and you choose which facts the image gives up**: a sharp instruction in front of the same pixels is the difference between a rambling caption and the one number you needed.`,
@@ -1871,6 +1919,14 @@ Sequences enable comparison tasks, but the trade-offs are sharp:
 - **Order must be explicit.** The model has no timeline, so label each frame ("t=0s," "before," "after") or it may not know which came first.
 - **Context limits cap how many frames fit.** A long video cannot go in all at once; you sample, summarize, or chunk.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The request errors out, or the question at the end seems to get ignored on a long clip | Too many frames were sent at full detail and filled the context window before the actual question was reached | Sample fewer frames or lower the detail per frame, and budget frames against the context limit |
+| A quick one-second event never shows up in the model's answer | The sampling rate was too sparse, so the event fell entirely between two sampled frames | Increase the sampling rate to catch fast events, even if it costs more tokens |
+| The model gets confused about which frame happened first | Frames were sent without timestamps or order labels | Label each frame's position or time so the sequence is explicit |
+
 ## The mental model to keep
 
 A model never watches video; it flips through a stack of stills you chose. **You decide how many frames to send and label their order**: sampling rate trades recall against cost, and without labels the model cannot tell before from after.`,
@@ -2160,6 +2216,14 @@ Editing is where vision generation earns its keep in real products, with its own
 - **Mask quality decides the seam.** A sloppy mask leaves visible halos or edits bleeding outside the region. Tight masks give clean edits.
 - **Edits compound errors.** Re-editing an already-edited image repeatedly degrades it, like photocopying a photocopy.
 - **Provenance and consent.** Editing real photos of real people raises the same rights and misuse concerns as generation, only sharper.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The edit barely changes the photo, or it drifts far past what you meant to change | The strength setting does not match the intended edit, too low ignores the prompt, too high strays from the original | Tune strength to the size of the edit, low for subtle tweaks, high only for bold changes |
+| The edited region has a visible seam, halo, or bleeds into the rest of the photo | The mask was loose or sloppy around the edges | Tighten the mask so only the pixels you mean to change are covered |
+| An image re-edited several times looks progressively worse | Each edit compounds small errors, like photocopying a photocopy | Do one well-masked edit instead of stacking multiple re-edits on the same image |
 
 ## The mental model to keep
 

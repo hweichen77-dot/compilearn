@@ -56,6 +56,14 @@ Once a model can act (call tools, send email, read files, hit APIs), injection s
 
 There is no single perfect fix. Injection is mitigated through layered defenses: separating trusted from untrusted text, constraining what the model can do, and validating its output before acting on it. The rest of this module covers those defenses.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The bot repeats a secret you told it never to reveal, right after a user says something like "ignore your instructions" | The system prompt and the user's text were concatenated into one stream, so the forceful later text outweighed the earlier rule | Treat the system prompt as one input among several to protect, not something the model obeys by default, and add checks outside the prompt itself |
+| A model summarizing a web page suddenly tries to send data somewhere it was never asked to | Hidden text inside the fetched page was read as an instruction instead of content to summarize | Never let fetched or read content carry instruction level authority, and keep it fenced as data the model reports on rather than obeys |
+| A blocklist of override phrases catches nothing even though the attack clearly landed | The attacker added spacing, punctuation, or casing tricks so the raw phrase text never matched | Normalize text before comparing it, lowercase it, strip punctuation, collapse whitespace, instead of matching literal strings |
+
 ## The mental model to keep
 
 Treat every piece of text the model reads as potentially hostile, because the model cannot tell your instructions apart from an attacker's. Defense is about limiting damage rather than trusting the model to resist.`,
@@ -366,6 +374,14 @@ Filtering is defense in depth. No single gate is perfect. Clever attacks slip pa
 
 The cost is real: filters add latency, can produce false positives (blocking legitimate text), and need maintenance as attacks evolve. But a wrapped model is dramatically harder to abuse than a bare one.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A leaked secret shows up in a response even though the input that triggered it looked clean | Only the input side was checked, and nothing scanned what the model actually produced before it reached the user | Add an output gate that scans the model's own text for secrets, PII, or disallowed content before it is shown or used |
+| A request gets through even though it clearly matches a banned pattern, once it is encoded or oddly spaced | The filter matched literal phrases, so anything not spelled out plainly bypassed it, the classic blocklist weakness | Where stakes are high, use an allowlist of expected input shapes so anything unrecognized is rejected by default |
+| A perfectly reasonable request gets rejected by your filter for no obvious reason | An allowlist was too narrow and did not anticipate a legitimate edge case | Widen the allowlist to cover the missing case, accepting that allowlists trade some false positives for stronger safety |
+
 ## The mental model to keep
 
 Never let raw model output trigger a real action. Put deterministic gates on both sides of the model, prefer allowlists where stakes are high, and treat the output gate as your last line of defense.`,
@@ -657,6 +673,14 @@ Leakage is not just embarrassing, it is legally and financially serious:
 - **Cross-user exposure.** In multi-tenant systems, sloppy context handling can surface one user's data to another, a severe trust failure.
 
 **Data minimization** is the governing principle: send the model the least sensitive data needed to do the job, and not one field more.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A customer's phone number or email shows up somewhere it should not, in logs, in another user's session, or echoed back later | Raw PII was sent straight to the model or to a logging pipeline instead of being scrubbed first | Redact known PII patterns, emails, phone numbers, IDs, before the data ever reaches the model or the logs |
+| PII still leaks even after you added a redaction step | The redactor's pattern list only covered a couple of PII types and missed others, like addresses or partial card numbers | Broaden detection to more PII shapes and pair it with data minimization, sending only the fields the task actually needs |
+| A long card number ends up only partially redacted, as if it were mistaken for a phone number | The phone pattern ran first and matched part of a longer digit sequence before the card pattern got a chance | Apply the more specific, longer pattern first so a longer match is not clipped by a shorter one |
 
 ## The mental model to keep
 
@@ -952,6 +976,14 @@ Jailbreaks are an arms race. Every published defense gets probed; every model up
 - **Refusal training is necessary but not sufficient.** It raises the bar, but determined users find framings that slip past it.
 - **External guardrails are what hold.** A separate classifier, topic allowlists, output filtering, and tight action permissions don't care how clever the story is.
 - **Limit the blast radius.** If a jailbreak succeeds, what is the worst it can do? A model with no dangerous tools and a strict output gate fails safely even when its alignment is bypassed.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The model does something it was trained to refuse once a user says something like "pretend you have no rules" | Roleplay framing convinced the model to continue a fiction that never contained a refusal | Do not rely on the model's own trained refusals, score requests with a separate classifier that ignores the framing |
+| A disallowed request gets through when written in leetspeak or another language, even though the plain-English version is blocked | Obfuscation hid the request from a check that only recognized plain text | Normalize or translate input before classification so the classifier sees the same request regardless of disguise |
+| No single message looks harmful, but the conversation as a whole clearly worked around a rule | The attack was split across several turns, each one innocuous by itself | Track cumulative signals across the whole conversation, not just the current turn, and limit what a jailbroken model could actually do |
 
 ## The mental model to keep
 
@@ -1266,6 +1298,14 @@ Moderation is where safety meets the messy real world, and the trade-offs are un
 - **Policy is a product decision.** What counts as disallowed, and how strictly, reflects the audience and the law. The classifier enforces the policy; humans must define it.
 
 Good moderation pairs an automated classifier with a **human review** path for edge cases and appeals, because no threshold is right for every input.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| Ordinary, harmless requests keep getting blocked and users complain | A category's threshold was set too low, so it flagged benign content as harmful | Raise the threshold for that category, accepting the trade-off of catching a bit less harm |
+| Genuinely harmful content gets through without being flagged | A category's threshold was set too high for the product it was protecting | Lower the threshold, and expect more borderline benign content to get caught as a trade-off |
+| A quote, lyric, or reclaimed term gets censored while a real threat elsewhere slips by | A score-only classifier could not tell context, quotation, education, satire, from a genuine attack | Use context-aware classification and route borderline scores to human review instead of a single fixed cutoff |
 
 ## The mental model to keep
 
@@ -1587,6 +1627,14 @@ Hardening changes the economics of an attack:
 
 The limit is real: a determined jailbreak can still find a framing the hierarchy mis-weights. Hardening reduces frequency and severity; it does not eliminate the risk.
 
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| A user claims to be a developer or an admin and the model complies with a rule it should have refused | The system prompt never declared that later messages cannot outrank it, so the forceful claim of authority won | State explicitly in the system prompt that user input cannot elevate its own authority, and treat authority claims made in messages as data, not fact |
+| An instruction embedded in a fetched document or a user message gets treated as a command instead of content | Untrusted text was not fenced off with delimiters, so the model could not tell where rules ended and data began | Wrap untrusted input in clear delimiters and state that anything inside is data to read, not instructions to follow |
+| A vague rule like "be careful with sensitive topics" gets argued around or reinterpreted | Vague tone-based rules are easier to relitigate than a concrete refusal | Replace vague guidance with explicit "never do X" rules that are harder to reinterpret |
+
 ## The mental model to keep
 
 **Write the system prompt like a constitution: higher law that later text cannot amend, with untrusted input clearly fenced off as evidence rather than orders.**`,
@@ -1889,6 +1937,14 @@ Without limits, the cheapest attack on an AI product is simply *using it too muc
 - **Fairness and accounting.** Per-user limits ensure one account's behavior is contained, and they give you the data to spot the worst offenders.
 
 The trade-off is friction: limits set too tight frustrate legitimate power users, while limits too loose leave the door open. Good systems tier limits (free vs paid), return clear "slow down" responses, and alert when a single user's usage spikes.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| One giant request costs as much as a hundred small ones, but the limiter treats it the same as any other single call | The cap was set on request count instead of token count, so call size was never accounted for | Cap tokens consumed per window, not just number of requests, since cost and load scale with tokens |
+| A blocked user comes back with a new account or key and the budget resets immediately | The limiter keys usage on something the requester fully controls and can rotate at will | Key limits on something harder to rotate, like a verified account or payment method, and add cross-key signals such as velocity checks |
+| An agent keeps calling the same request over and over until the bill spikes far past any single window's cap | There was a per-window cap but no detection for identical repeated calls and no hard cumulative ceiling | Add loop detection for repeated identical requests and a hard total-spend ceiling that shuts the client down, not just a per-window cap |
 
 ## The mental model to keep
 
@@ -2209,6 +2265,14 @@ Red-teaming is how the abstract layers of this module become a real security pos
 - **It is continuous.** Models update, prompts change, new jailbreaks get published. A guardrail that passed last month can fail today, so the catalog is a living document you re-run.
 
 The discipline is borrowed from security engineering for a reason: the attacker only has to find one gap, so you have to look for all of them, repeatedly.
+
+## What usually goes wrong
+
+| What you see | What caused it | How to fix it |
+| --- | --- | --- |
+| The system passes every test in the catalog, but a new attack style still gets through in production | The catalog only contained attacks you already knew about or had already built defenses for | Keep expanding the catalog with new techniques and public jailbreak and injection reports, not just the attacks your filters already catch |
+| A defense you fixed last month is breached again this month | The catalog was run once at launch and never re-run as models, prompts, and known attacks changed | Treat the catalog as a living document and re-run it on a schedule, not as a one-time audit |
+| Fixing one category's gap seems to work, but a different category quietly starts failing | A new defense changed model behavior or interacted with another gate in an unexpected way | Re-run the entire catalog after any fix, not just the attacks in the category you just patched |
 
 ## The mental model to keep
 
