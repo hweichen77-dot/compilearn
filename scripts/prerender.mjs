@@ -108,6 +108,14 @@ function replaceHead(html, { title, description, url }) {
     .replace(/<meta name="twitter:description" content="[\s\S]*?" \/>/, `<meta name="twitter:description" content="${d}" />`)
 }
 
+function composeDescription(r) {
+  const concept = stripMd(r.concept)
+  const body = stripMd(r.explanation)
+  if (concept.length >= 70) return concept.slice(0, 155).trim()
+  const lead = concept ? `${concept.replace(/[.·:;,\s]+$/, '')}. ` : ''
+  return `${lead}${body}`.slice(0, 155).trim()
+}
+
 function seoBlock(r) {
   const intro = stripMd(r.explanation).slice(0, 1200)
   const parts = [
@@ -130,10 +138,13 @@ function run() {
   const routes = LESSON_ROUTES.filter((r) => r.path)
   let written = 0
 
+  const titleCounts = routes.reduce((acc, r) => ({ ...acc, [r.title]: (acc[r.title] || 0) + 1 }), {})
+
   for (const r of routes) {
     const url = `${ORIGIN}${r.path}`
-    const description = stripMd(r.concept || r.explanation).slice(0, 155)
-    let html = replaceHead(template, { title: r.title, description, url })
+    const description = composeDescription(r)
+    const title = titleCounts[r.title] > 1 && r.projectTitle ? `${r.title} · ${r.projectTitle}` : r.title
+    let html = replaceHead(template, { title, description, url })
     html = withJsonLd(html, [
       ORG,
       {
