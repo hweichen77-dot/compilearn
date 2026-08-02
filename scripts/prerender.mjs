@@ -11,6 +11,8 @@ const SITE_URL = (process.env.VITE_SITE_URL || 'https://compilearn.vercel.app').
 const BASE = (process.env.VITE_BASE || '/').replace(/\/+$/, '')
 const ORIGIN = `${SITE_URL}${BASE}`
 
+const NOINDEX = process.env.PRERENDER_NOINDEX === '1'
+
 const TOP_PAGES = ['/', '/AITrack', '/Playground', '/Projects', '/Challenges', '/Competitive', '/APCS', '/Privacy', '/Terms']
 
 const TOP_PAGE_META = {
@@ -48,6 +50,12 @@ const TOP_PAGE_META = {
   Terms: { title: 'Terms', description: 'Compilearn terms of service.', blurb: 'Terms of service.' },
 }
 
+const HOME_META = {
+  title: 'Compilearn: learn how AI works by defending one',
+  blurb:
+    'Compilearn teaches you how language models actually behave by putting you on the defending side. Write the system prompt that guards an AI, watch real attacks try to break it, then build the projects and work through the AP Computer Science curriculum behind it. Free, in your browser, no signup to start.',
+}
+
 const esc = (s) =>
   String(s || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -63,11 +71,14 @@ const stripMd = (s) =>
     .replace(/\s+/g, ' ')
     .trim()
 
+const withNoindex = (html) =>
+  NOINDEX ? html.replace('</head>', '<meta name="robots" content="noindex" />\n  </head>') : html
+
 function replaceHead(html, { title, description, url }) {
   const t = esc(`${title} · Compilearn`)
   const d = esc(description)
   const u = esc(url)
-  return html
+  return withNoindex(html)
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${t}</title>`)
     .replace(/<meta name="description" content="[\s\S]*?" \/>/, `<meta name="description" content="${d}" />`)
     .replace(/<link rel="canonical" href="[\s\S]*?" \/>/, `<link rel="canonical" href="${u}" />`)
@@ -125,6 +136,20 @@ function run() {
     topWritten++
   }
 
+  const homeHtml = withNoindex(template)
+    .replace(/<link rel="canonical" href="[\s\S]*?" \/>/, `<link rel="canonical" href="${ORIGIN}/" />`)
+    .replace(/<meta property="og:url" content="[\s\S]*?" \/>/, `<meta property="og:url" content="${ORIGIN}/" />`)
+    .replace(
+      '<div id="root"></div>',
+      `<div id="root"><article style="max-width:720px;margin:64px auto;padding:0 24px;font-family:system-ui,sans-serif;color:#e8e2d5;line-height:1.6"><h1>${esc(HOME_META.title)}</h1><p>${esc(HOME_META.blurb)}</p>${Object.entries(TOP_PAGE_META)
+        .map(
+          ([page, meta]) =>
+            `<h2><a href="${BASE}/${page}">${esc(meta.title)}</a></h2><p>${esc(meta.blurb)}</p>`,
+        )
+        .join('')}</article></div>`,
+    )
+  fs.writeFileSync(path.join(DIST, 'index.html'), homeHtml)
+
   const notFound = replaceHead(template, {
     title: 'Page not found',
     description: 'That page could not be found.',
@@ -147,7 +172,9 @@ function run() {
 
   fs.writeFileSync(
     path.join(DIST, 'robots.txt'),
-    `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
+    NOINDEX
+      ? 'User-agent: *\nDisallow: /\n'
+      : `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
   )
 
   console.log(`[prerender] wrote ${written} lesson pages + ${topWritten} top pages + sitemap (${urls.length} urls)`)
