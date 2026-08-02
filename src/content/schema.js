@@ -48,6 +48,13 @@ export const LessonSchema = z
     expected_output: z.string().optional(),
     illustrative: z.boolean().optional(),
     hints: z.array(z.string()).optional(),
+    challenge_hints: z.array(z.string()).optional(),
+    inline_quizzes: z.array(z.any()).optional(),
+    quiz_questions: z.array(z.any()).optional(),
+    worked_examples: z.array(z.any()).optional(),
+    step_throughs: z.array(z.any()).optional(),
+    comparison_tables: z.array(z.any()).optional(),
+    key_terms: z.array(z.any()).optional(),
     challenge_title: z.string().optional(),
     challenge_test_cases: z.array(testCase).optional(),
   })

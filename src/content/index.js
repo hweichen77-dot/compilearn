@@ -38,7 +38,11 @@ const AI_MODULES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14,
 const MODULES = [...AI_MODULES, ...CSP_MODULES, ...CSA_MODULES, ...PRODUCT_MODULES]
 const ALL_BRIEFS = { ...BRIEFS, ...CSP_BRIEFS, ...CSA_BRIEFS }
 
-export const PROJECTS = MODULES.map(m => ({ ...m.project, brief: ALL_BRIEFS[m.project.id] || null }))
+export const PROJECTS = MODULES.map(m => ({
+  ...m.project,
+  lessons_count: (m.lessons || []).length,
+  brief: ALL_BRIEFS[m.project.id] || null,
+}))
 export const LESSONS = MODULES.flatMap(m => m.lessons)
 
 const XP_BY_DIFFICULTY = { beginner: 15, intermediate: 25, advanced: 40 }
