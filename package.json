@@ -15,7 +15,7 @@
     "scan:content": "node scripts/scan-content.mjs",
     "verify:solutions": "node scripts/verify-solutions.mjs",
     "smoke": "node scripts/smoke-test.mjs",
-    "test": "node --test \"src/**/*.test.js\"",
+    "test": "node scripts/check-functions-deployed.mjs && node --test \"src/**/*.test.js\"",
     "preview": "vite preview",
     "build:desktop": "node scripts/gen-content-manifests.mjs && cross-env VITE_BASE=/ vite build",
     "tauri": "tauri"

@@ -53,9 +53,10 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RETENTION_FROM: ${{ secrets.RETENTION_FROM }}
           RETENTION_TRIGGER_SECRET: ${{ secrets.RETENTION_TRIGGER_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.compilearn.com' }}
         run: |
           args=()
-          for k in GROQ_API_KEY TUTOR_GROQ_API_KEY INVOKE_GROQ_API_KEY PLAYGROUND_GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET; do
+          for k in GROQ_API_KEY TUTOR_GROQ_API_KEY INVOKE_GROQ_API_KEY PLAYGROUND_GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET SITE_URL; do
             v="${!k}"
             [ -n "$v" ] && args+=("$k=$v")
           done
@@ -164,6 +165,7 @@ jobs:
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RETENTION_TRIGGER_SECRET: ${{ secrets.RETENTION_TRIGGER_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.compilearn.com' }}
         run: |
           set -e
           if [ -z "$RESEND_API_KEY" ] || [ -z "$RETENTION_TRIGGER_SECRET" ]; then

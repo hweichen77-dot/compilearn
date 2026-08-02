@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
     caller,
     fn: "llm-playground",
     perMin: userId ? 10 : 4,
-    perDay: userId ? 60 : 15,
+    perDay: userId ? 90 : 40,
     globalPerMin: 120,
     globalPerDay: 4000,
     failClosed: true,

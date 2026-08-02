@@ -96,6 +96,8 @@ $$;
 
 -- Daily at 23:00 UTC — late enough to catch a full day of inactivity, before the
 -- streak breaks at local midnight for most US timezones.
+revoke all on function public.run_retention_sweep() from public, anon, authenticated;
+
 select cron.schedule('retention-sweep-daily', '0 23 * * *',
   $$select public.run_retention_sweep()$$);
 

@@ -16,6 +16,10 @@ alter table public.anon_lab_scores enable row level security;
 
 revoke all on public.anon_lab_scores from anon, authenticated;
 
+create unique index if not exists lab_scores_handle_uq
+  on public.lab_scores (lab_id, lower(handle))
+  where published and handle is not null;
+
 drop function if exists public.lab_leaderboard(text, integer);
 
 create function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)

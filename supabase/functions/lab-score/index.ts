@@ -53,6 +53,15 @@ Deno.serve(async (req: Request) => {
   const claimHash = await sha256(claimToken);
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
+  const { data: taken } = await admin
+    .from("lab_scores")
+    .select("handle")
+    .eq("lab_id", labId)
+    .eq("published", true)
+    .ilike("handle", handle)
+    .maybeSingle();
+  if (taken) return json({ error: "That handle is taken on this lab. Pick another." }, 409);
+
   const { data: existing, error: readErr } = await admin
     .from("anon_lab_scores")
     .select("prompt_chars, claim_hash")

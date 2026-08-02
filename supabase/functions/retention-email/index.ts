@@ -5,7 +5,7 @@ import { isDisposableEmail } from "../_shared/disposableEmail.ts";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("RETENTION_FROM") ?? "Compilearn <onboarding@resend.dev>";
 const TRIGGER_SECRET = Deno.env.get("RETENTION_TRIGGER_SECRET");
-const SITE = Deno.env.get("SITE_URL") ?? "https://hweichen77-dot.github.io/codeflow/";
+const SITE = Deno.env.get("SITE_URL") ?? "https://www.compilearn.com";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",

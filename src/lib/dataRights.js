@@ -1,14 +1,14 @@
 
 import { supabase, auth as supaAuth } from '@/api/supabaseClient'
 
-const PREFIX = 'codeflow'
+const PREFIXES = ['codeflow', 'compilearn', 'cf_']
 
 function localKeys() {
   if (typeof window === 'undefined') return []
   const keys = []
   for (let i = 0; i < window.localStorage.length; i++) {
     const k = window.localStorage.key(i)
-    if (k && k.startsWith(PREFIX)) keys.push(k)
+    if (k && PREFIXES.some((p) => k.startsWith(p))) keys.push(k)
   }
   return keys
 }

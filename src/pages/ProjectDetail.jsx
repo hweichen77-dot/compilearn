@@ -466,7 +466,7 @@ export default function ProjectDetail() {
               }}
             />
           )}
-          {!showSplit && <LessonChallenge lesson={activeLesson} />}
+          {!showSplit && <LessonChallenge lesson={activeLesson} onSolved={() => setChallengeReportDone(true)} />}
         </div>
       </div>
     </>
@@ -492,7 +492,7 @@ export default function ProjectDetail() {
     </>
   );
 
-  const rightBlock = handsOn ? editorBlock : (hasChallenge ? <LessonChallenge lesson={activeLesson} fill /> : null);
+  const rightBlock = handsOn ? editorBlock : (hasChallenge ? <LessonChallenge lesson={activeLesson} fill onSolved={() => setChallengeReportDone(true)} /> : null);
 
   const footerBlock = activeLesson && (
     <>

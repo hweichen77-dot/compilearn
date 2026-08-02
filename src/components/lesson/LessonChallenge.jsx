@@ -11,7 +11,7 @@ import { trace, traceStyles } from "./trace/theme";
 
 const EXT = { python: "py", java: "java", cpp: "cpp" };
 
-export default function LessonChallenge({ lesson, fill = false }) {
+export default function LessonChallenge({ lesson, fill = false, onSolved }) {
   const [code, setCode] = useState(lesson.challenge_starter_code || "");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -24,6 +24,9 @@ export default function LessonChallenge({ lesson, fill = false }) {
   const lang = lesson.challenge_language || lesson.language || "python";
   const grade = lang === "java" ? gradeJava : lang === "cpp" ? gradeCpp : gradePython;
   const ext = EXT[lang] || "py";
+  const allCases = lesson.challenge_test_cases || [];
+  const sampleCases = allCases.length > 2 ? allCases.slice(0, 2) : allCases;
+  const hiddenCount = allCases.length - sampleCases.length;
 
   const handleRun = async () => {
     setIsRunning(true);
@@ -33,14 +36,18 @@ export default function LessonChallenge({ lesson, fill = false }) {
       const { output: out, passed: ok, results, isError } = await grade(code, lesson.challenge_test_cases);
       let text = out || "(no output)";
       if (results.length > 0) {
-        const lines = results.map((r, i) =>
-          `Test ${i + 1}: ${r.ok ? "PASS" : "FAIL"}` +
-          (r.ok ? "" : `\n  expected: ${r.expected}\n  got:      ${r.got}`)
-        );
+        const lines = results.map((r, i) => {
+          const label = allCases[i]?.description || (i < sampleCases.length ? `Test ${i + 1}` : `Hidden test ${i + 1}`);
+          if (r.ok) return `${label}: PASS`;
+          if (i < sampleCases.length) return `${label}: FAIL\n  expected: ${r.expected}\n  got:      ${r.got}`;
+          return `${label}: FAIL\n  this case is hidden, so work out what input would break your solution`;
+        });
         text += `\n\n${lines.join("\n")}`;
       }
       setOutput(text);
-      setPassed(ok && !isError);
+      const didPass = ok && !isError;
+      setPassed(didPass);
+      if (didPass && onSolved) onSolved(lesson.id);
     } catch (e) {
       setOutput("Error: " + String(e?.message || e));
     }
@@ -141,16 +148,17 @@ export default function LessonChallenge({ lesson, fill = false }) {
         {lesson.challenge_test_cases?.length > 0 && (
           <div className="mb-5" style={{ ...traceStyles.terminal, overflow: "hidden" }}>
             <div
-              className="px-4 py-2 font-sans text-xs tracking-widest uppercase"
+              className="px-4 py-2 font-sans text-xs"
               style={{ borderBottom: `1px solid ${trace.border}`, color: '#FFFFFF', background: trace.surface }}
             >
-              test cases
+              {sampleCases.length} of {lesson.challenge_test_cases.length} test cases shown
+              {hiddenCount > 0 && `, ${hiddenCount} hidden until you run`}
             </div>
-            {lesson.challenge_test_cases.map((tc, i) => (
+            {sampleCases.map((tc, i) => (
               <div
                 key={i}
                 className="flex flex-wrap gap-6 px-4 py-3 font-mono text-xs"
-                style={{ background: trace.terminal, borderBottom: i < lesson.challenge_test_cases.length - 1 ? `1px solid ${trace.border}` : "none" }}
+                style={{ background: trace.terminal, borderBottom: i < sampleCases.length - 1 ? `1px solid ${trace.border}` : "none" }}
               >
                 <span style={{ color: '#FFFFFF' }}>#{i + 1}</span>
                 <span><span style={{ color: '#FFFFFF' }}>in </span><span style={{ color: trace.text }}>{tc.input}</span></span>
@@ -158,6 +166,11 @@ export default function LessonChallenge({ lesson, fill = false }) {
                 <span><span style={{ color: '#FFFFFF' }}>out </span><span style={{ color: trace.ok }}>{tc.expected_output}</span></span>
               </div>
             ))}
+            {hiddenCount > 0 && (
+              <div className="px-4 py-3 font-mono text-xs" style={{ background: trace.terminal, borderTop: `1px solid ${trace.border}`, color: '#FFFFFF' }}>
+                + {hiddenCount} hidden {hiddenCount === 1 ? 'case' : 'cases'}, including edge cases. Your code has to handle those too.
+              </div>
+            )}
           </div>
         )}
 

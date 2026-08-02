@@ -203,7 +203,7 @@ const STEPS = [
 ];
 
 const STATS = [
-  [480, "+", "lessons and challenges"],
+  [504, "", "lessons and challenges"],
   [128, "", "AP CS lessons"],
   [3, "", "languages that run in the browser"],
 ];
@@ -470,7 +470,7 @@ function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-12">
         <div className="max-w-sm">
           <div className="flex items-center gap-2">
-            <span className="u-mono text-[#F5A524] text-lg font-semibold">&gt;_</span>
+            <span className="u-mono text-[#5ED29C] text-lg font-semibold">&gt;_</span>
             <span className="u-display text-lg font-extrabold tracking-tight text-white">Compilearn</span>
           </div>
           <p className="mt-5 text-sm leading-relaxed text-white">

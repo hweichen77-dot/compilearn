@@ -108,7 +108,10 @@ export async function checkLimits(o: RateOpts): Promise<string | null> {
     [consume(`u:${o.fn}:${o.caller}`, o.perMin, 60_000), "rate limit exceeded — slow down and try again in a minute"],
   ];
   if (o.perDay) {
-    checks.push([consume(`ud:${o.fn}:${o.caller}`, o.perDay, 86_400_000), "daily limit reached for this account — try again tomorrow"]);
+    const dailyMsg = o.caller.startsWith("ip:")
+      ? "You have used today's free runs. Sign in for a higher daily limit, or come back tomorrow."
+      : "Daily limit reached for this account. Try again tomorrow.";
+    checks.push([consume(`ud:${o.fn}:${o.caller}`, o.perDay, 86_400_000), dailyMsg]);
   }
   checks.push([consume(`g:${o.fn}`, o.globalPerMin, 60_000), "service is busy right now — try again shortly"]);
   checks.push([consume(`d:${o.fn}`, o.globalPerDay, 86_400_000), "daily capacity reached — please try again tomorrow"]);

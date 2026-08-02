@@ -11,7 +11,7 @@ function readTries() {
   return Number(window.localStorage.getItem(TRIES_KEY)) || 0;
 }
 
-const mono = "'IBM Plex Mono', ui-monospace, monospace";
+const mono = "'Spline Sans Mono Variable', ui-monospace, monospace";
 const body = "var(--font-display)";
 const hl = { color: "#5ED29C", fontWeight: 600 };
 
@@ -90,7 +90,7 @@ export default function LivePlayground() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "26px" }}>
           {["write a prompt", "run it live", "read the output"].map((step, i) => (
             <React.Fragment key={step}>
-              <span style={{ fontFamily: mono, fontSize: "0.82rem", color: "#ECF3EF", background: "#1B1710", border: "1px solid #26302B", borderRadius: "999px", padding: "7px 15px" }}>
+              <span style={{ fontFamily: mono, fontSize: "0.82rem", color: "#ECF3EF", background: "#111917", border: "1px solid #26302B", borderRadius: "999px", padding: "7px 15px" }}>
                 {step}
               </span>
               {i < 2 && <span style={{ color: "#5ED29C", fontWeight: 700 }}>→</span>}
@@ -124,7 +124,7 @@ export default function LivePlayground() {
 
         <div style={{ marginTop: "40px", display: "grid", gap: "20px", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)" }} className="cf-pg-grid">
           <div style={{ background: "#070B0A", border: "1px solid #26302B", borderRadius: "6px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "11px 15px", borderBottom: "1px solid #111917", fontFamily: mono, fontSize: "0.74rem", letterSpacing: "0.05em", color: "rgba(255,255,255,0.55)" }}>
+            <div style={{ padding: "11px 15px", borderBottom: "1px solid #111917", fontFamily: mono, fontSize: "0.74rem", letterSpacing: "0.05em", color: "rgba(255,255,255,0.92)" }}>
               your defensive system prompt
             </div>
             <textarea
@@ -139,7 +139,7 @@ export default function LivePlayground() {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                color: "#7FBF8F",
+                color: "#ECF3EF",
                 fontFamily: mono,
                 fontSize: "0.86rem",
                 lineHeight: 1.7,
@@ -171,11 +171,12 @@ export default function LivePlayground() {
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                   <button
                     onClick={run}
+                    aria-busy={state === "running"}
                     disabled={state === "running"}
                     style={{
                       fontFamily: body, fontWeight: 650, fontSize: "0.9rem",
                       padding: "10px 22px", borderRadius: "3px", border: "none",
-                      background: state === "running" ? "#8A6A2E" : "#5ED29C",
+                      background: state === "running" ? "#F5A524" : "#5ED29C",
                       color: "#070B0A", cursor: state === "running" ? "wait" : "pointer",
                       transition: "background .15s",
                     }}
@@ -188,7 +189,7 @@ export default function LivePlayground() {
                     </span>
                   )}
                   {!isAuthenticated && (
-                    <span style={{ fontFamily: mono, fontSize: "0.74rem", color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}>
+                    <span style={{ fontFamily: mono, fontSize: "0.74rem", color: "rgba(255,255,255,0.92)", marginLeft: "auto" }}>
                       {remaining} free run{remaining === 1 ? "" : "s"} left
                     </span>
                   )}
@@ -197,14 +198,14 @@ export default function LivePlayground() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div aria-live="polite" aria-atomic="false" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {(rows.length ? rows : ATTACKS.map((a) => ({ attack: a, output: "", held: null }))).map((r, i) => (
               <div key={i} style={{ background: "#070B0A", border: "1px solid #26302B", borderRadius: "6px", padding: "13px 15px" }}>
                 <div style={{ fontFamily: mono, fontSize: "0.78rem", color: "#F0A89C", lineHeight: 1.5 }}>
-                  <span style={{ color: "rgba(255,255,255,0.55)" }}>attack {i + 1} ▸ </span>{r.attack}
+                  <span style={{ color: "rgba(255,255,255,0.92)" }}>attack {i + 1} ▸ </span>{r.attack}
                 </div>
                 {r.output && (
-                  <div style={{ marginTop: "9px", paddingTop: "9px", borderTop: "1px dashed #111917", fontFamily: mono, fontSize: "0.8rem", color: "#CBD6D0", lineHeight: 1.6 }}>
+                  <div style={{ marginTop: "9px", paddingTop: "9px", borderTop: "1px dashed #111917", fontFamily: mono, fontSize: "0.8rem", color: "#ECF3EF", lineHeight: 1.6 }}>
                     {r.output}
                   </div>
                 )}
@@ -214,7 +215,7 @@ export default function LivePlayground() {
                   </div>
                 )}
                 {state === "running" && !r.output && (
-                  <div style={{ marginTop: "9px", fontFamily: mono, fontSize: "0.76rem", color: "rgba(255,255,255,0.55)" }}>waiting for model…</div>
+                  <div style={{ marginTop: "9px", fontFamily: mono, fontSize: "0.76rem", color: "rgba(255,255,255,0.92)" }}>waiting for model…</div>
                 )}
               </div>
             ))}
