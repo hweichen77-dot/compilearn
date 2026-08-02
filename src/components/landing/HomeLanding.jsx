@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "@/styles/landing.css";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
@@ -6,7 +7,7 @@ import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/apiClient";
 import LiquidEther from "@/components/kit/LiquidEther";
-import { CountUp, Reveal, Stagger, Item } from "@/components/kit";
+import { Reveal } from "@/components/kit";
 import LivePlayground from "@/components/landing/LivePlayground";
 
 const prefersReducedMotion =
@@ -105,10 +106,10 @@ function Nav() {
         <div className="flex items-center gap-4">
           <NavLinks />
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(createPageUrl("AITrack"))}
             className="rounded-full bg-[#5ED29C] px-5 py-2 text-[13px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
           >
-            Start a track
+            Browse the tracks
           </button>
         </div>
       </div>
@@ -195,19 +196,6 @@ function TrackCell({ t, modules }) {
   );
 }
 
-const STEPS = [
-  ["01.", "Write a prompt", "Open a lesson and type your instructions. There is nothing to install, and you do not need an account yet."],
-  ["02.", "Run it on a real model", "Your prompt goes to an actual language model and comes back with whatever that model really said."],
-  ["03.", "Get it graded", "Challenges score the output against a rubric, so passing means the thing worked and not that you clicked through."],
-  ["04.", "Keep going", "Hold a streak, move through the tracks, and end up with projects worth showing someone."],
-];
-
-const STATS = [
-  [504, "", "lessons and challenges"],
-  [128, "", "AP CS lessons"],
-  [3, "", "languages that run in the browser"],
-];
-
 function Section({ id, children, className = "" }) {
   return (
     <section id={id} className={`relative mx-auto max-w-6xl px-6 ${className}`}>
@@ -217,7 +205,6 @@ function Section({ id, children, className = "" }) {
 }
 
 export default function HomeLanding() {
-  const navigate = useNavigate();
   const { data: projects = [] } = useQuery({
     queryKey: ["all-projects"],
     queryFn: () => api.entities.Project.list("order"),
@@ -259,49 +246,48 @@ export default function HomeLanding() {
       <Nav />
 
       <main id="main-content">
-      <section className="relative mx-auto flex min-h-[86vh] max-w-6xl flex-col justify-center px-6 pb-20 pt-10">
-        <Reveal>
-          <h1 className="u-display max-w-[15ch] text-[clamp(46px,8.4vw,104px)] font-extrabold leading-[0.92] tracking-[-0.035em] text-white">
-            Write the prompt.
-            <span className="block text-[#5ED29C]">
-              Survive the attacks<span className="cl-caret" aria-hidden="true">_</span>
-            </span>
-          </h1>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <p className="mt-9 max-w-[52ch] text-[clamp(17px,1.5vw,20px)] leading-[1.6] text-white">
-            You write the system prompt that guards a secret. Then real attacks try to{" "}
-            <Accent>talk the model into giving it up</Accent>. It runs against an actual
-            language model in your browser, and you do not need an account to start.
-          </p>
-        </Reveal>
-        <Reveal delay={0.18}>
-          <div className="mt-11 flex flex-wrap items-center gap-8">
-            <button
-              onClick={() => navigate("/login")}
-              className="inline-flex items-center gap-2.5 rounded-full bg-[#5ED29C] px-9 py-4 text-[16px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
-            >
-              Start building free
-              <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />
-            </button>
-            <a
-              href="#playground"
-              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-white"
-            >
-              <span className="border-b border-white/25 pb-0.5 transition-colors group-hover:border-[#5ED29C]">
-                Try the playground
-              </span>
-              <ArrowRight size={16} aria-hidden="true" className="text-[#5ED29C] transition-transform group-hover:translate-x-1" />
-            </a>
+      <section className="relative mx-auto max-w-6xl px-6 pb-16 pt-10 lg:pb-24">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+          <div>
+            <Reveal>
+              <h1 className="u-display max-w-[14ch] text-[clamp(34px,4.4vw,64px)] font-extrabold leading-[0.94] tracking-[-0.035em] text-white">
+                Write the prompt.
+                <span className="block text-[#5ED29C]">
+                  Survive the attacks<span className="cl-caret" aria-hidden="true">_</span>
+                </span>
+              </h1>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p className="mt-7 max-w-[46ch] text-[17px] leading-[1.55] text-white">
+                Three injection attacks run against your system prompt on a live model, and you get
+                a <Accent>held or broken score</Accent> in about twenty seconds.
+              </p>
+            </Reveal>
+            <Reveal delay={0.16}>
+              <p className="mt-4 text-[14px] text-white">
+                Nothing to install. Two free runs before you sign in.
+              </p>
+            </Reveal>
+            <Reveal delay={0.22}>
+              <a
+                href="#tracks"
+                className="group mt-8 inline-flex items-center gap-2 text-[15px] font-semibold text-white"
+              >
+                <span className="border-b border-white/25 pb-0.5 transition-colors group-hover:border-[#5ED29C]">
+                  Or see the 504 lessons behind it
+                </span>
+                <ArrowRight size={15} aria-hidden="true" className="text-[#5ED29C] transition-transform group-hover:translate-x-1" />
+              </a>
+            </Reveal>
           </div>
-        </Reveal>
+
+          <Reveal delay={0.08}>
+            <LivePlayground />
+          </Reveal>
+        </div>
       </section>
 
-      <Reveal>
-        <LivePlayground />
-      </Reveal>
-
-      <Section id="tracks" className="py-28">
+      <Section id="tracks" className="py-24">
         <Reveal>
           <h2 className="u-display max-w-[18ch] text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
             Start with AI. The rest is here when you want it.
@@ -318,137 +304,6 @@ export default function HomeLanding() {
             <TrackCell key={t.key} t={t} modules={t.key === "ai" ? aiTitles : null} />
           ))}
         </div>
-      </Section>
-
-      <Section className="py-28">
-        <Reveal>
-          <h2 className="u-display max-w-[16ch] text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
-            What actually happens when you open a lesson
-          </h2>
-        </Reveal>
-        <Stagger className="mt-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4" gap={0.08}>
-          {STEPS.map(([n, t, d]) => (
-            <Item key={n}>
-              <div className="border-t border-white/12 pt-7">
-                <Numeral>{n}</Numeral>
-                <h3 className="u-display mt-6 text-[19px] font-extrabold tracking-[-0.02em] text-white">{t}</h3>
-                <p className="mt-3 text-[15px] leading-relaxed text-white/92">{d}</p>
-              </div>
-            </Item>
-          ))}
-        </Stagger>
-      </Section>
-
-      <Section className="grid items-center gap-16 py-28 lg:grid-cols-[1fr_1fr]">
-        <Reveal>
-          <div className="flex flex-col gap-3 rounded-2xl border border-white/12 bg-[#070B0A]/70 p-6 backdrop-blur-sm">
-            <div className="self-end rounded-2xl border border-[#5ED29C]/25 bg-[#5ED29C]/10 px-4 py-3 u-mono text-[13px] text-white">
-              for i in range(len(nums)):
-              <br />
-              &nbsp;&nbsp;total =+ nums[i]
-            </div>
-            <div className="self-start rounded-2xl border border-white/12 px-4 py-3 text-sm leading-relaxed text-white">
-              <span className="u-mono mb-2 block text-[11px] text-[#5ED29C]">tutor</span>
-              Your total never adds up because{" "}
-              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">=+</code>{" "}
-              isn't what you think. Python reads it as{" "}
-              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">total = (+nums[i])</code>
-              , so each loop overwrites total. You meant{" "}
-              <code className="rounded bg-black/40 px-1.5 py-0.5 u-mono text-[12px] text-[#34D0C4]">+=</code>. Flip
-              the two characters and it accumulates.
-            </div>
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div>
-            <h2 className="u-display max-w-[15ch] text-[clamp(28px,3.8vw,46px)] font-extrabold leading-[1.04] tracking-[-0.035em] text-white">
-              A tutor that reads <Accent>your actual code</Accent>
-            </h2>
-            <p className="mt-6 max-w-[50ch] text-[17px] leading-relaxed text-white">
-              When something breaks it reads the code you wrote, not a generic version of
-              the error. It says what went wrong in plain English and points at the line
-              to change. You get that at 1am on a Sunday, which is usually when you need it.
-            </p>
-          </div>
-        </Reveal>
-      </Section>
-
-      <div className="border-y border-white/12">
-        <Section className="grid grid-cols-2 gap-x-8 gap-y-14 py-20 md:grid-cols-4">
-          {STATS.map(([v, suffix, label], i) => (
-            <Reveal key={label} delay={i * 0.07}>
-              <b className="u-display block text-[clamp(38px,5vw,62px)] font-extrabold leading-none tracking-[-0.04em] text-white">
-                <CountUp to={v} suffix={suffix} />
-              </b>
-              <span className="mt-5 block h-px w-10 bg-[#5ED29C]" />
-              <span className="mt-4 block text-[14px] font-medium text-white">{label}</span>
-            </Reveal>
-          ))}
-          <Reveal delay={0.21}>
-            <b className="u-display block text-[clamp(38px,5vw,62px)] font-extrabold leading-none tracking-[-0.04em] text-white">
-              $0
-            </b>
-            <span className="mt-5 block h-px w-10 bg-[#5ED29C]" />
-            <span className="mt-4 block text-[14px] font-medium text-white">to start, and no card</span>
-          </Reveal>
-        </Section>
-      </div>
-
-      <Section className="py-28">
-        <div className="grid items-start gap-16 md:grid-cols-[1.5fr_1fr]">
-          <Reveal>
-            <figure className="m-0">
-              <blockquote className="u-display text-[clamp(24px,2.9vw,38px)] font-extrabold leading-[1.14] tracking-[-0.03em] text-white">
-                Plenty of people finish a course and still have{" "}
-                <Accent>never built anything someone else could open</Accent>. That is the
-                part Compilearn is built around.
-              </blockquote>
-              <figcaption className="mt-8 flex items-center gap-4">
-                <span className="h-px w-10 bg-[#5ED29C]" />
-                <span className="text-[13px] font-semibold text-white">the Compilearn mission</span>
-              </figcaption>
-            </figure>
-          </Reveal>
-          <div className="flex flex-col gap-10">
-            {[
-              ["The tutor pushes you to work it out instead of pasting the answer in. Slower, and it is the only version that sticks.", "how we teach"],
-              ["Python, Java, and C++ all run in the browser. It is the same code you would write in a real editor, not a trimmed down teaching version.", "what you will use"],
-            ].map(([q, who], i) => (
-              <Reveal key={who} delay={0.08 + i * 0.08}>
-                <figure className="m-0 border-t border-white/12 pt-7">
-                  <blockquote className="text-[17px] leading-relaxed text-white">{q}</blockquote>
-                  <figcaption className="mt-5 flex items-center gap-4">
-                    <span className="h-px w-8 bg-[#5ED29C]" />
-                    <span className="text-[13px] font-semibold text-white">{who}</span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      <Section className="py-32">
-        <Reveal>
-          <h2 className="u-display max-w-[14ch] text-[clamp(40px,7vw,88px)] font-extrabold leading-[0.94] tracking-[-0.04em] text-white">
-            Start coding in the next 30 seconds<span className="cl-caret" aria-hidden="true">_</span>
-          </h2>
-        </Reveal>
-        <Reveal delay={0.08}>
-          <p className="mt-8 max-w-[48ch] text-[18px] leading-relaxed text-white">
-            It is free, it runs in the browser, and you do not have to sign up first. Open
-            a lesson and run a line.
-          </p>
-        </Reveal>
-        <Reveal delay={0.16}>
-          <button
-            onClick={() => navigate("/login")}
-            className="mt-12 inline-flex items-center gap-2.5 rounded-full bg-[#5ED29C] px-10 py-4 text-[17px] font-bold text-[#070B0A] transition-transform hover:-translate-y-0.5"
-          >
-            Start learning free
-            <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />
-          </button>
-        </Reveal>
       </Section>
       </main>
 
