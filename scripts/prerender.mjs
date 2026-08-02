@@ -64,6 +64,7 @@ const esc = (s) =>
 const stripMd = (s) =>
   String(s || '')
     .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/^#{1,6}\s*(.+?)\s*$/gm, (_, h) => (/[.!?:]$/.test(h) ? `${h} ` : `${h}. `))
     .replace(/`([^`]*)`/g, '$1')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
