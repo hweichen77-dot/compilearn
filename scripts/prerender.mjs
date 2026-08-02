@@ -74,6 +74,25 @@ const stripMd = (s) =>
 const withNoindex = (html) =>
   NOINDEX ? html.replace('</head>', '<meta name="robots" content="noindex" />\n  </head>') : html
 
+const ORG = {
+  '@type': 'Organization',
+  '@id': `${ORIGIN}/#org`,
+  name: 'Compilearn',
+  url: `${ORIGIN}/`,
+  logo: `${ORIGIN}/og-image.png`,
+  description:
+    'Compilearn teaches how language models behave by putting the learner on the defending side, alongside a full AP Computer Science curriculum that runs in the browser.',
+}
+
+function withJsonLd(html, nodes) {
+  const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })
+    .replace(/</g, '\\u003c')
+  return html.replace(
+    '</head>',
+    `<script type="application/ld+json">${json}</script>\n  </head>`,
+  )
+}
+
 function replaceHead(html, { title, description, url }) {
   const t = esc(`${title} · Compilearn`)
   const d = esc(description)
@@ -115,6 +134,30 @@ function run() {
     const url = `${ORIGIN}${r.path}`
     const description = stripMd(r.concept || r.explanation).slice(0, 155)
     let html = replaceHead(template, { title: r.title, description, url })
+    html = withJsonLd(html, [
+      ORG,
+      {
+        '@type': 'LearningResource',
+        '@id': `${url}#lesson`,
+        name: r.title,
+        description,
+        url,
+        inLanguage: 'en',
+        learningResourceType: 'lesson',
+        educationalLevel: 'high school',
+        isAccessibleForFree: true,
+        provider: { '@id': ORG['@id'] },
+        ...(r.projectTitle ? { isPartOf: { '@type': 'Course', name: r.projectTitle } } : {}),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Compilearn', item: `${ORIGIN}/` },
+          ...(r.projectTitle ? [{ '@type': 'ListItem', position: 2, name: r.projectTitle }] : []),
+          { '@type': 'ListItem', position: r.projectTitle ? 3 : 2, name: r.title, item: url },
+        ],
+      },
+    ])
     html = html.replace('<div id="root"></div>', `<div id="root">${seoBlock(r)}</div>`)
     const outDir = path.join(DIST, r.path.replace(/^\//, ''))
     fs.mkdirSync(outDir, { recursive: true })
@@ -126,6 +169,18 @@ function run() {
   for (const [page, meta] of Object.entries(TOP_PAGE_META)) {
     const url = `${ORIGIN}/${page}`
     let html = replaceHead(template, { title: meta.title, description: meta.description, url })
+    html = withJsonLd(html, [
+      ORG,
+      {
+        '@type': 'CollectionPage',
+        '@id': `${url}#page`,
+        name: meta.title,
+        description: meta.description,
+        url,
+        inLanguage: 'en',
+        isPartOf: { '@id': `${ORIGIN}/#website` },
+      },
+    ])
     html = html.replace(
       '<div id="root"></div>',
       `<div id="root"><article style="max-width:720px;margin:64px auto;padding:0 24px;font-family:system-ui,sans-serif;color:#e8e2d5;line-height:1.6"><h1>${esc(meta.title)}</h1><p>${esc(meta.blurb)}</p></article></div>`,
@@ -136,7 +191,19 @@ function run() {
     topWritten++
   }
 
-  const homeHtml = withNoindex(template)
+  const homeHtml = withJsonLd(withNoindex(template), [
+    ORG,
+    {
+      '@type': 'WebSite',
+      '@id': `${ORIGIN}/#website`,
+      name: 'Compilearn',
+      alternateName: ['Compilearn.com', 'Compi Learn'],
+      url: `${ORIGIN}/`,
+      description: HOME_META.blurb,
+      inLanguage: 'en',
+      publisher: { '@id': ORG['@id'] },
+    },
+  ])
     .replace(/<link rel="canonical" href="[\s\S]*?" \/>/, `<link rel="canonical" href="${ORIGIN}/" />`)
     .replace(/<meta property="og:url" content="[\s\S]*?" \/>/, `<meta property="og:url" content="${ORIGIN}/" />`)
     .replace(
