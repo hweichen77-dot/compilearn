@@ -20,6 +20,9 @@ create unique index if not exists lab_scores_handle_uq
   on public.lab_scores (lab_id, lower(handle))
   where published and handle is not null;
 
+drop policy if exists "own scores writable" on public.lab_scores;
+drop policy if exists "own scores updatable" on public.lab_scores;
+
 drop function if exists public.lab_leaderboard(text, integer);
 
 create function public.lab_leaderboard(p_lab_id text, p_limit integer default 20)

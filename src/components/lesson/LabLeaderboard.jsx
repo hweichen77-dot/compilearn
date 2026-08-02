@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Trophy } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
-import { fetchLeaderboard, getMyEntry, publishEntry, unpublishEntry, submitAnonScore } from '@/lib/leaderboard'
+import { fetchLeaderboard, getMyEntry, publishEntry, unpublishEntry } from '@/lib/leaderboard'
 import { track } from '@/lib/analytics'
 
 const ACCENT = '#5ED29C'
 const MUTED = 'rgba(236,243,239,0.72)'
 
-export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
+export default function LabLeaderboard({ lab, refreshKey, solvedPrompt = '' }) {
+  const bestChars = solvedPrompt.trim().length
   const { isAuthenticated } = useAuth()
   const [rows, setRows] = useState([])
   const [mine, setMine] = useState(null)
@@ -25,7 +26,7 @@ export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
   const join = async () => {
     setBusy(true)
     setError('')
-    const res = await publishEntry(lab.id, handle.trim())
+    const res = await publishEntry(lab.id, handle.trim(), solvedPrompt)
     setBusy(false)
     if (!res.ok) { setError(res.error); return }
     track('leaderboard_joined', { lab: lab.id })
@@ -36,7 +37,7 @@ export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
   const joinAnon = async () => {
     setBusy(true)
     setError('')
-    const res = await submitAnonScore({ labId: lab.id, handle: handle.trim(), promptChars: bestChars, attacksHeld: lab.inputs.length })
+    const res = await publishEntry(lab.id, handle.trim(), solvedPrompt)
     setBusy(false)
     if (!res.ok) { setError(res.error); return }
     track('leaderboard_joined_anon', { lab: lab.id })
@@ -79,10 +80,10 @@ export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
         </ol>
       )}
 
-      {isAuthenticated && mine && !mine.published && (
+      {isAuthenticated && bestChars > 0 && !mine?.published && (
         <div className="mt-4 pt-3" style={{ borderTop: '1px solid #17201C' }}>
           <p className="text-xs mb-2" style={{ color: MUTED }}>
-            Your best here is {mine.prompt_chars} characters. Pick a handle to appear on the board. Use a nickname, not your real name.
+            You solved this in {bestChars} characters. Pick a handle and your prompt gets re-run against every attack to confirm the score before it goes on the board.
           </p>
           <div className="flex flex-wrap gap-2">
             <input
@@ -116,7 +117,7 @@ export default function LabLeaderboard({ lab, refreshKey, bestChars = 0 }) {
         </div>
       )}
 
-      {!isAuthenticated && bestChars > 0 && (
+      {!isAuthenticated && bestChars > 0 && !mine?.published && (
         <div className="mt-3 pt-3" style={{ borderTop: '1px solid #17201C' }}>
           <p className="text-xs" style={{ color: MUTED }}>
             You solved this in {bestChars} characters. Pick a handle to appear on the board, no account needed.

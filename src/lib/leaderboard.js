@@ -12,33 +12,23 @@ async function currentUserId() {
   }
 }
 
-export async function submitLabScore({ labId, promptChars, attacksHeld }) {
+export async function submitLabScore({ labId, systemPrompt, handle }) {
   const userId = await currentUserId()
-  if (!userId || !labId || !promptChars) return { stored: false }
+  if (!userId || !labId || !systemPrompt?.trim()) return { stored: false }
+  return submitVerifiedScore({ labId, systemPrompt, handle })
+}
 
+async function submitVerifiedScore({ labId, systemPrompt, handle }) {
+  if (!supabase) return { ok: false, error: 'The board is not reachable in this build.' }
   try {
-    const { data: existing } = await supabase
-      .from('lab_scores')
-      .select('prompt_chars, handle, published')
-      .eq('user_id', userId)
-      .eq('lab_id', labId)
-      .maybeSingle()
-
-    if (existing && existing.prompt_chars <= promptChars) return { stored: false, kept: existing.prompt_chars }
-
-    const { error } = await supabase.from('lab_scores').upsert({
-      user_id: userId,
-      lab_id: labId,
-      prompt_chars: promptChars,
-      attacks_held: attacksHeld,
-      handle: existing?.handle ?? null,
-      published: existing?.published ?? false,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lab_id' })
-    if (error) return { stored: false }
-    return { stored: true, improved: Boolean(existing) }
+    const { data, error } = await supabase.functions.invoke('lab-score', {
+      body: { labId, systemPrompt, handle, claimToken: claimToken() },
+    })
+    if (error) return { ok: false, error: 'Could not reach the board right now.' }
+    if (data?.error) return { ok: false, error: data.error, held: data.held, total: data.total }
+    return { ok: true, stored: Boolean(data?.stored), kept: data?.kept, held: data?.held, total: data?.total }
   } catch {
-    return { stored: false }
+    return { ok: false, error: 'Could not reach the board right now.' }
   }
 }
 
@@ -69,34 +59,21 @@ export async function getMyEntry(labId) {
   }
 }
 
-export async function publishEntry(labId, handle) {
-  const userId = await currentUserId()
-  if (!userId || !labId) return { ok: false, error: 'Sign in to appear on the board.' }
+export async function publishEntry(labId, handle, systemPrompt) {
   if (!HANDLE_PATTERN.test(handle || '')) {
     return { ok: false, error: 'Pick 2 to 20 letters, numbers, dashes or underscores. Please do not use your real name.' }
   }
-  try {
-    const { error } = await supabase
-      .from('lab_scores')
-      .update({ handle, published: true, updated_at: new Date().toISOString() })
-      .eq('user_id', userId)
-      .eq('lab_id', labId)
-    if (error) return { ok: false, error: 'That handle is taken or could not be saved.' }
-    return { ok: true }
-  } catch {
-    return { ok: false, error: 'Could not reach the leaderboard right now.' }
+  if (!systemPrompt?.trim()) {
+    return { ok: false, error: 'Solve the lab again so your prompt can be checked before it goes on the board.' }
   }
+  return submitVerifiedScore({ labId, systemPrompt, handle })
 }
 
 export async function unpublishEntry(labId) {
   const userId = await currentUserId()
   if (!userId || !labId) return { ok: false }
   try {
-    await supabase
-      .from('lab_scores')
-      .update({ published: false, updated_at: new Date().toISOString() })
-      .eq('user_id', userId)
-      .eq('lab_id', labId)
+    await supabase.from('lab_scores').delete().eq('user_id', userId).eq('lab_id', labId)
     return { ok: true }
   } catch {
     return { ok: false }
@@ -117,19 +94,9 @@ export function claimToken() {
   return token
 }
 
-export async function submitAnonScore({ labId, handle, promptChars, attacksHeld }) {
-  if (!supabase) return { ok: false, error: 'The board is not reachable in this build.' }
+export async function submitAnonScore({ labId, handle, systemPrompt }) {
   if (!HANDLE_PATTERN.test(handle || '')) {
     return { ok: false, error: 'Pick 2 to 20 letters, numbers, dashes or underscores. Please do not use your real name.' }
   }
-  try {
-    const { data, error } = await supabase.functions.invoke('lab-score', {
-      body: { labId, handle, promptChars, attacksHeld, claimToken: claimToken() },
-    })
-    if (error) return { ok: false, error: 'Could not reach the board right now.' }
-    if (data?.error) return { ok: false, error: data.error }
-    return { ok: true, stored: Boolean(data?.stored), kept: data?.kept }
-  } catch {
-    return { ok: false, error: 'Could not reach the board right now.' }
-  }
+  return submitVerifiedScore({ labId, systemPrompt, handle })
 }

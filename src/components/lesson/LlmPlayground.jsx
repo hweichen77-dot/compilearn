@@ -7,7 +7,6 @@ import { buildReplayUrl } from '@/lib/replayLink'
 import { diffPrompts } from '@/lib/promptDiff'
 import ShareResult from './ShareResult'
 import SaveProgressPrompt from './SaveProgressPrompt'
-import { submitLabScore } from '@/lib/leaderboard'
 import LabLeaderboard from './LabLeaderboard'
 
 const FIRST_WAVE = 3
@@ -26,7 +25,7 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
   const [copied, setCopied] = useState(false)
   const [compare, setCompare] = useState(false)
   const [comparison, setComparison] = useState(null)
-  const [solvedChars, setSolvedChars] = useState(0)
+  const [solvedPrompt, setSolvedPrompt] = useState('')
 
   const activeInputs = lab.inputs.slice(0, unlocked)
   const locked = lab.inputs.length - unlocked
@@ -82,15 +81,14 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
     if (clearedEverything) {
       markLabSolved(lab.id)
       setSolved(true)
-      setSolvedChars(systemPrompt.trim().length)
+      setSolvedPrompt(systemPrompt)
     }
     try {
       track('playground_run', { lab: lab.id, passed: graded.passed, total: graded.total })
       if (clearedEverything) {
         track('playground_solved', { lab: lab.id, prompt_chars: systemPrompt.trim().length })
         trackFunnel('challengeComplete', { lab: lab.id, prompt_chars: systemPrompt.trim().length })
-        submitLabScore({ labId: lab.id, promptChars: systemPrompt.trim().length, attacksHeld: graded.total })
-          .then(() => setBoardKey((k) => k + 1))
+        setBoardKey((k) => k + 1)
       }
     } catch {  }
   }
@@ -306,7 +304,7 @@ export default function LlmPlayground({ lab, labIndex, labCount, initialPrompt =
         </div>
       )}
 
-      <LabLeaderboard lab={lab} refreshKey={boardKey} bestChars={solvedChars} />
+      <LabLeaderboard lab={lab} refreshKey={boardKey} solvedPrompt={solvedPrompt} />
     </div>
   )
 }
