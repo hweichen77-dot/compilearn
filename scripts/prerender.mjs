@@ -117,6 +117,16 @@ function composeDescription(r) {
   return `${lead}${body}`.slice(0, 155).trim()
 }
 
+function navBlock({ prev, next }) {
+  const link = (r, label) => `<li>${esc(label)}: <a href="${BASE}${r.path}">${esc(r.title)}</a></li>`
+  const items = [
+    `<li><a href="${BASE}/">Compilearn home</a></li>`,
+    prev ? link(prev, 'Previous') : '',
+    next ? link(next, 'Next') : '',
+  ].join('')
+  return `<nav><ul>${items}</ul></nav>`
+}
+
 function seoBlock(r) {
   const intro = stripMd(r.explanation).slice(0, 1200)
   const parts = [
@@ -141,7 +151,16 @@ function run() {
 
   const titleCounts = routes.reduce((acc, r) => ({ ...acc, [r.title]: (acc[r.title] || 0) + 1 }), {})
 
+  const siblings = new Map()
   for (const r of routes) {
+    if (!siblings.has(r.projectId)) siblings.set(r.projectId, [])
+    siblings.get(r.projectId).push(r)
+  }
+
+  for (const r of routes) {
+    const group = siblings.get(r.projectId)
+    const at = group.indexOf(r)
+    const nav = navBlock({ prev: group[at - 1], next: group[at + 1] })
     const url = `${ORIGIN}${r.path}`
     const description = composeDescription(r)
     const title = titleCounts[r.title] > 1 && r.projectTitle ? `${r.title} · ${r.projectTitle}` : r.title
@@ -170,7 +189,7 @@ function run() {
         ],
       },
     ])
-    html = html.replace('<div id="root"></div>', `<div id="root">${seoBlock(r)}</div>`)
+    html = html.replace('<div id="root"></div>', `<div id="root">${seoBlock(r)}${nav}</div>`)
     const outDir = path.join(DIST, r.path.replace(/^\//, ''))
     fs.mkdirSync(outDir, { recursive: true })
     fs.writeFileSync(path.join(outDir, 'index.html'), html)
