@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -14,11 +14,13 @@ if (!keyFile) {
 }
 const key = keyFile.replace(/\.txt$/, '')
 
-const sitemap = readFileSync(path.join(ROOT, 'dist', 'sitemap.xml'), 'utf8')
-const urlList = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1])
+const sitemap = await fetch(`https://${HOST}/sitemap.xml`).then((r) => (r.ok ? r.text() : ''))
+const prefix = `https://${HOST}/`
+const urlList = [...new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]))]
+  .filter((u) => u.startsWith(prefix))
 
 if (!urlList.length) {
-  console.error('[indexnow] sitemap has no urls')
+  console.error(`[indexnow] no urls on ${HOST} in the live sitemap`)
   process.exit(1)
 }
 
