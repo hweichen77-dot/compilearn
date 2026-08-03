@@ -18,7 +18,8 @@
     "test": "node scripts/check-functions-deployed.mjs && node scripts/gen-lab-rules.mjs --check && node --test \"src/**/*.test.js\"",
     "preview": "vite preview",
     "build:desktop": "node scripts/gen-content-manifests.mjs && cross-env VITE_BASE=/ vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "submit:indexnow": "node scripts/submit-indexnow.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.2.10",
