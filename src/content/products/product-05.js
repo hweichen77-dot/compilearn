@@ -183,6 +183,18 @@ main()
           "system|You are a rewriter. Rewrite the user's text in a casual tone. Keep the meaning.\nuser|We regret to inform you of the delay.",
         description: "The tone changes the system line but the text passes through unchanged.",
       },
+      {
+        input: "formal\nWe whats up",
+        expected_output: "system|You are a rewriter. Rewrite the user's text in a formal tone. Keep the meaning.\nuser|We whats up"
+      },
+      {
+        input: "casual\nWe whats up inform you of the delay.",
+        expected_output: "system|You are a rewriter. Rewrite the user's text in a casual tone. Keep the meaning.\nuser|We whats up inform you of the delay."
+      },
+      {
+        input: "formal\nWe regret up",
+        expected_output: "system|You are a rewriter. Rewrite the user's text in a formal tone. Keep the meaning.\nuser|We regret up"
+      }
     ],
   },
 
@@ -511,6 +523,14 @@ main()
         expected_output: "Rewrite in a formal tone for a executive audience.",
         description: "A different tone and audience produce a new instruction from the same template.",
       },
+      {
+        input: "friendly\nexecutive",
+        expected_output: "Rewrite in a friendly tone for a executive audience."
+      },
+      {
+        input: "formal\ncustomer",
+        expected_output: "Rewrite in a formal tone for a customer audience."
+      }
     ],
   },
 
@@ -670,6 +690,18 @@ main()
         expected_output: "UNKNOWN TONE",
         description: "A tone not in the menu returns the fallback string.",
       },
+      {
+        input: "3\nformal: Be professional language.\ncasual: Be it relaxed.\nfriendly: Be warm and kind.\ncasual",
+        expected_output: "Be it relaxed."
+      },
+      {
+        input: "3\nformal: Use professional language.\ncasual: Be it relaxed.\nfriendly: Be warm and kind.\ncasual",
+        expected_output: "Be it relaxed."
+      },
+      {
+        input: "3\nformal: Be professional language.\ncasual: Keep it relaxed.\nfriendly: Be warm and kind.\ncasual",
+        expected_output: "Keep it relaxed."
+      }
     ],
   },
 
@@ -861,6 +893,14 @@ main()
         expected_output: "PRESERVED",
         description: "Edge: with no numbers to lose, the check passes.",
       },
+      {
+        input: "Ship 3 boxes by 5pm to 42 Main St.\nWe nothing 4 boxes account 42 Main Street by 6 pm.",
+        expected_output: "LOST\n3 5"
+      },
+      {
+        input: "Ship 3 boxes by 5pm to 42 Main St.\nPlease nothing 4 to account 43 Main Street by 4 pm.",
+        expected_output: "LOST\n3 5 42"
+      }
     ],
   },
 
@@ -1048,6 +1088,14 @@ main()
         expected_output: "ERROR: empty text",
         description: "Whitespace-only text is rejected before any rewrite happens.",
       },
+      {
+        input: "  FORMAL \nHi there",
+        expected_output: "tone=formal\ntext=Hi there"
+      },
+      {
+        input: "shouty\nHi world",
+        expected_output: "tone=neutral\ntext=Hi world"
+      }
     ],
   },
 
@@ -1223,6 +1271,14 @@ main()
         expected_output: "Hello there!",
         description: "A language-tagged fence line is also stripped.",
       },
+      {
+        input: "```\nHello day to you.\nIt was a pleasure.\n```",
+        expected_output: "Hello day to you.\nIt was a pleasure."
+      },
+      {
+        input: "```text\nGood there!\n```",
+        expected_output: "Good there!"
+      }
     ],
   },
 

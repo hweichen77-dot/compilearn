@@ -401,6 +401,14 @@ main()
           expected_output: "0%\nPASS",
           description: "Edge: a threshold of 0 always passes, even at a 0% rate.",
         },
+        {
+          input: "10 80\n1 1 0 0 1 0 0 1 2 0",
+          expected_output: "60%\nFAIL"
+        },
+        {
+          input: "10 80\n1 2 0 2 1 0 1 2 1 1",
+          expected_output: "110%\nPASS"
+        }
       ],
     },
 
@@ -612,6 +620,14 @@ main()
           expected_output: "a 1/2 50%\nb 1/2 50%\nWeakest: a",
           description: "Edge: a tie between categories goes to the alphabetically first one.",
         },
+        {
+          input: "5\nmath hello hello\na hi hi\nrefund yes no\nb no no\nedge_case empty error",
+          expected_output: "a 1/1 100%\nb 1/1 100%\nedge_case 0/1 0%\nmath 1/1 100%\nrefund 0/1 0%\nWeakest: edge_case"
+        },
+        {
+          input: "2\na 6 5\ngreeting 3 3",
+          expected_output: "a 0/1 0%\ngreeting 1/1 100%\nWeakest: a"
+        }
       ],
     },
 
@@ -841,6 +857,14 @@ main()
           expected_output: "case 1: PASS\nPassed: 1/1",
           description: "Edge: the difference exactly equals the tolerance, which still counts as a pass.",
         },
+        {
+          input: "4\nexact yes dog\ncontains The_total_is_42.50_today 42.50\nrange 9.8 10.0 0.5\nrange 7.0 10.0 0.5",
+          expected_output: "case 1: FAIL\ncase 2: PASS\ncase 3: PASS\ncase 4: FAIL\nPassed: 2/4"
+        },
+        {
+          input: "2\nexact yes yes\ncontains hello xyz",
+          expected_output: "case 1: PASS\ncase 2: FAIL\nPassed: 1/2"
+        }
       ],
     },
 
@@ -1273,6 +1297,14 @@ main()
           expected_output: "solo: 5",
           description: "Edge: a single valid score is its own median.",
         },
+        {
+          input: "3\nemail_1 5 4 4 5 ERR 4\nemail_2 3 1 ERR ERR\nemail_3 3 ERR ERR ERR",
+          expected_output: "email_1: 4\nemail_2: 1\nemail_3: NO_VERDICT"
+        },
+        {
+          input: "1\nq1 3 2",
+          expected_output: "q1: 2"
+        }
       ],
     },
 
@@ -1479,6 +1511,14 @@ main()
           expected_output: "Overall: 0.80\nOK",
           description: "Edge: the drop lands right at the tolerance boundary, which does not count as a regression.",
         },
+        {
+          input: "0.85 0.05\n3\n1 5\n1 4\n0 3",
+          expected_output: "Overall: 0.75\nREGRESSION"
+        },
+        {
+          input: "0.5 0.1\n2\n1 -1\n1 3",
+          expected_output: "Overall: 0.88\nOK"
+        }
       ],
     },
 
@@ -1715,6 +1755,14 @@ main()
           expected_output: "solo: 1/1\nOverall: 100%",
           description: "Edge: a single passing case reports a perfect 100% overall.",
         },
+        {
+          input: "4\nmath 1\nmath 0\nmath 1\ngreetings 1",
+          expected_output: "greetings: 1/1\nmath: 2/3\nOverall: 75%"
+        },
+        {
+          input: "3\nmath 0\nmath 0\ngreetings 0",
+          expected_output: "greetings: 0/1\nmath: 0/2\nOverall: 0%"
+        }
       ],
     },
   ],

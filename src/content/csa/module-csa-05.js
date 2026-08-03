@@ -199,6 +199,14 @@ export default {
         {
           "input": "4\n1 2 3 4",
           "expected_output": "10"
+        },
+        {
+          "input": "3\n50 16 4",
+          "expected_output": "70"
+        },
+        {
+          "input": "1\n36",
+          "expected_output": "36"
         }
       ],
       "key_terms": [
@@ -318,6 +326,14 @@ export default {
         {
           "input": "1 0",
           "expected_output": "60"
+        },
+        {
+          "input": "1 39",
+          "expected_output": "99"
+        },
+        {
+          "input": "0 9",
+          "expected_output": "9"
         }
       ],
       "key_terms": [
@@ -437,6 +453,14 @@ export default {
         {
           "input": "-20",
           "expected_output": "0"
+        },
+        {
+          "input": "64",
+          "expected_output": "64"
+        },
+        {
+          "input": "53",
+          "expected_output": "53"
         }
       ],
       "key_terms": [
@@ -556,6 +580,14 @@ export default {
         {
           "input": "5 12",
           "expected_output": "169"
+        },
+        {
+          "input": "2 0",
+          "expected_output": "4"
+        },
+        {
+          "input": "3 6",
+          "expected_output": "45"
         }
       ],
       "key_terms": [
@@ -677,6 +709,14 @@ export default {
         {
           "input": "50 50",
           "expected_output": "0"
+        },
+        {
+          "input": "75 62",
+          "expected_output": "13"
+        },
+        {
+          "input": "63 121",
+          "expected_output": "63"
         }
       ],
       "key_terms": [
@@ -797,6 +837,14 @@ export default {
         {
           "input": "7",
           "expected_output": "7"
+        },
+        {
+          "input": "1",
+          "expected_output": "1"
+        },
+        {
+          "input": "4",
+          "expected_output": "4"
         }
       ],
       "key_terms": [
@@ -916,6 +964,14 @@ export default {
         {
           "input": "7 1",
           "expected_output": "7/1"
+        },
+        {
+          "input": "3 3",
+          "expected_output": "3/3"
+        },
+        {
+          "input": "5 1",
+          "expected_output": "5/1"
         }
       ],
       "key_terms": [

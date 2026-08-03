@@ -480,6 +480,14 @@ export default {
         {
           "input": "Plato",
           "expected_output": "Plato"
+        },
+        {
+          "input": "Grace Lovelace",
+          "expected_output": "Grace"
+        },
+        {
+          "input": "Ada Hopper",
+          "expected_output": "Ada"
         }
       ]
     },
@@ -597,6 +605,14 @@ export default {
         {
           "input": "apple banana",
           "expected_output": "apple banana"
+        },
+        {
+          "input": "cat banana",
+          "expected_output": "banana cat"
+        },
+        {
+          "input": "apple cat",
+          "expected_output": "apple cat"
         }
       ]
     },
@@ -714,6 +730,14 @@ export default {
         {
           "input": "2 2",
           "expected_output": "2"
+        },
+        {
+          "input": "3 11",
+          "expected_output": "11"
+        },
+        {
+          "input": "2 6",
+          "expected_output": "6"
         }
       ]
     },
@@ -830,6 +854,14 @@ export default {
         {
           "input": "0 0",
           "expected_output": "0"
+        },
+        {
+          "input": "50 28",
+          "expected_output": "78"
+        },
+        {
+          "input": "89 -1",
+          "expected_output": "88"
         }
       ]
     },
@@ -947,6 +979,14 @@ export default {
         {
           "input": "4\n0 -1 10 7",
           "expected_output": "0 -2 20 14"
+        },
+        {
+          "input": "3\n2 2 3",
+          "expected_output": "4 4 6"
+        },
+        {
+          "input": "1\n3",
+          "expected_output": "6"
         }
       ]
     }

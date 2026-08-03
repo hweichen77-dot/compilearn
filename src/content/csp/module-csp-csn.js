@@ -247,6 +247,14 @@ export default {
         {
           "input": "1\n0 only",
           "expected_output": "only"
+        },
+        {
+          "input": "3\n2 there\n0 hello\n0 brave",
+          "expected_output": "brave hello there"
+        },
+        {
+          "input": "2\n1 world\n0 hi",
+          "expected_output": "hi world"
         }
       ]
     },
@@ -363,6 +371,14 @@ export default {
         {
           "input": "2 0\nA B",
           "expected_output": "-1"
+        },
+        {
+          "input": "4 4\nA B\nB C\nA C\nC D\nA D",
+          "expected_output": "2"
+        },
+        {
+          "input": "3 2\nA B\nB D\nA C",
+          "expected_output": "-1"
         }
       ]
     },
@@ -478,6 +494,14 @@ export default {
         },
         {
           "input": "2 1\nA B\nA B X",
+          "expected_output": "reachable"
+        },
+        {
+          "input": "2 1\nA B\nB B X",
+          "expected_output": "reachable"
+        },
+        {
+          "input": "3 3\nA B\nA B\nA C\nA C B",
           "expected_output": "reachable"
         }
       ]
@@ -610,6 +634,14 @@ export default {
         {
           "input": "5 1000 100",
           "expected_output": "805"
+        },
+        {
+          "input": "32 641 54",
+          "expected_output": "706"
+        },
+        {
+          "input": "17 540 1",
+          "expected_output": "32"
         }
       ]
     },
@@ -726,6 +758,14 @@ export default {
         {
           "input": "POST /api/login HTTP/2",
           "expected_output": "POST /api/login"
+        },
+        {
+          "input": "POST /data HTTP/1.1",
+          "expected_output": "POST /data"
+        },
+        {
+          "input": "GET /api/login HTTP/2",
+          "expected_output": "GET /api/login"
         }
       ]
     },
@@ -856,6 +896,14 @@ export default {
         {
           "input": "5\n10 10 10 10 10\n5",
           "expected_output": "50 10"
+        },
+        {
+          "input": "4\n3 3 3 3\n4",
+          "expected_output": "12 3"
+        },
+        {
+          "input": "3\n9 10 1\n3",
+          "expected_output": "20 10"
         }
       ]
     },
@@ -975,6 +1023,14 @@ export default {
         {
           "input": "0.0 8",
           "expected_output": "1.00"
+        },
+        {
+          "input": "0.5 8",
+          "expected_output": "1.78"
+        },
+        {
+          "input": "0.5 4",
+          "expected_output": "1.60"
         }
       ]
     }

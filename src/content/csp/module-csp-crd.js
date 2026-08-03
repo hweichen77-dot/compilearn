@@ -123,6 +123,14 @@ export default {
         {
           "input": "7",
           "expected_output": "7"
+        },
+        {
+          "input": "7 9 9",
+          "expected_output": "25"
+        },
+        {
+          "input": "8 13 11 40",
+          "expected_output": "72"
         }
       ]
     },
@@ -248,6 +256,14 @@ export default {
         {
           "input": "7",
           "expected_output": "7"
+        },
+        {
+          "input": "25 7 29",
+          "expected_output": "29"
+        },
+        {
+          "input": "31 6 4 21",
+          "expected_output": "31"
         }
       ]
     },
@@ -359,6 +375,14 @@ export default {
         {
           "input": "10 20 30",
           "expected_output": "60"
+        },
+        {
+          "input": "1 13 15 3 6 7",
+          "expected_output": "6"
+        },
+        {
+          "input": "9 4 19",
+          "expected_output": "4"
         }
       ]
     },
@@ -470,6 +494,14 @@ export default {
         {
           "input": "9",
           "expected_output": "9"
+        },
+        {
+          "input": "62",
+          "expected_output": "56"
+        },
+        {
+          "input": "59",
+          "expected_output": "54"
         }
       ]
     },
@@ -591,6 +623,14 @@ export default {
         {
           "input": "59",
           "expected_output": "FAIL"
+        },
+        {
+          "input": "70",
+          "expected_output": "PASS"
+        },
+        {
+          "input": "62",
+          "expected_output": "PASS"
         }
       ]
     },
@@ -713,6 +753,14 @@ export default {
         {
           "input": "4 4 4 4",
           "expected_output": "4"
+        },
+        {
+          "input": "-1 -2 2",
+          "expected_output": "1"
+        },
+        {
+          "input": "1 -2 -1 0 4",
+          "expected_output": "2"
         }
       ]
     },
@@ -838,6 +886,14 @@ export default {
         {
           "input": "",
           "expected_output": "0"
+        },
+        {
+          "input": "8 18",
+          "expected_output": "13"
+        },
+        {
+          "input": "6 20 29",
+          "expected_output": "18"
         }
       ]
     },
@@ -962,6 +1018,14 @@ export default {
         {
           "input": "50 40 30",
           "expected_output": "40\nFAIL"
+        },
+        {
+          "input": "73 77 34",
+          "expected_output": "61\nPASS"
+        },
+        {
+          "input": "90 48 69",
+          "expected_output": "69\nPASS"
         }
       ]
     }

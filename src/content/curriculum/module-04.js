@@ -329,7 +329,8 @@ main()
         { input: "5\nuser 10\nassistant 20\nuser 5\nassistant 8\nuser 3", expected_output: "VALID\n164", description: "Valid alternating transcript; prefix-sum replay total is 164." },
         { input: "2\nuser 4\nuser 6", expected_output: "INVALID", description: "Two user turns in a row is rejected." },
         { input: "1\nassistant 9", expected_output: "INVALID", description: "Edge: starting with an assistant turn is invalid." },
-        { input: "1\nuser 7", expected_output: "VALID\n7", description: "Edge: a single user turn is valid and bills once." }
+        { input: "1\nuser 7", expected_output: "VALID\n7", description: "Edge: a single user turn is valid and bills once." },
+        { input: "1\nuser 9", expected_output: "VALID\n9" }
       ]
     },
 
@@ -661,7 +662,9 @@ main()
       challenge_test_cases: [
         { input: "3\nname Reddbeard\ntone gruff\nlanguage pirate\n2\ntone polite\nmood cheerful", expected_output: "1\nname=Reddbeard\ntone=gruff\nlanguage=pirate\nmood=cheerful", description: "One blocked override; new attribute appended." },
         { input: "1\nname Bot\n0", expected_output: "0\nname=Bot", description: "No user rules; persona unchanged." },
-        { input: "2\na x\nb y\n3\na z\nb w\nc q", expected_output: "2\na=x\nb=y\nc=q", description: "Edge: two pinned attributes blocked, one new attribute admitted." }
+        { input: "2\na x\nb y\n3\na z\nb w\nc q", expected_output: "2\na=x\nb=y\nc=q", description: "Edge: two pinned attributes blocked, one new attribute admitted." },
+        { input: "3\nname x\ntone gruff\nlanguage pirate\n2\nb polite\nmood q", expected_output: "0\nname=x\ntone=gruff\nlanguage=pirate\nb=polite\nmood=q" },
+        { input: "1\na Bot\n0", expected_output: "0\na=Bot" }
       ]
     },
 
@@ -982,7 +985,8 @@ main()
         { input: "1000 100 200\n5\n150 150 150 150 150", expected_output: "4 1\n900", description: "Drops the oldest turn to fit the 700-token history room." },
         { input: "100 90 50\n2\n10 10", expected_output: "OVERFLOW", description: "System plus reserve already exceeds the budget." },
         { input: "200 50 50\n3\n60 60 60", expected_output: "1 2\n160", description: "Only the newest turn fits the 100-token room." },
-        { input: "500 100 50\n0\n", expected_output: "0 0\n150", description: "Edge: empty history still costs system plus reserve." }
+        { input: "500 100 50\n0\n", expected_output: "0 0\n150", description: "Edge: empty history still costs system plus reserve." },
+        { input: "1000 100 200\n5\n73 135 140 150 150", expected_output: "5 0\n948" }
       ]
     },
 
@@ -1303,7 +1307,9 @@ main()
       challenge_test_cases: [
         { input: "3 50\n20 Hello \n30 there \n10 matey", expected_output: "70 110\nHello there matey", description: "Three chunks: TTFT 70, total 110, reply assembled in order." },
         { input: "1 100\n5 Hi", expected_output: "105 105\nHi", description: "Single chunk makes TTFT equal total." },
-        { input: "0 40\n", expected_output: "40 40\n", description: "Edge: no chunks; TTFT and total are just the warmup and the reply is empty." }
+        { input: "0 40\n", expected_output: "40 40\n", description: "Edge: no chunks; TTFT and total are just the warmup and the reply is empty." },
+        { input: "3 50\n12 Hi \n29 there \n9 matey", expected_output: "62 100\nHi there matey" },
+        { input: "1 100\n20 Hi", expected_output: "120 120\nHi" }
       ]
     },
 
@@ -1618,7 +1624,8 @@ main()
         { input: "3 6\ns1 hello\ns1 how are you\ns2 hi\ns1 what is python\ns1 explain loops\ns2 bye", expected_output: "12\ns1 3\ns2 2", description: "Two sessions; s1 hits the cap and drops its oldest message." },
         { input: "5 1\nx only one message", expected_output: "1\nx 1", description: "Single session and single message." },
         { input: "2 3\na one\na two\na three", expected_output: "5\na 2", description: "Cap of 2: stored lengths are 1, 2, 2; the oldest is dropped on the third event." },
-        { input: "1 2\nb first message\nb second message", expected_output: "2\nb 1", description: "Edge: cap of 1 keeps only the newest message each turn." }
+        { input: "1 2\nb first message\nb second message", expected_output: "2\nb 1", description: "Edge: cap of 1 keeps only the newest message each turn." },
+        { input: "3 6\nx hello\ns1 two message you\ns2 three\ns1 what is python\ns1 explain loops\ns2 bye", expected_output: "10\nx 1\ns1 3\ns2 2" }
       ]
     },
 
@@ -1941,7 +1948,8 @@ main()
         { input: "2 5\n5\n10 10 10 10 10", expected_output: "25\n25", description: "Three old turns compressed into a 5-token summary; saves 25 tokens." },
         { input: "3 4\n3\n7 8 9", expected_output: "NOSUMMARY\n24", description: "n equals keep, so nothing is summarized." },
         { input: "1 2\n4\n10 20 30 40", expected_output: "42\n58", description: "Keep the last turn (40) plus a 2-token summary; saves 58." },
-        { input: "5 10\n2\n3 4", expected_output: "NOSUMMARY\n7", description: "Edge: fewer turns than keep, raw total reported." }
+        { input: "5 10\n2\n3 4", expected_output: "NOSUMMARY\n7", description: "Edge: fewer turns than keep, raw total reported." },
+        { input: "2 5\n5\n6 6 29 23 10", expected_output: "38\n36" }
       ]
     },
 
@@ -2269,7 +2277,8 @@ main()
         { input: "neutral assistant\n5\nhello\n/persona pirate\nahoy\n/clear\nnew question", expected_output: "neutral assistant\n3 1 1", description: "Three messages, one switch, one clear; the clear restores the default persona." },
         { input: "base\n4\n/persona robot\nhi\n/persona wizard\nspell", expected_output: "wizard\n2 0 2", description: "Two switches and two messages; final persona is wizard." },
         { input: "helper\n3\na\nb\nc", expected_output: "helper\n3 0 0", description: "Three plain messages, no commands; persona unchanged." },
-        { input: "base\n2\n/clear\n/clear", expected_output: "base\n0 2 0", description: "Edge: only clears; no messages and persona stays default." }
+        { input: "base\n2\n/clear\n/clear", expected_output: "base\n0 2 0", description: "Edge: only clears; no messages and persona stays default." },
+        { input: "neutral assistant\n5\na\n/persona pirate\nc\n/clear\nnew question", expected_output: "neutral assistant\n3 1 1" }
       ]
     },
 
@@ -2593,7 +2602,8 @@ main()
         { input: "10 3\ns1 5\ns1 8\ns1 3", expected_output: "64\n26", description: "One growing session; per-request bills 15, 23, 26 sum to 64." },
         { input: "0 1\nu1 7", expected_output: "7\n7", description: "Single request with no system cost." },
         { input: "100 2\na 50\nb 50", expected_output: "300\n150", description: "Two separate sessions each bill 100+50 = 150; total 300, max 150." },
-        { input: "5 4\nx 10\ny 10\nx 10\ny 10", expected_output: "80\n25", description: "Interleaved sessions stay separate; bills are 15, 15, 25, 25 for total 80, max 25." }
+        { input: "5 4\nx 10\ny 10\nx 10\ny 10", expected_output: "80\n25", description: "Interleaved sessions stay separate; bills are 15, 15, 25, 25 for total 80, max 25." },
+        { input: "10 3\nu1 20\ns1 29\nx 7", expected_output: "86\n39" }
       ]
     }
   ]

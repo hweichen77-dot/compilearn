@@ -230,6 +230,10 @@ main()
           expected_output: "VALID",
           description: "Edge case: a tool with no required arguments is always valid.",
         },
+        {
+          input: "1\ncity\n0\n",
+          expected_output: "INVALID\ncity"
+        }
       ],
     },
 
@@ -421,6 +425,10 @@ main()
           expected_output: "TOOL search AT 1",
           description: "Edge: multiple tool_use blocks exist, only the first one counts.",
         },
+        {
+          input: "1\ntool_use search\n",
+          expected_output: "TOOL search AT 1"
+        }
       ],
     },
 
@@ -657,6 +665,10 @@ main()
           expected_output: "0\nNONE",
           description: "Edge: results arrive out of order, but matching is by id, not by position.",
         },
+        {
+          input: "2\n0 calculator\n2 weather\n1\n1 43\n",
+          expected_output: "2\ncalculator,weather"
+        }
       ],
     },
 
@@ -884,6 +896,10 @@ main()
           expected_output: "calculator\nsearch",
           description: "Edge: a question with digits routes to calculator, one with neither trigger falls to search.",
         },
+        {
+          input: "4\nMultiply the 2 + 2\nWhat's question weather in Tokyo\nWho won the World Cup in 2017\nFind me articles about penguins\n",
+          expected_output: "calculator\nweather\ncalculator\nsearch"
+        }
       ],
     },
 
@@ -1100,6 +1116,10 @@ main()
           expected_output: "1\ndone",
           description: "Edge: turns after the FINAL turn are ignored entirely.",
         },
+        {
+          input: "3\nTOOL calculator\nTOOL done\nFINAL Sunny and warm, sum is 9\n",
+          expected_output: "2\nSunny and warm, sum is 9"
+        }
       ],
     },
 
@@ -1376,6 +1396,10 @@ main()
           expected_output: "BAD_TYPE days",
           description: "Edge: days is declared int but the value 'abc' can't be parsed as one.",
         },
+        {
+          input: "2\ncalculator 1\ncity str\ndays 2\nweather str\ndays Tokyo\ndays 1\ncity 2+2\n",
+          expected_output: "MISSING weather"
+        }
       ],
     },
 
@@ -1585,6 +1609,10 @@ main()
           expected_output: "NO_FINAL",
           description: "Edge: the script runs out of turns well under the cap with no final answer ever given.",
         },
+        {
+          input: "5\n4\nFINAL immediate\nTOOL weather\nFINAL done\nFINAL All good\n",
+          expected_output: "DONE 1 immediate"
+        }
       ],
     },
 
@@ -1875,6 +1903,10 @@ main()
           expected_output: "SHIPPED\n0\n5",
           description: "Edge: a run that ships on the very first turn, exactly at the budget limit.",
         },
+        {
+          input: "100\n3\nsearch 14 0\nweather 11 0\nFINAL 10 1\n",
+          expected_output: "SHIPPED\n2\n35"
+        }
       ],
     },
   ],

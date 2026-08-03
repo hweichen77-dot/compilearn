@@ -620,7 +620,8 @@ main()
         { input: "3 3\nblue 1.5\nclear 0.5\ndark 0.5\n0.5\n1.0\n2.0", expected_output: "blue 0.7870\nblue 0.5761\nblue 0.4519", description: "Same logits at three temperatures: the leader's confidence falls as T rises." },
         { input: "4 2\nthe 3.0\na 2.0\nan 2.0\nzebra 0.0\n0.7\n1.5", expected_output: "the 0.6698\nthe 0.4625", description: "Larger vocab; higher T narrows the leader's margin." },
         { input: "1 1\nonly 5.0\n0.7", expected_output: "only 1.0000", description: "A single token always gets probability 1 at any temperature." },
-        { input: "2 1\nzebra 1.0\napple 1.0\n5.0", expected_output: "apple 0.5000", description: "Equal logits tie at 0.5; lexicographic tie-break picks `apple`." }
+        { input: "2 1\nzebra 1.0\napple 1.0\n5.0", expected_output: "apple 0.5000", description: "Equal logits tie at 0.5; lexicographic tie-break picks `apple`." },
+        { input: "3 3\nthe 2.4\nclear 1.3\nan 1.4\n0.5\n0.7\n1.7", expected_output: "the 0.8025\nthe 0.6909\nthe 0.4810" }
       ]
     },
     {
@@ -922,7 +923,8 @@ main()
         { input: "4 0.75\na 0.5\nb 0.3\nc 0.15\nd 0.05", expected_output: "2\na 0.6250\nb 0.3750", description: "Mass 0.8 crosses p=0.75; keep top two and renormalize." },
         { input: "5 0.9\nthe 0.4\nquick 0.25\nbrown 0.2\nfox 0.1\njumps 0.05", expected_output: "4\nthe 0.4211\nquick 0.2632\nbrown 0.2105\nfox 0.1053", description: "Larger nucleus; only the deepest tail token is dropped." },
         { input: "3 1.0\nx 0.6\ny 0.3\nz 0.1", expected_output: "3\nx 0.6000\ny 0.3000\nz 0.1000", description: "p=1.0 keeps every token; renormalization is a no-op." },
-        { input: "3 0.4\nx 0.6\ny 0.3\nz 0.1", expected_output: "1\nx 1.0000", description: "The leader alone already covers p=0.4, so the nucleus is a single token." }
+        { input: "3 0.4\nx 0.6\ny 0.3\nz 0.1", expected_output: "1\nx 1.0000", description: "The leader alone already covers p=0.4, so the nucleus is a single token." },
+        { input: "4 0.75\nthe 0.5\ny 0.3\nbrown 0.13\nd 0.07", expected_output: "2\nthe 0.6250\ny 0.3750" }
       ]
     },
     {
@@ -1218,7 +1220,8 @@ main()
         { input: "4\nclassification 2\npoetry 1\nchat 8\nextraction 9", expected_output: "temp=0.0, top_p=1.0\ntemp=1.2, top_p=0.9\ntemp=0.2, top_p=0.9\ntemp=0.0, top_p=1.0", description: "Convergent tasks pin to 0; high-risk chat clamps to 0.2." },
         { input: "5\ncode 0\nsummary 3\nbrainstorm 0\nchat 9\nmath 5", expected_output: "temp=0.0, top_p=1.0\ntemp=0.3, top_p=0.9\ntemp=1.0, top_p=0.9\ntemp=0.2, top_p=0.9\ntemp=0.0, top_p=1.0", description: "Mixed categories and risks across five tasks." },
         { input: "1\nweirdtask 0", expected_output: "temp=0.7, top_p=0.9", description: "Unknown category defaults to temperature 0.7." },
-        { input: "1\nbrainstorm 10", expected_output: "temp=0.2, top_p=0.9", description: "Even a creative task is clamped to 0.2 at maximum risk." }
+        { input: "1\nbrainstorm 10", expected_output: "temp=0.2, top_p=0.9", description: "Even a creative task is clamped to 0.2 at maximum risk." },
+        { input: "4\ncode 2\nsummary 1\nbrainstorm 5\nchat 9", expected_output: "temp=0.0, top_p=1.0\ntemp=0.3, top_p=0.9\ntemp=1.0, top_p=0.9\ntemp=0.2, top_p=0.9" }
       ]
     },
     {
@@ -1532,7 +1535,8 @@ main()
         { input: "3 3\nblue 2.0\nclear 1.0\ndark 0.0\n0.5 blue\n1.0 clear\n2.0 dark", expected_output: "0.8668\n0.2447\n0.1863", description: "One token queried at three temperatures; odds shift as T flattens the distribution." },
         { input: "2 2\nhot 1.0\ncold 0.0\n0.5 hot\n2.0 cold", expected_output: "0.8808\n0.3775", description: "Two tokens; low T sharpens the leader, high T lifts the underdog." },
         { input: "1 1\nonly 5.0\n0.7 only", expected_output: "1.0000", description: "A single token always has probability 1 at any temperature." },
-        { input: "2 1\nzebra 1.0\napple 1.0\n3.0 apple", expected_output: "0.5000", description: "Equal logits split evenly regardless of temperature." }
+        { input: "2 1\nzebra 1.0\napple 1.0\n3.0 apple", expected_output: "0.5000", description: "Equal logits split evenly regardless of temperature." },
+        { input: "2 2\nhot 1.7\ncold 0.1\n2.0 hot\n1.3 cold", expected_output: "0.6900\n0.2260" }
       ]
     },
     {
@@ -1838,7 +1842,8 @@ main()
         { input: "2\n3\nblue 2.0\nclear 1.0\ndark 0.5\n2\nsky 0.3\nsea 0.9", expected_output: "blue sea", description: "Two steps; greedy emits the top-logit token at each." },
         { input: "1\n3\nzebra 1.0\napple 1.0\nmango 0.5", expected_output: "apple", description: "Top-logit tie resolved by lexicographically smallest token." },
         { input: "3\n1\nonly 0.0\n1\nword 5.0\n1\nhere -3.0", expected_output: "only word here", description: "Single-candidate steps always emit that candidate." },
-        { input: "1\n4\nb 2.5\na 2.5\nd 2.5\nc 1.0", expected_output: "a", description: "Three-way tie at the top; lexicographic order selects 'a'." }
+        { input: "1\n4\nb 2.5\na 2.5\nd 2.5\nc 1.0", expected_output: "a", description: "Three-way tie at the top; lexicographic order selects 'a'." },
+        { input: "1\n3\nblue 0.1\nclear 1.7\nword 2.6", expected_output: "word" }
       ]
     },
     {
@@ -2159,7 +2164,8 @@ main()
         { input: "3 0.0 0.5\nthe 3.0 3\na 2.5 0\ncat 2.0 0", expected_output: "a 2.50", description: "Frequency penalty drops the overused 'the' below the fresh 'a'." },
         { input: "2 2.0 0.0\nthe 4.0 1\nfox 3.0 0", expected_output: "fox 3.00", description: "Flat presence penalty knocks the already-seen 'the' below 'fox'." },
         { input: "2 0.0 0.0\nzebra 1.0 0\napple 1.0 0", expected_output: "apple 1.00", description: "No penalties; tie on logit resolved lexicographically to 'apple'." },
-        { input: "3 1.0 1.0\nloop 5.0 4\nnew 1.0 0\nmid 2.0 1", expected_output: "new 1.00", description: "Heavily reused 'loop' (5.0 - 1.0 - 4.0 = 0.0) and 'mid' (2.0 - 1.0 - 1.0 = 0.0) both collapse; fresh 'new' at 1.0 wins." }
+        { input: "3 1.0 1.0\nloop 5.0 4\nnew 1.0 0\nmid 2.0 1", expected_output: "new 1.00", description: "Heavily reused 'loop' (5.0 - 1.0 - 4.0 = 0.0) and 'mid' (2.0 - 1.0 - 1.0 = 0.0) both collapse; fresh 'new' at 1.0 wins." },
+        { input: "3 0.0 0.5\nthe 4.2 3\napple 2.4 0\nmid 2.0 0", expected_output: "the 2.70" }
       ]
     },
     {
@@ -2455,7 +2461,8 @@ main()
         { input: "3 4\nrock rock paper paper\nrock rock paper paper\nrock rock paper paper", expected_output: "REPRODUCIBLE", description: "All three runs identical, reproducible." },
         { input: "2 4\nrock rock paper paper\npaper scissors scissors paper", expected_output: "NONDETERMINISTIC", description: "The two runs diverge, so nondeterminism leaked in." },
         { input: "1 3\na b c", expected_output: "REPRODUCIBLE", description: "A single run has nothing to disagree with." },
-        { input: "3 2\nyes no\nyes no\nyes yes", expected_output: "NONDETERMINISTIC", description: "The third run differs on the last token." }
+        { input: "3 2\nyes no\nyes no\nyes yes", expected_output: "NONDETERMINISTIC", description: "The third run differs on the last token." },
+        { input: "3 4\na rock paper paper\nyes scissors scissors paper\nyes rock paper paper", expected_output: "NONDETERMINISTIC" }
       ]
     }
   ]

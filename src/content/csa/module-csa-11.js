@@ -115,6 +115,14 @@ export default {
         {
           "input": "1\n5",
           "expected_output": "5"
+        },
+        {
+          "input": "3\n3 0 0",
+          "expected_output": "3"
+        },
+        {
+          "input": "1\n4",
+          "expected_output": "4"
         }
       ]
     },
@@ -217,6 +225,14 @@ export default {
         {
           "input": "3\n0 6 9",
           "expected_output": "3"
+        },
+        {
+          "input": "5\n1 4 6 6 13",
+          "expected_output": "2"
+        },
+        {
+          "input": "4\n0 2 7 10",
+          "expected_output": "1"
         }
       ]
     },
@@ -319,6 +335,14 @@ export default {
         {
           "input": "2 10",
           "expected_output": "20\n24"
+        },
+        {
+          "input": "3 8",
+          "expected_output": "24\n22"
+        },
+        {
+          "input": "2 5",
+          "expected_output": "10\n14"
         }
       ]
     },
@@ -420,6 +444,14 @@ export default {
         {
           "input": "1\n7",
           "expected_output": "7"
+        },
+        {
+          "input": "5\n1 6 2 10 1",
+          "expected_output": "10"
+        },
+        {
+          "input": "1\n0",
+          "expected_output": "0"
         }
       ]
     },
@@ -522,6 +554,14 @@ export default {
         {
           "input": "1 4\n5 0 5 0",
           "expected_output": "10"
+        },
+        {
+          "input": "2 2\n1 2\n3 2",
+          "expected_output": "8"
+        },
+        {
+          "input": "2 3\n1 1 1\n3 3 0",
+          "expected_output": "9"
         }
       ]
     },
@@ -623,6 +663,14 @@ export default {
         {
           "input": "10",
           "expected_output": "55"
+        },
+        {
+          "input": "5",
+          "expected_output": "15"
+        },
+        {
+          "input": "9",
+          "expected_output": "45"
         }
       ]
     },
@@ -722,6 +770,14 @@ export default {
         {
           "input": "5\nyes yes yes no yes\nyes",
           "expected_output": "4"
+        },
+        {
+          "input": "4\nyes dog cat fish\ncat",
+          "expected_output": "1"
+        },
+        {
+          "input": "3\nyes dog yes\nd",
+          "expected_output": "0"
         }
       ]
     },
@@ -822,6 +878,14 @@ export default {
         {
           "input": "5\n60 60 60 59 100",
           "expected_output": "4"
+        },
+        {
+          "input": "3\n35 22 65",
+          "expected_output": "1"
+        },
+        {
+          "input": "4\n17 44 71 47",
+          "expected_output": "1"
         }
       ]
     }

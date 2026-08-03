@@ -300,7 +300,9 @@ main()
       challenge_test_cases: [
         { input: "4\nsystem Be concise.\nuser Hello\nassistant Hi there.\nuser Bye", expected_output: "[setup] System: Be concise.\n[1] User: Hello\n[2] Assistant: Hi there.\n[3] User: Bye\nsystem=1 user=2 assistant=1", description: "Setup tag plus numbered turns and a correct role tally." },
         { input: "1\nsystem You are a router.", expected_output: "[setup] System: You are a router.\nsystem=1 user=0 assistant=0", description: "System-only request: no turns, zero user/assistant counts." },
-        { input: "3\nuser ping\nassistant pong\nuser ping again", expected_output: "[1] User: ping\n[2] Assistant: pong\n[3] User: ping again\nsystem=0 user=2 assistant=1", description: "Edge: no system message; turns start at 1 and content with spaces is preserved." }
+        { input: "3\nuser ping\nassistant pong\nuser ping again", expected_output: "[1] User: ping\n[2] Assistant: pong\n[3] User: ping again\nsystem=0 user=2 assistant=1", description: "Edge: no system message; turns start at 1 and content with spaces is preserved." },
+        { input: "4\nsystem Be concise.\nuser Hello\nuser Hi there.\nuser Bye", expected_output: "[setup] System: Be concise.\n[1] User: Hello\n[2] User: Hi there.\n[3] User: Bye\nsystem=1 user=3 assistant=0" },
+        { input: "1\nuser ping are a router.", expected_output: "[1] User: ping are a router.\nsystem=0 user=1 assistant=0" }
       ]
     },
     {
@@ -596,7 +598,9 @@ main()
       challenge_test_cases: [
         { input: "3 4\nrefund You are a billing specialist.\nbug You are a senior engineer.\nhello You are a friendly greeter.\nYou are a general assistant.\nI need a refund please\nThere is a bug in checkout\nhello there\nWhat is the weather", expected_output: "You are a billing specialist.\nYou are a senior engineer.\nYou are a friendly greeter.\nYou are a general assistant.", description: "Single-keyword matches plus a default fallback." },
         { input: "1 1\ncode You are a coder.\nYou are default.\nNothing matches here", expected_output: "You are default.", description: "No rule matches, so the default prompt is used." },
-        { input: "2 2\nbug You are tier-2 support.\nbug You are tier-1 support.\nDefault helper.\nThe app has a BUG today\nall good", expected_output: "You are tier-2 support.\nDefault helper.", description: "Two rules share a keyword and casing differs; the earlier (higher-priority) rule wins, second message falls back." }
+        { input: "2 2\nbug You are tier-2 support.\nbug You are tier-1 support.\nDefault helper.\nThe app has a BUG today\nall good", expected_output: "You are tier-2 support.\nDefault helper.", description: "Two rules share a keyword and casing differs; the earlier (higher-priority) rule wins, second message falls back." },
+        { input: "3 4\ncode You are a billing specialist.\nbug You are a senior engineer.\nNothing matches here a friendly greeter.\nYou app has a assistant.\nI good a refund please\nThere is a bug in checkout\nhello there\nWhat is the weather", expected_output: "You app has a assistant.\nYou are a senior engineer.\nYou app has a assistant.\nYou app has a assistant." },
+        { input: "1 1\ncode You are a coder.\nbug You default.\nNothing You here", expected_output: "bug You default." }
       ]
     },
     {
@@ -896,7 +900,9 @@ main()
       challenge_test_cases: [
         { input: "5 100\nsystem 20\nuser 30\nassistant 40\nuser 25\nassistant 35", expected_output: "kept 3\ndropped 2\ntokens 80", description: "System kept, two newest turns fit, oldest two dropped." },
         { input: "3 25\nsystem 20\nuser 30\nassistant 10", expected_output: "kept 1\ndropped 2\ntokens 20", description: "Budget too tight for any turn after the system prompt." },
-        { input: "3 1000\nsystem 5\nuser 5\nassistant 5", expected_output: "kept 3\ndropped 0\ntokens 15", description: "Edge: everything fits, nothing is dropped." }
+        { input: "3 1000\nsystem 5\nuser 5\nassistant 5", expected_output: "kept 3\ndropped 0\ntokens 15", description: "Edge: everything fits, nothing is dropped." },
+        { input: "5 100\nsystem 9\nuser 17\nassistant 35\nuser 24\nassistant 34", expected_output: "kept 3\ndropped 2\ntokens 67" },
+        { input: "3 25\nsystem 18\nuser 20\nassistant 34", expected_output: "kept 1\ndropped 2\ntokens 18" }
       ]
     },
     {
@@ -1191,7 +1197,9 @@ main()
       challenge_test_cases: [
         { input: "5 3\nBe brief.\nuser Hi\nassistant Hey\nuser How are you\nassistant Good\nuser Bye", expected_output: "0 system: Be brief.\n1 user: How are you\n2 assistant: Good\n3 user: Bye\ntotal 4", description: "Window keeps the last three turns; oldest two dropped." },
         { input: "3 0\nSys.\nuser A\nassistant B\nuser C", expected_output: "0 system: Sys.\ntotal 1", description: "k = 0 keeps only the system message." },
-        { input: "2 10\nYou help.\nuser A\nassistant B", expected_output: "0 system: You help.\n1 user: A\n2 assistant: B\ntotal 3", description: "Edge: window larger than history keeps every turn." }
+        { input: "2 10\nYou help.\nuser A\nassistant B", expected_output: "0 system: You help.\n1 user: A\n2 assistant: B\ntotal 3", description: "Edge: window larger than history keeps every turn." },
+        { input: "2 10\nBe help.\nuser A\nassistant Hey", expected_output: "0 system: Be help.\n1 user: A\n2 assistant: Hey\ntotal 3" },
+        { input: "5 3\nYou brief.\nuser A\nassistant B\nuser C are you\nassistant Good\nuser Bye", expected_output: "0 system: You brief.\n1 user: C are you\n2 assistant: Good\n3 user: Bye\ntotal 4" }
       ]
     },
     {
@@ -1477,7 +1485,9 @@ main()
       challenge_test_cases: [
         { input: "2\n{\n\"name\": \"Ada\"}\n- \nFirst item", expected_output: "{\"name\": \"Ada\"}\n- First item\nchars 27", description: "Two items reassembled; the trailing space in '- ' is preserved." },
         { input: "1\nTranslating: \nBonjour", expected_output: "Translating: Bonjour\nchars 20", description: "Single item: prefill ending in a space plus continuation." },
-        { input: "2\n\nHello\nworld\n", expected_output: "Hello\nworld\nchars 10", description: "Edge: empty prefill on item 1 and empty continuation on item 2 still concatenate correctly." }
+        { input: "2\n\nHello\nworld\n", expected_output: "Hello\nworld\nchars 10", description: "Edge: empty prefill on item 1 and empty continuation on item 2 still concatenate correctly." },
+        { input: "2\n\nBonjour\nworld\n", expected_output: "Bonjour\nworld\nchars 12" },
+        { input: "1\nTranslating: \nHello", expected_output: "Translating: Hello\nchars 18" }
       ]
     },
     {
@@ -1766,7 +1776,8 @@ main()
         { input: "3 3\nget_weather get_news get_weather\nget_weather get_weather get_news", expected_output: "matched 3\nunanswered 0\norphan 0", description: "Every call pairs with a result; balanced turn." },
         { input: "2 1\nget_time get_time\nget_time", expected_output: "matched 1\nunanswered 1\norphan 0", description: "A duplicate call goes unanswered." },
         { input: "1 2\nsearch\nsearch lookup", expected_output: "matched 1\nunanswered 0\norphan 1", description: "An extra result with no matching call is an orphan." },
-        { input: "0 1\n\nstray", expected_output: "matched 0\nunanswered 0\norphan 1", description: "Edge: no calls but a result arrives; pure orphan." }
+        { input: "0 1\n\nstray", expected_output: "matched 0\nunanswered 0\norphan 1", description: "Edge: no calls but a result arrives; pure orphan." },
+        { input: "1 2\nsearch\nstray lookup", expected_output: "matched 0\nunanswered 1\norphan 2" }
       ]
     },
     {
@@ -2059,7 +2070,9 @@ main()
       challenge_test_cases: [
         { input: "3 2\nHow long do refunds take?\n5 Refunds take 5 business days.\n9 Refunds are issued to the original card.\n2 Shipping is free over 50 dollars.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Refunds are issued to the original card.\n- Refunds take 5 business days.\n\nQuestion: How long do refunds take?", description: "Top 2 by score, highest first; lowest-scored snippet dropped." },
         { input: "2 1\nWhat is the warranty?\n4 Warranty is one year.\n4 Warranty excludes water damage.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Warranty is one year.\n\nQuestion: What is the warranty?", description: "Tie on score broken by input order." },
-        { input: "1 1\nWho do I contact?\n7 Email support at help@example.com.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Email support at help@example.com.\n\nQuestion: Who do I contact?", description: "Edge: a single snippet kept as the only context line." }
+        { input: "1 1\nWho do I contact?\n7 Email support at help@example.com.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Email support at help@example.com.\n\nQuestion: Who do I contact?", description: "Edge: a single snippet kept as the only context line." },
+        { input: "3 2\nWhat is the refunds take?\n5 Warranty is 5 business days.\n8 Refunds are issued to the original card.\n2 Shipping is free over 49 dollars.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Refunds are issued to the original card.\n- Warranty is 5 business days.\n\nQuestion: What is the refunds take?" },
+        { input: "2 1\nWhat is the warranty?\n4 Refunds take one year.\n4 Warranty are water damage.", expected_output: "SYSTEM: Answer only from the context below.\nUSER:\nContext:\n- Refunds take one year.\n\nQuestion: What is the warranty?" }
       ]
     },
     {
@@ -2382,7 +2395,8 @@ main()
         { input: "4\nsystem Be brief.\nuser Hi\nuser Are you there?\nassistant Yes", expected_output: "system: OK\nroles: OK\nalternation: BAD 1", description: "Valid system and roles, but a back-to-back user violation." },
         { input: "3\nuser Hi\nassitant Hello\nuser Bye", expected_output: "system: MISSING\nroles: BAD 1\nalternation: OK", description: "No leading system, one misspelled role, no adjacent same-role valid turns." },
         { input: "4\nsystem Setup.\nuser A\nassistant B\nuser C", expected_output: "system: OK\nroles: OK\nalternation: OK", description: "A clean, well-formed transcript passes every check." },
-        { input: "3\nassistant One\nassistant Two\nassistant Three", expected_output: "system: MISSING\nroles: OK\nalternation: BAD 2", description: "No system message and three assistant turns give two adjacent violations." }
+        { input: "3\nassistant One\nassistant Two\nassistant Three", expected_output: "system: MISSING\nroles: OK\nalternation: BAD 2", description: "No system message and three assistant turns give two adjacent violations." },
+        { input: "4\nuser One brief.\nuser A\nuser B you there?\nuser Yes", expected_output: "system: MISSING\nroles: OK\nalternation: BAD 3" }
       ]
     }
   ]

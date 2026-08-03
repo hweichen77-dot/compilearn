@@ -249,6 +249,14 @@ export default {
         {
           "input": "Sara\n9\n",
           "expected_output": "Sara in grade 9"
+        },
+        {
+          "input": "Omar\n9\n",
+          "expected_output": "Omar in grade 9"
+        },
+        {
+          "input": "Sara\n10\n",
+          "expected_output": "Sara in grade 10"
         }
       ]
     },
@@ -486,6 +494,14 @@ export default {
         {
           "input": "Cleo\nHR\n",
           "expected_output": "Employee: Cleo, Dept: HR"
+        },
+        {
+          "input": "Alice\nEngineering\n",
+          "expected_output": "Employee: Alice, Dept: Engineering"
+        },
+        {
+          "input": "Bob\nSales\n",
+          "expected_output": "Employee: Bob, Dept: Sales"
         }
       ]
     },
@@ -962,6 +978,14 @@ export default {
         {
           "input": "3\n1 1\n2 2\n3 3\n",
           "expected_output": "14"
+        },
+        {
+          "input": "1\n4 8\n",
+          "expected_output": "32"
+        },
+        {
+          "input": "3\n1 1\n2 2\n2 4\n",
+          "expected_output": "13"
         }
       ]
     }

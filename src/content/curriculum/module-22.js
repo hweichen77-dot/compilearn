@@ -305,7 +305,8 @@ main()
         { input: "3 6 500\nsmall 3 120 1\nmedium 6 300 4\nlarge 9 900 12", expected_output: "medium 4", description: "Quality floor and latency budget each knock out one tier; the survivor wins." },
         { input: "3 6 200\nsmall 3 120 1\nmedium 6 300 4\nlarge 9 900 12", expected_output: "NO TIER", description: "Tightening the latency budget leaves no eligible tier." },
         { input: "4 5 1000\na 7 100 5\nb 8 100 5\nc 9 100 9\nd 5 100 5\nx", expected_output: "a 5", description: "Three tiers tie at cost 5; the lexicographically smallest name wins." },
-        { input: "1 1 100\nonly 5 50 7", expected_output: "only 7", description: "A single eligible tier is selected outright." }
+        { input: "1 1 100\nonly 5 50 7", expected_output: "only 7", description: "A single eligible tier is selected outright." },
+        { input: "3 6 500\nsmall 6 86 1\nmedium 8 170 4\nlarge 9 383 11", expected_output: "small 1" }
       ]
     },
     {
@@ -598,7 +599,9 @@ main()
       challenge_test_cases: [
         { input: "10 1 2\n3\nsmall 3 1 1\nmedium 6 3 4\nlarge 9 9 12", expected_output: "small 27\nmedium 49\nlarge 57\nbest large", description: "Quality-heavy weights crown the smartest model." },
         { input: "1 5 1\n2\nfast 5 1 8\nslow 7 6 2", expected_output: "fast -8\nslow -25\nbest fast", description: "Latency-heavy weights favor the fastest model; scores go negative." },
-        { input: "1 0 0\n2\nbeta 5 9 9\nalpha 5 0 0", expected_output: "beta 5\nalpha 5\nbest alpha", description: "Two models tie at score 5; the lexicographically smaller name wins." }
+        { input: "1 0 0\n2\nbeta 5 9 9\nalpha 5 0 0", expected_output: "beta 5\nalpha 5\nbest alpha", description: "Two models tie at score 5; the lexicographically smaller name wins." },
+        { input: "10 1 2\n3\nfast 5 1 1\nmedium 5 4 4\nlarge 9 8 13", expected_output: "fast 47\nmedium 38\nlarge 56\nbest large" },
+        { input: "1 5 1\n2\nbeta 4 1 5\nmedium 7 0 0", expected_output: "beta -6\nmedium 7\nbest medium" }
       ]
     },
     {
@@ -916,7 +919,9 @@ main()
       challenge_test_cases: [
         { input: "1 4 12\n2\nclassify\nextract\n2\nreason\nsynthesize\n3\nclassify\nreason\ntranslate", expected_output: "classify -> small\nreason -> large\ntranslate -> medium\nsmall 1 medium 1 large 1\ntotal 17", description: "One request per tier; total sums the three per-call costs." },
         { input: "2 5 20\n1\ntag\n1\nplan\n2\nfoo\nbar", expected_output: "foo -> medium\nbar -> medium\nsmall 0 medium 2 large 0\ntotal 10", description: "Unrecognized tasks all fall to the medium default." },
-        { input: "1 4 12\n1\nclassify\n1\nreason\n1\nclassify", expected_output: "classify -> small\nsmall 1 medium 0 large 0\ntotal 1", description: "A single easy request routes to small for a total of 1." }
+        { input: "1 4 12\n1\nclassify\n1\nreason\n1\nclassify", expected_output: "classify -> small\nsmall 1 medium 0 large 0\ntotal 1", description: "A single easy request routes to small for a total of 1." },
+        { input: "2 5 20\n1\nclassify\n1\nreason\n2\nclassify\nbar", expected_output: "classify -> small\nbar -> medium\nsmall 1 medium 1 large 0\ntotal 7" },
+        { input: "1 4 12\n1\nclassify\n1\nplan\n1\nfoo", expected_output: "foo -> medium\nsmall 0 medium 1 large 0\ntotal 4" }
       ]
     },
     {
@@ -1240,7 +1245,9 @@ main()
       challenge_test_cases: [
         { input: "2\nsmall 1\nlarge 12\n3\nping pong\nhi hello\nyo sup\nsmall pong hello sup\nlarge pong hello sup", expected_output: "small: 3/3\nlarge: 3/3\nwinner: small", description: "Equal accuracy breaks the tie to the cheaper model." },
         { input: "2\nsmall 1\nlarge 12\n3\nping pong\nhi hello\nyo sup\nsmall pong WRONG sup\nlarge pong hello sup", expected_output: "small: 2/3\nlarge: 3/3\nwinner: large", description: "Higher accuracy wins even though the model costs more." },
-        { input: "3\nsmall 1\nmid 4\nlarge 12\n2\na x\nb y\nsmall x y\nmid x y\nlarge x y", expected_output: "small: 2/2\nmid: 2/2\nlarge: 2/2\nwinner: small", description: "Three-way accuracy tie resolves to the cheapest model." }
+        { input: "3\nsmall 1\nmid 4\nlarge 12\n2\na x\nb y\nsmall x y\nmid x y\nlarge x y", expected_output: "small: 2/2\nmid: 2/2\nlarge: 2/2\nwinner: small", description: "Three-way accuracy tie resolves to the cheapest model." },
+        { input: "2\nsmall 2\nlarge 7\n3\nping pong\nhi x\nb y\nsmall pong y sup\nlarge pong hello sup", expected_output: "small: 1/3\nlarge: 1/3\nwinner: small" },
+        { input: "2\nsmall 0\nmid 5\n3\nping pong\nhi hello\nyo sup\nsmall pong y sup\nmid pong hello sup", expected_output: "small: 2/3\nmid: 3/3\nwinner: mid" }
       ]
     },
     {
@@ -1551,7 +1558,9 @@ main()
       challenge_test_cases: [
         { input: "2\nmodelA 3 90 contaminated 80 clean 70 clean\nmodelB 2 60 clean 50 clean", expected_output: "modelA 75\nmodelB 55\nbest modelA", description: "Contaminated benchmarks dropped before averaging; higher clean average wins." },
         { input: "1\nsolo 1 99 contaminated", expected_output: "solo NONE\nNO TRUSTED MODEL", description: "A model with only contaminated benchmarks cannot be ranked." },
-        { input: "3\na 2 88 clean 92 clean\nb 2 88 clean 92 clean\nc 1 100 contaminated", expected_output: "a 90\nb 90\nc NONE\nbest a", description: "Two models tie at 90; lexicographically smaller name wins, contaminated-only model excluded." }
+        { input: "3\na 2 88 clean 92 clean\nb 2 88 clean 92 clean\nc 1 100 contaminated", expected_output: "a 90\nb 90\nc NONE\nbest a", description: "Two models tie at 90; lexicographically smaller name wins, contaminated-only model excluded." },
+        { input: "2\na 3 92 clean 90 clean 69 clean\nmodelB 2 74 clean 76 clean", expected_output: "a 83\nmodelB 75\nbest a" },
+        { input: "1\nsolo 1 95 clean", expected_output: "solo 95\nbest solo" }
       ]
     },
     {
@@ -1860,7 +1869,9 @@ main()
       challenge_test_cases: [
         { input: "1000\n2\nhosted closed 5\nselfhost open 20000 1", expected_output: "hosted 5000\nselfhost 21000\ncheapest hosted", description: "Below the crossover, the hosted (closed) option is cheaper." },
         { input: "10000\n2\nhosted closed 5\nselfhost open 20000 1", expected_output: "hosted 50000\nselfhost 30000\ncheapest selfhost", description: "Above the crossover, self-hosting amortizes its fixed cost and wins." },
-        { input: "5000\n2\nhosted closed 5\nselfhost open 20000 1", expected_output: "hosted 25000\nselfhost 25000\ncheapest hosted", description: "Exactly at the crossover both cost 25000; the lexicographically smaller name wins." }
+        { input: "5000\n2\nhosted closed 5\nselfhost open 20000 1", expected_output: "hosted 25000\nselfhost 25000\ncheapest hosted", description: "Exactly at the crossover both cost 25000; the lexicographically smaller name wins." },
+        { input: "1000\n2\nhosted closed 6\nselfhost open 20000 1", expected_output: "hosted 6000\nselfhost 21000\ncheapest hosted" },
+        { input: "10000\n2\nhosted closed 6\nselfhost open 19999 2", expected_output: "hosted 60000\nselfhost 39999\ncheapest selfhost" }
       ]
     },
     {
@@ -2172,7 +2183,9 @@ main()
       challenge_test_cases: [
         { input: "1 10 5\n3\nr1 3\nr2 8\nr3 5", expected_output: "r1 cheap\nr2 escalated\nr3 cheap\nescalations 1\ntotal 13\nallstrong 30", description: "Only the difficulty-8 request escalates; cascade is far cheaper than all-strong." },
         { input: "2 20 4\n2\na 9\nb 1", expected_output: "a escalated\nb cheap\nescalations 1\ntotal 24\nallstrong 40", description: "Mixed traffic: one escalation, cascade total below all-strong." },
-        { input: "1 5 3\n3\nx 10\ny 9\nz 8", expected_output: "x escalated\ny escalated\nz escalated\nescalations 3\ntotal 18\nallstrong 15", description: "When everything escalates, the cascade total (18) exceeds all-strong (15), the signal to skip the cheap step." }
+        { input: "1 5 3\n3\nx 10\ny 9\nz 8", expected_output: "x escalated\ny escalated\nz escalated\nescalations 3\ntotal 18\nallstrong 15", description: "When everything escalates, the cascade total (18) exceeds all-strong (15), the signal to skip the cheap step." },
+        { input: "1 10 5\n3\na 5\nb 5\nz 5", expected_output: "a cheap\nb cheap\nz cheap\nescalations 0\ntotal 3\nallstrong 30" },
+        { input: "2 20 4\n2\nx 7\nb 4", expected_output: "x escalated\nb cheap\nescalations 1\ntotal 24\nallstrong 40" }
       ]
     },
     {
@@ -2492,7 +2505,9 @@ main()
       challenge_test_cases: [
         { input: "2\ngpt 5\nclaude 4\ngpt\n4\ncall\nswitch claude\ncall\ncall", expected_output: "call gpt 5\nswitched to claude\ncall claude 4\ncall claude 4\ncalls 3\ntotal 13", description: "A mid-stream switch redirects later calls without changing call logic." },
         { input: "2\na 3\nb 7\na\n3\ncall\nswitch zzz\ncall", expected_output: "call a 3\nunknown zzz\ncall a 3\ncalls 2\ntotal 6", description: "An unknown switch target is rejected and the active provider stays put." },
-        { input: "3\nx 2\ny 9\nz 1\ny\n5\ncall\nswitch z\ncall\nswitch x\ncall", expected_output: "call y 9\nswitched to z\ncall z 1\nswitched to x\ncall x 2\ncalls 3\ntotal 12", description: "Two valid switches change the active provider; three calls total 9+1+2=12." }
+        { input: "3\nx 2\ny 9\nz 1\ny\n5\ncall\nswitch z\ncall\nswitch x\ncall", expected_output: "call y 9\nswitched to z\ncall z 1\nswitched to x\ncall x 2\ncalls 3\ntotal 12", description: "Two valid switches change the active provider; three calls total 9+1+2=12." },
+        { input: "2\ngpt 5\nclaude 5\ngpt\n3\ncall\nswitch claude\ncall", expected_output: "call gpt 5\nswitched to claude\ncall claude 5\ncalls 2\ntotal 10" },
+        { input: "2\ngpt 4\nclaude 6\ngpt\n3\ncall\ncall zzz\ncall", expected_output: "call gpt 4\ncall gpt 4\ncall gpt 4\ncalls 3\ntotal 12" }
       ]
     }
   ]

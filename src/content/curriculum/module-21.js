@@ -308,7 +308,8 @@ main()
         { input: "3 3 15\n1 1500 800\n2 500 2000\n3 1000 100", expected_output: "$0.052500\n2", description: "Batch total plus the most expensive call (call 2 dominated by output tokens)." },
         { input: "2 5 10\n1 100 100\n2 100 100", expected_output: "$0.003000\n1", description: "Cost tie resolves to the smaller id." },
         { input: "1 3 15\n7 1000000 1000000", expected_output: "$18.000000\n7", description: "Single max-size call: 1M input + 1M output = $18 exactly." },
-        { input: "2 1 1\n9 0 0\n4 0 0", expected_output: "$0.000000\n4", description: "Zero-token calls cost nothing; the tie still breaks to the smaller id." }
+        { input: "2 1 1\n9 0 0\n4 0 0", expected_output: "$0.000000\n4", description: "Zero-token calls cost nothing; the tie still breaks to the smaller id." },
+        { input: "3 3 15\n1 451160 619157\n4 106 545\n2 999 100", expected_output: "$10.653825\n1" }
       ]
     },
     {
@@ -598,7 +599,8 @@ main()
         { input: "3 4 16\n0.002000\n40 100\n400 50\n8 200", expected_output: "$0.006048\n1", description: "Batch estimate with one call over the per-call budget." },
         { input: "2 4 0\n0.000000\n4 0\n8 0", expected_output: "$0.000012\n2", description: "Zero output caps; both calls exceed a $0 budget." },
         { input: "1 4 16\n1.000000\n4 1", expected_output: "$0.000020\n0", description: "Single tiny call (1 input token, 1 output) well under a generous budget." },
-        { input: "1 1000 1000\n0.001000\n4 1", expected_output: "$0.002000\n1", description: "High prices push even a tiny call over budget: (1+1)*1000 = 2000 -> $0.002000." }
+        { input: "1 1000 1000\n0.001000\n4 1", expected_output: "$0.002000\n1", description: "High prices push even a tiny call over budget: (1+1)*1000 = 2000 -> $0.002000." },
+        { input: "3 4 16\n0.451547\n30 52\n105 47\n7 200", expected_output: "$0.004932\n0" }
       ]
     },
     {
@@ -891,7 +893,8 @@ main()
         { input: "3 20\n10 30\n15 25\n5 40", expected_output: "210\n3", description: "Growing transcript; cumulative input billed and peak turn." },
         { input: "2 100\n10 10\n10 10", expected_output: "240\n2", description: "Fixed system prompt dominates; turn 2 carries more history." },
         { input: "1 0\n50 50", expected_output: "50\n1", description: "Single turn, no system prompt: only the first user message is billed." },
-        { input: "4 0\n0 0\n0 0\n0 0\n0 0", expected_output: "0\n1", description: "All-zero session: cumulative 0, and the earliest turn wins the peak tie." }
+        { input: "4 0\n0 0\n0 0\n0 0\n0 0", expected_output: "0\n1", description: "All-zero session: cumulative 0, and the earliest turn wins the peak tie." },
+        { input: "3 20\n23 40\n3 7\n3 3", expected_output: "225\n3" }
       ]
     },
     {
@@ -1176,7 +1179,8 @@ main()
         { input: "8 120 2 3 15\n300 100", expected_output: "2520\n1600\n$0.031560", description: "Both levers applied over 8 turns; full savings report." },
         { input: "3 100 1 3 15\n200 50", expected_output: "300\n450\n$0.007650", description: "Window of 1 keeps only the current turn's history." },
         { input: "1 50 1 3 15\n100 100", expected_output: "0\n0\n$0.000000", description: "Single turn with no cap change: nothing is saved." },
-        { input: "5 200 2 3 15\n400 400", expected_output: "1200\n0\n$0.003600", description: "History trimmed but output cap unchanged: only input savings." }
+        { input: "5 200 2 3 15\n400 400", expected_output: "1200\n0\n$0.003600", description: "History trimmed but output cap unchanged: only input savings." },
+        { input: "8 120 2 3 15\n236 362", expected_output: "2520\n-1008\n$-0.007560" }
       ]
     },
     {
@@ -1483,7 +1487,8 @@ main()
         { input: "3 3 15\n1 1000 1000\n2 100 900\n3 2000 0", expected_output: "$0.037800\n2", description: "Batch total plus the call whose output share is highest." },
         { input: "2 2 10\n5 500 0\n9 0 100", expected_output: "$0.002000\n9", description: "Pure-input vs pure-output call; output-heavy one wins." },
         { input: "1 3 15\n7 1000000 1000000", expected_output: "$18.000000\n7", description: "Single max-size call: $3 input + $15 output = $18 exactly." },
-        { input: "2 5 5\n4 100 100\n8 100 100", expected_output: "$0.002000\n4", description: "Identical output shares (0.5 each) tie-break to the smaller id." }
+        { input: "2 5 5\n4 100 100\n8 100 100", expected_output: "$0.002000\n4", description: "Identical output shares (0.5 each) tie-break to the smaller id." },
+        { input: "3 3 15\n1 452764 981972\n6 36 851\n2 2000 0", expected_output: "$16.106745\n6" }
       ]
     },
     {
@@ -1785,7 +1790,8 @@ main()
         { input: "2 3 10 15 1000\n1500 200\n1200 500", expected_output: "$0.018600\n$0.013200\n$0.005400", description: "Prefix cached at 10% of base across two calls; full, cached, and savings." },
         { input: "1 4 0 10 500\n500 0", expected_output: "$0.002000\n$0.000000\n$0.002000", description: "Entire input is a free (0%) cached prefix." },
         { input: "1 3 100 15 1000\n1500 200", expected_output: "$0.007500\n$0.007500\n$0.000000", description: "Cache rate of 100% means no discount, so nothing is saved." },
-        { input: "2 3 10 15 0\n1000 1000\n1000 1000", expected_output: "$0.036000\n$0.036000\n$0.000000", description: "Prefix length 0: nothing is cacheable, so cached equals full." }
+        { input: "2 3 10 15 0\n1000 1000\n1000 1000", expected_output: "$0.036000\n$0.036000\n$0.000000", description: "Prefix length 0: nothing is cacheable, so cached equals full." },
+        { input: "2 3 10 15 1000\n953 72\n1051 698", expected_output: "$0.017562\n$0.012162\n$0.005400" }
       ]
     },
     {
@@ -2092,7 +2098,8 @@ main()
         { input: "3 3 15 50 60\n1000 500 120\n800 200 30\n2000 1000 1440", expected_output: "$0.036900\n$0.021150\n2", description: "Mixed workload: two patient jobs batch at 50% off, one urgent stays real-time." },
         { input: "2 4 8 25 100\n500 500 200\n500 500 50", expected_output: "$0.012000\n$0.010500\n1", description: "One job tolerates the turnaround and takes the 25% discount." },
         { input: "1 3 15 50 0\n1000 1000 0", expected_output: "$0.018000\n$0.009000\n1", description: "Batch latency of 0: any tolerance qualifies, so the job batches." },
-        { input: "2 3 15 100 60\n100 100 10\n100 100 10", expected_output: "$0.003600\n$0.003600\n0", description: "Both jobs are too urgent to batch, so routed equals all-real-time." }
+        { input: "2 3 15 100 60\n100 100 10\n100 100 10", expected_output: "$0.003600\n$0.003600\n0", description: "Both jobs are too urgent to batch, so routed equals all-real-time." },
+        { input: "3 3 15 50 60\n508 247 189\n404 208 13\n2000 999 1441", expected_output: "$0.030546\n$0.017439\n2" }
       ]
     },
     {
@@ -2398,7 +2405,8 @@ main()
         { input: "10000 80\n4\n1 7800\n2 21000\n1 1800\n2 1800", expected_output: "$0.011400\n1\n1", description: "One over-cap call blocked; one user crosses the 80% alert line." },
         { input: "5000 100\n3\n1 5000\n1 1\n1 0", expected_output: "$0.005000\n1\n1", description: "Alert at exactly 100%; the over-budget call is blocked, a zero-cost call still fits." },
         { input: "1000000 50\n3\n7 100\n7 100\n8 600000", expected_output: "$0.600200\n0\n1", description: "Only the big call crosses 50% of the cap and alerts; nothing is blocked." },
-        { input: "100 0\n2\n3 0\n3 0", expected_output: "$0.000000\n0\n1", description: "Alert threshold 0% fires immediately on the first successful call; zero-cost calls never block." }
+        { input: "100 0\n2\n3 0\n3 0", expected_output: "$0.000000\n0\n1", description: "Alert threshold 0% fires immediately on the first successful call; zero-cost calls never block." },
+        { input: "10000 80\n4\n1 3540\n2 5335\n1 375350\n1 1801", expected_output: "$0.010676\n1\n0" }
       ]
     }
   ]

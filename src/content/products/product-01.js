@@ -657,6 +657,14 @@ main()
           expected_output: "alpha beta ...",
           description: "The cut keeps exactly the first two words plus the marker.",
         },
+        {
+          input: "3\nshort two gamma four five",
+          expected_output: "short two gamma ..."
+        },
+        {
+          input: "5\nalpha beta sweet",
+          expected_output: "alpha beta sweet"
+        }
       ],
     },
 
@@ -864,6 +872,14 @@ main()
           expected_output: "1. Only one",
           description: "A single point still numbers correctly.",
         },
+        {
+          input: "bullets\n2\nA approved\nOpening next year",
+          expected_output: "- A approved\n- Opening next year"
+        },
+        {
+          input: "numbered\n3\nOnly\nB\nC",
+          expected_output: "1. Only\n2. B\n3. C"
+        }
       ],
     },
 
@@ -1075,6 +1091,14 @@ main()
           expected_output: "2\nhello\nworld",
           description: "Words longer than the budget still each get their own chunk.",
         },
+        {
+          input: "10\naa quick brown fox jumps",
+          expected_output: "3\naa quick\nbrown fox\njumps"
+        },
+        {
+          input: "5\nhello quick brown",
+          expected_output: "3\nhello\nquick\nbrown"
+        }
       ],
     },
 
@@ -1266,6 +1290,14 @@ main()
           expected_output: "5",
           description: "4 map calls collapse to one reduce call in a single pass.",
         },
+        {
+          input: "3 3",
+          expected_output: "4"
+        },
+        {
+          input: "5 3",
+          expected_output: "8"
+        }
       ],
     },
 
@@ -1480,6 +1512,14 @@ main()
           expected_output: "180",
           description: "Three clean calls at 60 tokens each total 180.",
         },
+        {
+          input: "2\n55 28 1\n129 11 3",
+          expected_output: "481"
+        },
+        {
+          input: "1\n62 30 2",
+          expected_output: "154"
+        }
       ],
     },
 
@@ -1695,6 +1735,10 @@ main()
           expected_output: "single-shot",
           description: "The threshold is inclusive, so exactly 2000 is single-shot.",
         },
+        {
+          input: "2000 20000\n22958",
+          expected_output: "map-reduce"
+        }
       ],
     },
   ],

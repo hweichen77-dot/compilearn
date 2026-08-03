@@ -211,6 +211,14 @@ main()
           expected_output: "0",
           description: "Edge: a field present with an empty value counts as missing.",
         },
+        {
+          input: "2\nname\nemail\n1\nname=C phone=",
+          expected_output: "0"
+        },
+        {
+          input: "3\nname\nphone\nphone\n2\nname=Ada email=ada@x.com phone=123\nname=Bob email=bob@x.com",
+          expected_output: "1"
+        }
       ],
     },
 
@@ -914,6 +922,14 @@ main()
           expected_output: "MISSING: a, b, c",
           description: "Edge: an empty record is missing everything, listed sorted.",
         },
+        {
+          input: "3\nname\nb\nname\n2\nname\nemail",
+          expected_output: "MISSING: b"
+        },
+        {
+          input: "3\na\nemail\nc\n0",
+          expected_output: "MISSING: a, c, email"
+        }
       ],
     },
 
@@ -1092,6 +1108,14 @@ main()
           expected_output: "1",
           description: "Edge: zero retries still allows the first attempt, which succeeds.",
         },
+        {
+          input: "1 3\nvalid\ninvalid\nvalid",
+          expected_output: "1"
+        },
+        {
+          input: "2 3\nvalid\ninvalid\nvalid",
+          expected_output: "1"
+        }
       ],
     },
 
@@ -1292,6 +1316,14 @@ main()
           expected_output: "OK",
           description: "Edge: no line items sum to 0, which matches a stated total of 0.",
         },
+        {
+          input: "2 250\n2 49\n3 51",
+          expected_output: "MISMATCH stated=250 computed=251"
+        },
+        {
+          input: "2 300\n2 51\n3 50",
+          expected_output: "MISMATCH stated=300 computed=252"
+        }
       ],
     },
 

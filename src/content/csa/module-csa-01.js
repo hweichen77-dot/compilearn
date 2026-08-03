@@ -129,6 +129,14 @@ export default {
         {
           "input": "100\n2.75\ntrue",
           "expected_output": "100\n2.75\ntrue"
+        },
+        {
+          "input": "48 1.1 true",
+          "expected_output": "48\n1.1\ntrue"
+        },
+        {
+          "input": "-2 0.6 false",
+          "expected_output": "-2\n0.6\nfalse"
         }
       ]
     },
@@ -249,6 +257,14 @@ export default {
         {
           "input": "10 10",
           "expected_output": "100"
+        },
+        {
+          "input": "7 6",
+          "expected_output": "42"
+        },
+        {
+          "input": "9 4",
+          "expected_output": "36"
         }
       ]
     },
@@ -365,6 +381,14 @@ export default {
         {
           "input": "-4 9",
           "expected_output": "Sum: 5"
+        },
+        {
+          "input": "1 5",
+          "expected_output": "Sum: 6"
+        },
+        {
+          "input": "1 2",
+          "expected_output": "Sum: 3"
         }
       ]
     },
@@ -481,6 +505,14 @@ export default {
         {
           "input": "10 3",
           "expected_output": "6.5"
+        },
+        {
+          "input": "7 3",
+          "expected_output": "5.0"
+        },
+        {
+          "input": "8 4",
+          "expected_output": "6.0"
         }
       ]
     },
@@ -599,6 +631,14 @@ export default {
         {
           "input": "80",
           "expected_output": "8\n0"
+        },
+        {
+          "input": "44",
+          "expected_output": "4\n4"
+        },
+        {
+          "input": "58",
+          "expected_output": "5\n8"
         }
       ]
     },
@@ -716,6 +756,14 @@ export default {
         {
           "input": "8 4 5",
           "expected_output": "26"
+        },
+        {
+          "input": "8 4 4",
+          "expected_output": "22"
+        },
+        {
+          "input": "10 4 5",
+          "expected_output": "28"
         }
       ]
     },
@@ -832,6 +880,14 @@ export default {
         {
           "input": "1 8",
           "expected_output": "12.5"
+        },
+        {
+          "input": "1 5",
+          "expected_output": "20.0"
+        },
+        {
+          "input": "3 3",
+          "expected_output": "100.0"
         }
       ]
     },
@@ -948,6 +1004,14 @@ export default {
         {
           "input": "-5 5 -3 3",
           "expected_output": "0"
+        },
+        {
+          "input": "1 11 29 36",
+          "expected_output": "77"
+        },
+        {
+          "input": "1 6 25 29",
+          "expected_output": "61"
         }
       ]
     }

@@ -286,7 +286,8 @@ main()
         { input: "1000 200 4\n300 300 300 300", expected_output: "2\n200", description: "Halts at the third chunk; 200 budget left." },
         { input: "8000 1000 3\n2000 3000 5000", expected_output: "2\n2000", description: "Large final chunk overflows; two packed." },
         { input: "500 500 3\n10 10 10", expected_output: "0\n0", description: "Reserve eats the whole window; budget is 0, nothing fits." },
-        { input: "100 0 1\n100", expected_output: "1\n0", description: "Single chunk exactly fills the window with no reserve." }
+        { input: "100 0 1\n100", expected_output: "1\n0", description: "Single chunk exactly fills the window with no reserve." },
+        { input: "1000 200 4\n912 498 4705 299", expected_output: "0\n800" }
       ]
     },
     {
@@ -583,7 +584,8 @@ main()
         { input: "1000 200 300 3\n30 100\n20 80\n40 120", expected_output: "OK\n230", description: "No overflow; leftover after the final turn is 1000 - 770 = 230." },
         { input: "1000 200 300 4\n100 200\n100 200\n100 200\n100 200", expected_output: "OVERFLOW\n3", description: "Re-sent history pushes turn 3 over the window." },
         { input: "600 150 400 1\n40 0", expected_output: "OK\n10", description: "Single turn: 150+0+40+400=590, leftover 10." },
-        { input: "500 100 100 3\n50 50\n200 200\n50 50", expected_output: "OVERFLOW\n3", description: "Fits through turn 2, then turn 3's history (500) overflows." }
+        { input: "500 100 100 3\n50 50\n200 200\n50 50", expected_output: "OVERFLOW\n3", description: "Fits through turn 2, then turn 3's history (500) overflows." },
+        { input: "1000 200 300 3\n62 51\n133 136\n97 176", expected_output: "OK\n21" }
       ]
     },
     {
@@ -868,7 +870,8 @@ main()
         { input: "70 4\n30 30 30 30", expected_output: "2\n2\n60", description: "Steady eviction keeps the two newest turns." },
         { input: "50 3\n60 10 10", expected_output: "1\n2\n20", description: "Oversized first turn survives until a newer turn forces its eviction." },
         { input: "100 3\n40 40 40", expected_output: "1\n2\n80", description: "Third turn pushes total to 120; drop one to reach 80." },
-        { input: "1000000 1\n1000000", expected_output: "0\n1\n1000000", description: "A single turn exactly at budget is never dropped." }
+        { input: "1000000 1\n1000000", expected_output: "0\n1\n1000000", description: "A single turn exactly at budget is never dropped." },
+        { input: "70 4\n454276 20 19 29", expected_output: "1\n3\n68" }
       ]
     },
     {
@@ -1161,7 +1164,8 @@ main()
         { input: "4000 300 100 800 50 4\n900 800 700 600", expected_output: "1\n2150\n650", description: "Summarizing only the oldest turn is enough to fit." },
         { input: "2000 200 100 500 30 5\n400 400 400 400 400", expected_output: "3\n830\n370", description: "Three oldest turns must collapse into the summary." },
         { input: "1000 100 50 200 999 2\n900 900", expected_output: "IMPOSSIBLE", description: "Even summarizing everything (cost 999) exceeds the 650 budget." },
-        { input: "5000 100 100 100 40 3\n200 200 200", expected_output: "0\n600\n4100", description: "Everything already fits verbatim, so k=0 and no summary is needed." }
+        { input: "5000 100 100 100 40 3\n200 200 200", expected_output: "0\n600\n4100", description: "Everything already fits verbatim, so k=0 and no summary is needed." },
+        { input: "4000 300 100 800 50 4\n518 505 698 509", expected_output: "0\n2230\n570" }
       ]
     },
     {
@@ -1452,7 +1456,8 @@ main()
         { input: "3\n23 5\n11 3\n40 18", expected_output: "9\n1", description: "Mixed drifts; only the code-heavy third sample undercounts." },
         { input: "2\n0 0\n8 2", expected_output: "0\n0", description: "Plain text lands exactly on the estimate." },
         { input: "1\n100 40", expected_output: "15\n1", description: "Single sample: estimate 25 vs actual 40, drift 15, one undercount." },
-        { input: "2\n400 90\n4 1", expected_output: "10\n0", description: "First overcounts (100 vs 90), second exact; nothing undercounted." }
+        { input: "2\n400 90\n4 1", expected_output: "10\n0", description: "First overcounts (100 vs 90), second exact; nothing undercounted." },
+        { input: "3\n182 47\n9 2\n41 18", expected_output: "9\n2" }
       ]
     },
     {
@@ -1758,7 +1763,8 @@ main()
         { input: "3 4\n8000 1\n32000 3\n200000 10\n5000\n20000\n100000\n500000", expected_output: "14\n1", description: "Each job routes to the cheapest fitting model; the oversized job is rejected." },
         { input: "2 2\n10000 5\n10000 5\n9000\n9000", expected_output: "10\n0", description: "Tie on window and cost; both jobs route." },
         { input: "2 3\n8000 1\n200000 2\n8000\n9000\n8001", expected_output: "5\n0", description: "First job fits the cheap 8k; the larger two need the 200k model at cost 2." },
-        { input: "1 2\n5000 4\n6000\n3000", expected_output: "4\n1", description: "Only model has a 5000 window: 6000 rejected, 3000 routed." }
+        { input: "1 2\n5000 4\n6000\n3000", expected_output: "4\n1", description: "Only model has a 5000 window: 6000 rejected, 3000 routed." },
+        { input: "3 4\n7277 4\n76697 3\n124969 9\n8305\n11729\n100000\n499999", expected_output: "15\n1" }
       ]
     },
     {
@@ -2044,7 +2050,8 @@ main()
         { input: "5\n10 50 30 20 40", expected_output: "40 20 10 30 50\n10", description: "Odd count: the least important lands exactly in the center." },
         { input: "4\n1 2 3 4", expected_output: "3 1 2 4\n2", description: "Even count: edges hold the two most important." },
         { input: "1\n7", expected_output: "7\n7", description: "A single item is both edge and middle." },
-        { input: "3\n5 5 5", expected_output: "5 5 5\n5", description: "All equal: ties resolved by index, arrangement is uniform." }
+        { input: "3\n5 5 5", expected_output: "5 5 5\n5", description: "All equal: ties resolved by index, arrangement is uniform." },
+        { input: "5\n5 36 4 15 40", expected_output: "36 5 4 15 40\n4" }
       ]
     },
     {
@@ -2346,7 +2353,8 @@ main()
         { input: "200000 4\n50000 gist\n500000 specific\n900000 gist\n10000 specific", expected_output: "STUFF 2\nSUMMARIZE 1\nRETRIEVE 1", description: "Mixed batch exercises all three routes." },
         { input: "100 3\n100 gist\n101 gist\n101 specific", expected_output: "STUFF 1\nSUMMARIZE 1\nRETRIEVE 1", description: "Boundary: t equal to W stuffs; just over splits by need." },
         { input: "1000000 2\n5000 specific\n9000 gist", expected_output: "STUFF 2\nSUMMARIZE 0\nRETRIEVE 0", description: "Everything fits the large window, so all stuff." },
-        { input: "50 3\n60 specific\n70 specific\n80 gist", expected_output: "STUFF 0\nSUMMARIZE 1\nRETRIEVE 2", description: "Nothing fits; need flag decides retrieve vs summarize." }
+        { input: "50 3\n60 specific\n70 specific\n80 gist", expected_output: "STUFF 0\nSUMMARIZE 1\nRETRIEVE 2", description: "Nothing fits; need flag decides retrieve vs summarize." },
+        { input: "200000 4\n22842 specific\n366935 gist\n843226 gist\n10000 specific", expected_output: "STUFF 2\nSUMMARIZE 2\nRETRIEVE 0" }
       ]
     }
   ]

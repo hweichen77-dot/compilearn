@@ -346,7 +346,9 @@ main()
       challenge_test_cases: [
         { input: "3\ndouble mul 2\nincrement add 1\nshift sub 5\n4\ndouble 10\nincrement 41\nshift 5\nsquare 9", expected_output: "20\n42\n0\nERROR", description: "Three valid tool calls plus one unregistered tool." },
         { input: "1\ndouble mul 2\n2\ndouble 0\nghost 7", expected_output: "0\nERROR", description: "Unknown tool name must yield ERROR, not a crash." },
-        { input: "2\nadd1 add 1\nmul3 mul 3\n3\nadd1 -5\nmul3 -2\nadd1 0", expected_output: "-4\n-6\n1", description: "Negative args and constants handled correctly." }
+        { input: "2\nadd1 add 1\nmul3 mul 3\n3\nadd1 -5\nmul3 -2\nadd1 0", expected_output: "-4\n-6\n1", description: "Negative args and constants handled correctly." },
+        { input: "3\ndouble mul 2\nincrement add 1\nshift sub 5\n4\nmul3 9\nadd1 14\nshift 6\nsquare 9", expected_output: "ERROR\nERROR\n1\nERROR" },
+        { input: "1\ndouble add 2\n2\nshift 0\nadd1 3", expected_output: "ERROR\nERROR" }
       ]
     },
     {
@@ -657,7 +659,9 @@ main()
       challenge_test_cases: [
         { input: "3\nadd 3 4\nmultiply 5 6\nsubtract 10 7", expected_output: "7\n30\n3\nTOTAL 40", description: "Three routed tools and their summed total." },
         { input: "1\ndivide 8 2", expected_output: "UNKNOWN_TOOL\nTOTAL 0", description: "Unsupported tool is flagged and excluded from the total." },
-        { input: "2\nmax -3 -8\nadd -5 5", expected_output: "-3\n0\nTOTAL -3", description: "max of two negatives and a zero-sum add." }
+        { input: "2\nmax -3 -8\nadd -5 5", expected_output: "-3\n0\nTOTAL -3", description: "max of two negatives and a zero-sum add." },
+        { input: "3\ndivide 3 4\nmultiply 1 5\nsubtract 11 8", expected_output: "UNKNOWN_TOOL\n5\n3\nTOTAL 8" },
+        { input: "2\ndivide 7 2\nadd 1 6", expected_output: "UNKNOWN_TOOL\n7\nTOTAL 7" }
       ]
     },
     {
@@ -999,7 +1003,9 @@ main()
       challenge_test_cases: [
         { input: "3\nPeru Lima\nLima SouthAmerica\nSouthAmerica Earth\nPeru\nEarth", expected_output: "Thought: start at Peru\nAction: lookup(Peru)\nObservation: Lima\nAction: lookup(Lima)\nObservation: SouthAmerica\nAction: lookup(SouthAmerica)\nObservation: Earth\nAnswer: reached Earth in 3 steps", description: "A clean three-hop chain to the goal." },
         { input: "2\nA B\nC D\nA\nD", expected_output: "Thought: start at A\nAction: lookup(A)\nObservation: B\nAnswer: DEAD_END after 1 steps", description: "B has no outgoing link, so the run dead-ends." },
-        { input: "2\nA B\nB A\nA\nC", expected_output: "Thought: start at A\nAction: lookup(A)\nObservation: B\nAction: lookup(B)\nObservation: A\nAnswer: LOOP after 2 steps", description: "Revisiting A trips the cycle guard." }
+        { input: "2\nA B\nB A\nA\nC", expected_output: "Thought: start at A\nAction: lookup(A)\nObservation: B\nAction: lookup(B)\nObservation: A\nAnswer: LOOP after 2 steps", description: "Revisiting A trips the cycle guard." },
+        { input: "3\nA B\nLima D\nA Earth\nD\nEarth", expected_output: "Thought: start at D\nAnswer: DEAD_END after 0 steps" },
+        { input: "2\nPeru B\nB A\nSouthAmerica\nPeru", expected_output: "Thought: start at SouthAmerica\nAnswer: DEAD_END after 0 steps" }
       ]
     },
     {
@@ -1334,7 +1340,9 @@ main()
       challenge_test_cases: [
         { input: "3\nfetch 10 0\nclean 5 1 fetch\nsummarize 2 2 fetch clean", expected_output: "fetch = 10\nclean = 15\nsummarize = 27\nFINAL 27", description: "Each step accumulates its dependencies' results from memory." },
         { input: "2\na 3 0\nb 0 1 a", expected_output: "a = 3\nb = 3\nFINAL 3", description: "b inherits a's value through working memory." },
-        { input: "1\nx 5 1 ghost", expected_output: "x MISSING_DEP", description: "A dependency never produced halts the plan safely." }
+        { input: "1\nx 5 1 ghost", expected_output: "x MISSING_DEP", description: "A dependency never produced halts the plan safely." },
+        { input: "3\na 6 0\nb 5 1 a\nsummarize 2 2 fetch clean", expected_output: "a = 6\nb = 11\nsummarize MISSING_DEP" },
+        { input: "2\na 3 0\nclean 0 0 a", expected_output: "a = 3\nclean = 0\nFINAL 0" }
       ]
     },
     {
@@ -1671,7 +1679,9 @@ main()
       challenge_test_cases: [
         { input: "10 100\n3\nsearch 5\nread 5\ndone 0", expected_output: "FINISHED\nsteps 3\nspent 10", description: "The `done` action ends the loop successfully under both guards." },
         { input: "2 100\n4\ngo 1\ngo 1\ngo 1\ndone 0", expected_output: "STEP_LIMIT\nsteps 2\nspent 2", description: "The step cap stops the agent before it can finish." },
-        { input: "10 8\n3\ngo 5\ngo 5\ndone 0", expected_output: "OVER_BUDGET\nsteps 1\nspent 5", description: "The budget guard blocks the second action before paying for it." }
+        { input: "10 8\n3\ngo 5\ngo 5\ndone 0", expected_output: "OVER_BUDGET\nsteps 1\nspent 5", description: "The budget guard blocks the second action before paying for it." },
+        { input: "10 100\n3\nsearch 5\nread 5\ngo 0", expected_output: "EXHAUSTED\nsteps 3\nspent 10" },
+        { input: "2 100\n4\ngo 1\ngo 1\ndone 1\ndone 0", expected_output: "STEP_LIMIT\nsteps 2\nspent 2" }
       ]
     },
     {
@@ -1994,7 +2004,8 @@ main()
         { input: "3\nget_weather 2 city units\nsend_email 3 to subject body\nsearch 1 query\n4\nget_weather city units\nsend_email to body\nsearch query\ntranslate text", expected_output: "CALL get_weather\nMISSING subject\nCALL search\nNO_SUCH_TOOL", description: "A complete call, a missing-argument call, another complete call, and an unregistered tool." },
         { input: "1\nbook 2 date guests\n2\nbook guests\nbook date guests party", expected_output: "MISSING date\nCALL book", description: "Missing one required param, then a complete call with a harmless extra param." },
         { input: "2\nping 0\nnotify 1 msg\n3\nping\nnotify\nnotify msg", expected_output: "CALL ping\nMISSING msg\nCALL notify", description: "A tool with no required params always passes; notify needs msg." },
-        { input: "1\nwipe 2 target confirm\n1\nwipe target", expected_output: "MISSING confirm", description: "A safety-critical confirm parameter is caught as missing before execution." }
+        { input: "1\nwipe 2 target confirm\n1\nwipe target", expected_output: "MISSING confirm", description: "A safety-critical confirm parameter is caught as missing before execution." },
+        { input: "3\nget_weather 1 date guests\nsend_email 3 msg subject body\nbook 1 query\n4\nget_weather city units\nsend_email msg body\nsearch query\ntranslate text", expected_output: "MISSING date\nMISSING subject\nNO_SUCH_TOOL\nNO_SUCH_TOOL" }
       ]
     },
     {
@@ -2307,7 +2318,9 @@ main()
       challenge_test_cases: [
         { input: "3\nsearch 1\nbook 1\nnotify 1", expected_output: "PLAN DONE 3\nREACT 3 3", description: "All steps succeed: both designs complete everything." },
         { input: "4\nsearch 1\nreserve 0\nbook 1\nnotify 1", expected_output: "PLAN ABORTED 1\nREACT 3 4", description: "A mid-plan failure aborts the planner but the reactor routes around it." },
-        { input: "2\na 0\nb 1", expected_output: "PLAN ABORTED 0\nREACT 1 2", description: "An immediate failure means the planner completes nothing; the reactor still finishes the later step." }
+        { input: "2\na 0\nb 1", expected_output: "PLAN ABORTED 0\nREACT 1 2", description: "An immediate failure means the planner completes nothing; the reactor still finishes the later step." },
+        { input: "3\nsearch 1\nb 1\nnotify 0", expected_output: "PLAN ABORTED 2\nREACT 2 3" },
+        { input: "2\na 0\nbook 0", expected_output: "PLAN ABORTED 0\nREACT 0 2" }
       ]
     },
     {
@@ -2614,7 +2627,8 @@ main()
         { input: "2\ndelete_file\nsend_payment\n4\nread_file none\ndelete_file approve\nsend_payment deny\ndelete_file none", expected_output: "EXECUTE read_file\nEXECUTE delete_file\nBLOCKED send_payment\nBLOCKED delete_file\nSUMMARY 2 executed 2 blocked", description: "A safe tool, an approved risky tool, and two unapproved risky tools." },
         { input: "1\ndrop_table\n2\nsearch none\ndrop_table deny", expected_output: "EXECUTE search\nBLOCKED drop_table\nSUMMARY 1 executed 1 blocked", description: "Safe action runs; denied risky action is blocked." },
         { input: "0\n3\na none\nb none\nc none", expected_output: "EXECUTE a\nEXECUTE b\nEXECUTE c\nSUMMARY 3 executed 0 blocked", description: "With no risky tools registered, every action runs freely." },
-        { input: "1\npay\n3\npay approve\npay approve\npay deny", expected_output: "EXECUTE pay\nEXECUTE pay\nBLOCKED pay\nSUMMARY 2 executed 1 blocked", description: "The same risky tool runs when approved and is blocked when denied." }
+        { input: "1\npay\n3\npay approve\npay approve\npay deny", expected_output: "EXECUTE pay\nEXECUTE pay\nBLOCKED pay\nSUMMARY 2 executed 1 blocked", description: "The same risky tool runs when approved and is blocked when denied." },
+        { input: "2\ndelete_file\nsend_payment\n4\nread_file deny\ndelete_file deny\nsend_payment deny\ndelete_file none", expected_output: "EXECUTE read_file\nBLOCKED delete_file\nBLOCKED send_payment\nBLOCKED delete_file\nSUMMARY 1 executed 3 blocked" }
       ]
     }
   ]

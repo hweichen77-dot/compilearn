@@ -184,6 +184,9 @@ main()
     challenge_test_cases: [
       { input: "You rewrite resume bullets.\nmanaged the front desk", expected_output: "system: You rewrite resume bullets.\nuser: Rewrite this as a resume bullet: managed the front desk", description: "System line echoed, task wrapped in the fixed instruction." },
       { input: "Turn tasks into strong bullets.\nhelped plan the company party", expected_output: "system: Turn tasks into strong bullets.\nuser: Rewrite this as a resume bullet: helped plan the company party", description: "Different system and task, same assembly." },
+      { input: "You rewrite resume bullets.\nhelped the front company", expected_output: "system: You rewrite resume bullets.\nuser: Rewrite this as a resume bullet: helped the front company" },
+      { input: "Turn tasks into strong bullets.\nhelped the the desk party", expected_output: "system: Turn tasks into strong bullets.\nuser: Rewrite this as a resume bullet: helped the the desk party" },
+      { input: "You rewrite resume bullets.\nhelped plan the desk", expected_output: "system: You rewrite resume bullets.\nuser: Rewrite this as a resume bullet: helped plan the desk" }
     ],
   },
 
@@ -369,6 +372,7 @@ main()
       { input: "1. \"Increased sales\"", expected_output: "Increased sales", description: "Removes a numeric marker and surrounding quotes." },
       { input: "• Managed a team of five", expected_output: "Managed a team of five", description: "Removes a bullet-dot marker." },
       { input: "\"Reduced churn\"", expected_output: "Reduced churn", description: "No marker, just surrounding quotes to strip." },
+      { input: "  - team the team ", expected_output: "team the team" }
     ],
   },
 
@@ -550,6 +554,8 @@ main()
       { input: "3\nresponsible for\nhelped\nworked on\n3\nResponsible for the budget\nLed the team\nHelped customers", expected_output: "WEAK\nSTRONG\nWEAK\nStrong: 1 Weak: 2", description: "Two weak openers, one strong verb." },
       { input: "2\nassisted with\nduties included\n2\nBuilt the API\nDesigned the logo", expected_output: "STRONG\nSTRONG\nStrong: 2 Weak: 0", description: "Both open with strong action verbs." },
       { input: "1\nresponsible for\n1\nResponsible for payroll", expected_output: "WEAK\nStrong: 0 Weak: 1", description: "Single weak bullet." },
+      { input: "3\nassisted with\nduties\nworked for\n3\nDesigned the the budget\nLed the team\nHelped customers", expected_output: "STRONG\nSTRONG\nSTRONG\nStrong: 3 Weak: 0" },
+      { input: "1\nassisted for\n1\nResponsible for payroll", expected_output: "STRONG\nStrong: 1 Weak: 0" }
     ],
   },
 
@@ -715,6 +721,8 @@ main()
       { input: "3\nCut costs by 30%\nImproved team morale\nGrew signups from 100 to 450", expected_output: "QUANTIFIED\nVAGUE\nQUANTIFIED\nQuantified: 2 of 3", description: "Two bullets carry digits, one is vague." },
       { input: "2\nManaged the office\nLed weekly standups", expected_output: "VAGUE\nVAGUE\nQuantified: 0 of 2", description: "No numbers anywhere." },
       { input: "1\nReduced load time by 2 seconds", expected_output: "QUANTIFIED\nQuantified: 1 of 1", description: "Single quantified bullet." },
+      { input: "2\nReduced costs by\nLed team standups", expected_output: "VAGUE\nVAGUE\nQuantified: 0 of 2" },
+      { input: "1\nCut the office by 2 seconds", expected_output: "QUANTIFIED\nQuantified: 1 of 1" }
     ],
   },
 
@@ -878,6 +886,8 @@ main()
       { input: "5\nLed a team of ten engineers across three offices", expected_output: "Led a team of ten\nTRIMMED", description: "Nine words trimmed to the first five." },
       { input: "6\nCut cloud costs by thirty percent", expected_output: "Cut cloud costs by thirty percent\nOK", description: "Exactly at the limit, unchanged." },
       { input: "3\nBuilt the dashboard", expected_output: "Built the dashboard\nOK", description: "Under the limit." },
+      { input: "5\nCut cloud team of ten engineers across three offices", expected_output: "Cut cloud team of ten\nTRIMMED" },
+      { input: "6\nCut a dashboard of thirty engineers", expected_output: "Cut a dashboard of thirty engineers\nOK" }
     ],
   },
 
@@ -1071,6 +1081,7 @@ main()
       { input: "8\n1\nresponsible for\nIncreased revenue 20% in Q3", expected_output: "PASS", description: "Strong, quantified, short enough." },
       { input: "4\n1\nhelped\nBuilt a fast reliable scalable analytics pipeline", expected_output: "NONUM LONG", description: "No number and over the word cap." },
       { input: "8\n1\nhelped\n   ", expected_output: "EMPTY", description: "Whitespace-only input short-circuits to EMPTY." },
+      { input: "8\n1\nhelped for\nBuilt for fast office scalable", expected_output: "NONUM" }
     ],
   },
 
@@ -1242,6 +1253,8 @@ main()
       { input: "3\nManaged staff\nmanaged staff\nLed sales", expected_output: "Unique: 2\nTokens: 5", description: "Case-insensitive duplicate collapses; tokens 3 + 2." },
       { input: "2\nBuilt the API\nBuilt the API", expected_output: "Unique: 1\nTokens: 3", description: "Exact duplicate removed." },
       { input: "1\nx", expected_output: "Unique: 1\nTokens: 1", description: "Tiny task still costs at least one token." },
+      { input: "3\nBuilt the\nBuilt staff\nLed sales", expected_output: "Unique: 3\nTokens: 6" },
+      { input: "2\nBuilt the API\nmanaged the API", expected_output: "Unique: 2\nTokens: 6" }
     ],
   },
 
@@ -1420,6 +1433,8 @@ main()
       { input: "4\nLed the team\n\nled the team\nCut costs 10%", expected_output: "- Led the team\n- Cut costs 10%\nBullets: 2", description: "Blank dropped, case-insensitive duplicate removed." },
       { input: "2\nBuilt the app\nBuilt the app", expected_output: "- Built the app\nBullets: 1", description: "Exact duplicate collapses to one." },
       { input: "1\n   ", expected_output: "Bullets: 0", description: "Only a blank line; nothing kept." },
+      { input: "4\nBuilt the team\n\nled the team\nCut costs 10%", expected_output: "- Built the team\n- led the team\n- Cut costs 10%\nBullets: 3" },
+      { input: "2\nLed the app\nBuilt the app", expected_output: "- Led the app\n- Built the app\nBullets: 2" }
     ],
   },
 ];

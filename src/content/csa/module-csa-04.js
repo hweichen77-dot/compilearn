@@ -130,6 +130,14 @@ export default {
         {
           "input": "3",
           "expected_output": "3\n2\n1"
+        },
+        {
+          "input": "2",
+          "expected_output": "2\n1"
+        },
+        {
+          "input": "4",
+          "expected_output": "4\n3\n2\n1"
         }
       ]
     },
@@ -248,6 +256,14 @@ export default {
         {
           "input": "10",
           "expected_output": "55"
+        },
+        {
+          "input": "7",
+          "expected_output": "28"
+        },
+        {
+          "input": "9",
+          "expected_output": "45"
         }
       ]
     },
@@ -364,6 +380,14 @@ export default {
         {
           "input": "-2 1",
           "expected_output": "-2\n-1\n0\n1"
+        },
+        {
+          "input": "1 3",
+          "expected_output": "1\n2\n3"
+        },
+        {
+          "input": "2 3",
+          "expected_output": "2\n3"
         }
       ]
     },
@@ -482,6 +506,14 @@ export default {
         {
           "input": "1",
           "expected_output": "1"
+        },
+        {
+          "input": "2",
+          "expected_output": "2"
+        },
+        {
+          "input": "3",
+          "expected_output": "6"
         }
       ]
     },
@@ -839,6 +871,10 @@ export default {
         {
           "input": "4",
           "expected_output": "1\n1 2\n1 2 3\n1 2 3 4"
+        },
+        {
+          "input": "2",
+          "expected_output": "1\n1 2"
         }
       ]
     },
@@ -958,6 +994,14 @@ export default {
         {
           "input": "10",
           "expected_output": "10 100"
+        },
+        {
+          "input": "3",
+          "expected_output": "3 9"
+        },
+        {
+          "input": "6",
+          "expected_output": "6 36"
         }
       ]
     }

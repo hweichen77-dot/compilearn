@@ -194,6 +194,8 @@ main()`,
       { input: "3\n1 -1\n0 100\n1 5000", expected_output: "OK\nERROR: missing prompt\nERROR: max_tokens out of range", description: "One clean request, one missing prompt, one over the 4096 token ceiling." },
       { input: "1\n1 4096", expected_output: "OK", description: "Edge: max_tokens exactly at the 4096 ceiling is still valid." },
       { input: "1\n1 0", expected_output: "ERROR: max_tokens out of range", description: "Edge: max_tokens of 0 is below the minimum of 1." },
+      { input: "3\n1 2051\n0 100\n0 5001", expected_output: "OK\nERROR: missing prompt\nERROR: missing prompt" },
+      { input: "1\n0 1262", expected_output: "ERROR: missing prompt" }
     ],
   },
   {
@@ -604,6 +606,8 @@ main()`,
       { input: "3\n10 20 100 ok\n5 5 50 error\n0 0 200 ok", expected_output: "3\n1\n40\n200", description: "Three requests, one error; tokens sum to 40 and the slowest call took 200ms." },
       { input: "1\n100 200 300 ok", expected_output: "1\n0\n300\n300", description: "Single clean request; totals equal that one record." },
       { input: "2\n0 0 5 error\n0 0 5 error", expected_output: "2\n2\n0\n5", description: "Edge: both calls failed with zero tokens, error count and max latency still tracked correctly." },
+      { input: "3\n50 82 255 ok\n5 4 32 error\n0 0 201 ok", expected_output: "3\n1\n141\n255" },
+      { input: "1\n94 120 251 error", expected_output: "1\n1\n214\n251" }
     ],
   },
   {
@@ -831,6 +835,8 @@ main()`,
       { input: "2\nhaiku 25 125\nsonnet 300 1500\n2\nhaiku 4000 1000\nsonnet 2000 2000", expected_output: "2\n3825\n225\n3600", description: "Two calls across two models; total cost is the sum of each call's own input+output cost." },
       { input: "1\nhaiku 10 10\n1\nhaiku 1000 1000", expected_output: "1\n20\n20", description: "Single call; cost matches manual math (10 cents input + 10 cents output)." },
       { input: "1\nhaiku 25 125\n1\nhaiku 0 0", expected_output: "1\n0\n0", description: "Edge: a zero-token call costs nothing." },
+      { input: "2\nhaiku 18 71\nsonnet 300 1499\n2\nhaiku 3999 1000\nsonnet 2000 1999", expected_output: "2\n3738\n142\n3596" },
+      { input: "1\nhaiku 10 70\n1\nhaiku 832 639", expected_output: "1\n52\n52" }
     ],
   },
   {
@@ -1048,6 +1054,8 @@ main()`,
       { input: "4\nhaiku 100 20 50\nsonnet 500 300 200\nhaiku 200 40 70\nsonnet 300 150 100", expected_output: "haiku 2 300 60 60\nsonnet 2 800 450 150\n510", description: "Two models, two calls each; per-model totals plus the grand total cost across both." },
       { input: "1\nhaiku 100 10 5", expected_output: "haiku 1 100 10 5\n10", description: "Single record; the group equals that one record exactly." },
       { input: "2\nzeta 10 5 3\nalpha 20 8 4", expected_output: "alpha 1 20 8 4\nzeta 1 10 5 3\n13", description: "Edge: models print alphabetically sorted regardless of input order." },
+      { input: "4\nhaiku 63 8 7\nsonnet 163 144 11\nhaiku 201 40 69\nsonnet 300 151 101", expected_output: "haiku 2 264 48 38\nsonnet 2 463 295 56\n343" },
+      { input: "1\nzeta 75 19 39", expected_output: "zeta 1 75 19 39\n19" }
     ],
   },
   {
@@ -1305,6 +1313,8 @@ main()`,
       { input: "5\nok\nbad_request\nrate_limit\ntimeout\nok", expected_output: "200 2\n400 1\n429 1\n504 1\n5", description: "Five outcomes across four status buckets, sorted ascending by code." },
       { input: "3\nok\nok\nok", expected_output: "200 3\n3", description: "All successful calls collapse into a single 200 bucket." },
       { input: "2\nok\nweird", expected_output: "200 1\n500 1\n2", description: "Edge: an unrecognized outcome string falls back to 500." },
+      { input: "3\nok\nweird\nok", expected_output: "200 2\n500 1\n3" },
+      { input: "2\nok\nok", expected_output: "200 2\n2" }
     ],
   },
   {
@@ -1515,6 +1525,8 @@ main()`,
       { input: "100\n4\n30\n50\n25\n10", expected_output: "ALLOW 30\nALLOW 80\nDENY 80\nALLOW 90\n3 1", description: "Four requests against a 100-cent budget; the third would overshoot so it is denied while spend holds steady." },
       { input: "0\n1\n0", expected_output: "ALLOW 0\n1 0", description: "Edge: a zero-cost request against a zero budget is still allowed." },
       { input: "10\n1\n20", expected_output: "DENY 0\n0 1", description: "Edge: a single request that alone exceeds the budget is denied immediately." },
+      { input: "100\n4\n15\n51\n24\n10", expected_output: "ALLOW 15\nALLOW 66\nALLOW 90\nALLOW 100\n4 0" },
+      { input: "100\n4\n24\n50\n26\n10", expected_output: "ALLOW 24\nALLOW 74\nALLOW 100\nDENY 100\n3 1" }
     ],
   },
   {
@@ -1741,6 +1753,8 @@ main()`,
       { input: "5\nok 10\nok 10\nok 10\nerror 5\nok 10\n50", expected_output: "READY\n20\n45", description: "1 of 5 calls failed (20% error rate, right at the ceiling) and total cost stays within the 50-cent budget." },
       { input: "4\nok 10\nerror 5\nerror 5\nok 10\n30", expected_output: "NOT READY\n50\n30", description: "Error rate of 50% blows past the 20% ceiling even though cost is within budget." },
       { input: "2\nok 40\nok 40\n50", expected_output: "NOT READY\n0\n80", description: "Zero errors but total cost of 80 exceeds the 50-cent budget." },
+      { input: "5\nok 36\nok 12\nok 8\nok 9\nok 9\n50", expected_output: "NOT READY\n0\n74" },
+      { input: "4\nok 17\nerror 28\nerror 5\nerror 9\n29", expected_output: "NOT READY\n75\n59" }
     ],
   },
   ],

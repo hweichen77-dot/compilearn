@@ -314,7 +314,9 @@ main()
       challenge_test_cases: [
         { input: "3\n500 1 250000 2000\n50 1 250000 2000\n400 0 500000 1500", expected_output: "FINE-TUNE\nPROMPT\nPROMPT\n1 500000000", description: "Only the first task clears all three gates." },
         { input: "1\n300 1 100000 1000", expected_output: "FINE-TUNE\n1 100000000", description: "Exactly on every threshold still qualifies." },
-        { input: "2\n299 1 100000 1000\n300 1 99999 1000", expected_output: "PROMPT\nPROMPT\n0 0", description: "Edge: one short on examples, one short on calls, neither qualifies." }
+        { input: "2\n299 1 100000 1000\n300 1 99999 1000", expected_output: "PROMPT\nPROMPT\n0 0", description: "Edge: one short on examples, one short on calls, neither qualifies." },
+        { input: "3\n390 1 110901 1256\n149 1 190777 1340\n401 0 500001 1499", expected_output: "FINE-TUNE\nPROMPT\nPROMPT\n1 139291656" },
+        { input: "1\n451 2 134857 1656", expected_output: "PROMPT\n0 0" }
       ]
     },
     {
@@ -632,7 +634,9 @@ main()
       challenge_test_cases: [
         { input: "3\n80\nParis\nparis\nLondon\nParis\n  YES  \nyes", expected_output: "2/3\n66.67%\nBLOCK", description: "Case-insensitive + whitespace-tolerant scoring; below the 80% gate." },
         { input: "2\n100\na\nA\nb\nb", expected_output: "2/2\n100.00%\nSHIP", description: "All pass after normalization; meets a 100% gate." },
-        { input: "1\n50\nfoo\nbar", expected_output: "0/1\n0.00%\nBLOCK", description: "Edge: zero passes, must not divide-by-zero and must BLOCK." }
+        { input: "1\n50\nfoo\nbar", expected_output: "0/1\n0.00%\nBLOCK", description: "Edge: zero passes, must not divide-by-zero and must BLOCK." },
+        { input: "3\n73\nParis\nbar\nLondon\nParis\n  YES  \nyes", expected_output: "1/3\n33.33%\nBLOCK" },
+        { input: "2\n54\nParis\nA\nb\nb", expected_output: "1/2\n50.00%\nBLOCK" }
       ]
     },
     {
@@ -958,7 +962,9 @@ main()
       challenge_test_cases: [
         { input: "2\n50\nThe capital of France is Paris\nParis France\nIt is Lyon\nParis France", expected_output: "0.167\n0", description: "Token-overlap scoring; neither case clears the 0.5 bar." },
         { input: "1\n100\nhello world\nhello world", expected_output: "1.000\n1", description: "Identical answers score a perfect 1.0." },
-        { input: "1\n50\n!!!\n???", expected_output: "1.000\n1", description: "Edge: both answers tokenize to empty sets → defined as 1.0." }
+        { input: "1\n50\n!!!\n???", expected_output: "1.000\n1", description: "Edge: both answers tokenize to empty sets → defined as 1.0." },
+        { input: "1\n92\nhello world\nParis world", expected_output: "0.333\n0" },
+        { input: "1\n89\nhello capital\nParis world", expected_output: "0.000\n0" }
       ]
     },
     {
@@ -1686,7 +1692,9 @@ main()
       challenge_test_cases: [
         { input: "3\n3\nexact\nParis\nparis\ncontains\nThe answer is 42\n42\nnumeric\n3.14\n3.0 0.2", expected_output: "3/3\n100%\nFAIL none\nSHIP", description: "All three scorer types pass; meets baseline → SHIP." },
         { input: "4\n4\nexact\nyes\nyes\nexact\nno\nyes\ncontains\nhello world\nworld\nnumeric\n9.9\n10 0.5", expected_output: "3/4\n75%\nFAIL 2\nBLOCK", description: "One regression named; passed below baseline → BLOCK." },
-        { input: "1\n1\nnumeric\nNaNvalue\n5 0.1", expected_output: "0/1\n0%\nFAIL 1\nBLOCK", description: "Edge: non-numeric output fails the numeric scorer cleanly instead of crashing." }
+        { input: "1\n1\nnumeric\nNaNvalue\n5 0.1", expected_output: "0/1\n0%\nFAIL 1\nBLOCK", description: "Edge: non-numeric output fails the numeric scorer cleanly instead of crashing." },
+        { input: "3\n2\nexact\nNaNvalue\nyes\ncontains\nThe answer is 41\n41\nnumeric\n3.14\n3.0 0.2", expected_output: "2/3\n67%\nFAIL 1\nSHIP" },
+        { input: "3\n4\nexact\nNaNvalue\nparis\nexact\nThe answer is 41\n42\nnumeric\n3.14\n3.0 0.2", expected_output: "1/3\n33%\nFAIL 1 2\nBLOCK" }
       ]
     },
     {
@@ -2024,7 +2032,8 @@ main()
         { input: "3\n2\nbilling\tMy card was charged twice\nbilling\tmy card was charged twice\nshipping\tWhere is my order", expected_output: "2 1\n2\nWEAK billing shipping", description: "Case-insensitive dedup drops the near-duplicate; both small classes flagged weak." },
         { input: "5\n2\na\tone\nb\ttwo\na\tthree\nb\tfour\nc\tfive", expected_output: "5 0\n3\nWEAK c", description: "No duplicates; only the single-example class c is below the floor." },
         { input: "4\n1\nx\thello\nx\tworld\ny\tfoo\ny\tbar", expected_output: "4 0\n2\nBALANCED", description: "Both classes meet a floor of 1, so the dataset is balanced." },
-        { input: "1\n5\nspam\tbuy now", expected_output: "1 0\n1\nWEAK spam", description: "Edge: a single row cannot meet a floor of 5, so its class is weak." }
+        { input: "1\n5\nspam\tbuy now", expected_output: "1 0\n1\nWEAK spam", description: "Edge: a single row cannot meet a floor of 5, so its class is weak." },
+        { input: "5\n3\na\tone\nb\ttwo\na\tthree\nb\tfour\nc\tfive", expected_output: "5 0\n3\nWEAK a b c" }
       ]
     },
     {
@@ -2332,7 +2341,8 @@ main()
         { input: "3\n10\n98 80\n85 83\n99 70", expected_output: "2\n2 83", description: "Two runs exceed the gap threshold; run 2 generalizes best." },
         { input: "2\n5\n90 90\n80 70", expected_output: "1\n1 90", description: "A gap exactly above the threshold counts; run 1 has the best test score." },
         { input: "3\n10\n70 70\n60 60\n70 70", expected_output: "0\n1 70", description: "Edge: tie on top test accuracy resolves to the lowest run number; none overfit." },
-        { input: "1\n0\n50 50", expected_output: "0\n1 50", description: "Edge: zero gap with a zero threshold is not overfitting (strict greater-than)." }
+        { input: "1\n0\n50 50", expected_output: "0\n1 50", description: "Edge: zero gap with a zero threshold is not overfitting (strict greater-than)." },
+        { input: "3\n5\n80 64\n76 74\n94 70", expected_output: "2\n2 74" }
       ]
     },
     {
@@ -2676,7 +2686,8 @@ main()
         { input: "4\nv1.0 70\nv1.1 75\nv1.2 72\nv1.3 80", expected_output: "v1.3 80\n1\nv1.2 -3", description: "One regression; v1.3 holds the best score." },
         { input: "5\nv1 60\nv2 50\nv3 55\nv4 40\nv5 90", expected_output: "v5 90\n2\nv4 -15", description: "Two regressions; the 15-point fall at v4 is the worst drop." },
         { input: "1\nv1 50", expected_output: "v1 50\n0\nNONE", description: "Edge: a single run has no previous score, so no regressions." },
-        { input: "3\nv1 80\nv2 80\nv3 80", expected_output: "v1 80\n0\nNONE", description: "Edge: equal scores are not regressions; ties on best resolve to the earliest version." }
+        { input: "3\nv1 80\nv2 80\nv3 80", expected_output: "v1 80\n0\nNONE", description: "Edge: equal scores are not regressions; ties on best resolve to the earliest version." },
+        { input: "4\nv1.0 64\nv1.1 71\nv1.2 56\nv1.3 66", expected_output: "v1.1 71\n1\nv1.2 -15" }
       ]
     }
   ]

@@ -286,6 +286,14 @@ print(f"response {res}")
           input: "2\nSEND a\nSEND b",
           expected_output: "request 2\nresponse 0",
           description: "Edge case: all outbound, zero responses."
+        },
+        {
+          input: "5\nRECV answer\nSEND messages\nRECV content\nSEND max_tokens\nRECV usage",
+          expected_output: "request 2\nresponse 3"
+        },
+        {
+          input: "2\nRECV a\nSEND b",
+          expected_output: "request 1\nresponse 1"
         }
       ]
     },
@@ -592,6 +600,10 @@ print(json.dumps(out, separators=(",", ":"), sort_keys=True))
           input: "{\"messages\":[]}",
           expected_output: "{\"tokens\":0,\"user_turns\":0}",
           description: "Edge case: an empty conversation costs nothing."
+        },
+        {
+          input: "{\"messages\":[{\"role\":\"user\",\"content\":\"What is 3 + 2?\"},{\"role\":\"assistant\",\"content\":\"4\"}]}",
+          expected_output: "{\"tokens\":4,\"user_turns\":1}"
         }
       ]
     },
@@ -897,6 +909,14 @@ print(f"429 {limited}")
           input: "5\n0\n",
           expected_output: "200 0\n429 0",
           description: "Edge case: no requests at all."
+        },
+        {
+          input: "2\n4\n0 6 6 41",
+          expected_output: "200 2\n429 2"
+        },
+        {
+          input: "2\n4\n0 7 61 62",
+          expected_output: "200 3\n429 1"
         }
       ]
     },
@@ -1212,6 +1232,10 @@ print("valid" if valid else "invalid")
           input: "0",
           expected_output: "invalid",
           description: "Edge case: an empty messages list has nothing to send."
+        },
+        {
+          input: "3\nuser\nuser\nuser",
+          expected_output: "invalid"
         }
       ]
     },
@@ -1544,6 +1568,10 @@ else:
           input: "POST /v1/messages\n2\nx-api-key sk-ant-xyz\ncontent-type application/json\n1\nmodel",
           expected_output: "400",
           description: "Body is missing the required messages field."
+        },
+        {
+          input: "POST /v1/messages\n2\nx-api-key sk-ant-xyz\ncontent-type application/json\n2\nmessages\nmessages",
+          expected_output: "400"
         }
       ]
     },
@@ -2181,6 +2209,10 @@ print(f"waited {total_wait}")
           input: "2\n3\n500 503 500",
           expected_output: "FAIL\nwaited 3",
           description: "Retries exhausted after waits of 1 and 2; the call never succeeds."
+        },
+        {
+          input: "5\n3\n461 408 277",
+          expected_output: "FAIL\nwaited 7"
         }
       ]
     },
@@ -2479,6 +2511,10 @@ print("BLOCKED" if any_leak else "CLEAN")
           input: "2\nKEY = 'sk-ant-live-9999'\nOTHER = 'sk-ant-test-1'",
           expected_output: "1 LEAK\n2 LEAK\nBLOCKED",
           description: "Multiple embedded keys all flagged; commit blocked."
+        },
+        {
+          input: "2\nKEY = 'sk-ant-live-9999'\nname = 'sk-ant-test-1'",
+          expected_output: "1 LEAK\n2 LEAK\nBLOCKED"
         }
       ]
     }

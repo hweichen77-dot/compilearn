@@ -335,7 +335,9 @@ main()
       challenge_test_cases: [
         { input: "3\n2 tone formal language en\n1 tone casual\n2 format json language fr\n3\ntone\nformat\nverbosity", expected_output: "casual\njson\nUNSET\n2", description: "Two overrides (tone, language); format set once; verbosity unset." },
         { input: "1\n1 role assistant\n1\nrole", expected_output: "assistant\n0", description: "Single directive, no overrides." },
-        { input: "2\n0\n2 tone calm tone calm\n1\ntone", expected_output: "calm\n0", description: "Empty layer, then re-setting a key to the same value is not an override." }
+        { input: "2\n0\n2 tone calm tone calm\n1\ntone", expected_output: "calm\n0", description: "Empty layer, then re-setting a key to the same value is not an override." },
+        { input: "3\n1 role assistant language en\n1 tone calm\n2 format json language fr\n3\ntone\nformat\nverbosity", expected_output: "calm\njson\nUNSET\n0" },
+        { input: "1\n1 role formal\n1\nrole", expected_output: "formal\n0" }
       ]
     },
 
@@ -643,7 +645,9 @@ main()
       challenge_test_cases: [
         { input: "1000 200 4 300 300 300 300 15000", expected_output: "2\n2\n0.012000", description: "Two newest turns fit; third dropped." },
         { input: "5000 100 3 50 60 70 3000", expected_output: "3\n0\n0.000840", description: "Whole short history fits." },
-        { input: "200 200 2 50 50 3000", expected_output: "0\n2\n0.000600", description: "System prompt fills the window; every turn is dropped but the system prompt is still billed." }
+        { input: "200 200 2 50 50 3000", expected_output: "0\n2\n0.000600", description: "System prompt fills the window; every turn is dropped but the system prompt is still billed." },
+        { input: "2367 171 3 112 285 1093 300 15000", expected_output: "3\n0\n0.000498" },
+        { input: "1896 152 2 173 237 350 2883", expected_output: "2\n0\n0.000196" }
       ]
     },
 
@@ -939,7 +943,9 @@ main()
       challenge_test_cases: [
         { input: "5\n10 30 25 30 5\n10", expected_output: "1\n3\n1 2 3", description: "Tie for max resolves to lowest index; margin widens the pool." },
         { input: "3\n7 7 7\n0", expected_output: "0\n3\n0 1 2", description: "All tied; pool is everything even at margin 0." },
-        { input: "1\n-5\n100", expected_output: "0\n1\n0", description: "Single token: it is both the greedy pick and the whole pool." }
+        { input: "1\n-5\n100", expected_output: "0\n1\n0", description: "Single token: it is both the greedy pick and the whole pool." },
+        { input: "5\n2 26 10 30 4\n9", expected_output: "3\n2\n1 3" },
+        { input: "3\n1 29 23\n0", expected_output: "1\n1\n1" }
       ]
     },
 
@@ -1253,7 +1259,9 @@ main()
       challenge_test_cases: [
         { input: "3\napple fruit\navocado fruit\ncarrot veg\nant", expected_output: "fruit", description: "Matching examples all agree on 'fruit', so the query copies it." },
         { input: "2\napple fruit\nant bug\nax", expected_output: "AMBIGUOUS", description: "Two matching examples carry different labels." },
-        { input: "2\napple fruit\nbanana fruit\nzebra", expected_output: "UNKNOWN", description: "No example starts with 'z', so nothing matches." }
+        { input: "2\napple fruit\nbanana fruit\nzebra", expected_output: "UNKNOWN", description: "No example starts with 'z', so nothing matches." },
+        { input: "2\napple fruit\navocado fruit\nax", expected_output: "fruit" },
+        { input: "2\napple fruit\nant bug\nzebra", expected_output: "UNKNOWN" }
       ]
     },
 
@@ -1877,7 +1885,9 @@ main()
       challenge_test_cases: [
         { input: "2\nsecurity injection auth password\nbilling refund invoice charge\n3\nmy password leaked and auth is broken\ni want a refund on my invoice\nhello there how are you", expected_output: "security\nbilling\ngeneric\n1", description: "Highest keyword overlap wins; one request falls back to generic." },
         { input: "2\nalpha cat dog\nbeta cat fish\n1\ni love my cat", expected_output: "alpha\n0", description: "Tie on 'cat' resolves to the earliest-defined persona; no generic fallback." },
-        { input: "1\nsec auth\n2\nplease reset my authentication token\nthe auth flow is down", expected_output: "generic\nsec\n1", description: "Whole-word matching: 'authentication' does not match keyword 'auth', so the first request is generic." }
+        { input: "1\nsec auth\n2\nplease reset my authentication token\nthe auth flow is down", expected_output: "generic\nsec\n1", description: "Whole-word matching: 'authentication' does not match keyword 'auth', so the first request is generic." },
+        { input: "2\nalpha injection auth password\nbilling cat invoice charge\n3\nthe auth my is down is broken\ni want a refund on my invoice\nhello there how are you", expected_output: "alpha\nbilling\ngeneric\n1" },
+        { input: "2\nsecurity cat dog\nbeta cat invoice\n1\nthe love leaked cat", expected_output: "security\n0" }
       ]
     },
 
@@ -2492,7 +2502,9 @@ main()
       challenge_test_cases: [
         { input: "3\nNEG POS NEU\n3\n0\nNEG POS POS\n1\nNEG POS NEU\n3\nPOS POS NEU\n", expected_output: "2\n3\n1", description: "V2 is best at 3/3; V3 changed 3 variables, one violation." },
         { input: "2\nA B\n2\n0\nA B\n2\nA A\n", expected_output: "1\n2\n1", description: "V1 wins; V2 changed two variables, one violation." },
-        { input: "2\nX Y\n3\n0\nX Y\n1\nX Y\n1\nY X\n", expected_output: "1\n2\n0", description: "V1 and V2 tie at 2/2; earliest wins. No version changed more than one variable, zero violations." }
+        { input: "2\nX Y\n3\n0\nX Y\n1\nX Y\n1\nY X\n", expected_output: "1\n2\n0", description: "V1 and V2 tie at 2/2; earliest wins. No version changed more than one variable, zero violations." },
+        { input: "3\nA POS NEU\n3\n0\nX Y POS\n2\nA A NEU\n3\nY X NEU\n", expected_output: "2\n2\n2" },
+        { input: "2\nNEG Y\n3\n0\nA Y\n2\nX Y\n1\nY POS\n", expected_output: "1\n1\n1" }
       ]
     },
 
@@ -2783,7 +2795,9 @@ main()
       challenge_test_cases: [
         { input: "3\n2 + 3 5\n5 * 4 20\n20 - 7 13", expected_output: "VALID\n13", description: "All three steps check out; final answer is the last step's result." },
         { input: "2\n10 - 4 6\n6 * 2 11", expected_output: "INVALID\n2", description: "Second step 6*2=11 is wrong (should be 12); first bad step is index 2." },
-        { input: "1\n7 + 8 15", expected_output: "VALID\n15", description: "A single correct step; its result is the final answer." }
+        { input: "1\n7 + 8 15", expected_output: "VALID\n15", description: "A single correct step; its result is the final answer." },
+        { input: "3\n2 + 5 8\n5 * 4 16\n19 - 6 13", expected_output: "INVALID\n1" },
+        { input: "1\n3 + 4 7", expected_output: "VALID\n7" }
       ]
     }
   ]

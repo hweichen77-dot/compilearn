@@ -131,6 +131,14 @@ export default {
         {
           "input": "2\nbeneficial harmful",
           "expected_output": "balanced"
+        },
+        {
+          "input": "2\nharmful harmful",
+          "expected_output": "net harmful"
+        },
+        {
+          "input": "3\nbeneficial harmful beneficial",
+          "expected_output": "net beneficial"
         }
       ]
     },
@@ -250,6 +258,14 @@ export default {
         {
           "input": "40 75",
           "expected_output": "35"
+        },
+        {
+          "input": "70 64",
+          "expected_output": "6"
+        },
+        {
+          "input": "56 71",
+          "expected_output": "15"
         }
       ]
     },
@@ -369,6 +385,14 @@ export default {
         {
           "input": "40 100 70 100",
           "expected_output": "biased"
+        },
+        {
+          "input": "27 83 64 93",
+          "expected_output": "biased"
+        },
+        {
+          "input": "27 88 18 76",
+          "expected_output": "fair"
         }
       ]
     },
@@ -488,6 +512,14 @@ export default {
         {
           "input": "4\n5 5 5 5",
           "expected_output": "5.0"
+        },
+        {
+          "input": "6\n3 4 5 5 5 5",
+          "expected_output": "4.5"
+        },
+        {
+          "input": "3\n3 2 4",
+          "expected_output": "3.0"
         }
       ]
     },
@@ -617,6 +649,14 @@ export default {
         },
         {
           "input": "1 unauthorized",
+          "expected_output": "violation"
+        },
+        {
+          "input": "1 authorized",
+          "expected_output": "compliant"
+        },
+        {
+          "input": "4 authorized unauthorized authorized",
           "expected_output": "violation"
         }
       ]
@@ -856,6 +896,14 @@ export default {
         {
           "input": "5\nphone address name email ssn",
           "expected_output": "5"
+        },
+        {
+          "input": "4\nweather favorite_color ssn email",
+          "expected_output": "2"
+        },
+        {
+          "input": "5\nphone score name email ssn",
+          "expected_output": "4"
         }
       ]
     },

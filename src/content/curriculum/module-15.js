@@ -302,7 +302,8 @@ main()
         { input: "3 7\n* 6 = 42\n- 2 = 40\n+ 8 = 48", expected_output: "VALID 48", description: "Every step checks out; prints the final accumulator." },
         { input: "2 100\n/ 4 = 25\n+ 5 = 31", expected_output: "WRONG 2", description: "Step 2 claims 31 but 25+5=30." },
         { input: "1 5\n+ 0 = 5", expected_output: "VALID 5", description: "Single-step chain that holds." },
-        { input: "4 0\n+ 10 = 10\n* 3 = 30\n- 30 = 0\n+ 7 = 8", expected_output: "WRONG 4", description: "First three steps hold; step 4 claims 8 but 0+7=7." }
+        { input: "4 0\n+ 10 = 10\n* 3 = 30\n- 30 = 0\n+ 7 = 8", expected_output: "WRONG 4", description: "First three steps hold; step 4 claims 8 but 0+7=7." },
+        { input: "3 7\n* 4 = 38\n- 5 = 33\n+ 14 = 41", expected_output: "WRONG 1" }
       ]
     },
     {
@@ -616,7 +617,9 @@ main()
       challenge_test_cases: [
         { input: "3\n10 positive\n50 neutral\n90 negative\n3\n12\n55\n70", expected_output: "positive\nneutral\nneutral", description: "Nearest-example labeling with a tie resolved toward the smaller feature." },
         { input: "2\n0 cold\n100 hot\n1\n50", expected_output: "cold", description: "Exact midpoint tie breaks toward the smaller feature." },
-        { input: "1\n5 only\n2\n-100\n9999", expected_output: "only\nonly", description: "A single example means every query gets that one label." }
+        { input: "1\n5 only\n2\n-100\n9999", expected_output: "only\nonly", description: "A single example means every query gets that one label." },
+        { input: "3\n4 only\n58 neutral\n79 negative\n3\n11\n55\n71", expected_output: "only\nneutral\nnegative" },
+        { input: "2\n9 only\n44 hot\n1\n6793", expected_output: "hot" }
       ]
     },
     {
@@ -903,7 +906,9 @@ main()
       challenge_test_cases: [
         { input: "5\n42 3\n42 1\n7 5\n7 4\n42 2", expected_output: "7 9", description: "7's weight (9) beats 42's weight (6)." },
         { input: "3\n1 10\n2 10\n3 5", expected_output: "1 10", description: "Tie on total confidence resolves to the smaller answer." },
-        { input: "1\n99 1", expected_output: "99 1", description: "A single run is its own winner." }
+        { input: "1\n99 1", expected_output: "99 1", description: "A single run is its own winner." },
+        { input: "5\n45 3\n4 1\n4 4\n6 3\n43 3", expected_output: "4 5" },
+        { input: "3\n1 4\n2 8\n7 5", expected_output: "2 8" }
       ]
     },
     {
@@ -1492,7 +1497,9 @@ main()
       challenge_test_cases: [
         { input: "5 50 2\n1 80\n2 30\n3 90\n4 50\n5 90", expected_output: "4\n3 5\n180", description: "Full extract-rank-summarize chain with a score tie broken by id." },
         { input: "3 100 5\n1 10\n2 20\n3 30", expected_output: "0\n-\n0", description: "Empty extraction propagates through the chain to `-` and 0." },
-        { input: "4 0 2\n7 5\n3 5\n9 1\n1 5", expected_output: "4\n1 3\n10", description: "All survive; equal scores rank by smaller id, so 1 and 3 lead." }
+        { input: "4 0 2\n7 5\n3 5\n9 1\n1 5", expected_output: "4\n1 3\n10", description: "All survive; equal scores rank by smaller id, so 1 and 3 lead." },
+        { input: "5 50 2\n4 24\n2 21\n6 85\n4 31\n4 89", expected_output: "2\n4 6\n174" },
+        { input: "4 0 2\n6 5\n2 5\n6 1\n4 5", expected_output: "4\n2 4\n10" }
       ]
     },
     {
@@ -1778,7 +1785,8 @@ main()
         { input: "4 2\n1 3\n2 7\n3 1\n4 5", expected_output: "2 4\n12", description: "Keep the top 2 of four branches by score; prune the rest." },
         { input: "3 2\n10 9\n20 9\n30 4", expected_output: "10 20\n18", description: "A score tie is resolved toward the smaller ids, both kept over the lower-scoring branch." },
         { input: "1 3\n5 8", expected_output: "5\n8", description: "Beam wider than the candidate set keeps the only branch." },
-        { input: "5 3\n1 5\n2 5\n3 5\n4 2\n5 2", expected_output: "1 2 3\n15", description: "Three branches tie at the top score; the smallest ids survive the prune." }
+        { input: "5 3\n1 5\n2 5\n3 5\n4 2\n5 2", expected_output: "1 2 3\n15", description: "Three branches tie at the top score; the smallest ids survive the prune." },
+        { input: "3 2\n6 7\n13 5\n15 4", expected_output: "6 13\n12" }
       ]
     },
     {
@@ -2064,7 +2072,8 @@ main()
         { input: "3\n2\nbad ugh\nthe bad cat ugh sat happily", expected_output: "3\nthe cat sat", description: "Strip two banned words, then trim one from the end to meet the length cap." },
         { input: "5\n0\n\nhello there friend", expected_output: "0\nhello there friend", description: "Clean draft within the length limit needs no fixes." },
         { input: "4\n1\nx\nx x x", expected_output: "3\n-", description: "Every word is banned, so all three are stripped and the answer is empty." },
-        { input: "2\n0\n\na b c d e", expected_output: "3\na b", description: "No banned words; trim three words from the end to reach length 2." }
+        { input: "2\n0\n\na b c d e", expected_output: "3\na b", description: "No banned words; trim three words from the end to reach length 2." },
+        { input: "3\n2\nbad ugh\nhello b x ugh sat happily", expected_output: "3\nhello b x" }
       ]
     },
     {
@@ -2355,7 +2364,9 @@ main()
       challenge_test_cases: [
         { input: "3 3\npA 20 5 5 5\npB 10 9 9 1\npC 15 6 6 7", expected_output: "pB 19", description: "Tie on total resolved by the shorter prompt length." },
         { input: "2 1\nzeta 10 8\nalpha 10 8", expected_output: "alpha 8", description: "Tie on total and length resolved by lexicographic id." },
-        { input: "3 2\npX 30 5 5\npY 12 4 6\npZ 50 1 1", expected_output: "pY 10", description: "pX and pY tie at 10; pY is shorter, so it wins over the higher-length pX." }
+        { input: "3 2\npX 30 5 5\npY 12 4 6\npZ 50 1 1", expected_output: "pY 10", description: "pX and pY tie at 10; pY is shorter, so it wins over the higher-length pX." },
+        { input: "3 3\nzeta 21 5 5 5\npY 11 9 6 1\npZ 24 6 1 7", expected_output: "pY 16" },
+        { input: "2 1\nzeta 21 7\npB 12 5", expected_output: "zeta 7" }
       ]
     }
   ]

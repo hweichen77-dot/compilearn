@@ -211,6 +211,14 @@ main()
           expected_output: "REPLY NEEDED: When?\nFYI: See you.",
           description: "Short question still counts; the sign-off does not.",
         },
+        {
+          input: "2\nWhen?\nThanks you.",
+          expected_output: "REPLY NEEDED: When?\nFYI: Thanks you."
+        },
+        {
+          input: "3\nAre we on for lunch?\nSee so much\nCan you send the file?",
+          expected_output: "REPLY NEEDED: Are we on for lunch?\nFYI: See so much\nREPLY NEEDED: Can you send the file?"
+        }
       ],
     },
 
@@ -412,6 +420,14 @@ main()
           expected_output: "Happy to help.",
           description: "Preamble plus a blank line both get cleaned away.",
         },
+        {
+          input: "Here works for me!",
+          expected_output: "Here works for me!"
+        },
+        {
+          input: "Here you for me!",
+          expected_output: "Here you for me!"
+        }
       ],
     },
 
@@ -638,6 +654,14 @@ main()
           expected_output: "greetings=2\nexclaims=1\navgwords=2",
           description: "Both open with a greeting; only the second has an exclamation.",
         },
+        {
+          input: "3\nHey! there you then\nThanks so much\nSure, I'll be there.",
+          expected_output: "greetings=1\nexclaims=1\navgwords=4"
+        },
+        {
+          input: "2\nHi see\nHello!",
+          expected_output: "greetings=2\nexclaims=1\navgwords=2"
+        }
       ],
     },
 
@@ -1084,6 +1108,14 @@ main()
           expected_output: "0\nOne two",
           description: "Exact tie on length keeps the earliest draft.",
         },
+        {
+          input: "6\n3\nYes.\nSure, four great, I'll be there!\nAbsolutely that works perfectly for me!",
+          expected_output: "1\nSure, four great, I'll be there!"
+        },
+        {
+          input: "3\n2\nHi two friend\nHey",
+          expected_output: "0\nHi two friend"
+        }
       ],
     },
 
@@ -1537,6 +1569,14 @@ main()
           expected_output: "0 0\n0",
           description: "Edge: no examples means nothing kept and zero tokens used.",
         },
+        {
+          input: "15 5\n3\n6 6 6",
+          expected_output: "2 1\n12"
+        },
+        {
+          input: "100 2\n4\n6 5 8 6",
+          expected_output: "2 2\n14"
+        }
       ],
     },
 

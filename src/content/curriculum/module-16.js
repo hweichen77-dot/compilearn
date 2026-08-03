@@ -336,7 +336,9 @@ main()
       challenge_test_cases: [
         { input: "5\n1 12 5000\n0 8 5000\n1 0 5000\n1 20 45000\n1 5 30000", expected_output: "accepted 2\nrejected 3\nmissing_key 1\nempty_prompt 1\ntimeout_too_long 1", description: "Mixed batch: one of each rejection reason plus two accepts; 30000 ms is allowed." },
         { input: "3\n1 10 1000\n1 7 25000\n1 3 30000", expected_output: "accepted 3\nrejected 0\nmissing_key 0\nempty_prompt 0\ntimeout_too_long 0", description: "All valid; the 30000 ms boundary passes." },
-        { input: "1\n0 0 99999", expected_output: "accepted 0\nrejected 1\nmissing_key 1\nempty_prompt 0\ntimeout_too_long 0", description: "Edge case: missing key AND empty prompt AND long timeout, but priority order counts it only as missing_key." }
+        { input: "1\n0 0 99999", expected_output: "accepted 0\nrejected 1\nmissing_key 1\nempty_prompt 0\ntimeout_too_long 0", description: "Edge case: missing key AND empty prompt AND long timeout, but priority order counts it only as missing_key." },
+        { input: "5\n0 12 57574\n0 8 16844\n1 0 12335\n1 21 45001\n2 4 29999", expected_output: "accepted 1\nrejected 4\nmissing_key 2\nempty_prompt 1\ntimeout_too_long 1" },
+        { input: "3\n1 8 95165\n1 8 6239\n1 3 12315", expected_output: "accepted 2\nrejected 1\nmissing_key 0\nempty_prompt 0\ntimeout_too_long 1" }
       ]
     },
     {
@@ -670,7 +672,9 @@ main()
       challenge_test_cases: [
         { input: "4\n100 50 0\n300 80 1\n200 60 0\n400 70 0", expected_output: "requests 4\navg_latency_ms 250.0\np95_latency_ms 400\ntotal_tokens 260\nerror_rate_pct 25.0", description: "Four traces: avg 250.0, p95 lands on 400, 25% error rate." },
         { input: "5\n120 30 0\n90 40 0\n300 20 1\n150 35 0\n80 25 0", expected_output: "requests 5\navg_latency_ms 148.0\np95_latency_ms 300\ntotal_tokens 150\nerror_rate_pct 20.0", description: "The single 300 ms outlier is the p95 even though the average is only 148.0." },
-        { input: "1\n250 100 1", expected_output: "requests 1\navg_latency_ms 250.0\np95_latency_ms 250\ntotal_tokens 100\nerror_rate_pct 100.0", description: "Edge case: a single error trace gives a 100.0% error rate." }
+        { input: "1\n250 100 1", expected_output: "requests 1\navg_latency_ms 250.0\np95_latency_ms 250\ntotal_tokens 100\nerror_rate_pct 100.0", description: "Edge case: a single error trace gives a 100.0% error rate." },
+        { input: "4\n168 35 0\n173 64 1\n234 49 0\n322 48 0", expected_output: "requests 4\navg_latency_ms 224.2\np95_latency_ms 322\ntotal_tokens 196\nerror_rate_pct 25.0" },
+        { input: "5\n213 92 0\n228 77 1\n253 39 1\n356 56 0\n80 24 0", expected_output: "requests 5\navg_latency_ms 226.0\np95_latency_ms 356\ntotal_tokens 288\nerror_rate_pct 40.0" }
       ]
     },
     {
@@ -982,7 +986,9 @@ main()
       challenge_test_cases: [
         { input: "4 75\nparis|||The capital is Paris.\n4|||2 plus 2 equals 4\nyes|||Absolutely, yes!\nblue|||The sky is gray today", expected_output: "passed 3/4\npass_rate 75.0\nPASS", description: "Case-insensitive match lets 'paris' pass against 'Paris'; 3/4 meets the threshold." },
         { input: "5 80\njson|||valid json output\nok|||status ok\nrefund|||processing your refund now\nyes|||no\ndone|||all done here", expected_output: "passed 4/5\npass_rate 80.0\nPASS", description: "Pass rate exactly equals the threshold and still passes (inclusive)." },
-        { input: "1 100\nhello|||say HELLO world", expected_output: "passed 1/1\npass_rate 100.0\nPASS", description: "Single case, uppercase HELLO matches lowercase expected at a 100 threshold." }
+        { input: "1 100\nhello|||say HELLO world", expected_output: "passed 1/1\npass_rate 100.0\nPASS", description: "Single case, uppercase HELLO matches lowercase expected at a 100 threshold." },
+        { input: "4 75\nparis|||The json is Paris.\n4|||2 ok 2 equals 3\nyes|||Absolutely, yes!\nblue|||The sky is gray today", expected_output: "passed 2/4\npass_rate 50.0\nFAIL" },
+        { input: "5 80\njson|||valid capital is\nok|||status plus\nrefund|||processing your refund now\nyes|||no\ndone|||all done here", expected_output: "passed 2/5\npass_rate 40.0\nFAIL" }
       ]
     },
     {
@@ -1295,7 +1301,9 @@ main()
       challenge_test_cases: [
         { input: "4 50000 3000 15000\n1000 500\n2000 1000\n500 200\n100 800", expected_output: "served 4\nrejected 0\nspent $0.048300\nremaining $0.001700", description: "Every request fits under the cap; spend lands just below budget." },
         { input: "4 40000 3000 15000\n1000 500\n5000 2000\n200 100\n1000 1000", expected_output: "served 3\nrejected 1\nspent $0.030600\nremaining $0.009400", description: "The expensive request 2 is throttled, but cheaper later requests still serve." },
-        { input: "1 100 3000 15000\n1000 1000", expected_output: "served 0\nrejected 1\nspent $0.000000\nremaining $0.000100", description: "Edge case: a single request that exceeds the tiny budget is rejected and nothing is spent." }
+        { input: "1 100 3000 15000\n1000 1000", expected_output: "served 0\nrejected 1\nspent $0.000000\nremaining $0.000100", description: "Edge case: a single request that exceeds the tiny budget is rejected and nothing is spent." },
+        { input: "4 50000 3000 15000\n999 627\n3877 1471\n482 184\n628 904", expected_output: "served 2\nrejected 2\nspent $0.046098\nremaining $0.003902" },
+        { input: "4 40000 3000 15000\n999 934\n4372 1602\n383 181\n394 892", expected_output: "served 3\nrejected 1\nspent $0.035433\nremaining $0.004567" }
       ]
     },
     {
@@ -1598,7 +1606,9 @@ main()
       challenge_test_cases: [
         { input: "3 3\n2\n0\n1", expected_output: "succeeded 2\nfell_back 1\ntotal_attempts 6", description: "A success on attempt 2, a never-succeed fallback (3 attempts), and a first-try success." },
         { input: "1 2\n5", expected_output: "succeeded 0\nfell_back 1\ntotal_attempts 2", description: "Edge case: succeed_on beyond max_attempts exhausts retries and falls back." },
-        { input: "4 2\n1\n2\n3\n0", expected_output: "succeeded 2\nfell_back 2\ntotal_attempts 7", description: "Edge case: succeed_on of 3 and 0 both exceed the 2-attempt budget and fall back (1+2+2+2 = 7 attempts)." }
+        { input: "4 2\n1\n2\n3\n0", expected_output: "succeeded 2\nfell_back 2\ntotal_attempts 7", description: "Edge case: succeed_on of 3 and 0 both exceed the 2-attempt budget and fall back (1+2+2+2 = 7 attempts)." },
+        { input: "3 3\n2\n0\n2", expected_output: "succeeded 2\nfell_back 1\ntotal_attempts 7" },
+        { input: "1 2\n2", expected_output: "succeeded 1\nfell_back 0\ntotal_attempts 2" }
       ]
     },
     {
@@ -1919,7 +1929,9 @@ main()
       challenge_test_cases: [
         { input: "3\ngpt-4o-2024-08-06 You are a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 You are a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 You are a support agent. Answer in two sentences.", expected_output: "NEW 928cbea1\nDUP 928cbea1\nNEW e5a72c01\ndistinct 2 duplicates 1", description: "An identical redeploy is flagged DUP; a one-word edit produces a NEW fingerprint." },
         { input: "4\nsmall-v1 Summarize the text.\nbig-v2 Summarize the text.\nsmall-v1 Summarize the text.\nsmall-v1 Translate to French.", expected_output: "NEW a14cef42\nNEW d7541545\nDUP a14cef42\nNEW 44e0bcec\ndistinct 3 duplicates 1", description: "Same template but a different model hashes differently; only the exact (model, template) repeat is a DUP." },
-        { input: "5\nm1 Be brief.\nm1 Be brief.\nm1 Be brief.\nm2 Be brief.\nm1 Be concise.", expected_output: "NEW 36303ce0\nDUP 36303ce0\nDUP 36303ce0\nNEW 4c87eaca\nNEW af7a43e8\ndistinct 3 duplicates 2", description: "Edge case: one fingerprint redeployed twice gives two duplicates; a model swap and a template edit are each new." }
+        { input: "5\nm1 Be brief.\nm1 Be brief.\nm1 Be brief.\nm2 Be brief.\nm1 Be concise.", expected_output: "NEW 36303ce0\nDUP 36303ce0\nDUP 36303ce0\nNEW 4c87eaca\nNEW af7a43e8\ndistinct 3 duplicates 2", description: "Edge case: one fingerprint redeployed twice gives two duplicates; a model swap and a template edit are each new." },
+        { input: "3\ngpt-4o-2024-08-06 Summarize are a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 Be the a support agent. Answer in one sentence.\ngpt-4o-2024-08-06 You are a support agent. Answer in two sentences.", expected_output: "NEW 18d8460f\nNEW fe310ef4\nNEW e5a72c01\ndistinct 3 duplicates 0" },
+        { input: "4\nsmall-v1 Summarize are text.\nbig-v2 Summarize the text.\nsmall-v1 Be the text.\nsmall-v1 Be to French.", expected_output: "NEW c8f133db\nNEW d7541545\nNEW 6ae7fd1b\nNEW 239109fb\ndistinct 4 duplicates 0" }
       ]
     },
     {
@@ -2241,7 +2253,9 @@ main()
       challenge_test_cases: [
         { input: "6 2\nA 1\nA 0\nB 1\nB 1\nA 1\nB 1", expected_output: "A 2/3 66.7\nB 3/3 100.0\nWINNER B", description: "Both arms meet the sample floor and B's higher rate clears the margin." },
         { input: "3 5\nA 1\nB 0\nA 1", expected_output: "A 2/2 100.0\nB 0/1 0.0\nINCONCLUSIVE", description: "Too few samples in each arm forces INCONCLUSIVE despite a huge raw gap." },
-        { input: "4 2\nA 1\nA 0\nB 1\nB 0", expected_output: "A 1/2 50.0\nB 1/2 50.0\nINCONCLUSIVE", description: "Equal rates: the gap is under the 1.0-point margin, so no winner is declared." }
+        { input: "4 2\nA 1\nA 0\nB 1\nB 0", expected_output: "A 1/2 50.0\nB 1/2 50.0\nINCONCLUSIVE", description: "Equal rates: the gap is under the 1.0-point margin, so no winner is declared." },
+        { input: "6 2\nA 0\nA 1\nB 1\nB 1\nA 1\nB 2", expected_output: "A 2/3 66.7\nB 2/3 66.7\nINCONCLUSIVE" },
+        { input: "3 5\nA 1\nA 0\nB 1", expected_output: "A 1/2 50.0\nB 1/1 100.0\nINCONCLUSIVE" }
       ]
     },
     {
@@ -2552,7 +2566,9 @@ main()
       challenge_test_cases: [
         { input: "5 20\n0 100\n30 100\n40 100\n5 100\n2 100", expected_output: "detected 1\ndowntime 2\nrecovered 1", description: "Incident detected at minute 1, lasts 2 minutes, then recovers." },
         { input: "3 50\n10 100\n5 100\n0 50", expected_output: "detected -1\ndowntime 0\nrecovered 0", description: "No minute crosses the threshold, so there is no incident." },
-        { input: "4 25\n1 100\n50 100\n60 100\n80 100", expected_output: "detected 1\ndowntime 3\nrecovered 0", description: "Edge case: incident detected at minute 1 and never recovers within the window." }
+        { input: "4 25\n1 100\n50 100\n60 100\n80 100", expected_output: "detected 1\ndowntime 3\nrecovered 0", description: "Edge case: incident detected at minute 1 and never recovers within the window." },
+        { input: "5 20\n5 99\n21 99\n36 92\n28 100\n1 100", expected_output: "detected 1\ndowntime 3\nrecovered 1" },
+        { input: "4 25\n1 100\n23 101\n23 78\n56 100", expected_output: "detected 2\ndowntime 2\nrecovered 0" }
       ]
     }
   ]

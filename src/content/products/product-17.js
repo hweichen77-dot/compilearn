@@ -213,6 +213,14 @@ main()
           expected_output: "Notes#1: Just one line here\nTOTAL 1",
           description: "A single note with a single paragraph is chunk #1.",
         },
+        {
+          input: "1\nRecipes\n1\nJust bread line 450F",
+          expected_output: "Recipes#1: Just bread line 450F\nTOTAL 1"
+        },
+        {
+          input: "2\nNotes\n2\nJust one line here\nAdd salt to taste\nTravel\n1\nPack light for Japan",
+          expected_output: "Notes#1: Just one line here\nNotes#2: Add salt to taste\nTravel#1: Pack light for Japan\nTOTAL 3"
+        }
       ],
     },
 
@@ -421,6 +429,14 @@ main()
           expected_output: "1 0.0000\n0 -1.0000",
           description: "Edge: a directly opposite vector scores -1.0000 and sorts last.",
         },
+        {
+          input: "1 0\n3\n1 0\n0 1\n0 2",
+          expected_output: "0 1.0000\n1 0.0000\n2 0.0000"
+        },
+        {
+          input: "1 0\n3\n1 0\n0 1\n1 2",
+          expected_output: "0 1.0000\n2 0.4472\n1 0.0000"
+        }
       ],
     },
 
@@ -647,6 +663,10 @@ main()
           expected_output: "2\nc1 1.0000\nc2 1.0000",
           description: "Edge: a tie is broken by ascending id.",
         },
+        {
+          input: "1 0\n4\nc1 2 1\nc2 1 1\nc3 1 1\nc4 -1 0\n3 0.0",
+          expected_output: "3\nc1 0.8944\nc2 0.7071\nc3 0.7071"
+        }
       ],
     },
 
@@ -835,6 +855,14 @@ main()
           expected_output: "SOURCES 1\n[1] Journal: Went for a run this morning",
           description: "A single source is still numbered [1].",
         },
+        {
+          input: "2\nRecipes|Bake for a 450F\nTravel|Pack light for Japan",
+          expected_output: "SOURCES 2\n[1] Recipes: Bake for a 450F\n[2] Travel: Pack light for Japan"
+        },
+        {
+          input: "1\nJournal|Went bread at run this morning",
+          expected_output: "SOURCES 1\n[1] Journal: Went bread at run this morning"
+        }
       ],
     },
 
@@ -1031,6 +1059,14 @@ main()
           expected_output: "NONE\nVALID",
           description: "Edge: an uncited answer prints NONE, and vacuously has no invalid citations.",
         },
+        {
+          input: "2\nThis is [1] citations [5] and 4 doesn't exist.",
+          expected_output: "1 5\nINVALID\n5"
+        },
+        {
+          input: "2\nThis has supported citations at all.",
+          expected_output: "NONE\nVALID"
+        }
       ],
     },
 
@@ -1235,6 +1271,14 @@ main()
           expected_output: "NO_MATCH",
           description: "Edge: a negative similarity score is a clear NO_MATCH.",
         },
+        {
+          input: "0.5 0.3\n3\n0.3\n0.30\n0.1",
+          expected_output: "WEAK\nWEAK\nNO_MATCH"
+        },
+        {
+          input: "0.5 0.3\n2\n0.4\n0.3",
+          expected_output: "WEAK\nWEAK"
+        }
       ],
     },
 
@@ -1441,6 +1485,14 @@ main()
           expected_output: "2\nSame text",
           description: "Edge: all three lines normalize identically, keeping only the first.",
         },
+        {
+          input: "4\nAlpha milk\nBUY MILK\nBuy   milk\nWalk the dog",
+          expected_output: "1\nAlpha milk\nBUY MILK\nWalk the dog"
+        },
+        {
+          input: "2\nSame\nBUY",
+          expected_output: "0\nSame\nBUY"
+        }
       ],
     },
 
@@ -1669,6 +1721,14 @@ main()
           expected_output: "Indexed 5 notes (0 duplicates removed)\nRetrieved 3 relevant chunks\nCitations INVALID\nSTATUS: NEEDS_REVIEW",
           description: "Edge: chunks were retrieved but citation verification failed, still NEEDS_REVIEW.",
         },
+        {
+          input: "12 3\n2 1\n0",
+          expected_output: "Indexed 12 notes (3 duplicates removed)\nRetrieved 2 relevant chunks\nCitations INVALID\nSTATUS: NEEDS_REVIEW"
+        },
+        {
+          input: "12 3\n0 1\n0",
+          expected_output: "Indexed 12 notes (3 duplicates removed)\nRetrieved 0 relevant chunks\nCitations INVALID\nSTATUS: NEEDS_REVIEW"
+        }
       ],
     },
   ],

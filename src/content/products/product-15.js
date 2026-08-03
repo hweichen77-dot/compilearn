@@ -211,6 +211,14 @@ main()
           expected_output: "1\nhello",
           description: "A window bigger than the text yields exactly one chunk.",
         },
+        {
+          input: "4 0\nhello",
+          expected_output: "2\nhell\no"
+        },
+        {
+          input: "5 2\nhello",
+          expected_output: "2\nhello\nlo"
+        }
       ],
     },
 
@@ -412,6 +420,14 @@ main()
           expected_output: "0",
           description: "A single zero vector still produces a valid, trivial ranking.",
         },
+        {
+          input: "3 2\n2 4\n1 1\n0 5",
+          expected_output: "2 0 1"
+        },
+        {
+          input: "2 3\n1 2 3\n3 2 0",
+          expected_output: "0 1"
+        }
       ],
     },
 
@@ -633,6 +649,14 @@ main()
           expected_output: "1 0\n1 1.0000\n0 0.0000",
           description: "Edge: a zero-magnitude chunk vector scores 0.0 by definition, not an error.",
         },
+        {
+          input: "2 2\n1 0\n0 0\n0 0",
+          expected_output: "0 1\n0 0.0000\n1 0.0000"
+        },
+        {
+          input: "2 3\n1 0 0\n1 0 0\n0 2 0",
+          expected_output: "0 1\n0 1.0000\n1 0.0000"
+        }
       ],
     },
 
@@ -843,6 +867,14 @@ main()
           expected_output: "1\n[1] hi",
           description: "Edge: even the first entry alone exceeds the tiny budget, but it's still included.",
         },
+        {
+          input: "50\n3\n1 hello world\n2 yo\n2 bar",
+          expected_output: "3\n[1] hello world\n\n[2] yo\n\n[2] bar"
+        },
+        {
+          input: "20\n3\n1 hi world\n2 foo\n3 bar",
+          expected_output: "1\n[1] hi world"
+        }
       ],
     },
 
@@ -1058,6 +1090,14 @@ main()
           expected_output: "1 0",
           description: "No duplicates at all; both chunks are kept in score order.",
         },
+        {
+          input: "4 2\n1 8 alpha cat sat\n1 3 alpha beta sat on the mat\n2 8 dogs bark loud\n3 6 dogs bark",
+          expected_output: "1 2"
+        },
+        {
+          input: "3 3\n0 6 foo\n1 4 bar cat\n1 4 gamma",
+          expected_output: "0 1 1"
+        }
       ],
     },
 
@@ -1271,6 +1311,10 @@ main()
           expected_output: "OK\nNONE",
           description: "A grounded answer with no citation markers is still valid, just uncited.",
         },
+        {
+          input: "0.2 0.5 3\nIt is not capital [1] and has a population of 2M [2].",
+          expected_output: "OK\n1 2"
+        }
       ],
     },
 
@@ -1484,6 +1528,14 @@ main()
           expected_output: "1 0",
           description: "Edge: an empty chunk still costs the minimum 1 token, since it's new.",
         },
+        {
+          input: "3\ntest\ndata\nhello world",
+          expected_output: "4 0"
+        },
+        {
+          input: "2\ntest\nabcdefgh",
+          expected_output: "3 0"
+        }
       ],
     },
 
@@ -1737,6 +1789,14 @@ main()
           expected_output: "ANSWER\n0 1",
           description: "Edge: fewer unique chunks exist than k asks for, so both available chunks are returned.",
         },
+        {
+          input: "5 2 4\n1 2 a cat sat\n1 3 b cat sat on the mat\n2 7 dogs bark loud\n2 0 cats meow",
+          expected_output: "ANSWER\n2 1"
+        },
+        {
+          input: "5 2 2\n0 5 alpha\n0 6 b",
+          expected_output: "ANSWER\n0 0"
+        }
       ],
     },
   ],

@@ -200,6 +200,14 @@ main()
           expected_output: "data: a b\n\ndata: \n\ndata: c\n\nTOTAL 4",
           description: "Edge: an empty delta still emits a valid 'data: ' frame with no payload.",
         },
+        {
+          input: "2\nAI\nworld",
+          expected_output: "data: AI\n\ndata: world\n\nTOTAL 7"
+        },
+        {
+          input: "1\nHello",
+          expected_output: "data: Hello\n\nTOTAL 5"
+        }
       ],
     },
     {
@@ -407,6 +415,14 @@ main()
           expected_output: "The end.!\nCHUNKS 4",
           description: "Edge: an empty chunk in the middle contributes nothing but still counts.",
         },
+        {
+          input: "3\nHi \nupon \na time",
+          expected_output: "Hi upon a time\nCHUNKS 3"
+        },
+        {
+          input: "1\nOnce",
+          expected_output: "Once\nCHUNKS 1"
+        }
       ],
     },
     {
@@ -586,6 +602,14 @@ main()
           expected_output: "a\nb\nCHUNKS 2",
           description: "Edge: a chunk size of 1 splits every character into its own piece.",
         },
+        {
+          input: "3\nAI world",
+          expected_output: "AI\nwor\nld\nCHUNKS 3"
+        },
+        {
+          input: "5\nhello",
+          expected_output: "hello\nCHUNKS 1"
+        }
       ],
     },
     {
@@ -771,6 +795,14 @@ main()
           expected_output: "\nX\nEVENTS 2",
           description: "Edge: a frame with an empty payload still counts as one event.",
         },
+        {
+          input: "data: Hello\n\ndata: skip\n\n",
+          expected_output: "Hello\nskip\nEVENTS 2"
+        },
+        {
+          input: "data: \n\ndata: world\n\n",
+          expected_output: "\nworld\nEVENTS 2"
+        }
       ],
     },
     {
@@ -978,6 +1010,14 @@ main()
           expected_output: "TURNS 3\nLAST assistant Done",
           description: "Edge: appending onto an existing two-turn history yields three turns total.",
         },
+        {
+          input: "1\nuser Write an a haiku about the sea\n3\nthere \nDone \nsoftly",
+          expected_output: "TURNS 2\nLAST assistant there Done softly"
+        },
+        {
+          input: "0\n2\nassistant \nWaves",
+          expected_output: "TURNS 1\nLAST assistant assistant Waves"
+        }
       ],
     },
     {
@@ -1153,6 +1193,14 @@ main()
           expected_output: "EVENTS 0",
           description: "Edge: an empty stream (nothing received yet) recovers zero events.",
         },
+        {
+          input: "data: A\n\ndata: partial\n\n",
+          expected_output: "A\npartial\nEVENTS 2"
+        },
+        {
+          input: "data: full\n\ndata: BC",
+          expected_output: "full\nEVENTS 1"
+        }
       ],
     },
     {
@@ -1374,6 +1422,14 @@ main()
           expected_output: "\nKEPT 0\nTOKENS 0\nTRUNCATED True",
           description: "Edge: a budget of 0 stops before even the first chunk, since any chunk costs at least 1 token.",
         },
+        {
+          input: "2\n3\nHi\nthere\nijkl",
+          expected_output: "Hithere\nKEPT 2\nTOKENS 2\nTRUNCATED True"
+        },
+        {
+          input: "100\n2\nabcd \nefgh",
+          expected_output: "abcd efgh\nKEPT 2\nTOKENS 2\nTRUNCATED False"
+        }
       ],
     },
     {
@@ -1625,6 +1681,14 @@ main()
           expected_output: "\nCHUNKS_SENT 1\nCHUNKS_KEPT 0\nTOKENS 0\nTRUNCATED True",
           description: "Edge: a budget of 0 stops before the first chunk is kept, even though one chunk was sent.",
         },
+        {
+          input: "5\n90\nhello ships",
+          expected_output: "hello ships\nCHUNKS_SENT 3\nCHUNKS_KEPT 3\nTOKENS 3\nTRUNCATED False"
+        },
+        {
+          input: "3\n0\nhello",
+          expected_output: "\nCHUNKS_SENT 2\nCHUNKS_KEPT 0\nTOKENS 0\nTRUNCATED True"
+        }
       ],
     },
   ],

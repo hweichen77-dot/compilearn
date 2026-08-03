@@ -312,7 +312,9 @@ main()
       challenge_test_cases: [
         { input: "2\nr1 2\n8 stop Use a cache layer.\n5 stop Add an index.\nr2 1\n9 length Streaming the", expected_output: "r1: [0] Use a cache layer.\nr2: NO_VALID_CHOICE\nVALID 1/2", description: "Highest-scoring stop choice wins; a length-only response yields NO_VALID_CHOICE." },
         { input: "1\nr1 3\n3 length cut off mid\n7 content_filter redacted\n2 stop Final answer here", expected_output: "r1: [2] Final answer here\nVALID 1/1", description: "Unusable finish_reasons are filtered before scoring, so the lone stop choice wins." },
-        { input: "1\nq 2\n5 stop alpha\n5 stop beta", expected_output: "q: [0] alpha\nVALID 1/1", description: "Score tie resolves to the smaller choice index." }
+        { input: "1\nq 2\n5 stop alpha\n5 stop beta", expected_output: "q: [0] alpha\nVALID 1/1", description: "Score tie resolves to the smaller choice index." },
+        { input: "2\nr1 2\n6 stop Use off mid layer.\n5 stop redacted an index.\nr2 1\n8 length Streaming the", expected_output: "r1: [0] Use off mid layer.\nr2: NO_VALID_CHOICE\nVALID 1/2" },
+        { input: "1\nr1 3\n3 stop alpha a cache\n7 content_filter redacted\n3 stop Final answer here", expected_output: "r1: [0] alpha a cache\nVALID 1/1" }
       ]
     },
     {
@@ -626,7 +628,9 @@ main()
       challenge_test_cases: [
         { input: "2 2\nA stop\nB length length stop", expected_output: "A DELIVERED 1\nB DELIVERED 3\nDELIVERED 2\nFAILED 0\nCALLS 4", description: "Clean stop vs two truncations recovered by continuations within the cap." },
         { input: "2 1\nC length length length\nD length content_filter", expected_output: "C TRUNCATED 2\nD BLOCKED 2\nDELIVERED 0\nFAILED 2\nCALLS 4", description: "Cap exhausted -> TRUNCATED; content_filter on a continuation -> BLOCKED." },
-        { input: "1 0\nE length stop", expected_output: "E TRUNCATED 1\nDELIVERED 0\nFAILED 1\nCALLS 1", description: "With zero retries, the first length truncates immediately." }
+        { input: "1 0\nE length stop", expected_output: "E TRUNCATED 1\nDELIVERED 0\nFAILED 1\nCALLS 1", description: "With zero retries, the first length truncates immediately." },
+        { input: "2 2\nC length\nD length length stop", expected_output: "C TRUNCATED 1\nD DELIVERED 3\nDELIVERED 1\nFAILED 1\nCALLS 4" },
+        { input: "2 1\nA length stop length\nB length content_filter", expected_output: "A DELIVERED 2\nB BLOCKED 2\nDELIVERED 1\nFAILED 1\nCALLS 4" }
       ]
     },
     {
@@ -931,7 +935,9 @@ main()
       challenge_test_cases: [
         { input: "2 1000000\n10\n5 20\n8 30", expected_output: "turn 1: prompt=15 completion=20 cost=$0.000345\nturn 2: prompt=43 completion=30 cost=$0.000579\nDELIVERED 2\nTOTAL $0.000924\nWITHIN_BUDGET", description: "Context grows across turns; both fit the budget." },
         { input: "3 1000\n10\n5 20\n100 200\n50 50", expected_output: "turn 1: prompt=15 completion=20 cost=$0.000345\nDELIVERED 1\nTOTAL $0.000345\nHALTED turn 2", description: "Meter halts before the turn that would exceed the budget." },
-        { input: "1 344\n10\n5 20", expected_output: "DELIVERED 0\nTOTAL $0.000000\nHALTED turn 1", description: "A budget one micro-dollar short of the first turn's cost halts immediately." }
+        { input: "1 344\n10\n5 20", expected_output: "DELIVERED 0\nTOTAL $0.000000\nHALTED turn 1", description: "A budget one micro-dollar short of the first turn's cost halts immediately." },
+        { input: "2 1000000\n9\n6 19\n31 190", expected_output: "turn 1: prompt=15 completion=19 cost=$0.000330\nturn 2: prompt=65 completion=190 cost=$0.003045\nDELIVERED 2\nTOTAL $0.003375\nWITHIN_BUDGET" },
+        { input: "3 1000\n9\n5 20\n9 90\n49 50", expected_output: "turn 1: prompt=14 completion=20 cost=$0.000342\nDELIVERED 1\nTOTAL $0.000342\nHALTED turn 2" }
       ]
     },
     {
@@ -1234,7 +1240,8 @@ main()
         { input: "2\nQ:\nEND\nParis. Q: next question", expected_output: "Paris. \nFINISH stop_sequence\nKEPT 7", description: "Earliest marker wins; text before it is kept." },
         { input: "1\n###\nplain text no marker", expected_output: "plain text no marker\nFINISH length\nKEPT 20", description: "No marker appears, so the finish reason is length and nothing is cut." },
         { input: "1\nX\nXhello", expected_output: "\nFINISH stop_sequence\nKEPT 0", description: "A marker at index 0 keeps an empty string." },
-        { input: "2\nABC\nAB\nzzAByABC", expected_output: "zz\nFINISH stop_sequence\nKEPT 2", description: "Both markers first appear at index 2; the shorter AB wins the tie." }
+        { input: "2\nABC\nAB\nzzAByABC", expected_output: "zz\nFINISH stop_sequence\nKEPT 2", description: "Both markers first appear at index 2; the shorter AB wins the tie." },
+        { input: "1\n###\nAB text no marker", expected_output: "AB text no marker\nFINISH length\nKEPT 17" }
       ]
     },
     {
@@ -1517,7 +1524,9 @@ main()
       challenge_test_cases: [
         { input: "4\nHel\nlo!\n there\n<END>", expected_output: "Hello! there\nCHUNKS 3", description: "Three fragments concatenate; the end marker stops and isn't counted." },
         { input: "4\nA\n<END>\nB\nC", expected_output: "A\nCHUNKS 1", description: "Deltas after the first <END> are ignored." },
-        { input: "3\nonly\n one\n piece", expected_output: "only one piece\nCHUNKS 3", description: "No end marker present: all n fragments are appended." }
+        { input: "3\nonly\n one\n piece", expected_output: "only one piece\nCHUNKS 3", description: "No end marker present: all n fragments are appended." },
+        { input: "4\nA\nlo!\n piece\n<END>", expected_output: "Alo! piece\nCHUNKS 3" },
+        { input: "4\nonly\n<END>\nB\nC", expected_output: "only\nCHUNKS 1" }
       ]
     },
     {
@@ -1810,7 +1819,9 @@ main()
       challenge_test_cases: [
         { input: "3\na ok Here is the answer.\nb refusal I cannot help with that.\nc ok Sure thing.", expected_output: "a: Here is the answer.\nb: REFUSED\nc: Sure thing.\nDELIVERED 2 REFUSED 1", description: "Answers delivered, refusal held back, split tallied." },
         { input: "2\nx refusal nope\ny refusal also nope", expected_output: "x: REFUSED\ny: REFUSED\nDELIVERED 0 REFUSED 2", description: "All refusals: nothing delivered." },
-        { input: "1\nz ok Final multi word answer here", expected_output: "z: Final multi word answer here\nDELIVERED 1 REFUSED 0", description: "Multi-word answer text is preserved intact." }
+        { input: "1\nz ok Final multi word answer here", expected_output: "z: Final multi word answer here\nDELIVERED 1 REFUSED 0", description: "Multi-word answer text is preserved intact." },
+        { input: "3\nx ok nope is word answer.\ny refusal also nope help with that.\nc ok Sure thing.", expected_output: "x: nope is word answer.\ny: REFUSED\nc: Sure thing.\nDELIVERED 2 REFUSED 1" },
+        { input: "2\nz refusal nope\ny refusal also cannot", expected_output: "z: REFUSED\ny: REFUSED\nDELIVERED 0 REFUSED 2" }
       ]
     },
     {
@@ -2109,7 +2120,9 @@ main()
       challenge_test_cases: [
         { input: "3\nr1 text The weather is nice.\nr2 tool get_weather city=Paris\nr3 tool send_email to=bob", expected_output: "r1: TEXT The weather is nice.\nr2: CALL get_weather city=Paris\nr3: CALL send_email to=bob\nTEXT 1 TOOL 2", description: "Text shown, tool calls dispatched, split tallied." },
         { input: "1\nq text hello world", expected_output: "q: TEXT hello world\nTEXT 1 TOOL 0", description: "Single text response, no tool calls." },
-        { input: "2\na tool search best pizza NYC\nb text done", expected_output: "a: CALL search best pizza NYC\nb: TEXT done\nTEXT 1 TOOL 1", description: "Multi-word tool arguments are preserved intact." }
+        { input: "2\na tool search best pizza NYC\nb text done", expected_output: "a: CALL search best pizza NYC\nb: TEXT done\nTEXT 1 TOOL 1", description: "Multi-word tool arguments are preserved intact." },
+        { input: "3\nq text The world pizza nice.\nr2 text get_weather city=Paris\nr3 tool send_email to=bob", expected_output: "q: TEXT The world pizza nice.\nr2: TEXT get_weather city=Paris\nr3: CALL send_email to=bob\nTEXT 2 TOOL 1" },
+        { input: "1\na text search best", expected_output: "a: TEXT search best\nTEXT 1 TOOL 0" }
       ]
     },
     {
@@ -2396,7 +2409,9 @@ main()
       challenge_test_cases: [
         { input: "3 -100\nthe -5\nxyzzy -250\ncat -40", expected_output: "FLAGGED 1\nLEAST xyzzy -250", description: "One token below threshold; it's also the least confident." },
         { input: "2 -100\na -300\nb -300", expected_output: "FLAGGED 2\nLEAST a -300", description: "Tie on logprob resolves to the lexicographically smaller label." },
-        { input: "4 -50\nThe 0\ncapital -10\nis -8\nCanberra -280", expected_output: "FLAGGED 1\nLEAST Canberra -280", description: "A confident sentence with one shaky token flagged and pinpointed." }
+        { input: "4 -50\nThe 0\ncapital -10\nis -8\nCanberra -280", expected_output: "FLAGGED 1\nLEAST Canberra -280", description: "A confident sentence with one shaky token flagged and pinpointed." },
+        { input: "3 -100\na -251\ncapital -174\ncat -38", expected_output: "FLAGGED 2\nLEAST a -251" },
+        { input: "2 -100\nthe -119\ncapital -65", expected_output: "FLAGGED 1\nLEAST the -119" }
       ]
     }
   ]

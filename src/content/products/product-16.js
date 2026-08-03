@@ -203,6 +203,10 @@ main()
         expected_output: "MISMATCH\n3",
         description: "The mismatch can appear at the very last vector.",
       },
+      {
+        input: "3\n1 2 3\n4 4 6\n6 7 9",
+        expected_output: "OK\n3"
+      }
     ],
   },
 
@@ -416,6 +420,14 @@ main()
         expected_output: "2\n0 0 0 0 0\n3 0 0 0 0",
         description: "Edge: a text with zero vowels produces the zero vector.",
       },
+      {
+        input: "3\nAEIOU World\naaa Science\nPython",
+        expected_output: "3\n1 1 1 2 1\n3 2 1 0 0\n0 0 0 1 0"
+      },
+      {
+        input: "1\nHello",
+        expected_output: "1\n0 1 0 1 0"
+      }
     ],
   },
 
@@ -615,6 +627,10 @@ main()
         expected_output: "0.0000",
         description: "Perpendicular vectors are unrelated and score 0.0000.",
       },
+      {
+        input: "1 0 1\n1 2 0",
+        expected_output: "0.3162"
+      }
     ],
   },
 
@@ -847,6 +863,14 @@ main()
         expected_output: "2 1.0000\n5 1.0000\n9 1.0000",
         description: "Edge: all three docs tie at 1.0, so ascending id order (2, 5, 9) decides the ranking.",
       },
+      {
+        input: "3 3\n1 1 1 1\n2 0 1 0\n3 2 0 1\n1 0 0",
+        expected_output: "3 0.8944\n1 0.5774\n2 0.0000"
+      },
+      {
+        input: "2 2\n1 0 0\n2 1 1\n8 1",
+        expected_output: "2 0.7894\n1 0.0000"
+      }
     ],
   },
 
@@ -1038,6 +1062,14 @@ main()
         expected_output: "2 1.0000",
         description: "Edge: both docs tie at 1.0, but only the top 1 is requested, so the smaller id (2) wins.",
       },
+      {
+        input: "4 2 2\n3 3 4\n2 4 3\n3 -2 -3\n1 0 0\n2 5",
+        expected_output: "3 0.9656\n2 0.8542"
+      },
+      {
+        input: "3 2 10\n1 1 3\n2 0 1\n2 1 1\n1 0",
+        expected_output: "2 0.7071\n1 0.3162\n2 0.0000"
+      }
     ],
   },
 
@@ -1284,6 +1316,14 @@ main()
         expected_output: "9 1.0000\n4 0.0000\n7 0.0000",
         description: "Two zero-vector docs tie at 0.0 and are ordered by ascending id (4 before 7) after the real match.",
       },
+      {
+        input: "3 2\n1 2 1 1\n2 3 1 0 0\n9 2 0 0\n1 0",
+        expected_output: "1 0.7071\n9 0.0000"
+      },
+      {
+        input: "3 2\n3 2 0 1\n4 2 0 0\n3 2 2 2\n1 0",
+        expected_output: "3 0.7071\n3 0.0000\n4 0.0000"
+      }
     ],
   },
 
@@ -1496,6 +1536,14 @@ main()
         expected_output: "4\n4\n17",
         description: "One duplicate is deduped to 4 unique texts; batch size 1 needs 4 batches; token estimate sums only the unique texts.",
       },
+      {
+        input: "6 2\nhello\ndog\nhello\nbird\nneural\nfish",
+        expected_output: "5\n3\n5"
+      },
+      {
+        input: "3 5\ncat\nhello\nhello",
+        expected_output: "2\n1\n2"
+      }
     ],
   },
 
@@ -1730,6 +1778,14 @@ main()
         expected_output: "zero_vector_guard\nbudget",
         description: "Index and cache are fine, but the zero-vector guard is missing and the estimate exceeds budget.",
       },
+      {
+        input: "25 1 1 618 593",
+        expected_output: "budget"
+      },
+      {
+        input: "40 1 0 483 720",
+        expected_output: "zero_vector_guard"
+      }
     ],
   },
 ];

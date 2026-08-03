@@ -330,6 +330,14 @@ main()
           input: "4 0.30\n0 255 0\n0 0 255\n0 0 255\n0 0 255",
           expected_output: "0.2322\n1",
           description: "Edge: green (luminance 0.587) clears the 0.30 gate while pure-blue pixels (0.114) do not."
+        },
+        {
+          input: "3 0.5\n115 204 51\n0 0 0\n28 91 205",
+          expected_output: "0.3204\n1"
+        },
+        {
+          input: "4 0.30\n110 239 220\n0 0 148\n0 0 229\n0 0 255",
+          expected_output: "0.2650\n1"
         }
       ]
     },
@@ -667,6 +675,14 @@ main()
           input: "3 3\n0 0 0\n0 0 0\n0 0 0",
           expected_output: "0\n0 0",
           description: "Edge: an all-zero response grid means no edge fired anywhere."
+        },
+        {
+          input: "2 3\n3 -1 4\n0 4 -5",
+          expected_output: "5\n1 2"
+        },
+        {
+          input: "1 4\n8 -3 4 2",
+          expected_output: "8\n0 0"
         }
       ]
     },
@@ -1051,6 +1067,14 @@ main()
           input: "3 0.50\ncam1 NO 0.50\ncam2 No 0.85\ncam3 nO 0.49",
           expected_output: "2\n1\n0",
           description: "Edge: mixed-case 'no' all parse equally; the 0.50 confidence sits exactly on the gate and is flagged."
+        },
+        {
+          input: "4 0.80\nA NO 0.76\nB No 0.79\nframe003 nO 0.48\nframe004 no 0.60",
+          expected_output: "0\n4\n0"
+        },
+        {
+          input: "3 0.50\nframe001 yes 0.86\nframe002 no 0.91\nframe003 yes 0.43",
+          expected_output: "1\n1\n1"
         }
       ]
     },
@@ -1748,6 +1772,14 @@ main()
           input: "2 100\n100 100\n50 50",
           expected_output: "18\n0",
           description: "Both images are within the cap; tokens round up (14 + 4)."
+        },
+        {
+          input: "3 1000\n962 247\n474 202\n4000 4000",
+          expected_output: "1779\n1"
+        },
+        {
+          input: "1 512\n395 642",
+          expected_output: "216\n1"
         }
       ]
     },
@@ -2079,6 +2111,14 @@ main()
           input: "4 200 100\ncar 0 0 50 50\ncar 50 0 100 50\nbus 0 50 100 100\ncar 100 0 150 50",
           expected_output: "car 3\n62.50",
           description: "car wins 3 to 1; combined box area is 62.50% of the 200x100 frame."
+        },
+        {
+          input: "3 100 100\nperson 2 6 29 48\ncar 0 0 79 49\ncat 52 58 96 96",
+          expected_output: "car 1\n66.77"
+        },
+        {
+          input: "1 10 10\ncar 0 0 23 28",
+          expected_output: "car 1\n644.00"
         }
       ]
     },
@@ -2424,6 +2464,14 @@ main()
           input: "4 0.70\n0.95 1\n0.85 1\n0.75 0\n0.20 1",
           expected_output: "0.6667\n0.6667",
           description: "Three predicted positive (2 TP, 1 FP), one real positive missed below the cutoff."
+        },
+        {
+          input: "5 0.50\n0.70 0\n0.61 1\n0.61 1\n0.55 1\n0.30 0",
+          expected_output: "0.7500\n1.0000"
+        },
+        {
+          input: "4 0.70\n0.91 1\n0.82 1\n0.49 0\n0.37 0",
+          expected_output: "1.0000\n1.0000"
         }
       ]
     },
@@ -2767,6 +2815,14 @@ main()
           input: "3 0.80\n0.85 blurry\n0.85 clean\n0.70 clean",
           expected_output: "1\n1\n1",
           description: "A risky-but-confident review, a clean confident trust, and a below-threshold reject."
+        },
+        {
+          input: "4 0.60\n0.70 clean\n0.90 clean\n0.48 clean\n0.99 occluded glare",
+          expected_output: "2\n1\n1"
+        },
+        {
+          input: "2 0.50\n0.70 clean\n0.66 clean",
+          expected_output: "2\n0\n0"
         }
       ]
     }

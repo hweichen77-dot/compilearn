@@ -208,6 +208,10 @@ main()
         expected_output: "VALID\n1\nhey",
         description: "Edge: a single user turn is valid.",
       },
+      {
+        input: "2\nuser hi\nassistant Nice",
+        expected_output: "VALID\n2\nhi"
+      }
     ],
   },
 
@@ -415,6 +419,14 @@ main()
         expected_output: "identity\nboundary\nantibreak",
         description: "Only voice present; three missing.",
       },
+      {
+        input: "4\nvoice\nvoice\nboundary\nantibreak",
+        expected_output: "identity"
+      },
+      {
+        input: "1\nidentity",
+        expected_output: "voice\nboundary\nantibreak"
+      }
     ],
   },
 
@@ -632,6 +644,14 @@ main()
         expected_output: "6\nfe",
         description: "Three exchanges keep the history balanced at six turns.",
       },
+      {
+        input: "2\nSam\ncd",
+        expected_output: "4\ndc"
+      },
+      {
+        input: "1\nab",
+        expected_output: "2\nba"
+      }
     ],
   },
 
@@ -825,6 +845,14 @@ main()
         expected_output: "18",
         description: "System 9 + 1 + 7 + 1 = 18.",
       },
+      {
+        input: "You are Captain Reddbeard, a pirate.\n3\nHello\nHi me a story about the sea\nAye",
+        expected_output: "17"
+      },
+      {
+        input: "Bot\n1\nHello",
+        expected_output: "2"
+      }
     ],
   },
 
@@ -1026,6 +1054,10 @@ main()
         expected_output: "SUMMARY\n8",
         description: "Edge: keep zero turns, so everything becomes the summary.",
       },
+      {
+        input: "5 2 10\n18 29 29 32 31",
+        expected_output: "SUMMARY\n73"
+      }
     ],
   },
 
@@ -1222,6 +1254,14 @@ main()
         expected_output: "2\nAB",
         description: "Chunks after [END] are dropped.",
       },
+      {
+        input: "5\nHello\nmatey\n[END]\nC\nstuff",
+        expected_output: "2\nHellomatey"
+      },
+      {
+        input: "3\nArr\nWorld\n!",
+        expected_output: "3\nArrWorld!"
+      }
     ],
   },
 
@@ -1440,6 +1480,10 @@ main()
         expected_output: "FAIL 14",
         description: "Only 2 attempts allowed, so the success at attempt 3 is never reached.",
       },
+      {
+        input: "2 10\nS F S",
+        expected_output: "OK 10"
+      }
     ],
   },
 
@@ -1664,6 +1708,14 @@ main()
         expected_output: "streaming\nbudget",
         description: "Streaming off and over budget; persona and memory pass.",
       },
+      {
+        input: "You are Reddbeard.\n2 0 411 614",
+        expected_output: "streaming"
+      },
+      {
+        input: "You are Reddbeard.\n3 1 1362 442",
+        expected_output: "budget"
+      }
     ],
   },
 ];

@@ -299,7 +299,8 @@ main()
         { input: "3 1000\nfast 200 5 100\nslow 50 9 200\nmid 150 4 150", expected_output: "mid", description: "Slowest-total route excluded; lowest TTFT among the rest wins." },
         { input: "2 100\na 200 1 50\nb 300 1 10", expected_output: "NONE", description: "No route fits the budget." },
         { input: "3 5000\nx 100 2 50\ny 100 1 50\nz 100 3 50", expected_output: "y", description: "All tie on TTFT; smallest total time breaks the tie." },
-        { input: "1 700\nonly 200 5 100", expected_output: "only", description: "A single route exactly at the budget is eligible." }
+        { input: "1 700\nonly 200 5 100", expected_output: "only", description: "A single route exactly at the budget is eligible." },
+        { input: "3 5000\na 170 2 89\nb 62 1 32\nmid 146 3 60", expected_output: "b" }
       ]
     },
     {
@@ -921,7 +922,8 @@ main()
         { input: "3 50\nYou are a helpful assistant. Q: France?\nYou are a helpful assistant. Q: Japan?\nYou are a helpful assistant. Q: Spain?", expected_output: "32\n800", description: "Shared system prefix; saving scales with (n-1) reused calls." },
         { input: "2 10\nhello\nworld", expected_output: "0\n0", description: "No shared prefix means no caching saving." },
         { input: "2 100\nabcdefgh\nabcdXYZ", expected_output: "4\n100", description: "Prefix of 4 chars -> 1 token -> (2-1)*1*100 = 100." },
-        { input: "1 500\nlonely prompt", expected_output: "13\n0", description: "A single prompt: nothing to reuse, so the saving is 0 even with a long prefix." }
+        { input: "1 500\nlonely prompt", expected_output: "13\n0", description: "A single prompt: nothing to reuse, so the saving is 0 even with a long prefix." },
+        { input: "1 500\nlonely are", expected_output: "10\n0" }
       ]
     },
     {
@@ -1206,7 +1208,9 @@ main()
       challenge_test_cases: [
         { input: "1000 50 200", expected_output: "200000\n4000\n50.00", description: "20 full waves; large speedup from high concurrency." },
         { input: "7 3 100", expected_output: "700\n300\n2.33", description: "Uneven last wave; speedup rounded to 2 decimals." },
-        { input: "1 8 500", expected_output: "500\n500\n1.00", description: "Fewer requests than the concurrency cap: one wave, no speedup." }
+        { input: "1 8 500", expected_output: "500\n500\n1.00", description: "Fewer requests than the concurrency cap: one wave, no speedup." },
+        { input: "453 50 329", expected_output: "149037\n3290\n45.30" },
+        { input: "361 48 337", expected_output: "121657\n2696\n45.12" }
       ]
     },
     {
@@ -1498,7 +1502,9 @@ main()
       challenge_test_cases: [
         { input: "10 95 500\n100 120 90 800 110 130 95 105 115 125", expected_output: "179\n800\nFAIL", description: "Tail sample blows the p95 SLO while the mean looks healthy." },
         { input: "20 90 300\n100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 900", expected_output: "140\n100\nPASS", description: "Outlier inflates the mean but p90 still passes." },
-        { input: "1 99 1000\n1500", expected_output: "1500\n1500\nFAIL", description: "Single sample: it is both the mean and the percentile, and it exceeds the SLO." }
+        { input: "1 99 1000\n1500", expected_output: "1500\n1500\nFAIL", description: "Single sample: it is both the mean and the percentile, and it exceeds the SLO." },
+        { input: "10 95 500\n734 101 92 378 106 110 99 104 106 119", expected_output: "194\n734\nFAIL" },
+        { input: "20 90 300\n1337 104 97 732 109 116 97 104 109 106 99 101 101 99 101 101 99 100 101 901", expected_output: "235\n732\nFAIL" }
       ]
     },
     {
@@ -1790,7 +1796,8 @@ main()
         { input: "3 30\nmodelA 120 4000\nmodelB 200 2000\nmodelC 60 3000", expected_output: "2\nmodelC 20", description: "Two deployments meet the 30 TPS SLO; the 20 TPS one is slowest." },
         { input: "2 50\nx 100 1000\ny 100 5000", expected_output: "1\ny 20", description: "Same output token count, very different streaming time, so very different TPS." },
         { input: "1 1000\nonly 500 1000", expected_output: "0\nonly 500", description: "A single deployment at 500 TPS fails a steep 1000 TPS target but is still the slowest by default." },
-        { input: "3 100\na 1000 1000\nb 1000 1000\nc 50 1000", expected_output: "2\nc 50", description: "Two tie at 1000 TPS and pass; c is clearly slowest at 50." }
+        { input: "3 100\na 1000 1000\nb 1000 1000\nc 50 1000", expected_output: "2\nc 50", description: "Two tie at 1000 TPS and pass; c is clearly slowest at 50." },
+        { input: "2 50\na 403 3752\ny 870 1392", expected_output: "2\na 107" }
       ]
     },
     {
@@ -2109,7 +2116,8 @@ main()
         { input: "5 2 0.95\n10 0\n9 1\n0 10\n10 1\n1 1", expected_output: "2\n3", description: "Near-aligned paraphrases hit; orthogonal and 45-degree queries miss." },
         { input: "3 2 0.99\n1 0\n0 1\n1 0", expected_output: "1\n2", description: "An exact-direction repeat hits; the orthogonal query misses." },
         { input: "1 3 0.5\n1 2 3", expected_output: "0\n1", description: "First query against an empty cache is always a miss." },
-        { input: "4 2 0.99\n1 0\n1 0\n1 0\n1 0", expected_output: "3\n1", description: "Identical queries hit after the first is stored." }
+        { input: "4 2 0.99\n1 0\n1 0\n1 0\n1 0", expected_output: "3\n1", description: "Identical queries hit after the first is stored." },
+        { input: "5 2 0.95\n5 0\n6 1\n0 5\n10 1\n2 0", expected_output: "3\n2" }
       ]
     },
     {
@@ -2405,7 +2413,8 @@ main()
         { input: "3 1000 50\nbig 300 100 5 2000\nsmall 100 100 2 400\nhuge 500 100 8 5000", expected_output: "small", description: "Over-budget strategy dropped; cheapest expected cost among the rest wins." },
         { input: "2 100 0\na 200 50 1 1000\nb 300 10 1 400", expected_output: "NONE", description: "Zero hit rate forces the cold path; nothing fits the tight budget." },
         { input: "2 2000 100\nx 1000 100 5 9000\ny 1000 100 5 9000", expected_output: "x", description: "Identical strategies at a 100% hit rate tie on cost and latency; lexicographic name breaks it." },
-        { input: "3 500 50\np 100 50 2 600\nq 100 50 2 600\nr 50 50 2 200", expected_output: "r", description: "All eligible; the cheapest cold cost gives the lowest expected cost." }
+        { input: "3 500 50\np 100 50 2 600\nq 100 50 2 600\nr 50 50 2 200", expected_output: "r", description: "All eligible; the cheapest cold cost gives the lowest expected cost." },
+        { input: "2 2000 100\nx 196 50 5 3999\nb 460 71 1 3462", expected_output: "b" }
       ]
     }
   ]

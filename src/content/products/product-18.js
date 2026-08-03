@@ -477,6 +477,14 @@ main()
           expected_output: "1\n1 3",
           description: "Edge case: a single definition that runs to the last line of the file.",
         },
+        {
+          input: "7\nimport os\nx load_config(path):\n    return 0\ndef save_config(path):\n    return 2\nclass ConfigError(Exception):\n    pass",
+          expected_output: "2\n4 5\n6 7"
+        },
+        {
+          input: "2\ndef os\nx = 1",
+          expected_output: "1\n1 2"
+        }
       ],
     },
 
@@ -688,6 +696,14 @@ main()
           expected_output: "0",
           description: "Edge case: a file with zero chunks contributes nothing, so the total is 0.",
         },
+        {
+          input: "2\nsrc/app.py\n2\n3 4\n7 6\nsrc/utils.py\n1\n1 1",
+          expected_output: "3\nsrc/app.py:3-4\nsrc/app.py:7-6\nsrc/utils.py:1-1"
+        },
+        {
+          input: "1\nsrc/app.py\n3\n2 6\n6 7\n7 10",
+          expected_output: "3\nsrc/app.py:2-6\nsrc/app.py:6-7\nsrc/app.py:7-10"
+        }
       ],
     },
 
@@ -916,6 +932,14 @@ main()
           expected_output: "a 0.100\nb 0.100",
           description: "Edge case: every chunk ties with no bonus applied, so the top k is simply the first k in input order.",
         },
+        {
+          input: "4\nc1 0.48 1\nc2 0.46 1\nc3 0.13 1\nc4 0.75 0\n3",
+          expected_output: "c4 0.750\nc1 0.730\nc2 0.710"
+        },
+        {
+          input: "2\nc1 0.21 0\nc2 0.48 1\n4",
+          expected_output: "c2 0.730\nc1 0.210"
+        }
       ],
     },
 
@@ -1126,6 +1150,14 @@ main()
           expected_output: "1\nlib/my_util-v2.py:3-4",
           description: "Edge case: a path containing an underscore and a hyphen is still matched correctly.",
         },
+        {
+          input: "1\nDefined code loader is config in safely.",
+          expected_output: "0"
+        },
+        {
+          input: "1\nThis in [lib/my_util-v2.py:3-4].",
+          expected_output: "1\nlib/my_util-v2.py:3-4"
+        }
       ],
     },
 
@@ -1357,6 +1389,14 @@ main()
           expected_output: "1\nc1\n20",
           description: "Edge case: c1 is included first, so c2's identical range is skipped as a duplicate even though it would fit the budget.",
         },
+        {
+          input: "100\n4\nc1 22 src/app.py 3 5\nc2 23 src/app.py 1 5\nc3 11 src/utils.py 1 3\nc4 20 src/app.py 6 9",
+          expected_output: "4\nc1\nc2\nc3\nc4\n76"
+        },
+        {
+          input: "25\n3\nc1 32 a.py 1 2\nc2 19 a.py 1 3\nc3 27 b.py 1 4",
+          expected_output: "1\nc2\n19"
+        }
       ],
     },
 
@@ -1584,6 +1624,14 @@ main()
           expected_output: "NO_CITATIONS",
           description: "Edge case: the answer contains no bracketed citations at all.",
         },
+        {
+          input: "1\nsrc/app.py:3-5\n1\nThis [src/app.py:3-5] loads [src/other.py:9-12], done.",
+          expected_output: "UNGROUNDED\nsrc/other.py:9-12"
+        },
+        {
+          input: "1\na.py:1-2\n1\nPer code loads a config file safely.",
+          expected_output: "NO_CITATIONS"
+        }
       ],
     },
 
@@ -1816,6 +1864,14 @@ main()
           expected_output: "NO_MATCH",
           description: "Edge case: no keyword overlap at all between the query and any chunk.",
         },
+        {
+          input: "3\nsrc/app.py 3 5 alpha config gamma read\nsrc/utils.py 1 3 alpha util delta string\nsrc/db.py 9 20 database connection query execute\nload config please",
+          expected_output: "src/app.py:3-5\n1"
+        },
+        {
+          input: "2\na.py 1 2 alpha config gamma\nb.py 2 4 helper beta format\nalpha beta",
+          expected_output: "a.py:1-2\n1"
+        }
       ],
     },
   ],

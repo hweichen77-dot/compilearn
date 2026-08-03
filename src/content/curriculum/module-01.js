@@ -340,7 +340,8 @@ main()
         { input: "3 5\nthe cat 7 dog 7\ncat sat 9\ndog ran 4\nthe", expected_output: "the cat sat", description: "Score tie resolved lexicographically, then a dead-end stop." },
         { input: "2 6\nhello there 5 world 9\nworld <END> 3 again 2\nhello", expected_output: "hello world", description: "Generation halts on the <END> token without emitting it." },
         { input: "1 2\na b 1 c 9\na", expected_output: "a c", description: "max_len caps the sequence at 2 tokens even though more could follow." },
-        { input: "1 5\nx y 1\nz", expected_output: "z", description: "The start token has no table entry, so output is just the start." }
+        { input: "1 5\nx y 1\nz", expected_output: "z", description: "The start token has no table entry, so output is just the start." },
+        { input: "3 5\nhello there 4 dog 9\ncat sat 7\ndog ran 5\nthe", expected_output: "the" }
       ]
     },
     {
@@ -586,7 +587,9 @@ print(f"\${total:.6f}")
       challenge_test_cases: [
         { input: "1000 500", expected_output: "$0.010500", description: "1000 input ($0.003) + 500 output ($0.0075) = $0.0105." },
         { input: "1000000 1000000", expected_output: "$18.000000", description: "1M input + 1M output." },
-        { input: "0 0", expected_output: "$0.000000", description: "A free call costs nothing." }
+        { input: "0 0", expected_output: "$0.000000", description: "A free call costs nothing." },
+        { input: "450772 528453", expected_output: "$9.279111" },
+        { input: "147916 174933", expected_output: "$3.067743" }
       ]
     },
     {
@@ -861,7 +864,8 @@ main()
         { input: "0.5 1.0 0.1 1", expected_output: "0.5500", description: "A single update step moves the weight from 0.5 to 0.55." },
         { input: "0.0 1.0 0.5 3", expected_output: "0.8750", description: "Three steps, each closing half the remaining gap to the target." },
         { input: "0.5 1.0 0.1 0", expected_output: "0.5000", description: "Zero steps leaves the weight unchanged: inference, not training." },
-        { input: "0.2 0.9 0.1 100", expected_output: "0.9000", description: "Over many steps the weight converges to the target." }
+        { input: "0.2 0.9 0.1 100", expected_output: "0.9000", description: "Over many steps the weight converges to the target." },
+        { input: "0.2 1.0 0.4 1", expected_output: "0.5200" }
       ]
     },
     {
@@ -1167,7 +1171,9 @@ main()
       challenge_test_cases: [
         { input: "80\n2\nwater boils at 100C\nthe sun is a star\n3\n95 the sun is a star\n90 the moon is made of cheese\n40 dragons are real", expected_output: "the sun is a star -> TRUST\nthe moon is made of cheese -> VERIFY\ndragons are real -> REJECT\nTRUSTED 1", description: "Grounding wins over confidence; threshold splits the rest." },
         { input: "50\n0\n2\n60 alpha\n30 beta", expected_output: "alpha -> VERIFY\nbeta -> REJECT\nTRUSTED 0", description: "No grounded facts: pure confidence gating." },
-        { input: "70\n1\nknown fact\n2\n70 unknown claim\n69 another claim", expected_output: "unknown claim -> VERIFY\nanother claim -> REJECT\nTRUSTED 0", description: "Threshold is inclusive: exactly 70 routes to VERIFY, 69 to REJECT." }
+        { input: "70\n1\nknown fact\n2\n70 unknown claim\n69 another claim", expected_output: "unknown claim -> VERIFY\nanother claim -> REJECT\nTRUSTED 0", description: "Threshold is inclusive: exactly 70 routes to VERIFY, 69 to REJECT." },
+        { input: "50\n0\n2\n59 alpha\n66 unknown", expected_output: "alpha -> VERIFY\nunknown -> VERIFY\nTRUSTED 0" },
+        { input: "80\n2\nknown fact at 100C\nthe alpha is a star\n3\n93 the sun is a star\n90 the moon is made of cheese\n41 dragons are real", expected_output: "the sun is a star -> VERIFY\nthe moon is made of cheese -> VERIFY\ndragons are real -> REJECT\nTRUSTED 0" }
       ]
     },
     {
@@ -1454,7 +1460,8 @@ main()
         { input: "4 3\ncat 8\ndog 6\nfish 2\nbird 4", expected_output: "cat 44.44\ndog 33.33\nbird 22.22", description: "Top-3 selection then normalize the kept logits to percentages." },
         { input: "2 2\nyes 3\nno 1", expected_output: "yes 75.00\nno 25.00", description: "All tokens kept; simple two-way split." },
         { input: "3 1\na 5\nb 5\nc 1", expected_output: "a 100.00", description: "Tie on logit resolved alphabetically; the single kept token holds 100%." },
-        { input: "3 3\nz 1\nm 1\na 1", expected_output: "a 33.33\nm 33.33\nz 33.33", description: "Equal logits split evenly; ties order alphabetically." }
+        { input: "3 3\nz 1\nm 1\na 1", expected_output: "a 33.33\nm 33.33\nz 33.33", description: "Equal logits split evenly; ties order alphabetically." },
+        { input: "4 3\nyes 7\ndog 2\nc 2\nbird 4", expected_output: "yes 53.85\nbird 30.77\nc 15.38" }
       ]
     },
     {
@@ -1734,7 +1741,9 @@ main()
       challenge_test_cases: [
         { input: "3\nembedding 1000\nattention 5000\nmlp 4000\n12000", expected_output: "embedding 10.0\nattention 50.0\nmlp 40.0\nTOTAL 10000\nFITS", description: "Per-layer shares, total, and an in-budget model." },
         { input: "2\na 600\nb 600\n1000", expected_output: "a 50.0\nb 50.0\nTOTAL 1200\nTOO BIG", description: "Total exceeds the budget." },
-        { input: "1\nsolo 5000\n5000", expected_output: "solo 100.0\nTOTAL 5000\nFITS", description: "Single layer holds 100%; total exactly equals budget so it FITS." }
+        { input: "1\nsolo 5000\n5000", expected_output: "solo 100.0\nTOTAL 5000\nFITS", description: "Single layer holds 100%; total exactly equals budget so it FITS." },
+        { input: "3\na 4522\nb 2021\nmlp 4000\n12001", expected_output: "a 42.9\nb 19.2\nmlp 37.9\nTOTAL 10543\nFITS" },
+        { input: "2\nsolo 4355\nattention 3408\n1001", expected_output: "solo 56.1\nattention 43.9\nTOTAL 7763\nTOO BIG" }
       ]
     },
     {
@@ -2032,7 +2041,8 @@ main()
         { input: "3\nThe 1\ncat 2\nsat 7", expected_output: "The 10.0\ncat 20.0\nsat 70.0\nFOCUS sat", description: "Scores normalized to weights; highest-weight token is the focus." },
         { input: "4\na 5\nbig 5\nred 3\ndog 7", expected_output: "a 25.0\nbig 25.0\nred 15.0\ndog 35.0\nFOCUS dog", description: "Mixed weights with the focus on the largest." },
         { input: "2\nfirst 4\nsecond 4", expected_output: "first 50.0\nsecond 50.0\nFOCUS first", description: "Tie on weight resolved to the earliest token." },
-        { input: "1\nonly 9", expected_output: "only 100.0\nFOCUS only", description: "A single token holds all the attention." }
+        { input: "1\nonly 9", expected_output: "only 100.0\nFOCUS only", description: "A single token holds all the attention." },
+        { input: "3\na 1\nsecond 2\nred 4", expected_output: "a 14.3\nsecond 28.6\nred 57.1\nFOCUS red" }
       ]
     },
     {
@@ -2311,7 +2321,9 @@ main()
       challenge_test_cases: [
         { input: "10.0 0.5\n1.0\n3\n4\n100\n10000", expected_output: "4 5.0000 BASIC\n100 1.0000 EMERGENT\n10000 0.1000 EMERGENT\nEMERGENT 2", description: "Power-law loss with two sizes crossing the threshold." },
         { input: "8.0 1.0\n2.0\n2\n2\n8", expected_output: "2 4.0000 BASIC\n8 1.0000 EMERGENT\nEMERGENT 1", description: "Inverse-size law; threshold reached at the larger model." },
-        { input: "5.0 0.5\n0.1\n1\n4", expected_output: "4 2.5000 BASIC\nEMERGENT 0", description: "No size reaches the strict threshold, so nothing emerges." }
+        { input: "5.0 0.5\n0.1\n1\n4", expected_output: "4 2.5000 BASIC\nEMERGENT 0", description: "No size reaches the strict threshold, so nothing emerges." },
+        { input: "10.0 0.5\n1.0\n3\n2\n31\n9999", expected_output: "2 7.0711 BASIC\n31 1.7961 BASIC\n9999 0.1000 EMERGENT\nEMERGENT 1" },
+        { input: "8.0 1.0\n1.2\n2\n3\n75", expected_output: "3 2.6667 BASIC\n75 0.1067 EMERGENT\nEMERGENT 1" }
       ]
     }
   ]

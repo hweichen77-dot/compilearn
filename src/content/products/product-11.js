@@ -212,6 +212,10 @@ main()
           expected_output: "VALID",
           description: "Edge: a single valid step passes.",
         },
+        {
+          input: "1\n2 search",
+          expected_output: "INVALID\n1"
+        }
       ],
     },
 
@@ -450,6 +454,14 @@ main()
           expected_output: "7\nedualc",
           description: "Negative arguments and reversal both work through the same dispatcher.",
         },
+        {
+          input: "3\nadd a=3 b=4\nreverse text=hello\nemail x=1",
+          expected_output: "7\nolleh\nUNKNOWN_TOOL"
+        },
+        {
+          input: "2\nadd a=10 b=-3\nupper text=claude",
+          expected_output: "7\nCLAUDE"
+        }
       ],
     },
 
@@ -661,6 +673,14 @@ main()
           expected_output: "1 2 3",
           description: "No dependencies at all; steps sort by ascending id in one round.",
         },
+        {
+          input: "3\n1\n2\n4",
+          expected_output: "1 2 4"
+        },
+        {
+          input: "3\n1\n3\n4",
+          expected_output: "1 3 4"
+        }
       ],
     },
 
@@ -865,6 +885,14 @@ main()
           expected_output: "p=3\nq=4",
           description: "Edge: no prior results at all, both arguments are literals.",
         },
+        {
+          input: "0\n2\np 3\nx 4",
+          expected_output: "p=3\nx=4"
+        },
+        {
+          input: "2\n1 38\n2 3\n2\na $step1\nb 10",
+          expected_output: "a=38\nb=10"
+        }
       ],
     },
 
@@ -1067,6 +1095,14 @@ main()
           expected_output: "3 earlier steps omitted",
           description: "Edge: keeping zero entries still reports the drop count with no trailing lines.",
         },
+        {
+          input: "4\n0 a x\n2 calc y\n3 c z\n1 write savedD\n3",
+          expected_output: "1 earlier steps omitted\n2 calc y\n3 c z\n1 write savedD"
+        },
+        {
+          input: "2\n1 a x\n3 b y\n4",
+          expected_output: "1 a x\n3 b y"
+        }
       ],
     },
 
@@ -1254,6 +1290,14 @@ main()
           expected_output: "SUCCESS\n5",
           description: "Two optional failures are skipped; the final required step still succeeds.",
         },
+        {
+          input: "3 2\n0 0\n0 -1\n1 1",
+          expected_output: "SUCCESS\n3"
+        },
+        {
+          input: "3 2\n0 0\n0 -1\n0 2",
+          expected_output: "SUCCESS\n4"
+        }
       ],
     },
 
@@ -1453,6 +1497,10 @@ main()
           expected_output: "CONTINUE",
           description: "Different arguments mean this isn't a repeat, and no other condition is triggered.",
         },
+        {
+          input: "10 3\n3\nsearch a\nfinish b\nsearch tokyo",
+          expected_output: "CONTINUE"
+        }
       ],
     },
 
@@ -1687,6 +1735,10 @@ main()
           expected_output: "SUCCESS\n2",
           description: "Edge: the plan runs to completion without ever hitting an explicit finish step.",
         },
+        {
+          input: "2\n3\n1 search\n2 email\n3 finish",
+          expected_output: "FAILURE\n1"
+        }
       ],
     },
   ],

@@ -230,6 +230,14 @@ main()
           expected_output: "3",
           description: "Every line is a commitment.",
         },
+        {
+          input: "4\nnothing here deploy the report\njust chatting the budget\nTODO: Sam the the room\nAction item: Priya reviews the PR",
+          expected_output: "2"
+        },
+        {
+          input: "2\nnothing will\njust chatting the the weekend",
+          expected_output: "1"
+        }
       ],
     },
 
@@ -1049,6 +1057,18 @@ main()
           expected_output: "Alex (1): Task B\nPriya (1): Task A",
           description: "Owners printed alphabetically, not in input order.",
         },
+        {
+          input: "4\nAlex|Send A\nSam|Book B\nAlex|Review PR\nSam|Email client",
+          expected_output: "Alex (2): Send A, Review PR\nSam (2): Book B, Email client"
+        },
+        {
+          input: "2\nPriya|Task report\nAlex|Task room",
+          expected_output: "Alex (1): Task room\nPriya (1): Task report"
+        },
+        {
+          input: "4\nAlex|Send report\nSam|Book B\nAlex|Review PR\nSam|Email client",
+          expected_output: "Alex (2): Send report, Review PR\nSam (2): Book B, Email client"
+        }
       ],
     },
 

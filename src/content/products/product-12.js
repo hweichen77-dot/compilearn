@@ -125,6 +125,8 @@ main()
       { input: "image/png\nAB", expected_output: "media_type=image/png\ndata_length=4\ndata=QUI=", description: "Two-byte string encodes to a 4-character base64 string." },
       { input: "image/jpeg\nHello", expected_output: "media_type=image/jpeg\ndata_length=8\ndata=SGVsbG8=", description: "Five-byte string encodes to 8 base64 characters with one padding char." },
       { input: "image/webp\n", expected_output: "media_type=image/webp\ndata_length=0\ndata=", description: "Edge: empty payload encodes to an empty string." },
+      { input: "image/png\nHello", expected_output: "media_type=image/png\ndata_length=8\ndata=SGVsbG8=" },
+      { input: "image/jpeg\nAB", expected_output: "media_type=image/jpeg\ndata_length=4\ndata=QUI=" }
     ],
   },
   {
@@ -380,6 +382,8 @@ main()
       { input: "caption\na dog running in a park", expected_output: "Write one vivid sentence caption for: a dog running in a park", description: "Caption mode fills the caption template." },
       { input: "alt_text\na red bicycle", expected_output: "Write alt text (max 125 chars, no 'image of') for: a red bicycle", description: "Alt text mode fills the alt text template." },
       { input: "video\nfoo", expected_output: "INVALID_MODE", description: "Edge: an unsupported mode is rejected." },
+      { input: "alt_text\nfoo dog running", expected_output: "Write alt text (max 125 chars, no 'image of') for: foo dog running" },
+      { input: "caption\na dog bicycle in a park", expected_output: "Write one vivid sentence caption for: a dog bicycle in a park" }
     ],
   },
   {
@@ -796,6 +800,7 @@ main()
       { input: "image/bmp\n1024", expected_output: "UNSUPPORTED_TYPE", description: "An unsupported media type is rejected before size is even considered." },
       { input: "image/png\n6000000", expected_output: "TOO_LARGE", description: "A file over the 5 MB limit is rejected." },
       { input: "image/png\n0", expected_output: "EMPTY_IMAGE", description: "Edge: a zero-byte file is rejected first, before the type check." },
+      { input: "image/png\n161297", expected_output: "OK" }
     ],
   },
   {
@@ -919,6 +924,8 @@ main()
       { input: "800 600 50 100", expected_output: "OK\n790", description: "A modest 800x600 image stays under the resize threshold." },
       { input: "2000 1500 50 100", expected_output: "RESIZE_RECOMMENDED\n4150", description: "A large image exceeds 1600 image tokens and triggers a resize flag." },
       { input: "1200 1000 0 0", expected_output: "OK\n1600", description: "Edge: exactly at the 1600-token threshold does not trigger a resize." },
+      { input: "1403 1215 45 13", expected_output: "RESIZE_RECOMMENDED\n2330" },
+      { input: "1896 642 45 96", expected_output: "RESIZE_RECOMMENDED\n1763" }
     ],
   },
   {

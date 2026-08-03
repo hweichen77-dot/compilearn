@@ -129,6 +129,14 @@ export default {
         {
           "input": "9 2",
           "expected_output": "false\nfalse"
+        },
+        {
+          "input": "9 5",
+          "expected_output": "false\nfalse"
+        },
+        {
+          "input": "8 4",
+          "expected_output": "false\nfalse"
         }
       ]
     },
@@ -246,6 +254,14 @@ export default {
         {
           "input": "42",
           "expected_output": "DONE"
+        },
+        {
+          "input": "56",
+          "expected_output": "DONE"
+        },
+        {
+          "input": "72",
+          "expected_output": "PASS\nDONE"
         }
       ]
     },
@@ -362,6 +378,14 @@ export default {
         },
         {
           "input": "55",
+          "expected_output": "F"
+        },
+        {
+          "input": "74",
+          "expected_output": "C"
+        },
+        {
+          "input": "57",
           "expected_output": "F"
         }
       ]
@@ -481,6 +505,14 @@ export default {
         {
           "input": "70",
           "expected_output": "NO"
+        },
+        {
+          "input": "60",
+          "expected_output": "YES"
+        },
+        {
+          "input": "42",
+          "expected_output": "YES"
         }
       ]
     },
@@ -596,6 +628,14 @@ export default {
         },
         {
           "input": "30 0",
+          "expected_output": "ADULT"
+        },
+        {
+          "input": "20 1",
+          "expected_output": "MEMBER"
+        },
+        {
+          "input": "16 0",
           "expected_output": "ADULT"
         }
       ]
@@ -713,6 +753,14 @@ export default {
         },
         {
           "input": "100 0",
+          "expected_output": "LOW"
+        },
+        {
+          "input": "143 4",
+          "expected_output": "LOW"
+        },
+        {
+          "input": "280 0",
           "expected_output": "LOW"
         }
       ]
@@ -833,6 +881,14 @@ export default {
         {
           "input": "25",
           "expected_output": "OUT"
+        },
+        {
+          "input": "7",
+          "expected_output": "OUT"
+        },
+        {
+          "input": "20",
+          "expected_output": "IN"
         }
       ]
     },
@@ -949,6 +1005,14 @@ export default {
         },
         {
           "input": "-4",
+          "expected_output": "NEGATIVE"
+        },
+        {
+          "input": "3",
+          "expected_output": "POS-ODD"
+        },
+        {
+          "input": "-3",
           "expected_output": "NEGATIVE"
         }
       ]

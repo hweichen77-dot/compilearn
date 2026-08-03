@@ -314,7 +314,8 @@ main()
         { input: "2\nThe total is $42.50.\nTax $3.00, subtotal $339.00, total $342.00.", expected_output: "1\n2 3", description: "Example 1: one risky reply; reply 2 has the most amounts." },
         { input: "1\nYour refund of $9.99 is processed.", expected_output: "0\n1 1", description: "Example 2: a single amount is safe to first-match parse." },
         { input: "1\nNo charges were applied to your account.", expected_output: "0\n1 0", description: "Edge: a reply with zero amounts still reports index 1 and count 0." },
-        { input: "3\nPaid $5 and $6 today.\nClean line here.\nLater $1, $2, $3 owed.", expected_output: "2\n3 3", description: "Edge: two risky replies; reply 3 wins with 3 amounts." }
+        { input: "3\nPaid $5 and $6 today.\nClean line here.\nLater $1, $2, $3 owed.", expected_output: "2\n3 3", description: "Edge: two risky replies; reply 3 wins with 3 amounts." },
+        { input: "2\nNo total is $42.50.\nTax $3.00, subtotal $339.00, total $342.00.", expected_output: "1\n2 3" }
       ]
     },
     {

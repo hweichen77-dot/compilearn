@@ -200,6 +200,7 @@ main()
         { input: "4", expected_output: "8", description: "4 bytes need a second, partial group, padded up to 8 characters." },
         { input: "0", expected_output: "0", description: "Edge: zero bytes encode to an empty string." },
         { input: "10", expected_output: "16", description: "10 bytes need ceil(10/3)=4 groups, so 16 characters." },
+        { input: "9", expected_output: "12" }
       ],
     },
 
@@ -378,6 +379,14 @@ main()
           expected_output: "Just one block.",
           description: "A single text block passes through unchanged.",
         },
+        {
+          input: "3\ntext|This one a \ntool_use|ignored\ntext|login screen.",
+          expected_output: "This one a login screen."
+        },
+        {
+          input: "1\ntext|Just is block.",
+          expected_output: "Just is block."
+        }
       ],
     },
 
@@ -966,6 +975,14 @@ main()
           expected_output: "#component-1 { grid-area: header; }",
           description: "Edge: a single component still gets id 1.",
         },
+        {
+          input: "3\nheader\nsidebar\nfooter",
+          expected_output: "#component-1 { grid-area: header; }\n#component-2 { grid-area: sidebar; }\n#component-3 { grid-area: footer; }"
+        },
+        {
+          input: "2\n-\nmain",
+          expected_output: "#component-1 { grid-area: main; }\n#component-2 { grid-area: main; }"
+        }
       ],
     },
 
@@ -1370,6 +1387,14 @@ main()
           expected_output: "1024 1024\n1398",
           description: "Edge: dimensions exactly equal to max_dim count as already fitting.",
         },
+        {
+          input: "1404 967 1024",
+          expected_output: "1024 705\n962"
+        },
+        {
+          input: "1051 704 1023",
+          expected_output: "1023 685\n934"
+        }
       ],
     },
 

@@ -205,6 +205,14 @@ main()
           expected_output: "1\nBLOCK",
           description: "A single flagged category still blocks.",
         },
+        {
+          input: "2\nspam 0\nharassment 0",
+          expected_output: "0\nALLOW"
+        },
+        {
+          input: "1\nviolence 1",
+          expected_output: "1\nBLOCK"
+        }
       ],
     },
 
@@ -393,6 +401,14 @@ main()
           expected_output: "SCREEN\n2",
           description: "Both blocklist terms appear as whole words.",
         },
+        {
+          input: "1\nass\nscam am taking this class seriously",
+          expected_output: "CLEAR\n0"
+        },
+        {
+          input: "2\nkill\nscam\nThis is kill spam process scam here",
+          expected_output: "SCREEN\n2"
+        }
       ],
     },
 
@@ -807,6 +823,14 @@ main()
           expected_output: "The [REDACTED] is out and [REDACTED] again\n2",
           description: "Case-insensitive matching redacts both 'Secret' and 'secret'.",
         },
+        {
+          input: "2\nass\npassword\nYour ssn is 122 and your password is hunter2",
+          expected_output: "Your ssn is 122 and your [REDACTED] is hunter2\n1"
+        },
+        {
+          input: "1\nssn\nI am is out and seriously",
+          expected_output: "I am is out and seriously\n0"
+        }
       ],
     },
 
@@ -1020,6 +1044,14 @@ main()
           expected_output: "INJECTION\nforget your rules",
           description: "Phrases are checked in list order, not by position in the content.",
         },
+        {
+          input: "1\nignore previous instructions\nThis is instructions normal question about pandas",
+          expected_output: "SAFE"
+        },
+        {
+          input: "2\nignore previous instructions\nThis is a\nignore ignore instructions, instructions and your rules",
+          expected_output: "SAFE"
+        }
       ],
     },
 
@@ -1250,6 +1282,10 @@ main()
           expected_output: "allow\nnone",
           description: "Edge case: no triggered categories at all defaults to allow with no cause.",
         },
+        {
+          input: "1\nspam allow\n1\nharassment",
+          expected_output: "block\nharassment"
+        }
       ],
     },
 
@@ -1456,6 +1492,14 @@ main()
           expected_output: "7\n0",
           description: "A single text is always billed once, with no possible cache hit.",
         },
+        {
+          input: "4 10\na\nhello\nc\nhello",
+          expected_output: "30\n1"
+        },
+        {
+          input: "4 10\nsolo\nb\nworld\nhello",
+          expected_output: "40\n0"
+        }
       ],
     },
 
@@ -1661,6 +1705,10 @@ main()
           expected_output: "REVIEW",
           description: "Classifier findings alone, with no hard blocker, route to review.",
         },
+        {
+          input: "0 0 1",
+          expected_output: "REVIEW"
+        }
       ],
     },
   ],

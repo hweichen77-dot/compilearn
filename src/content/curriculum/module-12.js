@@ -342,7 +342,8 @@ main()
         { input: "3 2 2\n0.9 0.1\n1.0 0.0\n0.0 1.0\n0.8 0.2", expected_output: "0 0.9939\n2 0.9910", description: "Two closest vectors to a query along the first axis, most similar first." },
         { input: "4 3 3\n1 2 3\n2 4 6\n1 0 0\n3 2 1\n0 0 5", expected_output: "0 1.0000\n3 0.8018\n2 0.7143", description: "A scalar multiple of the query scores exactly 1.0000." },
         { input: "2 2 2\n1.0 0.0\n1.0 0.0\n2.0 0.0", expected_output: "0 1.0000\n1 1.0000", description: "Tie on similarity is broken by the smaller index." },
-        { input: "2 2 1\n0.0 0.0\n1.0 1.0\n2.0 2.0", expected_output: "0 0.0000", description: "A zero-norm query yields similarity 0.0000 for every document." }
+        { input: "2 2 1\n0.0 0.0\n1.0 1.0\n2.0 2.0", expected_output: "0 0.0000", description: "A zero-norm query yields similarity 0.0000 for every document." },
+        { input: "3 2 2\n0.5 0.1\n1.0 0.8\n0.4 0.5\n0.8 0.2", expected_output: "2 0.9989\n0 0.8882" }
       ]
     },
     {
@@ -654,7 +655,8 @@ main()
         { input: "1 5\n3 7 9 2 5\n3 7 9 2 8", expected_output: "0.8000\n0.8000", description: "Single query: 4 of 5 true neighbors found, mean equals the per-query recall." },
         { input: "2 3\n10 11 12\n10 11 99\n5 6 7\n6 5 7", expected_output: "0.6667\n1.0000\n0.8333", description: "Two queries; order does not affect recall; mean is averaged." },
         { input: "1 4\n1 2 3 4\n4 3 2 1", expected_output: "1.0000\n1.0000", description: "Perfect recall even though the approximate order is reversed." },
-        { input: "1 3\n1 2 3\n4 5 6", expected_output: "0.0000\n0.0000", description: "No overlap at all gives recall 0.0000." }
+        { input: "1 3\n1 2 3\n4 5 6", expected_output: "0.0000\n0.0000", description: "No overlap at all gives recall 0.0000." },
+        { input: "1 5\n3 6 10 3 5\n3 5 94 1 8", expected_output: "0.4000\n0.4000" }
       ]
     },
     {
@@ -988,7 +990,8 @@ main()
         { input: "4\n1 0.90 2021 lang de\n2 0.86 2024 lang de\n3 0.93 2024 lang en\n4 0.80 2023 lang de\n2023\n1\nlang de", expected_output: "2 4", description: "Year floor and one language filter; survivors ranked by score." },
         { input: "5\n10 0.95 2024 lang en tier pro\n11 0.91 2024 lang en tier free\n12 0.99 2022 lang en tier pro\n13 0.88 2025 lang en tier pro\n14 0.70 2024 lang de tier pro\n2023\n2\nlang en\ntier pro", expected_output: "10 13", description: "Two equality filters plus the recency floor must all pass." },
         { input: "2\n1 0.9 2020 lang fr\n2 0.8 2021 lang fr\n2023\n1\nlang fr", expected_output: "NONE", description: "Every candidate fails the year floor, so the result is NONE." },
-        { input: "2\n1 0.9 2024 lang fr\n2 0.95 2024 lang de\n2024\n0", expected_output: "2 1", description: "No equality filters: pure recency floor, ranked by score (0.95 before 0.90)." }
+        { input: "2\n1 0.9 2024 lang fr\n2 0.95 2024 lang de\n2024\n0", expected_output: "2 1", description: "No equality filters: pure recency floor, ranked by score (0.95 before 0.90)." },
+        { input: "5\n10 0.92 2020 lang de tier pro\n6 0.85 2024 lang fr tier free\n1977 0.97 2023 lang en tier pro\n4 0.85 2025 lang de tier pro\n365 0.70 2024 lang de tier pro\n1231\n2\nlang en\ntier pro", expected_output: "1977" }
       ]
     },
     {
@@ -1296,7 +1299,9 @@ main()
       challenge_test_cases: [
         { input: "2 60\n2 docB docA\n1 docA docC", expected_output: "docA docB docC\ndocA 0.049454\ndocB 0.033333\ndocC 0.016393", description: "Keyword list weighted double; docA wins by appearing in both lists." },
         { input: "3 10\n1 a b c\n1 c b a\n2 b", expected_output: "b a c\nb 0.381818\na 0.183333\nc 0.183333", description: "A weighted third list lifts b to the top; a and c tie and break lexicographically." },
-        { input: "1 60\n1 x y z", expected_output: "x y z\nx 0.016667\ny 0.016393\nz 0.016129", description: "A single list just reflects its own rank order with RRF scores." }
+        { input: "1 60\n1 x y z", expected_output: "x y z\nx 0.016667\ny 0.016393\nz 0.016129", description: "A single list just reflects its own rank order with RRF scores." },
+        { input: "2 60\n1 x y\n1 docA b", expected_output: "docA x b y\ndocA 0.016667\nx 0.016667\nb 0.016393\ny 0.016393" },
+        { input: "3 10\n1 x y c\n1 c b a\n3 b", expected_output: "b c x y a\nb 0.390909\nc 0.183333\nx 0.100000\ny 0.090909\na 0.083333" }
       ]
     },
     {
@@ -1585,7 +1590,8 @@ main()
         { input: "4\na 0.80 0.30\nb 0.75 0.95\nc 0.70 0.60\nd 0.40 0.99\n3 2", expected_output: "b c", description: "A high-rerank doc is lost because the retriever dropped it in stage 1." },
         { input: "5\np 0.99 0.10\nq 0.95 0.90\nr 0.90 0.85\ns 0.85 0.99\nt 0.50 0.99\n4 3", expected_output: "s q r", description: "Stage 2 reorders the survivors by rerank score; the top retrieve doc p sinks." },
         { input: "3\nx 0.5 0.9\ny 0.4 0.8\nz 0.3 0.7\n2 5", expected_output: "x y", description: "final_k exceeds the survivor count, so all survivors are returned in reranked order." },
-        { input: "3\nm 0.5 0.5\nn 0.5 0.5\no 0.4 0.9\n2 2", expected_output: "m n", description: "Retrieve keeps m and n (o has lower retrieve_score); their rerank tie breaks by id." }
+        { input: "3\nm 0.5 0.5\nn 0.5 0.5\no 0.4 0.9\n2 2", expected_output: "m n", description: "Retrieve keeps m and n (o has lower retrieve_score); their rerank tie breaks by id." },
+        { input: "4\np 0.98 0.56\nq 0.92 0.77\nr 0.76 0.86\ns 0.59 0.99\n2 3", expected_output: "q p" }
       ]
     },
     {
@@ -1885,7 +1891,8 @@ main()
         { input: "3 0.95 50\npgvector 0.96 40 100\npinecone 0.99 20 800\nfaiss 0.97 10 0", expected_output: "faiss", description: "All clear the bars; cheapest (faiss at $0) wins." },
         { input: "3 0.98 15\npgvector 0.96 40 100\npinecone 0.99 20 800\nfaiss 0.97 10 0", expected_output: "NONE", description: "Recall or latency bars eliminate every candidate." },
         { input: "2 0.90 30\na 0.91 25 50\nb 0.95 25 50", expected_output: "a", description: "Both eligible and tied on cost; lexicographically smaller name wins." },
-        { input: "2 0.90 30\na 0.85 10 5\nb 0.88 20 5", expected_output: "NONE", description: "Neither meets the recall bar despite low latency and cost." }
+        { input: "2 0.90 30\na 0.85 10 5\nb 0.88 20 5", expected_output: "NONE", description: "Neither meets the recall bar despite low latency and cost." },
+        { input: "2 0.90 30\na 0.93 32 43\nb 0.95 23 143", expected_output: "b" }
       ]
     },
     {
@@ -2213,7 +2220,8 @@ main()
         { input: "2 100\nshardA 0\nshardB 0\n3\nacme 30\nbeta 80\nacme 50", expected_output: "acme shardA\nbeta shardB\nacme shardA", description: "Ties on room break to the earlier shard; later batches route to whoever has room." },
         { input: "2 50\nshardA 40\nshardB 10\n2\nt1 30\nt2 30", expected_output: "t1 shardB\nt2 REJECTED", description: "A batch that fits nowhere is rejected without changing any load." },
         { input: "3 100\ns0 90\ns1 50\ns2 95\n2\na 40\nb 60", expected_output: "a s1\nb REJECTED", description: "The emptiest shard wins; the next batch fits no remaining shard." },
-        { input: "1 10\nonly 0\n3\nx 4\ny 4\nz 4", expected_output: "x only\ny only\nz REJECTED", description: "A single shard fills until the third batch no longer fits." }
+        { input: "1 10\nonly 0\n3\nx 4\ny 4\nz 4", expected_output: "x only\ny only\nz REJECTED", description: "A single shard fills until the third batch no longer fits." },
+        { input: "2 100\nshardA 14\ns1 22\n3\nacme 6\nbeta 50\nb 58", expected_output: "acme shardA\nbeta shardA\nb s1" }
       ]
     },
     {
@@ -2522,7 +2530,8 @@ main()
         { input: "3 0.95 5 200\nmon 0.94 150\ntue 0.88 180\nwed 0.93 260", expected_output: "threshold 0.9025\nalerts 2\ntue RECALL\nwed LATENCY", description: "One recall breach and one latency breach on different days." },
         { input: "2 0.90 10 100\nd1 0.90 100\nd2 0.81 99", expected_output: "threshold 0.8100\nalerts 0", description: "Boundary values are not breaches because both comparisons are strict." },
         { input: "1 0.95 5 200\nbad 0.80 500", expected_output: "threshold 0.9025\nalerts 1\nbad RECALL,LATENCY", description: "A single day breaching both metrics reports RECALL,LATENCY in order." },
-        { input: "2 1.0 0 50\na 0.99 40\nb 1.0 60", expected_output: "threshold 1.0000\nalerts 2\na RECALL\nb LATENCY", description: "A zero drop tolerance means any recall below baseline alerts; the latency cap catches day b." }
+        { input: "2 1.0 0 50\na 0.99 40\nb 1.0 60", expected_output: "threshold 1.0000\nalerts 2\na RECALL\nb LATENCY", description: "A zero drop tolerance means any recall below baseline alerts; the latency cap catches day b." },
+        { input: "3 0.95 5 200\nd1 0.85 328\nd2 0.99 161\nwed 0.93 259", expected_output: "threshold 0.9025\nalerts 2\nd1 RECALL,LATENCY\nwed LATENCY" }
       ]
     }
   ]

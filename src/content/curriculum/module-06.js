@@ -306,7 +306,8 @@ main()`,
         { input: "3 2\n0 0\ncat 3 4\nkitten 1 1\ncar 6 8", expected_output: "kitten 1.4142", description: "Example 1: kitten is closest to the origin query." },
         { input: "1 2\n7 7\nonly 0 0", expected_output: "only 9.8995", description: "Example 2: single entry always wins." },
         { input: "4 3\n2 2 2\nalpha 2 2 2\nbeta 5 5 5\ngamma 0 0 0\ndelta 3 3 3", expected_output: "alpha 0.0000", description: "Edge: an exact match yields distance 0." },
-        { input: "2 2\n0 0\nfar 3 0\nnear 2 0", expected_output: "near 2.0000", description: "Edge: straightforward 1-D-style separation along one axis." }
+        { input: "2 2\n0 0\nfar 3 0\nnear 2 0", expected_output: "near 2.0000", description: "Edge: straightforward 1-D-style separation along one axis." },
+        { input: "3 2\n3 7\nfar 3 1\nkitten 1 1\ngamma 6 7", expected_output: "gamma 3.0000" }
       ]
     },
     {
@@ -649,7 +650,8 @@ main()`,
         { input: "3 3\nDieHard 0.9 0.1 0.2\nNotebook 0.1 0.9 0.2\nMadMax 0.95 0.05 0.1\n0.9 0.1 0.2", expected_output: "DieHard 1.0000", description: "Example 1: identical direction scores 1.0." },
         { input: "2 2\nalpha 2 0\nbeta 4 0\n1 0", expected_output: "alpha 1.0000", description: "Example 2: cosine ignores length; tie broken by name." },
         { input: "2 2\na 1 0\nb 0 1\n1 0", expected_output: "a 1.0000", description: "Edge: 'a' aligns, 'b' is perpendicular (score 0)." },
-        { input: "4 3\nA 1 2 2\nB 2 1 2\nC 0 0 5\nD 3 0 0\n2 2 1", expected_output: "A 0.8889", description: "Edge: best alignment is a non-trivial angle." }
+        { input: "4 3\nA 1 2 2\nB 2 1 2\nC 0 0 5\nD 3 0 0\n2 2 1", expected_output: "A 0.8889", description: "Edge: best alignment is a non-trivial angle." },
+        { input: "4 3\na 1 2 2\nb 2 1 2\nC 0 0 6\nD 3 0 0\n1 2 1", expected_output: "a 0.9526" }
       ]
     },
     {
@@ -965,7 +967,9 @@ main()`,
       challenge_test_cases: [
         { input: "3 2\n3 4\n0 5\n0 0", expected_output: "0.6000 0.8000\n0.0000 1.0000\n0.0000 0.0000", description: "Example 1: includes the zero-vector edge case." },
         { input: "1 3\n2 3 6", expected_output: "0.2857 0.4286 0.8571", description: "Example 2: magnitude 7." },
-        { input: "2 2\n-3 4\n5 0", expected_output: "-0.6000 0.8000\n1.0000 0.0000", description: "Edge: negative components keep their sign after scaling." }
+        { input: "2 2\n-3 4\n5 0", expected_output: "-0.6000 0.8000\n1.0000 0.0000", description: "Edge: negative components keep their sign after scaling." },
+        { input: "3 2\n0 4\n0 0\n0 0", expected_output: "0.0000 1.0000\n0.0000 0.0000\n0.0000 0.0000" },
+        { input: "1 3\n2 3 5", expected_output: "0.3244 0.4867 0.8111" }
       ]
     },
     {
@@ -1337,7 +1341,9 @@ main()`,
       challenge_test_cases: [
         { input: "4 3\nDieHard 0.9 0.1 0.2\nNotebook 0.1 0.9 0.2\nMadMax 0.95 0.05 0.1\nBridesmaids 0.2 0.4 0.9\nDieHard MadMax", expected_output: "Bridesmaids 0.3705", description: "Example 1: two liked movies excluded; best of the rest recommended." },
         { input: "3 2\nA 1 0\nB 0 1\nC 0.9 0.1\nA", expected_output: "C 0.9939", description: "Example 2: single liked movie, C is the closest unseen one." },
-        { input: "5 2\nm1 1 0\nm2 0 1\nm3 1 1\nm4 2 0\nm5 0 2\nm1 m2", expected_output: "m3 1.0000", description: "Edge: taste (0.5, 0.5) aligns perfectly with diagonal m3." }
+        { input: "5 2\nm1 1 0\nm2 0 1\nm3 1 1\nm4 2 0\nm5 0 2\nm1 m2", expected_output: "m3 1.0000", description: "Edge: taste (0.5, 0.5) aligns perfectly with diagonal m3." },
+        { input: "5 2\nm1 2 0\nm2 1 1\nC 1 1\nA 2 0\nDieHard 0 2\nm1 m2", expected_output: "A 0.9487" },
+        { input: "3 2\nA 1 0\nB 0 1\nMadMax 0.9 0.1\nA", expected_output: "MadMax 0.9939" }
       ]
     },
     {
@@ -1690,7 +1696,9 @@ main()`,
       challenge_test_cases: [
         { input: "4 3 3\nlogin_help 0.9 0.1 0.0\nreset_password 0.85 0.15 0.0\nbilling_faq 0.0 0.1 0.9\nsearch_tips 0.1 0.8 0.1\n0.9 0.1 0.0", expected_output: "login_help 1.0000\nreset_password 0.9980\nsearch_tips 0.2311", description: "Example 1: top 3 of 4 support docs, best first." },
         { input: "3 2 2\nx 1 0\ny 0 1\nz 0.8 0.2\n1 0", expected_output: "x 1.0000\nz 0.9701", description: "Example 2: perpendicular doc excluded from top 2." },
-        { input: "4 2 2\nbeta 2 0\nalpha 4 0\ngamma 0 1\ndelta 0 3\n1 0", expected_output: "alpha 1.0000\nbeta 1.0000", description: "Edge: alpha and beta tie at 1.0; lexicographic tie-break puts alpha first." }
+        { input: "4 2 2\nbeta 2 0\nalpha 4 0\ngamma 0 1\ndelta 0 3\n1 0", expected_output: "alpha 1.0000\nbeta 1.0000", description: "Edge: alpha and beta tie at 1.0; lexicographic tie-break puts alpha first." },
+        { input: "4 3 3\nlogin_help 0.9 0.1 0.0\nreset_password 0.85 0.15 0.0\nbilling_faq 0.4 0.1 0.9\nsearch_tips 0.1 0.8 0.1\n0.9 0.1 0.0", expected_output: "login_help 1.0000\nreset_password 0.9980\nbilling_faq 0.4127" },
+        { input: "4 2 2\nbeta 2 1\nalpha 3 1\nz 0 1\ndelta 0 2\n2 0", expected_output: "alpha 0.9487\nbeta 0.8944" }
       ]
     },
     {
@@ -1973,7 +1981,8 @@ main()`,
         { input: "3 4\nking 0.9 0.1 0.8 -0.2\nqueen 0.85 0.95 0.7 -0.1\napple -0.1 0.0 0.05 0.9\nking queen apple", expected_output: "king 0\nqueen 1\napple 3", description: "Example 1: each word's strongest axis." },
         { input: "2 3\na 0.5 0.5 0.5\nb -0.9 0.2 0.1\nb a", expected_output: "b 0\na 0", description: "Example 2: negative peak and an all-tie word." },
         { input: "1 5\nw 0.0 -3.0 1.0 3.0 -1.0\nw", expected_output: "w 1", description: "Edge: |-3.0| at index 1 ties |3.0| at index 3; smaller index wins." },
-        { input: "2 2\nx 7 7\ny 2 9\nx y x", expected_output: "x 0\ny 1\nx 0", description: "Edge: repeated query words echo their axis each time." }
+        { input: "2 2\nx 7 7\ny 2 9\nx y x", expected_output: "x 0\ny 1\nx 0", description: "Edge: repeated query words echo their axis each time." },
+        { input: "2 3\nx 0.6 -0.1 1.0\ny 0.2 0.2 0.6\nx y", expected_output: "x 2\ny 2" }
       ]
     },
     {
@@ -2258,7 +2267,8 @@ main()`,
         { input: "3 7\nthe\nquick\nbrown\nfox\njumps\nover\nwalls", expected_output: "3\nthe quick brown\nfox jumps over\nwalls", description: "Example 1: a leftover partial final chunk." },
         { input: "2 3\na\nb\nc", expected_output: "2\na b\nc", description: "Example 2: cap of 2 with one trailing word." },
         { input: "5 2\nhello\nworld", expected_output: "1\nhello world", description: "Edge: fewer words than the cap means a single chunk." },
-        { input: "1 4\nw\nx\ny\nz", expected_output: "4\nw\nx\ny\nz", description: "Edge: size 1 puts every word in its own chunk." }
+        { input: "1 4\nw\nx\ny\nz", expected_output: "4\nw\nx\ny\nz", description: "Edge: size 1 puts every word in its own chunk." },
+        { input: "3 7\na\nb\ny\nz\njumps\nover\nwalls", expected_output: "3\na b y\nz jumps over\nwalls" }
       ]
     },
     {
@@ -2557,7 +2567,8 @@ main()`,
         { input: "5\ndoc1 aaa\ndoc2 bbb\ndoc1 aaa\ndoc1 ccc\ndoc2 bbb", expected_output: "doc1 REEMBED\ndoc2 REEMBED\ndoc1 CACHED\ndoc1 REEMBED\ndoc2 CACHED\n3", description: "Example 1: new chunks, a repeat, and a real edit." },
         { input: "3\na x\na x\na x", expected_output: "a REEMBED\na CACHED\na CACHED\n1", description: "Example 2: one embed, then cache hits." },
         { input: "4\nk 1\nk 2\nk 1\nk 1", expected_output: "k REEMBED\nk REEMBED\nk REEMBED\nk CACHED\n3", description: "Edge: reverting to an old hash still counts as a change from the current cached value." },
-        { input: "2\np q\nr s", expected_output: "p REEMBED\nr REEMBED\n2", description: "Edge: two distinct new chunks both embed." }
+        { input: "2\np q\nr s", expected_output: "p REEMBED\nr REEMBED\n2", description: "Edge: two distinct new chunks both embed." },
+        { input: "5\na x\nk x\nk aaa\nk ccc\ndoc2 bbb", expected_output: "a REEMBED\nk REEMBED\nk REEMBED\nk REEMBED\ndoc2 REEMBED\n5" }
       ]
     }
   ]

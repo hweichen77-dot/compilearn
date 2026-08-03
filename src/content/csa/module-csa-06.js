@@ -137,6 +137,10 @@ export default {
           "input": "0",
           "expected_output": "",
           "description": "zero-length array prints nothing"
+        },
+        {
+          "input": "3\n20 8 11",
+          "expected_output": "20\n8\n11"
         }
       ],
       "xp_reward": 100
@@ -263,6 +267,10 @@ export default {
           "input": "5\n-3 20 30 40 -7",
           "expected_output": "-7 20 30 40 -3",
           "description": "negatives at both ends"
+        },
+        {
+          "input": "4\n3 2 27 11",
+          "expected_output": "11 2 27 3"
         }
       ],
       "xp_reward": 100

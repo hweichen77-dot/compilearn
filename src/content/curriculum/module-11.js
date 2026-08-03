@@ -306,7 +306,8 @@ main()
         { input: "16 3\nlow 1024 1024\nhigh 2048 1024\nhigh 100 100", expected_output: "1024\n4608\n49", description: "Resize + patch math across both detail modes." },
         { input: "16 1\nlow 4000 3000", expected_output: "768", description: "Non-square image floors the shorter side after scaling." },
         { input: "16 1\nhigh 7 7", expected_output: "1", description: "Edge case: image smaller than one patch still costs exactly one token." },
-        { input: "1 1\nlow 600 600", expected_output: "262144", description: "Patch size 1 with a clamped 512x512 image yields 512*512 tokens." }
+        { input: "1 1\nlow 600 600", expected_output: "262144", description: "Patch size 1 with a clamped 512x512 image yields 512*512 tokens." },
+        { input: "16 3\nlow 2117 449\nhigh 2048 1023\nhigh 101 100", expected_output: "224\n4608\n49" }
       ]
     },
     {
@@ -643,7 +644,8 @@ main()
         { input: "4\nlogo.PNG public 9000\nreceipt.jpeg private 1201\nnotes.txt private 500\nicon.webp private 10", expected_output: "logo.PNG url image/png\nreceipt.jpeg base64 image/jpeg 1604\nnotes.txt REJECT unsupported\nicon.webp base64 image/webp 16\nSUMMARY 3 1 1620", description: "Mixed batch exercising url, base64, and rejection." },
         { input: "1\nphoto.GIF public 100", expected_output: "photo.GIF url image/gif\nSUMMARY 1 0 0", description: "Case-insensitive match; public adds no base64 weight." },
         { input: "1\nbar.bmp private 50", expected_output: "bar.bmp REJECT unsupported\nSUMMARY 0 1 0", description: "Edge case: an unsupported extension is rejected even when private." },
-        { input: "1\nempty.png private 0", expected_output: "empty.png base64 image/png 0\nSUMMARY 1 0 0", description: "Edge case: a zero-byte file encodes to zero base64 bytes." }
+        { input: "1\nempty.png private 0", expected_output: "empty.png base64 image/png 0\nSUMMARY 1 0 0", description: "Edge case: a zero-byte file encodes to zero base64 bytes." },
+        { input: "1\nphoto.GIF private 5124", expected_output: "photo.GIF base64 image/gif 6832\nSUMMARY 1 0 6832" }
       ]
     },
     {
@@ -1221,7 +1223,9 @@ main()
       challenge_test_cases: [
         { input: "100 30 4", expected_output: "70.00\n49.00\n34.30\n24.01", description: "Geometric decay reported after each of four steps." },
         { input: "80 50 3", expected_output: "40.00\n20.00\n10.00", description: "Halving each step; noise drops 80 → 40 → 20 → 10." },
-        { input: "50 99 1", expected_output: "0.50", description: "Edge: a single aggressive step removes almost all noise." }
+        { input: "50 99 1", expected_output: "0.50", description: "Edge: a single aggressive step removes almost all noise." },
+        { input: "73 86 1", expected_output: "10.22" },
+        { input: "64 72 1", expected_output: "17.92" }
       ]
     },
     {
@@ -1557,7 +1561,9 @@ main()
       challenge_test_cases: [
         { input: "2\nreceipt 800 4000 40 150 1\nbanner 800 4000 40 150 0", expected_output: "receipt high $0.014370\nbanner low $0.004770\nALL_LOW $0.009540\nALL_HIGH $0.028740\nSAVINGS $0.019200", description: "Mixed routing with a savings calculation." },
         { input: "1\nchip 256 4096 40 150 1", expected_output: "chip high $0.014658\nALL_LOW $0.003138\nALL_HIGH $0.014658\nSAVINGS $0.011520", description: "Single high-detail request against its low baseline." },
-        { input: "1\nidle 0 0 0 0 0", expected_output: "idle low $0.000000\nALL_LOW $0.000000\nALL_HIGH $0.000000\nSAVINGS $0.000000", description: "Edge case: a zero-token request costs exactly $0.000000 with no savings." }
+        { input: "1\nidle 0 0 0 0 0", expected_output: "idle low $0.000000\nALL_LOW $0.000000\nALL_HIGH $0.000000\nSAVINGS $0.000000", description: "Edge case: a zero-token request costs exactly $0.000000 with no savings." },
+        { input: "2\nchip 713 3633 13 41 1\nbanner 801 4001 41 149 0", expected_output: "chip high $0.011553\nbanner low $0.004761\nALL_LOW $0.007554\nALL_HIGH $0.025914\nSAVINGS $0.018360" },
+        { input: "1\nchip 781 3534 28 150 0", expected_output: "chip low $0.004677\nALL_LOW $0.004677\nALL_HIGH $0.012936\nSAVINGS $0.008259" }
       ]
     },
     {
@@ -1872,7 +1878,8 @@ main()
         { input: "2\ntotal date merchant\nr1|merchant total date tax\nr2|merchant", expected_output: "r1 100 EXTRA tax\nr2 33 MISSING total,date\nAVG 66", description: "A perfect-with-extra response and a mostly-missing one, then the average." },
         { input: "1\na b\nx|b a", expected_output: "x 100\nAVG 100", description: "All requested present, no extras: clean line with no segments." },
         { input: "1\nname\nempty|", expected_output: "empty 0 MISSING name\nAVG 0", description: "Edge case: an empty reported list scores 0 and flags the missing field." },
-        { input: "2\ncolor\na|color size\nb|", expected_output: "a 100 EXTRA size\nb 0 MISSING color\nAVG 50", description: "One field requested; extra and missing handled, average rounds with integer division." }
+        { input: "2\ncolor\na|color size\nb|", expected_output: "a 100 EXTRA size\nb 0 MISSING color\nAVG 50", description: "One field requested; extra and missing handled, average rounds with integer division." },
+        { input: "2\na b merchant\nr1|merchant a date tax\nr2|merchant", expected_output: "r1 66 MISSING b EXTRA date,tax\nr2 33 MISSING a,b\nAVG 49" }
       ]
     },
     {
@@ -2172,7 +2179,8 @@ main()
         { input: "4 2 256\n50\n8\n10 11 20 21 90 91 95 96", expected_output: "SAMPLED 4\nTOKENS 1024\nCUTS 1\nDURATION 2.00", description: "Stepped sampling with one scene cut among four frames." },
         { input: "30 1 100\n30\n3\n0 100 0", expected_output: "SAMPLED 3\nTOKENS 300\nCUTS 2\nDURATION 0.10", description: "Every frame sampled; two cuts and a sub-second duration." },
         { input: "24 100 200\n10\n5\n5 6 7 8 9", expected_output: "SAMPLED 1\nTOKENS 200\nCUTS 0\nDURATION 0.21", description: "Edge case: step larger than the clip yields a single frame and zero cuts." },
-        { input: "10 2 50\n0\n4\n5 5 5 5", expected_output: "SAMPLED 2\nTOKENS 100\nCUTS 0\nDURATION 0.40", description: "Edge case: identical brightness never exceeds the threshold, so no cuts." }
+        { input: "10 2 50\n0\n4\n5 5 5 5", expected_output: "SAMPLED 2\nTOKENS 100\nCUTS 0\nDURATION 0.40", description: "Edge case: identical brightness never exceeds the threshold, so no cuts." },
+        { input: "4 2 256\n23\n8\n0 29 8 15 36 92 96 95", expected_output: "SAMPLED 4\nTOKENS 1024\nCUTS 2\nDURATION 2.00" }
       ]
     },
     {
@@ -2480,7 +2488,9 @@ main()
       challenge_test_cases: [
         { input: "3 3\n1 2 3\n4 5 6\n7 8 9\n1 1 2 2 0", expected_output: "CHANGED 4\n1 2 3\n4 0 0\n7 0 0", description: "An interior mask fills four cells; the rest of the image is preserved." },
         { input: "2 2\n9 9\n9 9\n0 0 1 1 9", expected_output: "CHANGED 0\n9 9\n9 9", description: "Edge: filling pixels with the value they already hold changes nothing." },
-        { input: "1 4\n5 6 7 8\n0 1 0 2 0", expected_output: "CHANGED 2\n5 0 0 8", description: "A row mask spanning columns 1..2 repaints two cells to 0, leaving the ends untouched." }
+        { input: "1 4\n5 6 7 8\n0 1 0 2 0", expected_output: "CHANGED 2\n5 0 0 8", description: "A row mask spanning columns 1..2 repaints two cells to 0, leaving the ends untouched." },
+        { input: "3 3\n1 2 3\n4 5 1\n7 3 3\n1 1 1 3 0", expected_output: "CHANGED 2\n1 2 3\n4 0 0\n7 3 3" },
+        { input: "2 2\n8 4\n9 6\n0 0 8 1 10", expected_output: "CHANGED 4\n10 10\n10 10" }
       ]
     }
   ]

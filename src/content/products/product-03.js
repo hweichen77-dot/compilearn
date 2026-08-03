@@ -250,6 +250,14 @@ main()
         expected_output: "0",
         description: "A line with no pipe cannot split into a question and answer.",
       },
+      {
+        input: "1\nno is here",
+        expected_output: "0"
+      },
+      {
+        input: "3\nno is 2+2?|4\n|missing question\nCapital of France?|Paris",
+        expected_output: "2"
+      }
     ],
   },
 
@@ -468,6 +476,14 @@ main()
         expected_output: "0",
         description: "Empty notes produce no chunks.",
       },
+      {
+        input: "5\na quick c fox e",
+        expected_output: "4"
+      },
+      {
+        input: "10\na b c fox",
+        expected_output: "1"
+      }
     ],
   },
 
@@ -682,6 +698,14 @@ main()
         expected_output: "0",
         description: "Three words falls short of the 5-word minimum.",
       },
+      {
+        input: "5\nThe note here.",
+        expected_output: "0"
+      },
+      {
+        input: "3\nShort note is blue. Yes. Water boils at one hundred degrees.",
+        expected_output: "2"
+      }
     ],
   },
 
@@ -896,6 +920,14 @@ main()
         expected_output: "[a] more [b]",
         description: "First '[' to last ']' spans across both bracketed pieces.",
       },
+      {
+        input: "text [a] here [b] end",
+        expected_output: "[a] here [b]"
+      },
+      {
+        input: "no brackets more",
+        expected_output: "NONE"
+      }
     ],
   },
 
@@ -1110,6 +1142,14 @@ main()
         expected_output: "1",
         description: "Case and trailing space differences normalize to the same key.",
       },
+      {
+        input: "4\nHello is Python?\nhi is python\nHI dog barks.\nWhat is Python?",
+        expected_output: "4"
+      },
+      {
+        input: "3\nHello\nhi\nA ",
+        expected_output: "3"
+      }
     ],
   },
 
@@ -1323,6 +1363,14 @@ main()
         expected_output: "0",
         description: "No notes means no API calls.",
       },
+      {
+        input: "50\n3\n32 40 51",
+        expected_output: "3"
+      },
+      {
+        input: "100\n5\n47 47 50 21 60",
+        expected_output: "3"
+      }
     ],
   },
 

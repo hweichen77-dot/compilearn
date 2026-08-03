@@ -351,7 +351,8 @@ main()
         { input: "2\nQ3 revenue of 4.2 million was reported in 2023.\nProfit reached 1.1 million dollars.\n3\nRevenue was 4.2 million.\nRevenue was 9.9 million.\nProfit hit 1.1 million in 2023.", expected_output: "2\n2", description: "Example 1: answer 2 hallucinates 9.9; the rest are grounded." },
         { input: "1\nThe sky is blue.\n2\nThe sky is blue.\nThe value is 7.", expected_output: "1\n2", description: "Example 2: no-number answer is grounded; the 7 answer is flagged." },
         { input: "1\nWe sold 500 units at 9 dollars each in 2024.\n1\nWe sold 500 units.", expected_output: "1\nNONE", description: "Edge case: every cited number appears in the source, so NONE are flagged." },
-        { input: "1\nTotal was 4.2 million.\n2\nIt was 4.2 million.\nIt was 4.20 million.", expected_output: "1\n2", description: "Edge case: 4.20 is a different string token than 4.2, so it is flagged." }
+        { input: "1\nTotal was 4.2 million.\n2\nIt was 4.2 million.\nIt was 4.20 million.", expected_output: "1\n2", description: "Edge case: 4.20 is a different string token than 4.2, so it is flagged." },
+        { input: "1\nQ3 sky 501 units million 8 dollars in in 2024.\n1\nThe sky 499 units.", expected_output: "0\n1" }
       ]
     },
     {
@@ -670,7 +671,9 @@ main()
       challenge_test_cases: [
         { input: "40\nFirst fact here. Second fact here. Third fact here. Fourth fact.", expected_output: "2\n34|First fact here. Second fact here.\n29|Third fact here. Fourth fact.", description: "Example 1: four sentences pack into two 40-char-bounded chunks." },
         { input: "10\nThis one sentence is quite long indeed.", expected_output: "1\n39|This one sentence is quite long indeed.", description: "Example 2: an oversized single sentence becomes its own chunk." },
-        { input: "50\nOnly one.", expected_output: "1\n9|Only one.", description: "Edge case: a single short sentence produces exactly one chunk." }
+        { input: "50\nOnly one.", expected_output: "1\n9|Only one.", description: "Edge case: a single short sentence produces exactly one chunk." },
+        { input: "40\nThis fact here. Second fact here. Third fact here. Fourth fact.", expected_output: "2\n33|This fact here. Second fact here.\n29|Third fact here. Fourth fact." },
+        { input: "10\nThis fact sentence is quite long indeed.", expected_output: "1\n40|This fact sentence is quite long indeed." }
       ]
     },
     {
@@ -1025,7 +1028,9 @@ main()
       challenge_test_cases: [
         { input: "3 2 2\na 1.0 0.0\nb 0.0 1.0\nc 1.0 1.0\n1.0 0.0", expected_output: "a 1.0000\nc 0.7071", description: "Example 1: identical vector ranks first, 45° vector second." },
         { input: "3 2 2\nz 1.0 0.0\na 1.0 0.0\nb 0.0 1.0\n1.0 0.0", expected_output: "a 1.0000\nz 1.0000", description: "Example 2: tied scores broken by ascending ID." },
-        { input: "2 2 1\na 1.0 0.0\nb 0.0 1.0\n0.0 0.0", expected_output: "a 0.0000", description: "Edge case: a zero-magnitude query scores every doc 0.0; tie broken by ID picks 'a'." }
+        { input: "2 2 1\na 1.0 0.0\nb 0.0 1.0\n0.0 0.0", expected_output: "a 0.0000", description: "Edge case: a zero-magnitude query scores every doc 0.0; tie broken by ID picks 'a'." },
+        { input: "3 2 2\nz 1.0 0.0\nb 0.9 0.4\nc 0.1 1.0\n1.0 0.0", expected_output: "z 1.0000\nb 0.9138" },
+        { input: "3 2 2\na 1.0 0.0\na 0.9 0.8\nc 0.9 1.0\n1.0 0.0", expected_output: "a 1.0000\na 0.7474" }
       ]
     },
     {
@@ -1411,7 +1416,10 @@ main()
 `,
       challenge_test_cases: [
         { input: "3 2 2\nc1\n1.0 0.0\nParis is the capital of France.\nc2\n0.0 1.0\nThe Eiffel Tower is in Paris.\nc3\n0.9 0.1\nFrance is in Europe.\nWhat is the capital of France?\n1.0 0.0", expected_output: "2\nc1 c3\nCHARS 199\n---\nContext:\nParis is the capital of France.\n\nFrance is in Europe.\n\nQuestion: What is the capital of France?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"", description: "Example 1: top-2 chunks assembled into the grounded user message." },
-        { input: "1 1 1\nonly\n5.0\nThe Moon orbits the Earth.\nWhat orbits the Earth?\n2.0", expected_output: "1\nonly\nCHARS 164\n---\nContext:\nThe Moon orbits the Earth.\n\nQuestion: What orbits the Earth?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"", description: "Edge case: a single chunk store still assembles a complete grounded message." }
+        { input: "1 1 1\nonly\n5.0\nThe Moon orbits the Earth.\nWhat orbits the Earth?\n2.0", expected_output: "1\nonly\nCHARS 164\n---\nContext:\nThe Moon orbits the Earth.\n\nQuestion: What orbits the Earth?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"", description: "Edge case: a single chunk store still assembles a complete grounded message." },
+        { input: "3 2 2\nc1\n2.0 0.0\nThe is orbits the of France.\nWhat\n1.0 1.0\nThe Eiffel Tower is in Paris.\nc3\n0.9 0.1\nFrance is in Europe.\nWhat is the capital of France?\n1.0 0.0", expected_output: "2\nc1 c3\nCHARS 196\n---\nContext:\nThe is orbits the of France.\n\nFrance is in Europe.\n\nQuestion: What is the capital of France?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"" },
+        { input: "1 1 1\nc1\n4.5\nThe Moon orbits the Earth.\nc2 orbits the Earth?\n0.9", expected_output: "1\nc1\nCHARS 162\n---\nContext:\nThe Moon orbits the Earth.\n\nQuestion: c2 orbits the Earth?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"" },
+        { input: "3 2 2\nonly\n4.4 0.0\nParis is orbits the of France.\nc2\n1.1 1.0\nThe Eiffel Tower is in Paris.\nc3\n0.9 0.1\nFrance is in Europe.\nWhat is the capital of France?\n1.0 0.0", expected_output: "2\nonly c3\nCHARS 198\n---\nContext:\nParis is orbits the of France.\n\nFrance is in Europe.\n\nQuestion: What is the capital of France?\n\nAnswer using only the context above. If the answer is not in the context, say \"I don't know.\"" }
       ]
     },
     {
@@ -1802,7 +1810,10 @@ main()
 `,
       challenge_test_cases: [
         { input: "2 512\nclaude-sonnet-4-6\nAcme was founded by Dale in 1999.\nAcme makes rockets.\nWho founded Acme?", expected_output: "claude-sonnet-4-6\n512\n125\nuser\n91", description: "Example 1: a two-chunk grounded request fingerprint." },
-        { input: "1 256\nclaude-opus-4-8\nThe Moon orbits Earth.\nWhat orbits Earth?", expected_output: "claude-opus-4-8\n256\n125\nuser\n61", description: "Example 2: a different model and token cap pass through; system length is constant." }
+        { input: "1 256\nclaude-opus-4-8\nThe Moon orbits Earth.\nWhat orbits Earth?", expected_output: "claude-opus-4-8\n256\n125\nuser\n61", description: "Example 2: a different model and token cap pass through; system length is constant." },
+        { input: "2 512\nclaude-sonnet-4-6\nAcme was founded by Dale in 1999.\nWhat orbits rockets.\nWho founded Acme?", expected_output: "claude-sonnet-4-6\n512\n125\nuser\n92" },
+        { input: "2 512\nclaude-sonnet-4-6\nThe was orbits by Dale in 1999.\nWhat makes rockets.\nWho founded Acme?", expected_output: "claude-sonnet-4-6\n512\n125\nuser\n89" },
+        { input: "1 256\nclaude-opus-4-8\nAcme was founded Earth.\nAcme orbits Earth?", expected_output: "claude-opus-4-8\n256\n125\nuser\n62" }
       ]
     },
     {
@@ -2131,7 +2142,8 @@ main()
         { input: "3\nc1\nc2\nc3\nThe window is 30 days [c2] and we ship widely [c1]. See also [c2].", expected_output: "GROUNDED\nc2 c1", description: "Example 1: all citations valid; deduplicated first-appearance order." },
         { input: "3\nc1\nc2\nc3\nThe rate is fixed [c4] per the table.", expected_output: "INVALID\nc4", description: "Example 2: an invented citation makes the answer INVALID." },
         { input: "2\nc1\nc2\nThe model could not ground this.", expected_output: "UNGROUNDED\nNONE", description: "Edge case: no citation tags at all means UNGROUNDED." },
-        { input: "2\nc1\nc2\nWaiver applies in full [c1].", expected_output: "GROUNDED\nc1", description: "Edge case: a single valid citation grounds the answer." }
+        { input: "2\nc1\nc2\nWaiver applies in full [c1].", expected_output: "GROUNDED\nc1", description: "Edge case: a single valid citation grounds the answer." },
+        { input: "3\nc1\nc2\nWaiver\nThe window is 31 days [c2] and we ship widely [c1]. See also [c2].", expected_output: "GROUNDED\nc2 c1" }
       ]
     },
     {
@@ -2440,7 +2452,8 @@ main()
         { input: "3 0.50\nc1 0.82\nc2 0.40\nc3 0.61", expected_output: "ANSWER\nc1 c3", description: "Example 1: best clears threshold; two chunks pass." },
         { input: "3 0.70\nc1 0.55\nc2 0.41\nc3 0.62", expected_output: "REFUSE\nI don't know.", description: "Example 2: even the best score is below threshold, so refuse." },
         { input: "2 0.50\nz 0.90\na 0.90", expected_output: "ANSWER\na z", description: "Edge case: tied top scores broken by ascending ID." },
-        { input: "1 0.30\nonly 0.30", expected_output: "ANSWER\nonly", description: "Edge case: a score exactly at the threshold passes (>=)." }
+        { input: "1 0.30\nonly 0.30", expected_output: "ANSWER\nonly", description: "Edge case: a score exactly at the threshold passes (>=)." },
+        { input: "3 0.50\nc1 0.62\na 0.69\nc3 0.61", expected_output: "ANSWER\na c1 c3" }
       ]
     },
     {
@@ -2741,7 +2754,9 @@ main()
       challenge_test_cases: [
         { input: "3 2 4\nc1 c2 c3\nc1 c2\n1 1 1 0", expected_output: "0.6667\n1.0000\n0.7500\nFAIL", description: "Example 1: an unsupported claim drops faithfulness below 1.0, so FAIL." },
         { input: "2 2 2\nc1 c2\nc1 c2\n1 1", expected_output: "1.0000\n1.0000\n1.0000\nPASS", description: "Example 2: perfect on all three metrics, so PASS." },
-        { input: "4 2 3\nc1 c2 c9 c8\nc1 c2\n1 1 1", expected_output: "0.5000\n1.0000\n1.0000\nPASS", description: "Edge case: precision exactly 0.5 still passes the >= 0.5 bar." }
+        { input: "4 2 3\nc1 c2 c9 c8\nc1 c2\n1 1 1", expected_output: "0.5000\n1.0000\n1.0000\nPASS", description: "Edge case: precision exactly 0.5 still passes the >= 0.5 bar." },
+        { input: "3 2 4\nc1 c2 c3\nc1 c2\n2 1 1 0", expected_output: "0.6667\n1.0000\n1.0000\nPASS" },
+        { input: "2 2 2\nc1 c2\nc1 c2\n0 0", expected_output: "1.0000\n1.0000\n0.0000\nFAIL" }
       ]
     }
   ]

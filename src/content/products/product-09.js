@@ -664,6 +664,14 @@ main()
           expected_output: "1 1",
           description: "Edge: a tie between two equal-scoring lines resolves to the earliest line number.",
         },
+        {
+          input: "2\nQ: What you ship internationally?\nA: No, open within the US.\nWe ship you ship policy?",
+          expected_output: "1 1"
+        },
+        {
+          input: "2\nship What are\nship ship only\nWe is things",
+          expected_output: "1 0"
+        }
       ],
     },
     {
@@ -904,6 +912,14 @@ main()
           expected_output: "I don't have that information in my FAQ.",
           description: "Edge: score of exactly 0 always forces the refusal string.",
         },
+        {
+          input: "2\n3 We're within 9am-5pm.\n0 Yes we sell gift cards!",
+          expected_output: "We're within 9am-5pm.\nI don't have that information in my FAQ."
+        },
+        {
+          input: "1\n5 Confident open ungrounded US only.",
+          expected_output: "Confident open ungrounded US only."
+        }
       ],
     },
     {
@@ -1149,6 +1165,14 @@ main()
           expected_output: "NO_CITATION",
           description: "Edge: no 'Source: line N' pattern present at all.",
         },
+        {
+          input: "4\nWe ship worldwide.\\nSource: line 6",
+          expected_output: "INVALID 6"
+        },
+        {
+          input: "4\nWe open worldwide.\\nSource: line 8",
+          expected_output: "INVALID 8"
+        }
       ],
     },
     {
