@@ -15,6 +15,7 @@ const APCS = lazy(() => import('./pages/APCS'));
 const Playground = lazy(() => import('./pages/Playground'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
+const Accessibility = lazy(() => import('./pages/Accessibility'));
 import __Layout from './Layout.jsx';
 
 export const PAGES = {
@@ -33,6 +34,7 @@ export const PAGES = {
     "Playground": Playground,
     "Privacy": Privacy,
     "Terms": Terms,
+    "Accessibility": Accessibility,
 }
 
 export const pagesConfig = {

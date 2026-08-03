@@ -363,6 +363,7 @@ function SiteFooter() {
             <FooterLink href="mailto:jason.huang317235@gmail.com">Contact</FooterLink>
             <FooterLink to={createPageUrl("Privacy")}>Privacy</FooterLink>
             <FooterLink to={createPageUrl("Terms")}>Terms</FooterLink>
+            <FooterLink to={createPageUrl("Accessibility")}>Accessibility</FooterLink>
           </div>
         </div>
       </div>

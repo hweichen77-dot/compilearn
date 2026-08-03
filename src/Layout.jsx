@@ -313,6 +313,15 @@ export default function Layout({ children, currentPageName }) {
           >
             Terms
           </Link>
+          <Link
+            to={createPageUrl("Accessibility")}
+            className="u-mono text-xs transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-strong)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+          >
+            Accessibility
+          </Link>
           <span className="u-mono text-xs" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
             Export or delete your data any time from Privacy.
           </span>

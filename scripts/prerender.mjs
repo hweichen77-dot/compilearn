@@ -13,7 +13,7 @@ const ORIGIN = `${SITE_URL}${BASE}`
 
 const NOINDEX = process.env.PRERENDER_NOINDEX === '1'
 
-const TOP_PAGES = ['/', '/AITrack', '/Playground', '/Projects', '/Challenges', '/Competitive', '/APCS', '/Privacy', '/Terms']
+const TOP_PAGES = ['/', '/AITrack', '/Playground', '/Projects', '/Challenges', '/Competitive', '/APCS', '/Privacy', '/Terms', '/Accessibility']
 
 const TOP_PAGE_META = {
   AITrack: {
@@ -48,6 +48,11 @@ const TOP_PAGE_META = {
   },
   Privacy: { title: 'Privacy', description: 'Compilearn privacy policy.', blurb: 'Privacy policy.' },
   Terms: { title: 'Terms', description: 'Compilearn terms of service.', blurb: 'Terms of service.' },
+  Accessibility: {
+    title: 'Accessibility',
+    description: 'How Compilearn works with a keyboard, a screen reader, enlarged text, and reduced motion, what is in place, and which problems are still open.',
+    blurb: 'How Compilearn works with a keyboard, a screen reader, enlarged text, and reduced motion, plus the problems we know about.',
+  },
 }
 
 const HOME_META = {
