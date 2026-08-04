@@ -1,11 +1,17 @@
 
 import { checkLimits } from "../_shared/rateLimit.ts";
 import { isDisposableEmail } from "../_shared/disposableEmail.ts";
+import { emailFooter, isUnsubscribed, unsubscribeUrl } from "../_shared/emailOptOut.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = Deno.env.get("RETENTION_FROM") ?? "Compilearn <onboarding@resend.dev>";
 const TRIGGER_SECRET = Deno.env.get("RETENTION_TRIGGER_SECRET");
 const SITE = Deno.env.get("SITE_URL") ?? "https://www.compilearn.com";
+const FUNCTIONS_BASE = Deno.env.get("FUNCTIONS_BASE_URL") ?? "";
+const UNSUB_SECRET = Deno.env.get("EMAIL_UNSUB_SECRET") ?? "";
+const POSTAL_ADDRESS = Deno.env.get("MAILING_POSTAL_ADDRESS") ?? "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -78,12 +84,31 @@ Deno.serve(async (req: Request) => {
   const limitErr = await checkLimits({ caller: email || "cron", fn: "retention-email", perMin: 60, globalPerMin: 120, globalPerDay: 10000 });
   if (limitErr) return json({ error: limitErr }, 429);
 
+  if (!UNSUB_SECRET || !POSTAL_ADDRESS) {
+    console.error("retention-email blocked: EMAIL_UNSUB_SECRET and MAILING_POSTAL_ADDRESS are required by CAN-SPAM");
+    return json({ error: "email not configured" }, 500);
+  }
+
+  if (await isUnsubscribed(email, SUPABASE_URL, SERVICE_KEY)) return json({ sent: false, reason: "unsubscribed" });
+
+  const unsubUrl = await unsubscribeUrl(email, SITE, FUNCTIONS_BASE, UNSUB_SECRET);
   const { subject, html } = subjectAndBody(body);
+  const fullHtml = html + emailFooter(unsubUrl, POSTAL_ADDRESS);
+
   try {
     const resp = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${RESEND_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [email], subject, html }),
+      body: JSON.stringify({
+        from: FROM,
+        to: [email],
+        subject,
+        html: fullHtml,
+        headers: {
+          "List-Unsubscribe": `<${unsubUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+      }),
     });
     if (!resp.ok) {
       const detail = await resp.text();

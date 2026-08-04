@@ -103,6 +103,13 @@ export default function Playground() {
         )}
       </StaggerItem>
 
+      <StaggerItem as="div">
+        <p className="mb-6 text-xs" style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 1.6, maxWidth: '62ch' }}>
+          Every run here goes to a real AI language model. Responses are AI-generated and can be
+          inaccurate. Your prompt and test inputs are sent to Groq to produce them.
+        </p>
+      </StaggerItem>
+
       <StaggerItem className="mb-6 flex gap-2" as="div">
         {[['defend', 'Defend a prompt'], ['attack', 'Break one instead'], ['audit', 'Audit your own']].map(([key, label]) => (
           <button
