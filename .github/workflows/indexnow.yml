@@ -1,0 +1,20 @@
+name: Submit sitemap to IndexNow
+
+# submit-indexnow.mjs reads the LIVE sitemap and refuses to run until the key
+# file is served, so this cannot hang off the build — at build time the deploy
+# it would announce does not exist yet. A schedule after the fact is correct,
+# and weekly keeps us clear of IndexNow's "only submit what changed" guidance.
+on:
+  schedule:
+    - cron: '17 11 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/submit-indexnow.mjs
