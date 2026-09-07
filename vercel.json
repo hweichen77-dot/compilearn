@@ -7,7 +7,12 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "compilearn.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "compilearn.com"
+        }
+      ],
       "destination": "https://www.compilearn.com/:path*",
       "permanent": true
     },
@@ -19,6 +24,61 @@
     {
       "source": "/app/:path*",
       "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/Privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/Terms",
+      "permanent": true
+    },
+    {
+      "source": "/accessibility",
+      "destination": "/Accessibility",
+      "permanent": true
+    },
+    {
+      "source": "/projects",
+      "destination": "/Projects",
+      "permanent": true
+    },
+    {
+      "source": "/challenges",
+      "destination": "/Challenges",
+      "permanent": true
+    },
+    {
+      "source": "/playground",
+      "destination": "/Playground",
+      "permanent": true
+    },
+    {
+      "source": "/competitive",
+      "destination": "/Competitive",
+      "permanent": true
+    },
+    {
+      "source": "/apcs",
+      "destination": "/APCS",
+      "permanent": true
+    },
+    {
+      "source": "/aitrack",
+      "destination": "/AITrack",
+      "permanent": true
+    },
+    {
+      "source": "/portfolio",
+      "destination": "/Portfolio",
+      "permanent": true
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/Dashboard",
       "permanent": true
     }
   ],

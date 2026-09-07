@@ -55,6 +55,18 @@ const TOP_PAGE_META = {
   },
 }
 
+const APP_PAGES = {
+  login: { title: 'Sign in', description: 'Sign in to Compilearn to save your progress across devices.' },
+  Home: { title: 'Compilearn', description: 'Learn how AI works by defending one, alongside a full AP Computer Science curriculum.' },
+  Dashboard: { title: 'Your dashboard', description: 'Your streak, your progress, and the lesson you left off on.' },
+  Portfolio: { title: 'Your portfolio', description: 'The projects and challenges you have finished on Compilearn.' },
+  ChallengeDetail: { title: 'Coding challenge', description: 'A graded coding challenge that runs in the browser.' },
+  CompetitiveDetail: { title: 'Competitive problem', description: 'A competitive programming problem with a real in-browser judge.' },
+  ProjectDetail: { title: 'Project', description: 'A guided project you build step by step with live code execution.' },
+  LessonDemo: { title: 'Lesson demo', description: 'A preview of how a Compilearn lesson works.' },
+  LessonExpander: { title: 'Lesson expander', description: 'An internal tool for drafting lesson content.' },
+}
+
 const HOME_META = {
   title: 'Compilearn: learn how AI works by defending one',
   blurb:
@@ -77,8 +89,10 @@ const stripMd = (s) =>
     .replace(/\s+/g, ' ')
     .trim()
 
-const withNoindex = (html) =>
-  NOINDEX ? html.replace('</head>', '<meta name="robots" content="noindex" />\n  </head>') : html
+const addNoindex = (html) =>
+  html.replace('</head>', '<meta name="robots" content="noindex" />\n  </head>')
+
+const withNoindex = (html) => (NOINDEX ? addNoindex(html) : html)
 
 const ORG = {
   '@type': 'Organization',
@@ -227,6 +241,74 @@ function run() {
     topWritten++
   }
 
+  let appWritten = 0
+  for (const [page, meta] of Object.entries(APP_PAGES)) {
+    const url = `${ORIGIN}/${page}`
+    let html = addNoindex(replaceHead(template, { title: meta.title, description: meta.description, url }))
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root"><article style="max-width:720px;margin:64px auto;padding:0 24px;font-family:system-ui,sans-serif;color:#e8e2d5;line-height:1.6"><h1>${esc(meta.title)}</h1><p>${esc(meta.description)}</p><p><a href="${BASE}/">Compilearn home</a></p></article></div>`,
+    )
+    const outDir = path.join(DIST, page)
+    fs.mkdirSync(outDir, { recursive: true })
+    fs.writeFileSync(path.join(outDir, 'index.html'), html)
+    appWritten++
+  }
+
+  const projects = new Map()
+  for (const r of routes) {
+    if (!r.projectSlug) continue
+    if (!projects.has(r.projectSlug)) projects.set(r.projectSlug, [])
+    projects.get(r.projectSlug).push(r)
+  }
+
+  const projectPaths = []
+  for (const [slug, group] of projects) {
+    const title = group[0].projectTitle || slug
+    const lead = stripMd(group[0].explanation || group[0].concept || '').slice(0, 260).trim()
+    const description = `${title}. ${group.length} lessons that run in the browser. ${lead}`.slice(0, 155).trim()
+    const routePath = `/learn/${slug}`
+    const url = `${ORIGIN}${routePath}`
+    let html = replaceHead(template, { title, description, url })
+    html = withJsonLd(html, [
+      ORG,
+      {
+        '@type': 'Course',
+        '@id': `${url}#course`,
+        name: title,
+        description,
+        url,
+        inLanguage: 'en',
+        isAccessibleForFree: true,
+        provider: { '@id': ORG['@id'] },
+        hasCourseInstance: {
+          '@type': 'CourseInstance',
+          courseMode: 'online',
+          courseWorkload: `PT${group.length * 20}M`,
+        },
+        numberOfCredits: group.length,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Compilearn', item: `${ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: title, item: url },
+        ],
+      },
+    ])
+    const lessons = group
+      .map((r) => `<li><a href="${BASE}${r.path}">${esc(r.title)}</a></li>`)
+      .join('')
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root"><article style="max-width:720px;margin:64px auto;padding:0 24px;font-family:system-ui,sans-serif;color:#e8e2d5;line-height:1.6"><h1>${esc(title)}</h1><p>${esc(lead)}</p><p>${group.length} lessons, each with runnable code in the browser.</p><ol>${lessons}</ol><p><a href="${BASE}/">Compilearn home</a></p></article></div>`,
+    )
+    const outDir = path.join(DIST, 'learn', slug)
+    fs.mkdirSync(outDir, { recursive: true })
+    fs.writeFileSync(path.join(outDir, 'index.html'), html)
+    projectPaths.push(routePath)
+  }
+
   const homeHtml = withJsonLd(withNoindex(template), [
     ORG,
     {
@@ -262,6 +344,7 @@ function run() {
 
   const urls = [
     ...TOP_PAGES.map((p) => `${BASE}${p === '/' ? '/' : p}`),
+    ...projectPaths.map((p) => `${BASE}${p}`),
     ...routes.map((r) => `${BASE}${r.path}`),
   ]
   const sitemap =
@@ -280,7 +363,9 @@ function run() {
       : `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
   )
 
-  console.log(`[prerender] wrote ${written} lesson pages + ${topWritten} top pages + sitemap (${urls.length} urls)`)
+  console.log(
+    `[prerender] wrote ${written} lesson pages + ${projectPaths.length} project pages + ${topWritten} top pages + ${appWritten} app pages + sitemap (${urls.length} urls)`,
+  )
 }
 
 run()

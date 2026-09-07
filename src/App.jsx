@@ -15,6 +15,7 @@ import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import AppSkeleton from '@/components/ui/AppSkeleton';
 import { checkForAppUpdate } from '@/lib/appUpdate';
+import { Analytics } from '@vercel/analytics/react';
 
 const isDesktop = typeof window !== 'undefined' && Boolean(window.__TAURI__ || window.__TAURI_INTERNALS__);
 
@@ -118,6 +119,7 @@ const Gate = () => {
       <AuthenticatedApp />
       <FeedbackWidget />
       <StorageWatcher />
+      {!isDesktop && <Analytics />}
     </Router>
   );
 };
