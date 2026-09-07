@@ -57,7 +57,7 @@ const TOP_PAGE_META = {
 
 const APP_PAGES = {
   login: { title: 'Sign in', description: 'Sign in to Compilearn to save your progress across devices.' },
-  Home: { title: 'Compilearn', description: 'Learn how AI works by defending one, alongside a full AP Computer Science curriculum.' },
+  Home: { title: 'Home', description: 'Learn how AI works by defending one, alongside a full AP Computer Science curriculum.' },
   Dashboard: { title: 'Your dashboard', description: 'Your streak, your progress, and the lesson you left off on.' },
   Portfolio: { title: 'Your portfolio', description: 'The projects and challenges you have finished on Compilearn.' },
   ChallengeDetail: { title: 'Coding challenge', description: 'A graded coding challenge that runs in the browser.' },
