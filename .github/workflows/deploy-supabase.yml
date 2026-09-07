@@ -12,6 +12,7 @@ on:
       - 'supabase/functions/**'
       - 'supabase/retention-cron.sql'
       - 'supabase/rate-limit.sql'
+      - 'supabase/email-optout.sql'
       - 'supabase/leaderboard.sql'
       - 'supabase/anon-leaderboard.sql'
       - '.github/workflows/deploy-supabase.yml'
@@ -53,10 +54,12 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RETENTION_FROM: ${{ secrets.RETENTION_FROM }}
           RETENTION_TRIGGER_SECRET: ${{ secrets.RETENTION_TRIGGER_SECRET }}
+          EMAIL_UNSUB_SECRET: ${{ secrets.EMAIL_UNSUB_SECRET }}
+          MAILING_POSTAL_ADDRESS: ${{ secrets.MAILING_POSTAL_ADDRESS }}
           SITE_URL: ${{ vars.SITE_URL || 'https://www.compilearn.com' }}
         run: |
           args=()
-          for k in GROQ_API_KEY TUTOR_GROQ_API_KEY INVOKE_GROQ_API_KEY PLAYGROUND_GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET SITE_URL; do
+          for k in GROQ_API_KEY TUTOR_GROQ_API_KEY INVOKE_GROQ_API_KEY PLAYGROUND_GROQ_API_KEY RESEND_API_KEY RETENTION_FROM RETENTION_TRIGGER_SECRET EMAIL_UNSUB_SECRET MAILING_POSTAL_ADDRESS SITE_URL; do
             v="${!k}"
             [ -n "$v" ] && args+=("$k=$v")
           done
@@ -105,6 +108,19 @@ jobs:
           if [ "$code" -ge 300 ]; then cat /tmp/anonlbresp.json; exit 1; fi
           echo "Anonymous leaderboard schema applied."
 
+      - name: Apply email opt-out schema
+        run: |
+          set -e
+          jq -Rs '{query: .}' < supabase/email-optout.sql > /tmp/eo.json
+          code=$(curl -sS -o /tmp/eoresp.json -w '%{http_code}' \
+            -X POST "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "content-type: application/json" \
+            --data @/tmp/eo.json)
+          echo "email opt-out SQL HTTP $code"
+          if [ "$code" -ge 300 ]; then cat /tmp/eoresp.json; exit 1; fi
+          echo "Email opt-out schema applied."
+
       - name: Deploy functions
         run: |
           set -e
@@ -120,6 +136,7 @@ jobs:
           supabase functions deploy retention-email --project-ref "$PROJECT_REF" --no-verify-jwt
           supabase functions deploy feedback        --project-ref "$PROJECT_REF" --no-verify-jwt
           supabase functions deploy lab-score       --project-ref "$PROJECT_REF" --no-verify-jwt
+          supabase functions deploy unsubscribe     --project-ref "$PROJECT_REF" --no-verify-jwt
 
       - name: Apply auth hardening
         env:
