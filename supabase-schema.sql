@@ -133,3 +133,14 @@ create policy "Users can insert own state" on public.user_state
   for insert with check (auth.uid() = user_id);
 create policy "Users can update own state" on public.user_state
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ── Email opt-outs (CAN-SPAM suppression list) ────────────────────────────────
+-- Written by the unsubscribe edge function using the service role. Checked
+-- before any retention email is sent. No RLS policy is granted to end users;
+-- opt-out happens through the signed unsubscribe link, not the client.
+create table if not exists public.email_optouts (
+  email text primary key,
+  created_at timestamptz not null default now()
+);
+
+alter table public.email_optouts enable row level security;

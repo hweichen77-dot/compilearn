@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { font } from "@/lib/tokens";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
+import AgeGate, { isAgeEligible } from '@/components/AgeGate';
 
 const LABEL = font.body;
 const SERIF = font.display;
@@ -36,6 +37,7 @@ export default function AuthGate() {
   const { signInGoogle, signInGuest, supabaseConfigured } = useAuth();
   const navigate = useNavigate();
 
+  const [ageOk, setAgeOk] = useState(() => isAgeEligible());
   const [mode, setMode] = useState('google');
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -70,6 +72,14 @@ export default function AuthGate() {
     google: 'Sign in with Google to save your progress across devices.',
     guest: 'No account, progress is saved locally on this device.',
   };
+
+  if (!ageOk) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#070B0A' }}>
+        <AgeGate onPass={() => setAgeOk(true)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#070B0A' }}>

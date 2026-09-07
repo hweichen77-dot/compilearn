@@ -112,6 +112,47 @@ export default function Privacy() {
           </p>
         </Section></StaggerItem>
 
+        <StaggerItem as="div"><Section title="Children's privacy">
+          <p>
+            Compilearn is intended for people aged 13 and over. Before you can create an account we
+            ask for your year of birth. If you are under 13 we do not create the account and we do
+            not keep what you entered, only the fact that the age check did not pass, stored in your
+            own browser.
+          </p>
+          <p>
+            We do not knowingly collect personal information from children under 13. If you believe a
+            child under 13 has given us personal information, email{' '}
+            <a href="mailto:jason.huang317235@gmail.com" style={{ color: '#5ED29C' }}>jason.huang317235@gmail.com</a>{' '}
+            and we will delete it.
+          </p>
+          <p>
+            If you are between 13 and 18, use Compilearn with the permission of a parent, guardian, or
+            teacher. Parents, guardians, and schools can request access to or deletion of a student's
+            data at the same address. When a school uses Compilearn with its students we handle that
+            data consistently with FERPA, use it only to provide the service, and never sell it or use
+            it to train AI models.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="Email we send you">
+          <p>
+            If you have an account, we may email you about your streak, your weekly progress, or a
+            lesson you left unfinished. Every one of those emails has a one-click unsubscribe link and
+            our postal address, and unsubscribing stops them straight away. Account and security
+            messages, such as a sign-in link, are not marketing and still go out.
+          </p>
+        </Section></StaggerItem>
+
+        <StaggerItem as="div"><Section title="AI features">
+          <p>
+            The tutor and the prompt playground are AI language models, not people. Anything they say
+            can be wrong, and they are labelled as AI wherever they appear. What you send them goes to
+            Groq, which runs the model and returns the answer. We do not use your prompts or code to
+            train models; Groq handles what it receives under its own API terms. We do not send
+            anything to an AI provider unless you ask for help or press run.
+          </p>
+        </Section></StaggerItem>
+
         <StaggerItem as="div"><Section title="How long we keep it">
           <p>
             Local progress stays in your browser until you clear it. If you have an account, your
