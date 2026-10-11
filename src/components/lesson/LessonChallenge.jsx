@@ -74,7 +74,7 @@ export default function LessonChallenge({ lesson, fill = false, onSolved }) {
         </span>
       </div>
 
-      <div className={`px-6 py-5 ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
+      <div className={`px-6 py-5 ${fill ? "flex min-h-0 flex-1 flex-col overflow-y-auto" : ""}`}>
         <style>{`
           .lc-md { color:#FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 0.875rem; line-height: 1.7; }
           .lc-md p { margin: 0 0 0.6rem; }
@@ -174,7 +174,7 @@ export default function LessonChallenge({ lesson, fill = false, onSolved }) {
           </div>
         )}
 
-        <div className={`mb-4 ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
+        <div className={`mb-4 ${fill ? "flex flex-1 flex-col" : ""}`}>
           <CodeEditor
             fill={fill}
             code={code}

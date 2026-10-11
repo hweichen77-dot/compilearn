@@ -152,22 +152,22 @@ Be direct and specific to the code shown. Under 130 words total.`,
 
   return (
     <>
-      <div className={`overflow-hidden ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`} style={{ border: "1px solid #17201C", background: "#070B0A" }}>
+      <div className={`overflow-hidden ${fill ? "flex flex-1 flex-col" : ""}`} style={{ border: "1px solid #17201C", background: "#070B0A" }}>
         <div
-          className="flex items-center justify-between px-5 py-3"
+          className="flex items-center justify-between gap-3 px-5 py-3"
           style={{ borderBottom: "1px solid #17201C", background: "#070B0A" }}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#26302B" }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#26302B" }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#26302B" }} />
             </div>
-            <span className="font-sans text-xs" style={{ color: "#FFFFFF" }}>
+            <span className="min-w-0 truncate font-sans text-xs" style={{ color: "#FFFFFF" }}>
               ~/compilearn/{filename}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-shrink-0 items-center gap-2">
             <button
               onClick={handleCopy}
               className="font-sans text-xs px-3 py-1.5 transition-all duration-150"
@@ -208,7 +208,7 @@ Be direct and specific to the code shown. Under 130 words total.`,
           </div>
         </div>
 
-        <div className={`flex relative ${fill ? "min-h-0 flex-1" : ""}`} style={{ minHeight: fill ? 0 : "280px", maxHeight: fill ? "none" : "500px", background: EDITOR_BG }}>
+        <div className={`flex relative ${fill ? "flex-1" : ""}`} style={{ minHeight: fill ? "240px" : "280px", maxHeight: fill ? "none" : "500px", background: EDITOR_BG }}>
           <div
             ref={lineNumbersRef}
             className="text-right select-none overflow-hidden flex-shrink-0 py-5 px-4"

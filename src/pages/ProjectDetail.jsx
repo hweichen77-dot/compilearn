@@ -679,7 +679,7 @@ export default function ProjectDetail() {
       </div>
 
       <div className={`px-6 sm:px-10 lg:px-16 py-8 ${focusMode ? "mx-auto" : ""}`} style={{ maxWidth: focusMode ? 960 : "none" }}>
-        <div className={`grid gap-10 ${focusMode ? "" : "lg:grid-cols-[220px_minmax(0,1fr)]"}`} style={{ gridTemplateColumns: focusMode ? "1fr" : undefined }}>
+        <div className={`grid grid-cols-[minmax(0,1fr)] gap-10 ${focusMode ? "" : "lg:grid-cols-[220px_minmax(0,1fr)]"}`} style={{ gridTemplateColumns: focusMode ? "minmax(0,1fr)" : undefined }}>
           {!focusMode && (
             <aside className="relative hidden lg:block" style={{ width: 220 }} aria-label="Lessons in this module">
               <div className="sticky top-16" style={{ borderLeft: "1px solid var(--border-subtle)", paddingLeft: "1.25rem" }}>
@@ -767,7 +767,7 @@ export default function ProjectDetail() {
                         >
                           <div className="h-12 w-1 rounded-full bg-white/20 transition-colors group-hover:bg-[#5ED29C]" />
                         </div>
-                        <section role="region" aria-label="Code editor" className="flex flex-col" style={{ flex: 1, minWidth: 0, position: "sticky", top: 64, height: "calc(100vh - 96px)" }}>
+                        <section role="region" aria-label="Code editor" className="flex flex-col overflow-y-auto" style={{ flex: 1, minWidth: 0, position: "sticky", top: 64, height: "calc(100vh - 96px)" }}>
                           {rightBlock}
                         </section>
                       </div>
