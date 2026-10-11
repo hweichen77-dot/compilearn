@@ -111,7 +111,10 @@ function normalize(data) {
   return { output: raw, isError: false, empty: raw.length === 0 };
 }
 
-export async function runJava(source, stdin = "") {
+const TOP_LEVEL_PUBLIC = /^public\s+(?=(?:(?:abstract|final|sealed|non-sealed|strictfp)\s+)*(?:class|interface|enum|record|@interface)\b)/gm;
+
+export async function runJava(userSource, stdin = "") {
+  const source = String(userSource ?? "").replace(TOP_LEVEL_PUBLIC, "");
   let signedIn = false;
   try {
     let data;
