@@ -20,14 +20,12 @@ class InfraError extends Error {
 
 async function rateLimitMessage(e) {
   const status = e?.context?.status ?? e?.status;
-  if (status !== 429 && status !== 401 && status !== 403) return null;
+  if (status !== 429) return null;
   try {
     const body = await e.context.json();
     if (body?.error) return body.error;
   } catch {  }
-  return status === 429
-    ? "You've hit the limit for now. Wait a minute and try again."
-    : "Sign in to keep running code.";
+  return "You've hit the limit for now. Wait a minute and try again.";
 }
 
 async function runViaGodbolt(source, stdin) {
@@ -114,9 +112,14 @@ function normalize(data) {
 }
 
 export async function runJava(source, stdin = "") {
+  let signedIn = false;
   try {
     let data;
     if (auth.isConfigured) {
+      const { data: sessionData } = await auth.getSession();
+      signedIn = Boolean(sessionData?.session);
+    }
+    if (signedIn) {
       const { data: d, error } = await supabase.functions.invoke("run-java", {
         body: { source, stdin: String(stdin || "") },
       });
@@ -128,8 +131,8 @@ export async function runJava(source, stdin = "") {
     return normalize(data);
   } catch (e) {
     const limited = await rateLimitMessage(e);
-    if (limited) return { output: limited, isError: true, infra: true, empty: false };
-    if (auth.isConfigured) {
+    if (limited) return { output: limited, isError: true, limited: true, empty: false };
+    if (signedIn) {
       try {
         return normalize(await runViaGodbolt(source, stdin));
       } catch (e2) {
@@ -174,8 +177,8 @@ export async function gradeJava(source, testCases = []) {
     const shown = r.empty ? "(no output)" : r.output;
     if (i === 0) firstOutput = shown;
 
-    if (r.infra) {
-      return { output: r.output, passed: false, results, ran: false, isError: true, infra: true };
+    if (r.infra || r.limited) {
+      return { output: r.output, passed: false, results, ran: false, isError: true, infra: Boolean(r.infra), limited: Boolean(r.limited) };
     }
 
     if (r.compileError) {
