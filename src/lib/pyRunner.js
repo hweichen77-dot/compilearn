@@ -43,11 +43,18 @@ self.onmessage = async (e) => {
     // Feed canned stdin so BOTH input() and sys.stdin work. Many problems read
     // via sys.stdin.read()/sys.stdin loops, not just input(), so we back stdin
     // with a fresh StringIO each run (also prevents leftover input leaking
-    // between graded test cases) and route input() through it.
+    // between graded test cases) and route input() through it. We subclass
+    // StringIO so we can attach a real .buffer (a BytesIO), because the common
+    // competitive idiom sys.stdin.buffer.read() would otherwise raise
+    // AttributeError on a plain StringIO.
     const payload = JSON.stringify(String(stdin == null ? "" : stdin));
     await py.runPythonAsync(
       "import sys, io, builtins\\n" +
-      "sys.stdin = io.StringIO(" + payload + ")\\n" +
+      "class __CFStdin(io.StringIO):\\n" +
+      "    pass\\n" +
+      "__cf_text = " + payload + "\\n" +
+      "sys.stdin = __CFStdin(__cf_text)\\n" +
+      "sys.stdin.buffer = io.BytesIO(__cf_text.encode(\\"utf-8\\"))\\n" +
       "def __cf_input(*_a):\\n" +
       "    line = sys.stdin.readline()\\n" +
       "    if line == \\"\\":\\n" +
