@@ -12,6 +12,8 @@ import CodeEditor from "../components/editor/CodeEditor";
 import AIChatbot from "../components/chat/AIChatbot";
 import ProblemStatement from "../components/challenge/ProblemStatement";
 import { gradePython, runPython } from "../lib/pyRunner";
+import { gradeJava, runJava } from "../lib/javaRunner";
+import { gradeCpp, runCpp } from "../lib/cppRunner";
 import { markChallengeComplete } from "../api/progressStore";
 
 const DIFF_NUM = { beginner: "01", easy: "01", intermediate: "02", medium: "02", advanced: "03", hard: "03" };
@@ -45,19 +47,25 @@ export default function ChallengeDetail() {
 
   const samples = (challenge?.test_cases || []).slice(0, 3);
 
+  const lang = challenge?.language || "python";
+  const runCode = lang === "java" ? runJava : lang === "cpp" ? runCpp : runPython;
+  const gradeCode = lang === "java" ? gradeJava : lang === "cpp" ? gradeCpp : gradePython;
+  const ext = lang === "java" ? "java" : lang === "cpp" ? "cpp" : "py";
+  const langLabel = lang === "java" ? "JAVA" : lang === "cpp" ? "C++" : "PY";
+
   const handleRun = async () => {
     setIsRunning(true);
     setOutput("Running…");
     try {
       if (samples.length === 0) {
-        const r = await runPython(code, "");
+        const r = await runCode(code, "");
         setOutput(r.isError ? "Error: " + r.output : (r.empty ? "(no output)" : r.output));
       } else {
         const blocks = [];
         for (let i = 0; i < samples.length; i++) {
           const tc = samples[i];
           const stdin = tc.input && tc.input !== "(no input)" ? tc.input : "";
-          const r = await runPython(code, stdin);
+          const r = await runCode(code, stdin);
           const shown = r.isError ? "Error: " + r.output : (r.empty ? "(no output)" : r.output);
           blocks.push(`Sample ${i + 1}${stdin ? `  input: ${stdin.replace(/\n/g, " ")}` : ""}\n${shown}`);
         }
@@ -74,7 +82,7 @@ export default function ChallengeDetail() {
     setPassed(false);
     setSubmitResults(null);
     try {
-      const { passed: ok, results, isError } = await gradePython(code, challenge.test_cases);
+      const { passed: ok, results, isError } = await gradeCode(code, challenge.test_cases);
       const rows = results.map((r, i) => ({
         ...r,
         name: (challenge.test_cases?.[i]?.description) || `Test ${i + 1}`,
@@ -273,7 +281,7 @@ export default function ChallengeDetail() {
                     <div style={{ border: "1px solid #17201C", background: "#0C1210", borderRadius: 14, overflow: "hidden" }}>
                       <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #17201C" }}>
                         <span className="font-display text-xs" style={{ color: "#ECF3EF" }}>Solution</span>
-                        <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10" }}>PY</span>
+                        <span className="font-sans text-xs px-2 py-0.5" style={{ color: "#5ED29C", border: "1px solid #5ED29C33", background: "#5ED29C10" }}>{langLabel}</span>
                       </div>
                       <pre className="font-mono overflow-x-auto p-5" style={{ fontSize: "0.75rem", lineHeight: "1.7", color: "#ECF3EF" }}>{challenge.solution_code}</pre>
                     </div>
@@ -294,7 +302,7 @@ export default function ChallengeDetail() {
                 submitResults={submitResults}
                 output={output}
                 isRunning={isRunning}
-                filename={`challenge.py`}
+                filename={`challenge.${ext}`}
                 lessonTitle={challenge.title}
               />
               <AnimatePresence>
