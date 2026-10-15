@@ -25,24 +25,28 @@ export default function ComparisonTable({ title, columns = [], rows = [] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, ri) => (
-              <tr key={ri} style={{ background: r.highlight ? trace.limeFaint : "transparent" }}>
-                {r.cells.map((cell, ci) => (
-                  <td
-                    key={ci}
-                    className="font-display text-sm px-4 py-3 align-top"
-                    style={{
-                      color: ci === 0 ? trace.text : trace.dim,
-                      fontWeight: ci === 0 ? 600 : 400,
-                      borderBottom: `1px solid ${trace.border}`,
-                      borderLeft: r.highlight && ci === 0 ? `2px solid ${trace.lime}` : "none",
-                    }}
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {rows.map((r, ri) => {
+              const cells = Array.isArray(r) ? r : r?.cells || [];
+              const highlight = !Array.isArray(r) && !!r?.highlight;
+              return (
+                <tr key={ri} style={{ background: highlight ? trace.limeFaint : "transparent" }}>
+                  {cells.map((cell, ci) => (
+                    <td
+                      key={ci}
+                      className="font-display text-sm px-4 py-3 align-top"
+                      style={{
+                        color: ci === 0 ? trace.text : trace.dim,
+                        fontWeight: ci === 0 ? 600 : 400,
+                        borderBottom: `1px solid ${trace.border}`,
+                        borderLeft: highlight && ci === 0 ? `2px solid ${trace.lime}` : "none",
+                      }}
+                    >
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

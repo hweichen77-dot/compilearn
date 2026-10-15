@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { getStreakInfo } from "@/lib/progressStats";
 
 export default function StreakBadge({ completedCount }) {
   const [streakDays, setStreakDays] = useState(0);
 
   useEffect(() => {
-    const today = new Date().toDateString();
-    const data = JSON.parse(localStorage.getItem("codeflow_streak") || "{}");
-    const lastVisit = data.lastVisit;
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-    if (lastVisit === today) {
-      setStreakDays(data.streak || 1);
-    } else if (lastVisit === yesterday) {
-      const newStreak = (data.streak || 0) + 1;
-      localStorage.setItem("codeflow_streak", JSON.stringify({ lastVisit: today, streak: newStreak }));
-      setStreakDays(newStreak);
-    } else {
-      localStorage.setItem("codeflow_streak", JSON.stringify({ lastVisit: today, streak: 1 }));
-      setStreakDays(1);
+    try {
+      setStreakDays(getStreakInfo().current);
+    } catch {
+      setStreakDays(0);
     }
   }, []);
 
